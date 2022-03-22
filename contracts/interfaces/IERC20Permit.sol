@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.7.5;
+// OpenZeppelin Contracts v4.4.1 (token/ERC20/extensions/draft-IERC20Permit.sol)
+
+pragma solidity 0.8.13;
 
 /**
  * @dev Interface of the ERC20 Permit extension allowing approvals to be made via signatures, as defined in
@@ -11,7 +13,7 @@ pragma solidity >=0.7.5;
  */
 interface IERC20Permit {
     /**
-     * @dev Sets `value` as th xe allowance of `spender` over ``owner``'s tokens,
+     * @dev Sets `value` as the allowance of `spender` over ``owner``'s tokens,
      * given ``owner``'s signed approval.
      *
      * IMPORTANT: The same issues {IERC20-approve} has related to transaction
