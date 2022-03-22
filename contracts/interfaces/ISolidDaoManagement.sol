@@ -2,7 +2,6 @@
 pragma solidity 0.8.13;
 
 interface ISolidDaoManagement {
-    /* ========== EVENTS ========== */
     
     event GovernorPushed(address indexed from, address indexed to, bool _effectiveImmediately);
     event GuardianPushed(address indexed from, address indexed to, bool _effectiveImmediately);    
@@ -13,8 +12,6 @@ interface ISolidDaoManagement {
     event GuardianPulled(address indexed from, address indexed to);
     event PolicyPulled(address indexed from, address indexed to);
     event VaultPulled(address indexed from, address indexed to);
-
-    /* ========== VIEW ========== */
     
     function governor() external view returns (address);
     function guardian() external view returns (address);

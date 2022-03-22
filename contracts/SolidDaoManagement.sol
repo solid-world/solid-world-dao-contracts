@@ -5,29 +5,22 @@ import "./interfaces/ISolidDaoManagement.sol";
 
 import "./lib/SolidDaoManaged.sol";
 
+/**
+ * @title Solid Dao Management
+ * @author Solid World DAO
+ * @notice Contract to manage and store the addresses of Solid World DAO authorities
+ */
 contract SolidDaoManagement is ISolidDaoManagement, SolidDaoManaged {
 
-
-    /* ========== STATE VARIABLES ========== */
-
     address public override governor;
-
     address public override guardian;
-
     address public override policy;
-
     address public override vault;
 
     address public newGovernor;
-
     address public newGuardian;
-
     address public newPolicy;
-
     address public newVault;
-
-
-    /* ========== Constructor ========== */
 
     constructor(
         address _governor,
@@ -44,9 +37,6 @@ contract SolidDaoManagement is ISolidDaoManagement, SolidDaoManaged {
         vault = _vault;
         emit VaultPushed(address(0), vault, true);
     }
-
-
-    /* ========== GOV ONLY ========== */
 
     function pushGovernor(address _newGovernor, bool _effectiveImmediately) external onlyGovernor {
         if( _effectiveImmediately ) governor = _newGovernor;
@@ -71,9 +61,6 @@ contract SolidDaoManagement is ISolidDaoManagement, SolidDaoManaged {
         newVault = _newVault;
         emit VaultPushed(vault, newVault, _effectiveImmediately);
     }
-
-
-    /* ========== PENDING ROLE ONLY ========== */
 
     function pullGovernor() external {
         require(msg.sender == newGovernor, "!newGovernor");
