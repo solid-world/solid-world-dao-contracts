@@ -1,22 +1,24 @@
-// SPDX-License-Identifier: AGPL-3.0
-pragma solidity ^0.7.5;
+// SPDX-License-Identifier: MIT
 
-import "./libraries/SafeMath.sol";
+pragma solidity 0.8.13;
 
 import "./interfaces/IERC20.sol";
-import "./interfaces/ISOLID.sol";
+import "./interfaces/ISCT.sol";
 import "./interfaces/IERC20Permit.sol";
+import "./lib/ERC20Permit.sol";
+import "./lib/SolidDaoManaged.sol";
 
-import "./types/ERC20Permit.sol";
-import "./types/OlympusAccessControlled.sol";
+/**
+ * @title SCT ERC-20 Token
+ * @author Solid World DAO
+ * @notice SCT Token
+ */
+contract SCTERC20Token is ERC20Permit, ISCT, SolidDaoManaged {
 
-contract SCTERC20Token is ERC20Permit, ISOLID, OlympusAccessControlled {
-    using SafeMath for uint256;
-
-    constructor(address _authority) 
-    ERC20("SCT", "SCT", 9) 
-    ERC20Permit("SCT") 
-    OlympusAccessControlled(IOlympusAuthority(_authority)) {}
+    constructor(address _authority)
+        ERC20("SCT", "SCT", 9)
+        ERC20Permit("SCT")
+        SolidDaoManaged(ISolidDaoManagement(_authority)) {}
 
     function mint(address account_, uint256 amount_) external override onlyVault {
         _mint(account_, amount_);
@@ -31,9 +33,10 @@ contract SCTERC20Token is ERC20Permit, ISOLID, OlympusAccessControlled {
     }
 
     function _burnFrom(address account_, uint256 amount_) internal {
-        uint256 decreasedAllowance_ = allowance(account_, msg.sender).sub(amount_, "ERC20: burn amount exceeds allowance");
-
-        _approve(account_, msg.sender, decreasedAllowance_);
+        uint256 senderAllowance = allowance(account_, msg.sender);
+        require(senderAllowance - amount_ >= 0, "ERC20: burn amount exceeds allowance");
+        senderAllowance -= amount_;
+        _approve(account_, msg.sender, senderAllowance);
         _burn(account_, amount_);
     }
 }

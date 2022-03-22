@@ -1,0 +1,650 @@
+{
+	"compiler": {
+		"version": "0.8.13+commit.abaa5c0e"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_authority",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "value",
+						"type": "uint256"
+					}
+				],
+				"name": "Approval",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "contract ISolidDaoManagement",
+						"name": "authority",
+						"type": "address"
+					}
+				],
+				"name": "AuthorityUpdated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "from",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "to",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "value",
+						"type": "uint256"
+					}
+				],
+				"name": "Transfer",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "DOMAIN_SEPARATOR",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					}
+				],
+				"name": "allowance",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "approve",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "authority",
+				"outputs": [
+					{
+						"internalType": "contract ISolidDaoManagement",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "balanceOf",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "burn",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account_",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount_",
+						"type": "uint256"
+					}
+				],
+				"name": "burnFrom",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "decimals",
+				"outputs": [
+					{
+						"internalType": "uint8",
+						"name": "",
+						"type": "uint8"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subtractedValue",
+						"type": "uint256"
+					}
+				],
+				"name": "decreaseAllowance",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "addedValue",
+						"type": "uint256"
+					}
+				],
+				"name": "increaseAllowance",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account_",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount_",
+						"type": "uint256"
+					}
+				],
+				"name": "mint",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "name",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					}
+				],
+				"name": "nonces",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "value",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint8",
+						"name": "v",
+						"type": "uint8"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "r",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "s",
+						"type": "bytes32"
+					}
+				],
+				"name": "permit",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "contract ISolidDaoManagement",
+						"name": "_newAuthority",
+						"type": "address"
+					}
+				],
+				"name": "setAuthority",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "symbol",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "totalSupply",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "to",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "transfer",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "from",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "to",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "transferFrom",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"author": "Solid World DAO",
+			"kind": "dev",
+			"methods": {
+				"DOMAIN_SEPARATOR()": {
+					"details": "See {IERC20Permit-DOMAIN_SEPARATOR}."
+				},
+				"allowance(address,address)": {
+					"details": "See {IERC20-allowance}."
+				},
+				"approve(address,uint256)": {
+					"details": "See {IERC20-approve}. NOTE: If `amount` is the maximum `uint256`, the allowance is not updated on `transferFrom`. This is semantically equivalent to an infinite approval. Requirements: - `spender` cannot be the zero address."
+				},
+				"balanceOf(address)": {
+					"details": "See {IERC20-balanceOf}."
+				},
+				"decimals()": {
+					"details": "Returns the number of decimals used to get its user representation. For example, if `decimals` equals `2`, a balance of `505` tokens should be displayed to a user as `5.05` (`505 / 10 ** 2`). Tokens usually opt for a value of 18, imitating the relationship between Ether and Wei. This is the value {ERC20} uses, unless this function is overridden; NOTE: This information is only used for _display_ purposes: it in no way affects any of the arithmetic of the contract, including {IERC20-balanceOf} and {IERC20-transfer}."
+				},
+				"decreaseAllowance(address,uint256)": {
+					"details": "Atomically decreases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address. - `spender` must have allowance for the caller of at least `subtractedValue`."
+				},
+				"increaseAllowance(address,uint256)": {
+					"details": "Atomically increases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address."
+				},
+				"name()": {
+					"details": "Returns the name of the token."
+				},
+				"nonces(address)": {
+					"details": "See {IERC20Permit-nonces}."
+				},
+				"permit(address,address,uint256,uint256,uint8,bytes32,bytes32)": {
+					"details": "See {IERC20Permit-permit}."
+				},
+				"setAuthority(address)": {
+					"details": "Emit AuthorityUpdated event",
+					"params": {
+						"_newAuthority": "Address of the new Solid Dao Management smart contract"
+					}
+				},
+				"symbol()": {
+					"details": "Returns the symbol of the token, usually a shorter version of the name."
+				},
+				"totalSupply()": {
+					"details": "See {IERC20-totalSupply}."
+				},
+				"transfer(address,uint256)": {
+					"details": "See {IERC20-transfer}. Requirements: - `to` cannot be the zero address. - the caller must have a balance of at least `amount`."
+				},
+				"transferFrom(address,address,uint256)": {
+					"details": "See {IERC20-transferFrom}. Emits an {Approval} event indicating the updated allowance. This is not required by the EIP. See the note at the beginning of {ERC20}. NOTE: Does not update the allowance if the current allowance is the maximum `uint256`. Requirements: - `from` and `to` cannot be the zero address. - `from` must have a balance of at least `amount`. - the caller must have allowance for ``from``'s tokens of at least `amount`."
+				}
+			},
+			"title": "SCT ERC-20 Token",
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"setAuthority(address)": {
+					"notice": "Function to set and update Solid Dao Management smart contract address"
+				}
+			},
+			"notice": "SCT Token",
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"SCTERC20.sol": "SCTERC20Token"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": true,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"SCTERC20.sol": {
+			"keccak256": "0x42b1f2cedf10ad0e976af96995e144dfce6d64f2f5a6e0af17785740946f08e0",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://017f0b57c46cc702dc3d0f1abea567c88d8b2852ae388069f6d2d96896a08a98",
+				"dweb:/ipfs/QmR6m2ozoRMfUBZjr1zxjiTaQ1dcr9FS1uwDNVn9MkMLK9"
+			]
+		},
+		"interfaces/IERC20.sol": {
+			"keccak256": "0xbb468cd9676a6fdae71b903143d44854a9b4082b703613463644b828e9b7a400",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://21c8b22a3e1b54ef211bc17afb71f5a91ab26360133c7f835c9d0e89706bfb52",
+				"dweb:/ipfs/QmNwhncwZbdRfqpJe5fVH2S2KkZQrnLGXQsWdHnEfXVrFd"
+			]
+		},
+		"interfaces/IERC20Metadata.sol": {
+			"keccak256": "0x5ab724c374aa11b7d36796b8b247e217d0450f17ac5602cad5ef2f3972e20a29",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://970545544bd5acb3dfbe77d23145ddf5ff1f92e5098a3ab2639aef290461d7c7",
+				"dweb:/ipfs/QmeznehGiN9jkRCeWP2WLKZBDUthS9iG3dDayDM5EKj5z7"
+			]
+		},
+		"interfaces/IERC20Permit.sol": {
+			"keccak256": "0x6c5d6b0fac68a0df7d5c22de80963331eba86dd134546760142c1574af2e0149",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://63bb0f2401c9e2c2b02812002dbb739fe6b87906e0d5cc6b47b9cafb4e38eaec",
+				"dweb:/ipfs/QmcC4q2C95ZU4MyT2tbBNghHshFvmJNm1JcWMU3ggtyBUJ"
+			]
+		},
+		"interfaces/ISCT.sol": {
+			"keccak256": "0xf0f8752e0eab8fd241446bc33a92189fb0205beda927291823c76301caca1484",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://8f37c80ed39dc2fdf32b3be9df6c136359f8b7b3c6c1487d6a4f58e36c3e8ff1",
+				"dweb:/ipfs/QmewDPDF3jAkLFUYWdiR2LvqS13LLe5VQzVaLenUmdFyic"
+			]
+		},
+		"interfaces/ISolidDaoManagement.sol": {
+			"keccak256": "0xfb63c0130746202658e7fb3283676d7cb250577ad0a588583a9108be1fbe5e0d",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3895b5685122d1f72871ce9d0540e35d33079a1d55e79100d9b0dc5820cd5f04",
+				"dweb:/ipfs/QmXaXZQ1ooLy8fzhQBcxj3A28pWfTRrnbL227C8RGuyNPC"
+			]
+		},
+		"lib/Context.sol": {
+			"keccak256": "0xa46498600c8c57847d8f9ab4d1aa637430774a38c8dc931a7042e567631bc9e7",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://ff544714ca02ccb77277b236f9626d9f062aff293379f5f94c01204ce0ac753e",
+				"dweb:/ipfs/QmdmRkqNwy9FmLGdfhime1uBGh5KkmuFEF1WnKScUvhPWg"
+			]
+		},
+		"lib/Counters.sol": {
+			"keccak256": "0x77898d5981da699aa451beabcb0ed96b4c5b1995981089cb325c3cf602bef76a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://72ccb026c6d7a63e42a5bae821596c6e40f14c1fdf01d4963d8bc51caf1e3e77",
+				"dweb:/ipfs/QmVZc2GYfvJsWhmYeoTEAoYa7zSzbMMte87Dqb1rGZ3Sf1"
+			]
+		},
+		"lib/ECDSA.sol": {
+			"keccak256": "0x520645adb5993259909660d35f33b85f3243d99e5188730eee6be76925852dde",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://71048fdda06285509e650eb19cc1480229ecdf0fc5af591e1f22f0d07619a325",
+				"dweb:/ipfs/QmRnRTtMbv6gjEnXB6MyvNcLjg2V3cDHTv2oc5fbPxfjU8"
+			]
+		},
+		"lib/EIP712.sol": {
+			"keccak256": "0xa48876cff251e305d0552a85f1fc2b597725464a9bd568ab7153fa0e80763e8e",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://9f4d3c87a3bff9df59911ab0121e096bb27eb4f9bb30b67215f979714cd83ef8",
+				"dweb:/ipfs/QmQ8e6SvBkdmWikitvCDdW3F59un6yCSSUenzmjP9yEe2o"
+			]
+		},
+		"lib/ERC20Permit.sol": {
+			"keccak256": "0x993dff934d3d210b62ca31a4a2f9bc6d5658b8803e67b1e16dc2d0c7b6f7efda",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://f5e3bfca057406884bf32527fd993c736df9736b9eac15c1b784dddc93393844",
+				"dweb:/ipfs/QmQmo99vKGwbAEfvWTx9izMYo6a4zoU9yrTg5GgBUM6BZv"
+			]
+		},
+		"lib/SolidDaoManaged.sol": {
+			"keccak256": "0xecee613ceda26429bebc796767798ac8cadd6194f2469b8ab1c9ef0e8c21b39b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://75d1a5d2b59a3c28cb13922ec94de32f846a0c3540210d5ade5b1d1496ecbd1a",
+				"dweb:/ipfs/QmNw8fMKx8qHoGjX4pVh9afizqBGrLYZy11fAfrEuDbgTR"
+			]
+		},
+		"lib/Strings.sol": {
+			"keccak256": "0x9f1088cb32eb6043568c033e1c6f0f51cc382485d0614137373905dca647941e",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://8ff55d8a39d9b1b2e8bdbb779772e00c777f10fba9b30048e237e07da9e1b173",
+				"dweb:/ipfs/QmPeenxPo1n4KC8kbC72doiYRwPAj2Ya1Kf9b2e8U2b6f5"
+			]
+		},
+		"tokens/ERC20.sol": {
+			"keccak256": "0x4d8cb1879e6842e12e6650f24ed3acf34962c58c85b8066a324744d42d54acad",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6aa2e16957e66504484c50664947b7cef7574e84e91291005a80e134c7d40283",
+				"dweb:/ipfs/QmXHxsoFLbXrSXuYRBWAAqjxFCZSUSWpx1xvXfiKCvQPvG"
+			]
+		}
+	},
+	"version": 1
+}
