@@ -6,7 +6,6 @@ import "./lib/SafeERC20.sol";
 import "./lib/SolidDaoManaged.sol";
 import "./interfaces/ISCT.sol";
 import "./interfaces/IERC1155.sol";
-//import "./interfaces/ICarbonTreasury.sol";
 
 /**
  * @title Carbon Treasury
@@ -42,8 +41,9 @@ contract CarbonTreasury is SolidDaoManaged {
         uint256 tons;
         bool isActive;
         bool isWithdrawed;
+        address owner;
 
-        //TODO: Confirm if these variables are unique for each project
+        //TODO: Confirm if these variables are unique for each project and need to be here or in carbon queue
         //uint256 flatRate;
         //uint256 sdgPremium;
         //uint256 daysToRealization;
@@ -51,11 +51,7 @@ contract CarbonTreasury is SolidDaoManaged {
 
         //TODO: confirm if certified and redeemed variables are used in this contract
         // bool isCertified;
-        // uint256 dateOfCertification;
         // bool isRedeemed;
-
-        //TODO: confirm if owner address is used in this contract
-        //address owner;
     }
 
     ISCT public immutable SCT;
@@ -92,7 +88,7 @@ contract CarbonTreasury is SolidDaoManaged {
      * @notice enables timelocks after initilization
      */
     function initialize() external onlyGovernor {
-        require(initialized == false, "Carbon Treasury: already initialized");
+        require(!initialized, "Carbon Treasury: already initialized");
         timelockEnabled = true;
         initialized = true;
     }
@@ -101,59 +97,48 @@ contract CarbonTreasury is SolidDaoManaged {
      * @notice allow approved address to deposit an asset for SCT
      * @dev only reserve depositor can call this function
      * @param _token address
-     * @param _erc1155 bool
-     * @param _carbonProject CarbonProject
+     * @param _amount uint256
+     * @param _owner address
      * @return _amount uint256
      */
     function deposit(
         address _token,
-        bool _erc1155,
-        CarbonProject memory _carbonProject
+        uint256 _tokenId,
+        uint256 _amount,
+        address _owner
     ) external returns (uint256) {
 
         require(permissions[STATUS.RESERVEDEPOSITOR][msg.sender], "Carbon Treasury: reserve depositor not approved");
         require(reserveTokens[_token], "Carbon Treasury: invalid reserve token");
-        require(!carbonProjects[_token][_carbonProject.tokenId].isActive, "Carbon Treasury: invalid carbon project");
+        require(!carbonProjects[_token][_tokenId].isActive, "Carbon Treasury: invalid carbon project");
 
-        uint256 depositAmount = _carbonProject.tons;
+        IERC1155(_token).safeTransferFrom(
+            _owner, 
+            address(this), 
+            _tokenId, 
+            _amount, 
+            ""
+        ); //TODO:Test with ERC1155
 
-        if(_erc1155) {
-            IERC1155(_token).safeTransferFrom(
-                msg.sender, 
-                address(this), 
-                _carbonProject.tokenId, 
-                depositAmount, 
-                ""
-            ); //TODO:Test with ERC1155
-        } else {
-            IERC20(_token).safeTransferFrom(msg.sender, address(this), depositAmount);
-        }
+        SCT.mint(_owner, _amount);
 
-        //TODO: calculate carbon project x sct value? 
-        //IMPORTANT: If we accept other tokens need to manage decimals for example
+        totalReserves += _amount;
+        carbonProjects[_token][_tokenId] = CarbonProject(_token, _tokenId, _amount, true, false, _owner);
 
-        SCT.mint(msg.sender, depositAmount);
+        emit Deposit(_token, _tokenId, _owner, _amount);
 
-        totalReserves += depositAmount;
-        carbonProjects[_token][_carbonProject.tokenId] = _carbonProject;
-        carbonProjects[_token][_carbonProject.tokenId].isActive = true;
-
-        emit Deposit(_token, _carbonProject.tokenId, msg.sender, depositAmount);
-
-        return(depositAmount);
+        return(_amount);
     }
 
     /**
      * @notice Allow approved address to withdraw Carbon Project tokens
      * @dev only reserve spender can call this function
      * @param _token address
-     * @param _erc1155 bool
      * @param _tokenId unint256
      * @param _toAddress address
      */
     function withdraw(
         address _token,
-        bool _erc1155,
         uint256 _tokenId,
         address _toAddress
     ) external returns (uint256) {
@@ -170,18 +155,14 @@ contract CarbonTreasury is SolidDaoManaged {
         carbonProjects[_token][_tokenId].isWithdrawed = true;
 
         //TODO: burn SCT here?
-
-        if(_erc1155) {
-            IERC1155(_token).safeTransferFrom( 
-                address(this), 
-                _toAddress,
-                _tokenId, 
-                withdrawAmount, 
-                ""
-            ); //TODO:Test with ERC1155
-        } else {
-            IERC20(_token).safeTransfer(_toAddress, withdrawAmount);
-        }
+        
+        IERC1155(_token).safeTransferFrom( 
+            address(this), 
+            _toAddress,
+            _tokenId, 
+            withdrawAmount, 
+            ""
+        ); //TODO:Test with ERC1155
 
         emit Withdrawal(_token, _tokenId, _toAddress, withdrawAmount);
 
@@ -263,7 +244,7 @@ contract CarbonTreasury is SolidDaoManaged {
      * @notice disables timelocked
      */
     function disableTimelock() external onlyGovernor {
-        require(timelockEnabled == true, "Carbon Treasury: timelock already disabled");
+        require(timelockEnabled, "Carbon Treasury: timelock already disabled");
         if (onChainGovernanceTimelock != 0 && onChainGovernanceTimelock <= block.number) {
             timelockEnabled = false;
         } else {
