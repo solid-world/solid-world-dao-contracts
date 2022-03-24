@@ -14,19 +14,24 @@ import "./interfaces/IERC1155.sol";
  */
 contract CarbonTreasury is SolidDaoManaged {
 
-    using SafeERC20 for IERC20;
-
     event Deposit(address indexed token, uint256 indexed tokenId, address fromAddress, uint256 amount);
     event Withdrawal(address indexed token, uint256 indexed tokenId, address toAddress, uint256 amount);
     //event PermissionOrder(STATUS indexed status, address ordered);
     event Permissioned(STATUS indexed status, address addr, bool result);
+
+    /**
+     * @title STATUS
+     * @notice enum of permisions types
+     * @dev 0 RESERVETOKEN,
+            1 RESERVEDEPOSITOR,
+            2 RESERVESPENDER
+     */
 
     enum STATUS {
         RESERVETOKEN,
         RESERVEDEPOSITOR,
         RESERVESPENDER
     }
-
     struct Order {
         STATUS managing;
         address toPermit;
@@ -58,8 +63,7 @@ contract CarbonTreasury is SolidDaoManaged {
     
     uint256 public totalReserves;
 
-    mapping(address => bool) public reserveTokens;
-    mapping(address => mapping(uint256 => CarbonProject)) public carbonProjects;
+    mapping(address => mapping(uint256 => CarbonProject)) public carbonProjects; 
 
     mapping(STATUS => address[]) public registry;
     mapping(STATUS => mapping(address => bool)) public permissions;
@@ -94,7 +98,8 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
-     * @notice allow approved address to deposit an asset for SCT
+     * @title deposit
+     * @notice function to allow approved address to deposit an asset for SCT
      * @dev only reserve depositor can call this function
      * @param _token address
      * @param _amount uint256
@@ -109,7 +114,7 @@ contract CarbonTreasury is SolidDaoManaged {
     ) external returns (uint256) {
 
         require(permissions[STATUS.RESERVEDEPOSITOR][msg.sender], "Carbon Treasury: reserve depositor not approved");
-        require(reserveTokens[_token], "Carbon Treasury: invalid reserve token");
+        require(permissions[STATUS.RESERVETOKEN][_token], "Carbon Treasury: reserve token not approved");
         require(!carbonProjects[_token][_tokenId].isActive, "Carbon Treasury: invalid carbon project");
 
         IERC1155(_token).safeTransferFrom(
@@ -131,7 +136,8 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
-     * @notice Allow approved address to withdraw Carbon Project tokens
+     * @title withdraw
+     * @notice function to allow approved address to withdraw Carbon Project tokens
      * @dev only reserve spender can call this function
      * @param _token address
      * @param _tokenId unint256
@@ -144,17 +150,13 @@ contract CarbonTreasury is SolidDaoManaged {
     ) external returns (uint256) {
 
         require(permissions[STATUS.RESERVESPENDER][msg.sender], "Carbon Treasury: reserve spender not approved");
-        require(reserveTokens[_token], "Carbon Treasury: invalid reserve token");
+        require(permissions[STATUS.RESERVETOKEN][_token], "Carbon Treasury: reserve token not approved");
         require(carbonProjects[_token][_tokenId].isActive, "Carbon Treasury: invalid carbon project");
         require(!carbonProjects[_token][_tokenId].isWithdrawed, "Carbon Treasury: carbon project withdrawed");
-
-        //TODO: is it possible to withdraw part of tokens deposited?
 
         uint256 withdrawAmount = carbonProjects[_token][_tokenId].tons;
         totalReserves -= withdrawAmount;
         carbonProjects[_token][_tokenId].isWithdrawed = true;
-
-        //TODO: burn SCT here?
         
         IERC1155(_token).safeTransferFrom( 
             address(this), 
@@ -170,7 +172,8 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
-     * @notice enable permission
+     * @title enable
+     * @notice function to enable permission
      * @param _status STATUS
      * @param _address address
      */
@@ -181,14 +184,10 @@ contract CarbonTreasury is SolidDaoManaged {
 
         require(timelockEnabled == false, "Carbon Treasury: use orderTimelock");
 
-        if (_status == STATUS.RESERVETOKEN) {
-            reserveTokens[_address] = true;
-        } else {
-            permissions[_status][_address] = true;
-            (bool registered, ) = indexInRegistry(_address, _status);
-            if (!registered) {
-                registry[_status].push(_address);
-            }
+        permissions[_status][_address] = true;
+        (bool registered, ) = indexInRegistry(_address, _status);
+        if (!registered) {
+            registry[_status].push(_address);
         }
 
         emit Permissioned(_status, _address, true);
@@ -197,6 +196,7 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
+     * @title disable
      *  @notice disable permission
      *  @param _status STATUS
      *  @param _address address
@@ -206,11 +206,7 @@ contract CarbonTreasury is SolidDaoManaged {
         address _address
     ) external onlyGovernor returns(bool) {
 
-        if (_status == STATUS.RESERVETOKEN) {
-            reserveTokens[_address] = false;
-        } else {
-            permissions[_status][_address] = false;
-        }
+        permissions[_status][_address] = false;
 
         emit Permissioned(_status, _address, false);
 
@@ -218,7 +214,8 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
-     * @notice check if registry contains address
+     * @title indexInRegistry
+     * @notice view function to check if registry contains address
      * @return (bool, uint256)
      */
     function indexInRegistry(address _address, STATUS _status) public view returns (bool, uint256) {
@@ -231,9 +228,9 @@ contract CarbonTreasury is SolidDaoManaged {
         return (false, 0);
     }
 
-    //TODO: mint or burn SCT in this contract?
+    //NOTE: mint or burn SCT in this contract?
 
-    //TODO: Are there other management functions? manage tokens, edit projects, etc
+    //NOTE: Are there other management functions? manage tokens, edit projects, etc
 
     //TODO: implement timelock orders
     //function orderTimelock(STATUS _status, address _address);
@@ -254,8 +251,10 @@ contract CarbonTreasury is SolidDaoManaged {
 
     //TODO: implement view functions
     //function carbonProject(address _token, address _tokenId) external view returns (CarbonProject);
-    //function indexInRegistry(address _address, STATUS _status) external view returns (bool, uint256);
+
+    //TODO: implement token value
     //function tokenValue(address _token, address _tokenId, uint256 _amount) external view returns (uint256);
+
     //function baseSupply() external view returns (uint256);
 
 }
