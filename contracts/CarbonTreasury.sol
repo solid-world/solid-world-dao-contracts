@@ -120,7 +120,7 @@ contract CarbonTreasury is SolidDaoManaged, ERC1155Receiver {
             address(this), 
             _tokenId, 
             _amount, 
-            ""
+            "data"
         );
 
         SCT.mint(_owner, _amount);
@@ -159,7 +159,7 @@ contract CarbonTreasury is SolidDaoManaged, ERC1155Receiver {
             _toAddress,
             _tokenId, 
             withdrawAmount, 
-            ""
+            "data"
         );
 
         emit Withdrawal(_token, _tokenId, _toAddress, withdrawAmount);
