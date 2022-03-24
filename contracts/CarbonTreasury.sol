@@ -44,19 +44,15 @@ contract CarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         address token;
         uint256 tokenId;
         uint256 tons;
+        uint256 flatRate;
+        uint256 sdgPremium;
+        uint256 daysToRealization;
+        uint256 closenessPremium;
+        bool isCertified;
+        bool isRedeemed;
         bool isActive;
         bool isWithdrawed;
         address owner;
-
-        //TODO: Confirm if these variables are unique for each project and need to be here or in carbon queue
-        //uint256 flatRate;
-        //uint256 sdgPremium;
-        //uint256 daysToRealization;
-        //uint256 closenessPremium;
-
-        //TODO: confirm if certified and redeemed variables are used in this contract
-        // bool isCertified;
-        // bool isRedeemed;
     }
 
     ISCT public immutable SCT;
@@ -100,36 +96,31 @@ contract CarbonTreasury is SolidDaoManaged, ERC1155Receiver {
      * @notice deposit
      * @notice function to allow approved address to deposit an asset for SCT
      * @dev only reserve depositor can call this function
-     * @param _token address
-     * @param _amount uint256
-     * @param _owner address
-     * @return _amount uint256
+     * @param _carbonProject CarbonProject
+     * @return _carbonProject.tons uint256
      */
-    function deposit(
-        address _token,
-        uint256 _tokenId,
-        uint256 _amount,
-        address _owner
-    ) external returns (uint256) {
+    function deposit(CarbonProject memory _carbonProject) external returns (uint256) {
         require(permissions[STATUS.RESERVEDEPOSITOR][msg.sender], "Carbon Treasury: reserve depositor not approved");
-        require(permissions[STATUS.RESERVETOKEN][_token], "Carbon Treasury: reserve token not approved");
-        require(!carbonProjects[_token][_tokenId].isActive, "Carbon Treasury: invalid carbon project");
+        require(permissions[STATUS.RESERVETOKEN][_carbonProject.token], "Carbon Treasury: reserve token not approved");
+        require(!carbonProjects[_carbonProject.token][_carbonProject.tokenId].isActive, "Carbon Treasury: invalid carbon project");
 
-        IERC1155(_token).safeTransferFrom(
-            _owner, 
+        IERC1155(_carbonProject.token).safeTransferFrom(
+            _carbonProject.owner, 
             address(this), 
-            _tokenId, 
-            _amount, 
+            _carbonProject.tokenId, 
+            _carbonProject.tons, 
             "data"
         );
 
-        SCT.mint(_owner, _amount);
+        SCT.mint(_carbonProject.owner, _carbonProject.tons);
 
-        totalReserves += _amount;
-        carbonProjects[_token][_tokenId] = CarbonProject(_token, _tokenId, _amount, true, false, _owner);
+        totalReserves += _carbonProject.tons;
+        carbonProjects[_carbonProject.token][_carbonProject.tokenId] = _carbonProject;
+        carbonProjects[_carbonProject.token][_carbonProject.tokenId].isActive = true;
+        carbonProjects[_carbonProject.token][_carbonProject.tokenId].isWithdrawed = false;
 
-        emit Deposit(_token, _tokenId, _owner, _amount);
-        return(_amount);
+        emit Deposit(_carbonProject.token, _carbonProject.tokenId, _carbonProject.owner, _carbonProject.tons);
+        return(_carbonProject.tons);
     }
 
     /**
@@ -301,13 +292,6 @@ contract CarbonTreasury is SolidDaoManaged, ERC1155Receiver {
             onChainGovernanceTimelock = block.number + (blocksNeededForOrder * 7);
         }
     }
-
-    //NOTE: mint or burn SCT in this contract?
-
-    //NOTE: Are there other management functions? manage tokens, edit projects, etc
-
-    //NOTE: implement token value in this contract?
-    //function tokenValue(address _token, address _tokenId, uint256 _amount) external view returns (uint256);
 
     /**
      * @notice baseSupply
