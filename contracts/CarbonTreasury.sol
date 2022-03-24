@@ -16,7 +16,7 @@ contract CarbonTreasury is SolidDaoManaged {
 
     event Deposit(address indexed token, uint256 indexed tokenId, address fromAddress, uint256 amount);
     event Withdrawal(address indexed token, uint256 indexed tokenId, address toAddress, uint256 amount);
-    //event PermissionOrder(STATUS indexed status, address ordered);
+    event PermissionOrdered(STATUS indexed status, address ordered);
     event Permissioned(STATUS indexed status, address addr, bool result);
 
     /**
@@ -67,9 +67,8 @@ contract CarbonTreasury is SolidDaoManaged {
 
     mapping(STATUS => address[]) public registry;
     mapping(STATUS => mapping(address => bool)) public permissions;
-
-    Order[] public permissionQueue;
-    uint256 public immutable blocksNeededForQueue;
+    Order[] public permissionOrder;
+    uint256 public immutable blocksNeededForOrder;
 
     bool public timelockEnabled;
     bool public initialized;
@@ -85,7 +84,7 @@ contract CarbonTreasury is SolidDaoManaged {
         SCT = ISCT(_sct);
         timelockEnabled = false;
         initialized = false;
-        blocksNeededForQueue = _timelock;
+        blocksNeededForOrder = _timelock;
     }
 
     /**
@@ -112,7 +111,6 @@ contract CarbonTreasury is SolidDaoManaged {
         uint256 _amount,
         address _owner
     ) external returns (uint256) {
-
         require(permissions[STATUS.RESERVEDEPOSITOR][msg.sender], "Carbon Treasury: reserve depositor not approved");
         require(permissions[STATUS.RESERVETOKEN][_token], "Carbon Treasury: reserve token not approved");
         require(!carbonProjects[_token][_tokenId].isActive, "Carbon Treasury: invalid carbon project");
@@ -131,7 +129,6 @@ contract CarbonTreasury is SolidDaoManaged {
         carbonProjects[_token][_tokenId] = CarbonProject(_token, _tokenId, _amount, true, false, _owner);
 
         emit Deposit(_token, _tokenId, _owner, _amount);
-
         return(_amount);
     }
 
@@ -148,7 +145,6 @@ contract CarbonTreasury is SolidDaoManaged {
         uint256 _tokenId,
         address _toAddress
     ) external returns (uint256) {
-
         require(permissions[STATUS.RESERVESPENDER][msg.sender], "Carbon Treasury: reserve spender not approved");
         require(permissions[STATUS.RESERVETOKEN][_token], "Carbon Treasury: reserve token not approved");
         require(carbonProjects[_token][_tokenId].isActive, "Carbon Treasury: invalid carbon project");
@@ -167,13 +163,13 @@ contract CarbonTreasury is SolidDaoManaged {
         ); //TODO:Test with ERC1155
 
         emit Withdrawal(_token, _tokenId, _toAddress, withdrawAmount);
-
         return(withdrawAmount);
     }
 
     /**
      * @title enable
      * @notice function to enable permission
+     * @dev only governor can call this function
      * @param _status STATUS
      * @param _address address
      */
@@ -181,7 +177,6 @@ contract CarbonTreasury is SolidDaoManaged {
         STATUS _status,
         address _address
     ) external onlyGovernor returns(bool) {
-
         require(timelockEnabled == false, "Carbon Treasury: use orderTimelock");
 
         permissions[_status][_address] = true;
@@ -191,15 +186,15 @@ contract CarbonTreasury is SolidDaoManaged {
         }
 
         emit Permissioned(_status, _address, true);
-
         return true;
     }
 
     /**
      * @title disable
-     *  @notice disable permission
-     *  @param _status STATUS
-     *  @param _address address
+     * @notice disable permission
+     * @dev only governor can call this function
+     * @param _status STATUS
+     * @param _address address
      */
     function disable(
         STATUS _status, 
@@ -209,7 +204,6 @@ contract CarbonTreasury is SolidDaoManaged {
         permissions[_status][_address] = false;
 
         emit Permissioned(_status, _address, false);
-
         return true;
     }
 
@@ -228,26 +222,91 @@ contract CarbonTreasury is SolidDaoManaged {
         return (false, 0);
     }
 
-    //NOTE: mint or burn SCT in this contract?
+    /**
+     * @title orderTimelock
+     * @notice create order for address receive permission
+     * @dev only governor can call this function
+     * @param _status STATUS
+     * @param _address address
+     * @param _calculator address
+     */
+    function orderTimelock(
+        STATUS _status,
+        address _address,
+        address _calculator
+    ) external onlyGovernor returns(bool) {
+        require(_address != address(0), "Carbon Treasury: invalid address");
+        require(timelockEnabled, "Carbon Treasury: timelock is disabled, use enable");
 
-    //NOTE: Are there other management functions? manage tokens, edit projects, etc
+        uint256 timelock = block.number + blocksNeededForOrder;
+        permissionOrder.push(
+            Order({
+                managing: _status, 
+                toPermit: _address, 
+                timelockEnd: timelock, 
+                nullify: false, 
+                executed: false
+            })
+        );
 
-    //TODO: implement timelock orders
-    //function orderTimelock(STATUS _status, address _address);
-    //function execute(uint256 _index);
-    //function nullify(uint256 _index);
+        emit PermissionOrdered(_status, _address);
+        return true;
+    }
 
     /**
+     * @title execute
+     * @notice enable ordered permission
+     * @dev only governor can call this function
+     * @param _index uint256
+     */
+    function execute(uint256 _index) external onlyGovernor returns(bool) {
+        require(timelockEnabled, "Carbon Treasury: timelock is disabled, use enable");
+
+        Order memory info = permissionOrder[_index];
+
+        require(!info.nullify, "Carbon Treasury: order has been nullified");
+        require(!info.executed, "Carbon Treasury: order has already been executed");
+        require(block.number >= info.timelockEnd, "Carbon Treasury: timelock not complete");
+
+        permissions[info.managing][info.toPermit] = true;
+        (bool registered, ) = indexInRegistry(info.toPermit, info.managing);
+        if (!registered) {
+            registry[info.managing].push(info.toPermit);
+        }
+        permissionOrder[_index].executed = true;
+
+        emit Permissioned(info.toPermit, info.managing, true);
+        return true;
+    }
+
+    /**
+     * @title nullify
+     * @notice cancel timelocked order
+     * @dev only governor can call this function
+     * @param _index uint256
+     */
+    function nullify(uint256 _index) external onlyGovernor returns(bool) {
+        permissionOrder[_index].nullify = true;
+        return true;
+    }
+
+    /**
+     * @title disableTimelock
      * @notice disables timelocked
+     * @dev only governor can call this function
      */
     function disableTimelock() external onlyGovernor {
         require(timelockEnabled, "Carbon Treasury: timelock already disabled");
         if (onChainGovernanceTimelock != 0 && onChainGovernanceTimelock <= block.number) {
             timelockEnabled = false;
         } else {
-            onChainGovernanceTimelock = block.number + (blocksNeededForQueue*7);
+            onChainGovernanceTimelock = block.number + (blocksNeededForQueue * 7);
         }
     }
+
+    //NOTE: mint or burn SCT in this contract?
+
+    //NOTE: Are there other management functions? manage tokens, edit projects, etc
 
     //TODO: implement view functions
     //function carbonProject(address _token, address _tokenId) external view returns (CarbonProject);
@@ -255,6 +314,13 @@ contract CarbonTreasury is SolidDaoManaged {
     //TODO: implement token value
     //function tokenValue(address _token, address _tokenId, uint256 _amount) external view returns (uint256);
 
-    //function baseSupply() external view returns (uint256);
+    /**
+     * @title baseSupply
+     * @notice returns SCT total supply
+     * @return uint256
+     */
+    function baseSupply() external view returns (uint256) {
+        return SCT.totalSupply();
+    }
 
 }
