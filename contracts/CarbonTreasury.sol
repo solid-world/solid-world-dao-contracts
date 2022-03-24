@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.13;
 
-import "./lib/SafeERC20.sol";
 import "./lib/SolidDaoManaged.sol";
+import "./lib/ERC1155Receiver.sol";
 import "./interfaces/ISCT.sol";
 import "./interfaces/IERC1155.sol";
 
@@ -12,7 +12,7 @@ import "./interfaces/IERC1155.sol";
  * @author Solid World DAO
  * @notice Carbon Project Treasury
  */
-contract CarbonTreasury is SolidDaoManaged {
+contract CarbonTreasury is SolidDaoManaged, ERC1155Receiver {
 
     event Deposit(address indexed token, uint256 indexed tokenId, address fromAddress, uint256 amount);
     event Withdrawal(address indexed token, uint256 indexed tokenId, address toAddress, uint256 amount);
@@ -97,7 +97,7 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
-     * @title deposit
+     * @notice deposit
      * @notice function to allow approved address to deposit an asset for SCT
      * @dev only reserve depositor can call this function
      * @param _token address
@@ -121,7 +121,7 @@ contract CarbonTreasury is SolidDaoManaged {
             _tokenId, 
             _amount, 
             ""
-        ); //TODO:Test with ERC1155
+        );
 
         SCT.mint(_owner, _amount);
 
@@ -133,7 +133,7 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
-     * @title withdraw
+     * @notice withdraw
      * @notice function to allow approved address to withdraw Carbon Project tokens
      * @dev only reserve spender can call this function
      * @param _token address
@@ -160,14 +160,14 @@ contract CarbonTreasury is SolidDaoManaged {
             _tokenId, 
             withdrawAmount, 
             ""
-        ); //TODO:Test with ERC1155
+        );
 
         emit Withdrawal(_token, _tokenId, _toAddress, withdrawAmount);
         return(withdrawAmount);
     }
 
     /**
-     * @title enable
+     * @notice enable
      * @notice function to enable permission
      * @dev only governor can call this function
      * @param _status STATUS
@@ -190,8 +190,8 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
-     * @title disable
-     * @notice disable permission
+     * @notice disable
+     * @notice function to disable permission
      * @dev only governor can call this function
      * @param _status STATUS
      * @param _address address
@@ -208,7 +208,7 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
-     * @title indexInRegistry
+     * @notice indexInRegistry
      * @notice view function to check if registry contains address
      * @return (bool, uint256)
      */
@@ -223,17 +223,15 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
-     * @title orderTimelock
-     * @notice create order for address receive permission
+     * @notice orderTimelock
+     * @notice function to create order for address receive permission
      * @dev only governor can call this function
      * @param _status STATUS
      * @param _address address
-     * @param _calculator address
      */
     function orderTimelock(
         STATUS _status,
-        address _address,
-        address _calculator
+        address _address
     ) external onlyGovernor returns(bool) {
         require(_address != address(0), "Carbon Treasury: invalid address");
         require(timelockEnabled, "Carbon Treasury: timelock is disabled, use enable");
@@ -254,8 +252,8 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
-     * @title execute
-     * @notice enable ordered permission
+     * @notice execute
+     * @notice function to enable ordered permission
      * @dev only governor can call this function
      * @param _index uint256
      */
@@ -275,13 +273,13 @@ contract CarbonTreasury is SolidDaoManaged {
         }
         permissionOrder[_index].executed = true;
 
-        emit Permissioned(info.toPermit, info.managing, true);
+        emit Permissioned(info.managing, info.toPermit, true);
         return true;
     }
 
     /**
-     * @title nullify
-     * @notice cancel timelocked order
+     * @notice nullify
+     * @notice function to cancel timelocked order
      * @dev only governor can call this function
      * @param _index uint256
      */
@@ -291,8 +289,8 @@ contract CarbonTreasury is SolidDaoManaged {
     }
 
     /**
-     * @title disableTimelock
-     * @notice disables timelocked
+     * @notice disableTimelock
+     * @notice function to disable timelocke
      * @dev only governor can call this function
      */
     function disableTimelock() external onlyGovernor {
@@ -300,7 +298,7 @@ contract CarbonTreasury is SolidDaoManaged {
         if (onChainGovernanceTimelock != 0 && onChainGovernanceTimelock <= block.number) {
             timelockEnabled = false;
         } else {
-            onChainGovernanceTimelock = block.number + (blocksNeededForQueue * 7);
+            onChainGovernanceTimelock = block.number + (blocksNeededForOrder * 7);
         }
     }
 
@@ -308,19 +306,32 @@ contract CarbonTreasury is SolidDaoManaged {
 
     //NOTE: Are there other management functions? manage tokens, edit projects, etc
 
-    //TODO: implement view functions
-    //function carbonProject(address _token, address _tokenId) external view returns (CarbonProject);
-
-    //TODO: implement token value
+    //NOTE: implement token value in this contract?
     //function tokenValue(address _token, address _tokenId, uint256 _amount) external view returns (uint256);
 
     /**
-     * @title baseSupply
-     * @notice returns SCT total supply
+     * @notice baseSupply
+     * @notice view function that returns SCT total supply
      * @return uint256
      */
     function baseSupply() external view returns (uint256) {
         return SCT.totalSupply();
+    }
+
+    /**
+     * @notice onERC1155Received
+     * @notice virtual function to allow contract accept ERC1155 tokens
+     */
+    function onERC1155Received(address, address, uint256, uint256, bytes memory) public virtual returns (bytes4) {
+        return this.onERC1155Received.selector;
+    }
+
+    /**
+     * @notice onERC1155BatchReceived
+     * @notice virtual function to allow contract accept ERC1155 tokens
+     */
+    function onERC1155BatchReceived(address, address, uint256[] memory, uint256[] memory, bytes memory) public virtual returns (bytes4) {
+        return this.onERC1155BatchReceived.selector;
     }
 
 }
