@@ -15,7 +15,7 @@ import "./interfaces/IERC1155.sol";
 contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
 
     event Deposited(address indexed token, uint256 indexed tokenId, address fromAddress, uint256 amount);
-    event Selled(address indexed token, uint256 indexed tokenId, address toAddress, uint256 amount);
+    event Sold(address indexed token, uint256 indexed tokenId, address toAddress, uint256 amount);
     event Permissioned(STATUS indexed status, address addr, bool result);
     event PermissionOrdered(STATUS indexed status, address ordered);
 
@@ -96,8 +96,9 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     /**
      * @notice deposit
      * @notice function to deposit an asset for SCT
-     * @dev only reserve tokens are accepted
-     * @dev depositor/owner need to allow this contract spend ERC1155 first
+     * @dev require: only reserve tokens are accepted
+     * @dev require: owner _tokenId balance needs to be more or equal than _amount
+     * @dev require: owner_ need to allow this contract spend ERC1155 first
      * @param _token address
      * @param _tokenId unint256
      * @param _amount unint256
@@ -111,7 +112,8 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         address _owner
     ) external returns (bool) {
         require(permissions[STATUS.RESERVETOKEN][_carbonProject.token], "SCT Carbon Treasury: reserve token not permitted");
-        require(IERC1155(_token).isApprovedForAll(_owner, address(this)) , "SCT Carbon Treasury: owner not allowed this contract spend ERC1155 tokens");
+        require(IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount, "SCT Carbon Treasury: owner insuficient ERC1155 balance");
+        require(IERC1155(_token).isApprovedForAll(_owner, address(this)) , "SCT Carbon Treasury: owner not approve this contract spend ERC1155");
 
         IERC1155(_token).safeTransferFrom(
             _owner, 
@@ -138,15 +140,16 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     /**
      * @notice sell
      * @notice function to sell msg.sender deposited Carbon Credits to _buyer
-     * @dev only owner can call this function
-     * @dev _buyer need to approve this smart contract spend sct first
-     * @dev deposited Carbon Credits balance of the msg.sender needs to be equal or less than _amount
-     * @dev SCT _totalValue needs to be equal or more than Carbon Credits _amount
+     * @dev require: only owner can call this function
+     * @dev require: _buyer need to approve this smart contract spend sct first
+     * @dev require: deposited Carbon Credits balance of the msg.sender needs to be equal or less than _amount
+     * @dev require: SCT _totalValue needs to be equal or more than Carbon Credits _amount
      * @param _token address
      * @param _tokenId unint256
      * @param _amount unint256: amount of msg.sender Carbon Credits deposited in contract to sell
      * @param _totalValue unint256: amount of SCT to be paid by _buyer
      * @param _buyer address
+     * @return true     
      */
     function sell(
         address _token,
@@ -154,15 +157,15 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         uint256 _amount,
         uint256 _totalValue,
         address _buyer
-    ) external returns (uint256) {
+    ) external returns (bool) {
         require(permissions[STATUS.RESERVETOKEN][_token], "SCT Carbon Treasury: reserve token not permitted");
         require(carbonProjectBalances[_token][_tokenId][msg.sender] >= _amount, "SCT Carbon Treasury: seller ERC1155 balance insuficient");
         require((SCT.allowance(msg.sender, address(this))) >= _totalValue), "SCT Carbon Treasury: buyer not allowed this contract spend SCT");
-        require(_totalValue >= _amount, "Carbon Trasury: SCT total value needs to be more or equal of ERC1155 amount")
+        require(_totalValue >= _amount, "Carbon Trasury: SCT total value needs to be equal or more than ERC1155 amount")
 
         carbonProjectBalances[_token][_tokenId][_owner] -= _amount;
-        totalReserves -= _amount;
         carbonProjects[_token][_tokenId].tons -= _amount;
+        totalReserves -= _amount;
 
         if(carbonProjects[_token][_tokenId].tons == 0) {
             carbonProjects[_token][_tokenId].isActive = false;
@@ -180,8 +183,8 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
             "data"
         );
 
-        emit Selled(_token, _tokenId, _buyer, _amount);
-        return(_amount);
+        emit Sold(_token, _tokenId, _buyer, _amount);
+        return true;
     }
 
     /**
