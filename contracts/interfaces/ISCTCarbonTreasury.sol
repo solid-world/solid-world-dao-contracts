@@ -30,7 +30,7 @@ interface ISCTCarbonTreasury {
     function initialize() external;
     function deposit(address _token, uint256 _tokenId, uint256 _amount,address _owner) external returns(bool);
     function sell(address _token, uint256 _tokenId, uint256 _amount, uint256 _totalValue, address _buyer) external returns(bool);
-    function setCarbonProject(CarbonProject memory _carbonProject) external returns(bool)
+    function createCarbonProject(CarbonProject memory _carbonProject) external returns(bool)
     function enable(STATUS _status, address _address) external returns(bool);
     function disable(STATUS _status, address _address) external returns(bool);
     function indexInRegistry(address _address, STATUS _status) external view returns (bool, uint256);
