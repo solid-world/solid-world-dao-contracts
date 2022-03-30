@@ -3,6 +3,11 @@
 		"inputs": [
 			{
 				"internalType": "address",
+				"name": "_authority",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
 				"name": "_sct",
 				"type": "address"
 			},
@@ -10,11 +15,6 @@
 				"internalType": "uint256",
 				"name": "_timelock",
 				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "_authority",
-				"type": "address"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -49,9 +49,9 @@
 				"type": "uint256"
 			},
 			{
-				"indexed": false,
+				"indexed": true,
 				"internalType": "address",
-				"name": "fromAddress",
+				"name": "owner",
 				"type": "address"
 			},
 			{
@@ -61,7 +61,7 @@
 				"type": "uint256"
 			}
 		],
-		"name": "Deposit",
+		"name": "Deposited",
 		"type": "event"
 	},
 	{
@@ -69,14 +69,14 @@
 		"inputs": [
 			{
 				"indexed": true,
-				"internalType": "enum CarbonTreasury.STATUS",
+				"internalType": "enum SCTCarbonTreasury.STATUS",
 				"name": "status",
 				"type": "uint8"
 			},
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "ordered",
+				"name": "token",
 				"type": "address"
 			}
 		],
@@ -88,14 +88,14 @@
 		"inputs": [
 			{
 				"indexed": true,
-				"internalType": "enum CarbonTreasury.STATUS",
+				"internalType": "enum SCTCarbonTreasury.STATUS",
 				"name": "status",
 				"type": "uint8"
 			},
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "addr",
+				"name": "token",
 				"type": "address"
 			},
 			{
@@ -124,9 +124,15 @@
 				"type": "uint256"
 			},
 			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "toAddress",
+				"name": "buyer",
 				"type": "address"
 			},
 			{
@@ -136,7 +142,32 @@
 				"type": "uint256"
 			}
 		],
-		"name": "Withdrawal",
+		"name": "Sold",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "isActive",
+				"type": "bool"
+			}
+		],
+		"name": "UpdatedInfo",
 		"type": "event"
 	},
 	{
@@ -202,6 +233,35 @@
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "carbonProjectBalances",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"name": "carbonProjects",
@@ -243,6 +303,11 @@
 			},
 			{
 				"internalType": "bool",
+				"name": "isActive",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
 				"name": "isCertified",
 				"type": "bool"
 			},
@@ -250,21 +315,6 @@
 				"internalType": "bool",
 				"name": "isRedeemed",
 				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "isActive",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "isWithdrawed",
-				"type": "bool"
-			},
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -273,79 +323,32 @@
 	{
 		"inputs": [
 			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "token",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "tokenId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "tons",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "flatRate",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "sdgPremium",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "daysToRealization",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "closenessPremium",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "isCertified",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "isRedeemed",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "isActive",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "isWithdrawed",
-						"type": "bool"
-					},
-					{
-						"internalType": "address",
-						"name": "owner",
-						"type": "address"
-					}
-				],
-				"internalType": "struct CarbonTreasury.CarbonProject",
-				"name": "_carbonProject",
-				"type": "tuple"
+				"internalType": "address",
+				"name": "_token",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_tokenId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_owner",
+				"type": "address"
 			}
 		],
 		"name": "deposit",
 		"outputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "bool",
 				"name": "",
-				"type": "uint256"
+				"type": "bool"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -354,7 +357,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum CarbonTreasury.STATUS",
+				"internalType": "enum SCTCarbonTreasury.STATUS",
 				"name": "_status",
 				"type": "uint8"
 			},
@@ -385,7 +388,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum CarbonTreasury.STATUS",
+				"internalType": "enum SCTCarbonTreasury.STATUS",
 				"name": "_status",
 				"type": "uint8"
 			},
@@ -433,7 +436,7 @@
 				"type": "address"
 			},
 			{
-				"internalType": "enum CarbonTreasury.STATUS",
+				"internalType": "enum SCTCarbonTreasury.STATUS",
 				"name": "_status",
 				"type": "uint8"
 			}
@@ -587,7 +590,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum CarbonTreasury.STATUS",
+				"internalType": "enum SCTCarbonTreasury.STATUS",
 				"name": "_status",
 				"type": "uint8"
 			},
@@ -619,7 +622,7 @@
 		"name": "permissionOrder",
 		"outputs": [
 			{
-				"internalType": "enum CarbonTreasury.STATUS",
+				"internalType": "enum SCTCarbonTreasury.STATUS",
 				"name": "managing",
 				"type": "uint8"
 			},
@@ -650,7 +653,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum CarbonTreasury.STATUS",
+				"internalType": "enum SCTCarbonTreasury.STATUS",
 				"name": "",
 				"type": "uint8"
 			},
@@ -674,7 +677,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum CarbonTreasury.STATUS",
+				"internalType": "enum SCTCarbonTreasury.STATUS",
 				"name": "",
 				"type": "uint8"
 			},
@@ -698,6 +701,45 @@
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "_token",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_tokenId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_totalValue",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_buyer",
+				"type": "address"
+			}
+		],
+		"name": "sell",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "contract ISolidDaoManagement",
 				"name": "_newAuthority",
 				"type": "address"
@@ -705,6 +747,77 @@
 		],
 		"name": "setAuthority",
 		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "tokenId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "tons",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "flatRate",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "sdgPremium",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "daysToRealization",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "closenessPremium",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "isActive",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "isCertified",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "isRedeemed",
+						"type": "bool"
+					}
+				],
+				"internalType": "struct SCTCarbonTreasury.CarbonProject",
+				"name": "_carbonProject",
+				"type": "tuple"
+			}
+		],
+		"name": "setCarbonProject",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
@@ -751,35 +864,6 @@
 			}
 		],
 		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_token",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "_toAddress",
-				"type": "address"
-			}
-		],
-		"name": "withdraw",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]

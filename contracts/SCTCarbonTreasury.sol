@@ -16,9 +16,29 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
 
     event Deposited(address indexed token, uint256 indexed tokenId, address indexed owner, uint256 amount);
     event Sold(address indexed token, uint256 indexed tokenId, address indexed owner, address buyer, uint256 amount);
-    event UpdatedInfo(address indexed token, uint256 indexed tokenId);
+    event UpdatedInfo(address indexed token, uint256 indexed tokenId, bool isActive);
     event Permissioned(STATUS indexed status, address token, bool result);
     event PermissionOrdered(STATUS indexed status, address token);
+
+    struct CarbonProject {
+        address token;
+        uint256 tokenId;
+        uint256 tons;
+        uint256 flatRate;
+        uint256 sdgPremium;
+        uint256 daysToRealization;
+        uint256 closenessPremium;
+        bool isActive;
+        bool isCertified;
+        bool isRedeemed;
+    }
+
+    ISCT public immutable SCT;
+    
+    uint256 public totalReserves;
+
+    mapping(address => mapping(uint256 => mapping(address => uint256))) public carbonProjectBalances;
+    mapping(address => mapping(uint256 => CarbonProject)) public carbonProjects; 
 
     /**
      * @title STATUS
@@ -39,32 +59,6 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         bool nullify;
         bool executed;
     }
-
-    struct CarbonProject {
-        address token;
-        uint256 tokenId;
-        uint256 tons;
-        bool isActive;
-    }
-
-    struct CarbonProjectInfo {
-        address token;
-        uint256 tokenId;
-        uint256 flatRate;
-        uint256 sdgPremium;
-        uint256 daysToRealization;
-        uint256 closenessPremium;
-        bool isCertified;
-        bool isRedeemed;
-    }
-
-    ISCT public immutable SCT;
-    
-    uint256 public totalReserves;
-
-    mapping(address => mapping(uint256 => mapping(address => uint256))) public carbonProjectBalances;
-    mapping(address => mapping(uint256 => CarbonProject)) public carbonProjects; 
-    mapping(address => mapping(uint256 => CarbonProjectInfo)) public carbonProjectInfos; 
 
     mapping(STATUS => address[]) public registry;
     mapping(STATUS => mapping(address => bool)) public permissions;
@@ -102,6 +96,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
      * @notice deposit
      * @notice function to deposit reserve token and mint SCT
      * @dev require: only permitted reserve tokens are accepted
+     * @dev require: only active carbon projects are accepted
      * @dev require: owner ERC1155 (_token, _tokenId) balance needs to be more or equal than _amount
      * @dev require: owner_ need to allow this contract spend ERC1155 first
      * @param _token address
@@ -117,6 +112,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         address _owner
     ) external returns (bool) {
         require(permissions[STATUS.RESERVETOKEN][_token], "SCT Treasury: reserve token not permitted");
+        require(carbonProjects[_token][_tokenId].isActive, "SCT Treasury: carbon project not active");
         require((IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount, "SCT Treasury: owner insuficient ERC1155 balance");
         require((IERC1155(_token).isApprovedForAll(_owner, address(this))) , "SCT Treasury: owner not approve this contract spend ERC1155");
 
@@ -130,18 +126,8 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
 
         SCT.mint(_owner, _amount);
 
-        totalReserves += _amount;
-
         carbonProjectBalances[_token][_tokenId][_owner] += _amount;
-
-        if(carbonProjects[_token][_tokenId].isActive) {
-            carbonProjects[_token][_tokenId].tons += _amount;
-        } else {
-            carbonProjects[_token][_tokenId].token = _token;
-            carbonProjects[_token][_tokenId].tokenId = _tokenId;
-            carbonProjects[_token][_tokenId].tons = _amount;
-            carbonProjects[_token][_tokenId].isActive = true;
-        }
+        totalReserves += _amount;
 
         emit Deposited(_token, _tokenId, _owner, _amount);
         return true;
@@ -169,17 +155,12 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         address _buyer
     ) external returns (bool) {
         require(permissions[STATUS.RESERVETOKEN][_token], "SCT Treasury: reserve token not permitted");
-        require(carbonProjectBalances[_token][_tokenId][msg.sender]  >= _amount, "SCT Treasury: seller ERC1155 balance insuficient");
+        require(carbonProjectBalances[_token][_tokenId][msg.sender]  >= _amount, "SCT Treasury: seller ERC1155 deposited balance insuficient");
         require((SCT.allowance(msg.sender, address(this))) >= _totalValue, "SCT Treasury: buyer not allowed this contract spend SCT");
         require(_totalValue >= _amount, "SCT Trasury: SCT total value needs to be equal or more than ERC1155 amount");
 
         carbonProjectBalances[_token][_tokenId][msg.sender] -= _amount;
-        carbonProjects[_token][_tokenId].tons -= _amount;
         totalReserves -= _amount;
-
-        if(carbonProjects[_token][_tokenId].tons == 0) {
-            carbonProjects[_token][_tokenId].isActive = false;
-        }
 
         SCT.burnFrom(_buyer, _amount);
 
@@ -202,16 +183,16 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
      * @notice function to update carbon project info
      * @dev require: only permitted reserve manager can call this function
      * @dev require: only permitted reserve tokens are accepted
-     * @param _carbonProjectInfo CarbonProjectInfo
+     * @param _carbonProject CarbonProject
      * @return true
      */
-    function setCarbonProjectInfo(CarbonProjectInfo memory _carbonProjectInfo) external returns (bool) {
+    function setCarbonProject(CarbonProject memory _carbonProject) external returns (bool) {
         require(permissions[STATUS.RESERVEMANAGER][msg.sender], "SCT Treasury: reserve manager not permitted");
-        require(permissions[STATUS.RESERVETOKEN][_carbonProjectInfo.token], "SCT Treasury: reserve token not permitted");
+        require(permissions[STATUS.RESERVETOKEN][_carbonProject.token], "SCT Treasury: reserve token not permitted");
 
-        carbonProjectInfos[_carbonProjectInfo.token][_carbonProjectInfo.tokenId] = _carbonProjectInfo;
+        carbonProjects[_carbonProject.token][_carbonProject.tokenId] = _carbonProject;
 
-        emit UpdatedInfo(_carbonProjectInfo.token, _carbonProjectInfo.tokenId);
+        emit UpdatedInfo(_carbonProject.token, _carbonProject.tokenId, _carbonProject.isActive);
         return true;
     }
 
