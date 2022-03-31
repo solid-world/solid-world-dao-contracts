@@ -17,8 +17,8 @@ Source: https://mumbai.polygonscan.com/address/0x00885b0976c50ea7716e8950937f862
 
 ### SCT Carbon Treasury
 
-Address: 0x2533650256FC355383d491D6b072cE18969234Fc
-Source: https://mumbai.polygonscan.com/address/0x2533650256FC355383d491D6b072cE18969234Fc#code
+Address: 0x5f785a9f0dF181a42B469564065EA38c5ea45F47
+Source: https://mumbai.polygonscan.com/address/0x5f785a9f0df181a42b469564065ea38c5ea45f47#code
 
 ## Testnet Carbon Credit tokens
 ### ERC1155

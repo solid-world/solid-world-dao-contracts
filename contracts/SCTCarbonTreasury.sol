@@ -179,14 +179,14 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     }
 
     /**
-     * @notice setCarbonProjectInfo
-     * @notice function to update carbon project info
+     * @notice createOrUpdateCarbonProject
+     * @notice function to create or update carbon project
      * @dev require: only permitted reserve manager can call this function
      * @dev require: only permitted reserve tokens are accepted
      * @param _carbonProject CarbonProject
      * @return true
      */
-    function createCarbonProject(CarbonProject memory _carbonProject) external returns (bool) {
+    function createOrUpdateCarbonProject(CarbonProject memory _carbonProject) external returns (bool) {
         require(permissions[STATUS.RESERVEMANAGER][msg.sender], "SCT Treasury: reserve manager not permitted");
         require(permissions[STATUS.RESERVETOKEN][_carbonProject.token], "SCT Treasury: reserve token not permitted");
 
