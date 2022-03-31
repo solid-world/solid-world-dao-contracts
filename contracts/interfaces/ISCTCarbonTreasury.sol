@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-interface ICarbonTreasury {
+interface ISCTCarbonTreasury {
+
+    enum STATUS {
+        RESERVETOKEN,
+        RESERVEMANAGER
+    }
 
     struct CarbonProject {
         address token;
@@ -11,16 +16,21 @@ interface ICarbonTreasury {
         uint256 sdgPremium;
         uint256 daysToRealization;
         uint256 closenessPremium;
+        bool isActive;
         bool isCertified;
         bool isRedeemed;
-        bool isActive;
-        bool isWithdrawed;
-        address owner;
     }
 
+    event Deposited(address indexed token, uint256 indexed tokenId, address indexed owner, uint256 amount);
+    event Sold(address indexed token, uint256 indexed tokenId, address indexed owner, address buyer, uint256 amount);
+    event UpdatedInfo(address indexed token, uint256 indexed tokenId, bool isActive);
+    event Permissioned(STATUS indexed status, address token, bool result);
+    event PermissionOrdered(STATUS indexed status, address token);
+
     function initialize() external;
-    function deposit(CarbonProject _carbonProject) external returns(uint256);
-    function withdraw(address _token, uint256 _tokenId, address _toAddress) external returns(uint256);
+    function deposit(address _token, uint256 _tokenId, uint256 _amount,address _owner) external returns(bool);
+    function sell(address _token, uint256 _tokenId, uint256 _amount, uint256 _totalValue, address _buyer) external returns(bool);
+    function createOrUpdateCarbonProject(CarbonProject memory _carbonProject) external returns(bool)
     function enable(STATUS _status, address _address) external returns(bool);
     function disable(STATUS _status, address _address) external returns(bool);
     function indexInRegistry(address _address, STATUS _status) external view returns (bool, uint256);
