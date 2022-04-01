@@ -15,7 +15,8 @@ import "./interfaces/IERC1155.sol";
 contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
 
     event Deposited(address indexed token, uint256 indexed tokenId, address indexed owner, uint256 amount);
-    event Sold(address indexed token, uint256 indexed tokenId, address indexed owner, address buyer, uint256 amount);
+    event ApprovedSell(address indexed token, uint256 indexed tokenId, address owner, uint256 amount, uint256 totalValue);
+    event Sold(address indexed token, uint256 indexed tokenId, address indexed owner, address buyer, uint256 amount, uint256 totalValue));
     event UpdatedInfo(address indexed token, uint256 indexed tokenId, bool isActive);
     event Permissioned(STATUS indexed status, address token, bool result);
     event PermissionOrdered(STATUS indexed status, address token);
@@ -33,11 +34,17 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         bool isRedeemed;
     }
 
+    struct SaleApproval {
+        uint256 amount;
+        uint256 totalValue;
+    }
+
     ISCT public immutable SCT;
     
     uint256 public totalReserves;
 
     mapping(address => mapping(uint256 => mapping(address => uint256))) public carbonProjectBalances;
+    mapping(address => mapping(uint256 => mapping(address => SaleApproval))) public saleApprovals;
     mapping(address => mapping(uint256 => CarbonProject)) public carbonProjects; 
 
     /**
@@ -93,8 +100,9 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     }
 
     /**
-     * @notice deposit
-     * @notice function to deposit reserve token and mint SCT
+     * @notice depositReserveToken
+     * @notice function to deposit reserve token in treasury and mint SCT to _owner
+     * @dev this function update _owner carbonProjectBalances
      * @dev require: only permitted reserve tokens are accepted
      * @dev require: only active carbon projects are accepted
      * @dev require: owner ERC1155 (_token, _tokenId) balance needs to be more or equal than _amount
@@ -105,7 +113,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
      * @param _owner address
      * @return true
      */
-    function deposit(
+    function depositReserveToken(
         address _token,
         uint256 _tokenId,
         uint256 _amount,
@@ -114,7 +122,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         require(permissions[STATUS.RESERVETOKEN][_token], "SCT Treasury: reserve token not permitted");
         require(carbonProjects[_token][_tokenId].isActive, "SCT Treasury: carbon project not active");
         require((IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount, "SCT Treasury: owner insuficient ERC1155 balance");
-        require((IERC1155(_token).isApprovedForAll(_owner, address(this))) , "SCT Treasury: owner not approve this contract spend ERC1155");
+        require((IERC1155(_token).isApprovedForAll(_owner, address(this))) , "SCT Treasury: owner not approved this contract spend ERC1155");
 
         IERC1155(_token).safeTransferFrom(
             _owner, 
@@ -134,49 +142,83 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     }
 
     /**
-     * @notice sell
-     * @notice function to sell msg.sender deposited Carbon Credits to _buyer
-     * @dev require: only owner can call this function
-     * @dev require: _buyer need to approve this smart contract spend sct first
-     * @dev require: deposited Carbon Credits balance of the msg.sender needs to be equal or less than _amount
+     * @notice approveReserveTokenSell
+     * @notice function to approve a sale of some _amount of deposited Carbon Credits
+     * @dev to remove previous or unused sale approval the owner need call this function again and set _amount to zero
+     * @dev require: only active carbon projects are accepted
+     * @dev require: msg.sender/owner deposited Carbon Credits balance needs to be equal or less than _amount
      * @dev require: SCT _totalValue needs to be equal or more than Carbon Credits _amount
      * @param _token address
      * @param _tokenId unint256
-     * @param _amount unint256: amount of msg.sender Carbon Credits deposited in contract to sell
-     * @param _totalValue unint256: amount of SCT to be paid by _buyer
-     * @param _buyer address
-     * @return true     
+     * @param _amount unint256: amount of msg.sender Carbon Credits deposited in contract for sale
+     * @param _totalValue unint256: amount of SCT to be paid by buyer
+     * @return true
      */
-    function sell(
+    function approveReserveTokenSell(
         address _token,
         uint256 _tokenId,
         uint256 _amount,
-        uint256 _totalValue,
-        address _buyer
+        uint256 _totalValue
     ) external returns (bool) {
-        require(permissions[STATUS.RESERVETOKEN][_token], "SCT Treasury: reserve token not permitted");
-        require(carbonProjectBalances[_token][_tokenId][msg.sender]  >= _amount, "SCT Treasury: seller ERC1155 deposited balance insuficient");
-        require((SCT.allowance(_buyer, address(this))) >= _totalValue, "SCT Treasury: buyer not allowed this contract spend SCT");
-        require(_totalValue >= _amount, "SCT Trasury: SCT total value needs to be equal or more than ERC1155 amount");
+        require(carbonProjects[_token][_tokenId].isActive, "SCT Treasury: carbon project not active");
+        require(carbonProjectBalances[_token][_tokenId][msg.sender]  >= _amount, "SCT Treasury: msg.sender ERC1155 deposited balance insuficient");
+        require(_totalValue >= _amount, "SCT Treasury: SCT total value needs to be more or equal than ERC1155 amount");
 
-        carbonProjectBalances[_token][_tokenId][msg.sender] -= _amount;
+        saleApprovals[_token][_tokenId][msg.sender] = SaleApproval(_amount, _totalValue);
+
+        emit ApprovedSell(_token, _tokenId, _owner, _amount, _totalValue);
+        return true;
+    }
+
+    /**
+     * @notice buyReserveToken
+     * @notice function to buy with SCT approved amount of Carbon Credits
+     * @dev for security reasons, it is necessary the _owner/seller approve same _amount and _totalValue of the sale at approveReserveTokenSell function
+     * @dev this function burn the same _amount of SCT from msg.sender/buyer, set _owner sale approve amount and total value to zero and update _owner carbonProjectBalances
+     * @dev require: only active carbon projects are accepted
+     * @dev require: only approved token sale can be executed by this function
+     * @dev require: _owner deposited Carbon Credits balance needs to be equal or less than _amount
+     * @dev require: msg.sender/buyer need to approve this smart contract spend sct first
+     * @param _token address
+     * @param _tokenId unint256
+     * @param _owner address
+     * @param _amount unint256: amount of _owner Carbon Credits deposited in contract to sell
+     * @param _totalValue unint256: amount of SCT to be paid by _buyer
+     * @return true     
+     */
+    function buyReserveToken(
+        address _token,
+        uint256 _tokenId,
+        address _owner,
+        uint256 _amount,
+        uint256 _totalValue
+    ) external returns (bool) {
+        require(carbonProjects[_token][_tokenId].isActive, "SCT Treasury: carbon project not active");
+        require(saleApprovals[_token][_tokenId][_owner].amount  == _amount, "SCT Treasury: incorrect ERC1155 amount sale approved");
+        require(saleApprovals[_token][_tokenId][_owner].totalValue  == _totalValue, "SCT Treasury: incorrect SCT total value sale approved");
+        require(carbonProjectBalances[_token][_tokenId][_owner]  >= _amount, "SCT Treasury: owner ERC1155 deposited balance insuficient");
+        require((SCT.allowance(msg.sender, address(this))) >= _totalValue, "SCT Treasury: msg.sender not allowed this contract spend SCT");
+
+        carbonProjectBalances[_token][_tokenId][_owner] -= _amount;
+        saleApprovals[_token][_tokenId][_owner].amount = 0;
+        saleApprovals[_token][_tokenId][_owner].totalValue = 0;
         totalReserves -= _amount;
 
-        SCT.burnFrom(_buyer, _amount);
+        SCT.burnFrom(msg.sender, _amount);
 
         if(_totalValue - _amount > 0) {
-            SCT.transferFrom(_buyer, msg.sender, _totalValue - _amount);
+            SCT.transferFrom(msg.sender, _owner, _totalValue - _amount);
         }
         
         IERC1155(_token).safeTransferFrom( 
             address(this), 
-            _buyer,
+            msg.sender,
             _tokenId, 
             _amount, 
             "data"
         );
 
-        emit Sold(_token, _tokenId, msg.sender, _buyer, _amount);
+        emit Sold(_token, _tokenId, _owner, msg.sender, _amount, _totalValue);
         return true;
     }
 
