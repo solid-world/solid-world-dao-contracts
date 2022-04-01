@@ -1,4 +1,4 @@
-# Router step-by-step to test Solid World Dao Smart Contracts
+# Router step-by-step to test Solid World Dao Smart Contracts 
 
 ## SCT Carbon Treasury
 
@@ -13,7 +13,7 @@
 2.1. Call enable function setting _status 1 (RESERVEMANAGER) and manager wallet _address 
 
 3. Create and Set Carbon Project as active in SCT Carbon Treasury
-* To set and active Carbon Project you need to call setCarbonProject function, passing isActive field as true.
+* To set and active Carbon Project you need to call createOrUpdateCarbonProject function, passing isActive field as true.
 3.1. Call setCarbonProject function sending CarbonProject struct:
 
 {
@@ -29,7 +29,7 @@
   bool isRedeemed; // status of ERC1155 token id redeem (will start with false)
 }
 
-Example: ["0x2f85416eB19C30361a63632E874886E8a5C4DA95",1,1000,1,1,1,1,true,false,false]
+Example: ["0x4D3470e7567d805b29D220cc462825d1abee7D87",1,1000,1,1,1,1,true,false,false]
 
 4. Deposit Carbon Credit in SCT Carbon Treasury
 * Before execute deposit function the owner needs to allow SCT Carbon Treasury spend same amount of Carbon Credit Tokens using ERC1155 setApprovalForAll function
@@ -45,4 +45,4 @@ Example: ["0x2f85416eB19C30361a63632E874886E8a5C4DA95",1,1000,1,1,1,1,true,false
 * To set Carbon Project as inactive you need to call setCarbonProject function, passing isActive field as false and isCertified as true.
 6.1. Call setCarbonProject function sending CarbonProject struct (see 3.1):
 
-Example: ["0x2f85416eB19C30361a63632E874886E8a5C4DA95",1,1000,1,1,1,1,false,true,false]
+Example: ["0x4D3470e7567d805b29D220cc462825d1abee7D87",1,1000,1,1,1,1,false,true,false]

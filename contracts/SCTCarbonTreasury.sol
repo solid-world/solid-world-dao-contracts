@@ -156,7 +156,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     ) external returns (bool) {
         require(permissions[STATUS.RESERVETOKEN][_token], "SCT Treasury: reserve token not permitted");
         require(carbonProjectBalances[_token][_tokenId][msg.sender]  >= _amount, "SCT Treasury: seller ERC1155 deposited balance insuficient");
-        require((SCT.allowance(msg.sender, address(this))) >= _totalValue, "SCT Treasury: buyer not allowed this contract spend SCT");
+        require((SCT.allowance(_buyer, address(this))) >= _totalValue, "SCT Treasury: buyer not allowed this contract spend SCT");
         require(_totalValue >= _amount, "SCT Trasury: SCT total value needs to be equal or more than ERC1155 amount");
 
         carbonProjectBalances[_token][_tokenId][msg.sender] -= _amount;
@@ -164,7 +164,9 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
 
         SCT.burnFrom(_buyer, _amount);
 
-        SCT.transferFrom(_buyer, msg.sender, _totalValue - _amount);
+        if(_totalValue - _amount > 0) {
+            SCT.transferFrom(_buyer, msg.sender, _totalValue - _amount);
+        }
         
         IERC1155(_token).safeTransferFrom( 
             address(this), 

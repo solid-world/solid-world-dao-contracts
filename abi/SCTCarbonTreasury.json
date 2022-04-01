@@ -5,20 +5,35 @@
 				"internalType": "address",
 				"name": "_authority",
 				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_sct",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_timelock",
-				"type": "uint256"
 			}
 		],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "Approval",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -34,155 +49,81 @@
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "token",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "tokenId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "tons",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "flatRate",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "sdgPremium",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "daysToRealization",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "closenessPremium",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "isActive",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "isCertified",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "isRedeemed",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct SCTCarbonTreasury.CarbonProject",
-				"name": "_carbonProject",
-				"type": "tuple"
-			}
-		],
-		"name": "createOrUpdateCarbonProject",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_token",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "_owner",
-				"type": "address"
-			}
-		],
-		"name": "deposit",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "token",
+				"name": "from",
 				"type": "address"
 			},
 			{
 				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
 			},
 			{
-				"indexed": true,
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "Transfer",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "DOMAIN_SEPARATOR",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "owner",
 				"type": "address"
 			},
 			{
-				"indexed": false,
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			}
+		],
+		"name": "allowance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
 				"internalType": "uint256",
 				"name": "amount",
 				"type": "uint256"
 			}
 		],
-		"name": "Deposited",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "_status",
-				"type": "uint8"
-			},
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "disable",
+		"name": "approve",
 		"outputs": [
 			{
 				"internalType": "bool",
@@ -195,7 +136,45 @@
 	},
 	{
 		"inputs": [],
-		"name": "disableTimelock",
+		"name": "authority",
+		"outputs": [
+			{
+				"internalType": "contract ISolidDaoManagement",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "balanceOf",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "burn",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -203,254 +182,172 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "_status",
-				"type": "uint8"
+				"internalType": "address",
+				"name": "account_",
+				"type": "address"
 			},
 			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "enable",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "uint256",
-				"name": "_index",
+				"name": "amount_",
 				"type": "uint256"
 			}
 		],
-		"name": "execute",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
+		"name": "burnFrom",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
 		"inputs": [],
-		"name": "initialize",
+		"name": "decimals",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "subtractedValue",
+				"type": "uint256"
+			}
+		],
+		"name": "decreaseAllowance",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "addedValue",
+				"type": "uint256"
+			}
+		],
+		"name": "increaseAllowance",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account_",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount_",
+				"type": "uint256"
+			}
+		],
+		"name": "mint",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_index",
-				"type": "uint256"
-			}
-		],
-		"name": "nullify",
+		"inputs": [],
+		"name": "name",
 		"outputs": [
 			{
-				"internalType": "bool",
+				"internalType": "string",
 				"name": "",
-				"type": "bool"
+				"type": "string"
 			}
 		],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "",
+				"name": "owner",
 				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
-			},
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
-			},
-			{
-				"internalType": "bytes",
-				"name": "",
-				"type": "bytes"
 			}
 		],
-		"name": "onERC1155BatchReceived",
+		"name": "nonces",
 		"outputs": [
 			{
-				"internalType": "bytes4",
+				"internalType": "uint256",
 				"name": "",
-				"type": "bytes4"
+				"type": "uint256"
 			}
 		],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "",
+				"name": "owner",
 				"type": "address"
 			},
 			{
 				"internalType": "address",
-				"name": "",
+				"name": "spender",
 				"type": "address"
 			},
 			{
 				"internalType": "uint256",
-				"name": "",
+				"name": "value",
 				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
-				"name": "",
+				"name": "deadline",
 				"type": "uint256"
 			},
 			{
-				"internalType": "bytes",
-				"name": "",
-				"type": "bytes"
-			}
-		],
-		"name": "onERC1155Received",
-		"outputs": [
-			{
-				"internalType": "bytes4",
-				"name": "",
-				"type": "bytes4"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "_status",
+				"internalType": "uint8",
+				"name": "v",
 				"type": "uint8"
 			},
 			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
+				"internalType": "bytes32",
+				"name": "r",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "s",
+				"type": "bytes32"
 			}
 		],
-		"name": "orderTimelock",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "status",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			}
-		],
-		"name": "PermissionOrdered",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "status",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "result",
-				"type": "bool"
-			}
-		],
-		"name": "Permissioned",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_token",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_totalValue",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "_buyer",
-				"type": "address"
-			}
-		],
-		"name": "sell",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
+		"name": "permit",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
@@ -468,236 +365,74 @@
 		"type": "function"
 	},
 	{
-		"anonymous": false,
+		"inputs": [],
+		"name": "symbol",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalSupply",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
-				"indexed": true,
 				"internalType": "address",
-				"name": "token",
+				"name": "to",
 				"type": "address"
 			},
 			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
 				"internalType": "uint256",
 				"name": "amount",
 				"type": "uint256"
 			}
 		],
-		"name": "Sold",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
+		"name": "transfer",
+		"outputs": [
 			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
 				"internalType": "bool",
-				"name": "isActive",
+				"name": "",
 				"type": "bool"
 			}
 		],
-		"name": "UpdatedInfo",
-		"type": "event"
-	},
-	{
-		"inputs": [],
-		"name": "authority",
-		"outputs": [
-			{
-				"internalType": "contract ISolidDaoManagement",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "baseSupply",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "blocksNeededForOrder",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "",
+				"name": "from",
 				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
 			},
 			{
 				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "carbonProjectBalances",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
+				"name": "to",
 				"type": "address"
 			},
 			{
 				"internalType": "uint256",
-				"name": "",
+				"name": "amount",
 				"type": "uint256"
 			}
 		],
-		"name": "carbonProjects",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tons",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "flatRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "sdgPremium",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "daysToRealization",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "closenessPremium",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "isActive",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "isCertified",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "isRedeemed",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			},
-			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "_status",
-				"type": "uint8"
-			}
-		],
-		"name": "indexInRegistry",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "initialized",
+		"name": "transferFrom",
 		"outputs": [
 			{
 				"internalType": "bool",
@@ -705,165 +440,7 @@
 				"type": "bool"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "onChainGovernanceTimelock",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "permissionOrder",
-		"outputs": [
-			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "managing",
-				"type": "uint8"
-			},
-			{
-				"internalType": "address",
-				"name": "toPermit",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "timelockEnd",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "nullify",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "executed",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "",
-				"type": "uint8"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "permissions",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "",
-				"type": "uint8"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "registry",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "SCT",
-		"outputs": [
-			{
-				"internalType": "contract ISCT",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes4",
-				"name": "interfaceId",
-				"type": "bytes4"
-			}
-		],
-		"name": "supportsInterface",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "timelockEnabled",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "totalReserves",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]
