@@ -49,11 +49,11 @@ Example: ["0x4D3470e7567d805b29D220cc462825d1abee7D87",1,1000,1,1,1,1,true,false
 * Before execute sell function the buyer needs to allow SCT Carbon Treasury spend same amount totalvalue of SCT tokens
 * This function burn the _amount of SCT tokens from buyer, transfer to seller the diference between _totalValue - _amount in SCT tokens and transfer to buyer the _amount of ERC1155
 * Only buyer can execute this function
-5.1. Call buyReserveToken function setting address of Carbon Credit _token, token id _tokenId, address of token owner in _owner, the amount of ERC1155 to sell in _amount and the total SCT value in _totalValue
+6.1. Call buyReserveToken function setting address of Carbon Credit _token, token id _tokenId, address of token owner in _owner, the amount of ERC1155 to sell in _amount and the total SCT value in _totalValue
 
-6. Set Carbon Credit as inactive and certified
+7. Set Carbon Credit as inactive and certified
 * To set Carbon Project as inactive you need to call setCarbonProject function, passing isActive field as false and isCertified as true.
 * Only reserve manager can execute this function
-6.1. Call setCarbonProject function sending CarbonProject struct (see 3.1):
+7.1. Call setCarbonProject function sending CarbonProject struct (see 3.1):
 
 Example: ["0x4D3470e7567d805b29D220cc462825d1abee7D87",1,1000,1,1,1,1,false,true,false]
