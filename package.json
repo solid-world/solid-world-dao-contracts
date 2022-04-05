@@ -1,0 +1,19 @@
+{
+  "name": "solid-world-dao-contracts",
+  "version": "1.0.0",
+  "description": "Solid World DAO Smart Contracts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/solid-world/solid-world-dao-contracts.git"
+  },
+  "author": "Solid World DAO",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/solid-world/solid-world-dao-contracts/issues"
+  },
+  "homepage": "https://github.com/solid-world/solid-world-dao-contracts#readme"
+}

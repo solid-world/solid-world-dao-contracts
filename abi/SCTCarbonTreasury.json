@@ -25,6 +25,25 @@
 		"inputs": [
 			{
 				"indexed": true,
+				"internalType": "contract ISolidDaoManagement",
+				"name": "authority",
+				"type": "address"
+			}
+		],
+		"name": "AuthorityUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "offerId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
 				"internalType": "address",
 				"name": "token",
 				"type": "address"
@@ -36,9 +55,9 @@
 				"type": "uint256"
 			},
 			{
-				"indexed": false,
+				"indexed": true,
 				"internalType": "address",
-				"name": "owner",
+				"name": "buyer",
 				"type": "address"
 			},
 			{
@@ -54,20 +73,50 @@
 				"type": "uint256"
 			}
 		],
-		"name": "ApprovedSell",
+		"name": "CanceledOffer",
 		"type": "event"
 	},
 	{
 		"anonymous": false,
 		"inputs": [
 			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "offerId",
+				"type": "uint256"
+			},
+			{
 				"indexed": true,
-				"internalType": "contract ISolidDaoManagement",
-				"name": "authority",
+				"internalType": "address",
+				"name": "token",
 				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "buyer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "totalValue",
+				"type": "uint256"
 			}
 		],
-		"name": "AuthorityUpdated",
+		"name": "CreatedOffer",
 		"type": "event"
 	},
 	{
@@ -149,6 +198,12 @@
 		"anonymous": false,
 		"inputs": [
 			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "offerId",
+				"type": "uint256"
+			},
+			{
 				"indexed": true,
 				"internalType": "address",
 				"name": "token",
@@ -229,27 +284,12 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "_token",
-				"type": "address"
-			},
-			{
 				"internalType": "uint256",
-				"name": "_tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_totalValue",
+				"name": "_offerId",
 				"type": "uint256"
 			}
 		],
-		"name": "approveReserveTokenSell",
+		"name": "acceptOffer",
 		"outputs": [
 			{
 				"internalType": "bool",
@@ -302,32 +342,12 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "_token",
-				"type": "address"
-			},
-			{
 				"internalType": "uint256",
-				"name": "_tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "_owner",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_totalValue",
+				"name": "_offerId",
 				"type": "uint256"
 			}
 		],
-		"name": "buyReserveToken",
+		"name": "cancelOffer",
 		"outputs": [
 			{
 				"internalType": "bool",
@@ -357,6 +377,30 @@
 			}
 		],
 		"name": "carbonProjectBalances",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "carbonProjectTons",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -434,6 +478,57 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "tokenId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "buyer",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalValue",
+						"type": "uint256"
+					},
+					{
+						"internalType": "enum SCTCarbonTreasury.StatusOffer",
+						"name": "statusOffer",
+						"type": "uint8"
+					}
+				],
+				"internalType": "struct SCTCarbonTreasury.Offer",
+				"name": "_offer",
+				"type": "tuple"
+			}
+		],
+		"name": "createOffer",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -685,6 +780,63 @@
 	},
 	{
 		"inputs": [],
+		"name": "offerIdCounter",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "offers",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "buyer",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalValue",
+				"type": "uint256"
+			},
+			{
+				"internalType": "enum SCTCarbonTreasury.StatusOffer",
+				"name": "statusOffer",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "onChainGovernanceTimelock",
 		"outputs": [
 			{
@@ -880,40 +1032,6 @@
 				"internalType": "address",
 				"name": "",
 				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "saleApprovals",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "totalValue",
-				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
