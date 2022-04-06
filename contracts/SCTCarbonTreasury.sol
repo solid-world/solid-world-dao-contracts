@@ -24,7 +24,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
 
     /**
      * @notice SCT
-     * @dev variable to store SCT ERC20 token address
+     * @dev immutable variable to store SCT ERC20 token address
      * @return address
      */
     ISCT public immutable SCT;
@@ -39,16 +39,16 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     /**
      * @notice CarbonProject
      * @dev struct to store carbon project details
-     * @dev token: ERC1155 smart contract address 
-     * @dev tokenId: ERC1155 carbon project token id
-     * @dev tons: total amount of carbon project tokens
-     * @dev flatRate: premium price variable
-     * @dev sdgPremium: premium price variable
-     * @dev daysToRealization: premium price variable
-     * @dev closenessPremium: premium price variable
-     * @dev isActive: status of carbon project in this smart contract
-     * @dev isCertified: verra status of carbon project certificate
-     * @dev isRedeemed: status of carbon project redeem
+     * @param token: ERC1155 smart contract address 
+     * @param tokenId: ERC1155 carbon project token id
+     * @param tons: total amount of carbon project tokens
+     * @param flatRate: premium price variable
+     * @param sdgPremium: premium price variable
+     * @param daysToRealization: premium price variable
+     * @param closenessPremium: premium price variable
+     * @param isActive: boolean status of carbon project in this smart contract
+     * @param isCertified: boolean verra status of carbon project certificate
+     * @param isRedeemed: boolean status of carbon project redeem
      */
     struct CarbonProject {
         address token;
@@ -100,12 +100,12 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     /**
      * @notice Offer
      * @dev struct to store ERC1155 carbon project buy offers
-     * @dev token: ERC1155 carbon project smart contract address 
-     * @dev tokenId: ERC1155 carbon project token id
-     * @dev buyer: address of buyer
-     * @dev amount: amount of ERC1155 carbon project tokens to buy
-     * @dev totalValue: amount of SCT tokens to pay for the sale
-     * @dev statusOffer: enum StatusOffer
+     * @param token: ERC1155 carbon project smart contract address 
+     * @param tokenId: ERC1155 carbon project token id
+     * @param buyer: address of buyer
+     * @param amount: amount of ERC1155 carbon project tokens to buy
+     * @param totalValue: amount of SCT tokens to pay for the sale
+     * @param statusOffer: enum StatusOffer
      */
     struct Offer {
         address token;
@@ -144,11 +144,11 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     /**
      * @notice Order
      * @dev struct to store orders created on the timelock
-     * @dev managing: STATUS enum to be enabled
-     * @dev toPermit: address to recieve permision
-     * @dev timelockEnd: due date of the order in blocks
-     * @dev nullify: boolean to verify if the order is null
-     * @dev executed: boolean to verify if the order is executed
+     * @param managing: STATUS enum to be enabled
+     * @param toPermit: address to recieve permision
+     * @param timelockEnd: due date of the order in blocks
+     * @param nullify: boolean to verify if the order is null
+     * @param executed: boolean to verify if the order is executed
      */
     struct Order {
         STATUS managing;
@@ -231,6 +231,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     /**
      * @notice initialize
      * @dev this function enable timelock and set initialized to true
+     * @dev only governor can call this function
      */
     function initialize() external onlyGovernor {
         require(!initialized, "SCT Treasury: already initialized");
@@ -330,7 +331,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
 
         SCT.transferFrom(address(this), msg.sender, offers[_offerId].totalValue);
 
-        emit CanceledOffer(offerIdCounter, offers[_offerId].token, offers[_offerId].tokenId, msg.sender, offers[_offerId].amount, offers[_offerId].totalValue);
+        emit CanceledOffer(_offerId, offers[_offerId].token, offers[_offerId].tokenId, msg.sender, offers[_offerId].amount, offers[_offerId].totalValue);
         return true;
     }
 
