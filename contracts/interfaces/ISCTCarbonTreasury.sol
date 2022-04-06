@@ -42,6 +42,8 @@ interface ISCTCarbonTreasury {
     event CanceledOffer(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed buyer, uint256 amount, uint256 totalValue);
     event Sold(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed owner, address buyer, uint256 amount, uint256 totalValue);
     event UpdatedInfo(address indexed token, uint256 indexed tokenId, bool isActive);
+    event ChangedTimelock(bool timelock);
+    event SetOnChainGovernanceTimelock(uint256 blockNumber);
     event Permissioned(STATUS indexed status, address token, bool result);
     event PermissionOrdered(STATUS indexed status, address token);
 
@@ -57,6 +59,7 @@ interface ISCTCarbonTreasury {
     function orderTimelock(STATUS _status, address _address) external;
     function execute(uint256 _index) external returns(bool);
     function nullify(uint256 _index) external returns(bool);
+    function enableTimelock() external;
     function disableTimelock() external;
     function baseSupply() external view returns (uint256);
     
