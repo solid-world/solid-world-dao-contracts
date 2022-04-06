@@ -19,6 +19,8 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     event CanceledOffer(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed buyer, uint256 amount, uint256 totalValue);
     event Sold(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed owner, address buyer, uint256 amount, uint256 totalValue);
     event UpdatedInfo(address indexed token, uint256 indexed tokenId, bool isActive);
+    event ChangedTimelock(bool timelock);
+    event SetOnChainGovernanceTimelock(uint256 blockNumber);
     event Permissioned(STATUS indexed status, address token, bool result);
     event PermissionOrdered(STATUS indexed status, address token);
 
@@ -202,7 +204,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     
     /**
      * @notice onChainGovernanceTimelock
-     * @dev variable to store the number of blocks that order needed to stay in queue to be executed 
+     * @dev variable to store the block number that disableTimelock function can change timelockEnabled to true
      * @return uint256
      */
     uint256 public onChainGovernanceTimelock;
@@ -329,7 +331,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
 
         offers[_offerId].statusOffer = StatusOffer.CANCELED;
 
-        SCT.transferFrom(address(this), msg.sender, offers[_offerId].totalValue);
+        SCT.transfer(msg.sender, offers[_offerId].totalValue);
 
         emit CanceledOffer(_offerId, offers[_offerId].token, offers[_offerId].tokenId, msg.sender, offers[_offerId].amount, offers[_offerId].totalValue);
         return true;
@@ -530,16 +532,32 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     }
 
     /**
-     * @notice disableTimelock
-     * @notice function to disable timelocke
+     * @notice enableTimelock
+     * @notice function to disable timelock
      * @dev only governor can call this function
+     * @dev set timelockEnabled to true
+     */
+    function enableTimelock() external onlyGovernor {
+        require(!timelockEnabled, "SCT Treasury: timelock already enabled");
+        timelockEnabled = true;
+        emit ChangedTimelock(true);
+    }
+
+    /**
+     * @notice disableTimelock
+     * @notice function to disable timelock
+     * @dev only governor can call this function
+     * @dev if onChainGovernanceTimelock is less or equal than block number this fucntion set timelockEnabled to false
+     * @dev if onChainGovernanceTimelock is more than block number this function set new onChainGovernanceTimelock
      */
     function disableTimelock() external onlyGovernor {
         require(timelockEnabled, "SCT Treasury: timelock already disabled");
         if (onChainGovernanceTimelock != 0 && onChainGovernanceTimelock <= block.number) {
             timelockEnabled = false;
+            emit ChangedTimelock(false);
         } else {
-            onChainGovernanceTimelock = block.number + (blocksNeededForOrder * 7);
+            onChainGovernanceTimelock = block.number + (blocksNeededForOrder * 10);
+            emit SetOnChainGovernanceTimelock(onChainGovernanceTimelock);
         }
     }
 

@@ -81,6 +81,19 @@
 		"inputs": [
 			{
 				"indexed": false,
+				"internalType": "bool",
+				"name": "timelock",
+				"type": "bool"
+			}
+		],
+		"name": "ChangedTimelock",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
 				"internalType": "uint256",
 				"name": "offerId",
 				"type": "uint256"
@@ -192,6 +205,19 @@
 			}
 		],
 		"name": "Permissioned",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "blockNumber",
+				"type": "uint256"
+			}
+		],
+		"name": "SetOnChainGovernanceTimelock",
 		"type": "event"
 	},
 	{
@@ -688,6 +714,13 @@
 				"type": "bool"
 			}
 		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "enableTimelock",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
