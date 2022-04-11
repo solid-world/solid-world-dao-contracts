@@ -17,3 +17,5 @@ mock/
 #Remix log
 remix.log
 **/artifacts
+
+node_modules
