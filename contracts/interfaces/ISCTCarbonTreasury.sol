@@ -52,7 +52,7 @@ interface ISCTCarbonTreasury {
     function createOffer(Offer memory _offer) external returns(uint256);
     function cancelOffer(uint256 _offerId) external returns(bool);
     function acceptOffer(uint256 _offerId) external returns(bool);
-    function createOrUpdateCarbonProject(CarbonProject memory _carbonProject) external returns(bool)
+    function createOrUpdateCarbonProject(CarbonProject memory _carbonProject) external returns(bool);
     function enable(STATUS _status, address _address) external returns(bool);
     function disable(STATUS _status, address _address) external returns(bool);
     function indexInRegistry(address _address, STATUS _status) external view returns (bool, uint256);
@@ -62,5 +62,5 @@ interface ISCTCarbonTreasury {
     function enableTimelock() external;
     function disableTimelock() external;
     function baseSupply() external view returns (uint256);
-    
+
 }
