@@ -1,14 +1,19 @@
 const { ethers, upgrades } = require('hardhat');
 
 async function main() {
-  const accounts = await ethers.getSigners();
+  const [
+    governor,
+    guardian,
+    policy,
+    vault
+  ] = await ethers.getSigners();
 
   const SolidDaoManagement = await ethers.getContractFactory('SolidDaoManagement');
   const solidDaoManagement = await SolidDaoManagement.deploy(
-    accounts[1].address,
-    accounts[2].address,
-    accounts[3].address,
-    accounts[4].address,
+    governor.address,
+    guardian.address,
+    policy.address,
+    vault.address,
   );
   await solidDaoManagement.deployed()
   console.log('DAO Management Address:'.padStart(25), solidDaoManagement.address);
