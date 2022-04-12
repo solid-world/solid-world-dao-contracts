@@ -42,3 +42,19 @@ Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba
 
 Address: 0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299
 Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299
+
+### How to deploy to network
+
+- Add fund to deployer account on target network
+- Add private keys, Etherscan API key and Infura API key with your own ones in ./secrets.json
+- Set private keys in such order: governer, guardian, policy, vault
+- Run the following command:
+
+```sh
+npx hardhat run ./scripts/deploy.js --network {rinkeby | ropsten | main | mumbai}
+```
+
+For verification run:
+```sh
+npx hardhat verify --network {rinkeby | ropsten | main | mumbai} DEPLOYED_DAO_CONTRACT_ADDRESS GOVERNER_ADDRESS GUARDIAN_ADDRESS POLICY_ADDRESS VAULT_ADDRESS
+```
