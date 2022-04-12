@@ -18,6 +18,7 @@
   "homepage": "https://github.com/solid-world/solid-world-dao-contracts#readme",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@openzeppelin/hardhat-upgrades": "^1.12.1",
     "ethers": "^5.5.1",
     "hardhat": "^2.6.2"

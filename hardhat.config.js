@@ -1,3 +1,4 @@
+require("@nomiclabs/hardhat-etherscan");
 require('@openzeppelin/hardhat-upgrades');
 const { accountsSecrets, mnemonic, etherscanApiKey, infuraKey } = require('./secrets.json');
 
