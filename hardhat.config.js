@@ -1,5 +1,7 @@
 require("@nomiclabs/hardhat-etherscan");
 require('@nomiclabs/hardhat-ethers');
+require('dotenv').config()
+require('./tasks/print-accounts');
 const { accountsSecrets, mnemonic, etherscanApiKey, infuraKey } = require('./secrets.json');
 
 /**
