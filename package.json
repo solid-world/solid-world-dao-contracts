@@ -21,6 +21,7 @@
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "dotenv": "^16.0.0",
     "ethers": "^5.5.1",
-    "hardhat": "^2.6.2"
+    "hardhat": "^2.6.2",
+    "picocolors": "^1.0.0"
   }
 }
