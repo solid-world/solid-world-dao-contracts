@@ -1,10 +1,12 @@
 const { task } = require('hardhat/config');
+const { getAccounts, getDeployer} = require('./accounts');
 
 task('deploy', 'Deploys DAO Management, SCT and Treasury contracts')
   .setAction(async (taskArgs, hre) => {
     const { ethers } = hre;
 
-    const { governor, guardian, policy, vault } = await hre.run('accounts');
+    const deployerWallet = await getDeployer(hre.ethers);
+    const { governor, guardian, policy, vault } = await getAccounts(deployerWallet.address);
 
     const SolidDaoManagement = await ethers.getContractFactory('SolidDaoManagement');
     const solidDaoManagement = await SolidDaoManagement.deploy(
