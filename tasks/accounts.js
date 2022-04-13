@@ -25,7 +25,7 @@ async function getAccounts(deployerAddress) {
 
 /**
  * Returns deployer's wallet
- * @param ethers
+ * @param {import('@nomiclabs/hardhat-ethers').HardhatRuntimeEnvironment.ethers} ethers
  * @return {Promise<import('ethers').Wallet>}
  */
 async function getDeployer(ethers) {
@@ -36,7 +36,8 @@ async function getDeployer(ethers) {
   const password = process.env.DEPLOYER_PASSWORD;
 
   const json = await fs.readFile(file, 'utf8');
-  return ethers.Wallet.fromEncryptedJson(json, password);
+  const wallet = await ethers.Wallet.fromEncryptedJson(json, password);
+  return new ethers.Wallet(wallet.privateKey, ethers.provider);
 }
 
 exports.getAccounts = getAccounts;
