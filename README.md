@@ -46,15 +46,13 @@ Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba
 ### How to deploy to network
 
 - Add fund to deployer account on target network
-- Create `secrets.json` (see `secrets.json.example`): add a private key of deployer's account, Etherscan API key and Infura API key
-- Create `.env` (see `.env.example`): add guardian, policy and vault addresses
+- Create `secrets.json` (see `secrets.json.example`): add Etherscan API key and Infura API key
+- Create `.env` (see `.env.example`): add deployer's creds, guardian, policy and vault addresses
 - Run the following command:
 
 ```sh
 npx hardhat deploy --network {rinkeby | ropsten | main | mumbai}
 ```
-
-Please refer to `print-accounts` task in order to decrypt private keys stored in JSON files.
 
 For verification the contract after deployment run:
 ```sh
