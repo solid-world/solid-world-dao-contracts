@@ -4,6 +4,8 @@ const { getAccounts, getDeployer} = require('./accounts');
 
 task('deploy', 'Deploys DAO Management, SCT and Treasury contracts')
   .setAction(async (taskArgs, hre) => {
+    await hre.run('compile')
+
     const { ethers } = hre;
 
     const deployerWallet = await getDeployer(ethers);
