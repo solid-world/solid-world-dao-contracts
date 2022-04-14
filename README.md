@@ -56,7 +56,7 @@ npx hardhat deploy --network {rinkeby | ropsten | main | mumbai}
 
 For verification the contract after deployment run:
 ```sh
-npx hardhat verify --network {rinkeby | ropsten | main | mumbai} DEPLOYED_DAO_CONTRACT_ADDRESS GOVERNER_ADDRESS GUARDIAN_ADDRESS POLICY_ADDRESS VAULT_ADDRESS
+npx hardhat verify --network {rinkeby | ropsten | main | mumbai} DEPLOYED_CONTRACT_ADDRESS PARAM1 PARAM_N
 ```
 
 ### Available tasks
