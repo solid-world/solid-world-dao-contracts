@@ -17,3 +17,13 @@ mock/
 #Remix log
 remix.log
 **/artifacts
+
+node_modules
+
+# Secrets
+secrets.json
+.env
+
+# Hardhat directories
+/artifacts
+/cache

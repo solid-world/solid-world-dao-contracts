@@ -42,3 +42,26 @@ Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba
 
 Address: 0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299
 Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299
+
+### How to deploy to network
+
+- Add fund to deployer account on target network
+- Create `secrets.json` (see `secrets.json.example`): add Etherscan API key and Infura API key
+- Create `.env` (see `.env.example`): add deployer's creds, guardian, policy and vault addresses
+- Run the following command:
+
+```sh
+npx hardhat deploy --network {rinkeby | ropsten | main | mumbai}
+```
+
+For verification the contract after deployment run:
+```sh
+npx hardhat verify --network {rinkeby | ropsten | main | mumbai} DEPLOYED_CONTRACT_ADDRESS PARAM1 PARAM_N
+```
+
+### Available tasks
+
+Decrypts and prints JSON accounts stored in the root directory (e.g. `UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299`):
+```sh
+npx hardhat print-accounts
+```
