@@ -17,194 +17,206 @@ contract SolidDaoManagementTest is Test {
     event VaultPulled(address indexed from, address indexed to);
 
     SolidDaoManagement private solidDaoManagement;
+
+    address internal governorAddress = vm.addr(1);
+    address internal guardianAddress = vm.addr(2);
+    address internal policyAddress = vm.addr(3);
+    address internal vaultAddress = vm.addr(4);
+
+    address internal newGovernorAddress = vm.addr(5);
+    address internal newGuardianAddress = vm.addr(6);
+    address internal newPolicyAddress = vm.addr(7);
+    address internal newVaultAddress = vm.addr(8);
+
+    address internal otherAddress = vm.addr(9);
     
     function setUp() public {
         solidDaoManagement = new SolidDaoManagement(
-            address(1),
-            address(2),
-            address(3),
-            address(4)
+            governorAddress,
+            guardianAddress,
+            policyAddress,
+            vaultAddress
         );
     }
 
     function testGovernorAddress() public {
-        assertEq(solidDaoManagement.governor(), address(1));
+        assertEq(solidDaoManagement.governor(), governorAddress);
     }
 
     function testGuardianAddress() public {
-        assertEq(solidDaoManagement.guardian(), address(2));
+        assertEq(solidDaoManagement.guardian(), guardianAddress);
     }
 
     function testPolicyAddress() public {
-        assertEq(solidDaoManagement.policy(), address(3));
+        assertEq(solidDaoManagement.policy(), policyAddress);
     }
 
     function testVaultAddress() public {
-        assertEq(solidDaoManagement.vault(), address(4));
+        assertEq(solidDaoManagement.vault(), vaultAddress);
     }
 
     function testPushGovernor() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit GovernorPushed(address(5), address(5), true);
-        solidDaoManagement.pushGovernor(address(5), true);
-        assertEq(solidDaoManagement.governor(), address(5));
-        assertEq(solidDaoManagement.newGovernor(), address(5));
+        emit GovernorPushed(newGovernorAddress, newGovernorAddress, true);
+        solidDaoManagement.pushGovernor(newGovernorAddress, true);
+        assertEq(solidDaoManagement.governor(), newGovernorAddress);
+        assertEq(solidDaoManagement.newGovernor(), newGovernorAddress);
     }
 
     function testUnautorizedPushGovernor() public {
         vm.expectRevert(bytes("UNAUTHORIZED"));
-        vm.prank(address(100));
-        solidDaoManagement.pushGovernor(address(5), true);
-        assertEq(solidDaoManagement.governor(), address(1));
+        vm.prank(otherAddress);
+        solidDaoManagement.pushGovernor(newGovernorAddress, true);
+        assertEq(solidDaoManagement.governor(), governorAddress);
     }
 
     function testPullGovernor() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit GovernorPushed(address(1), address(5), false);
-        solidDaoManagement.pushGovernor(address(5), false);
-        assertEq(solidDaoManagement.governor(), address(1));
-        vm.prank(address(5));
+        emit GovernorPushed(governorAddress, newGovernorAddress, false);
+        solidDaoManagement.pushGovernor(newGovernorAddress, false);
+        assertEq(solidDaoManagement.governor(), governorAddress);
+        vm.prank(newGovernorAddress);
         vm.expectEmit(true, true, true, true);
-        emit GovernorPulled(address(1), address(5));
+        emit GovernorPulled(governorAddress, newGovernorAddress);
         solidDaoManagement.pullGovernor();
-        assertEq(solidDaoManagement.governor(), address(5));
-        assertEq(solidDaoManagement.newGovernor(), address(5));
+        assertEq(solidDaoManagement.governor(), newGovernorAddress);
+        assertEq(solidDaoManagement.newGovernor(), newGovernorAddress);
     }
 
     function testUnauthorizedPullGovernor() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit GovernorPushed(address(1), address(5), false);
-        solidDaoManagement.pushGovernor(address(5), false);
+        emit GovernorPushed(governorAddress, newGovernorAddress, false);
+        solidDaoManagement.pushGovernor(newGovernorAddress, false);
         vm.expectRevert(bytes("!newGovernor"));
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         solidDaoManagement.pullGovernor();
-        assertEq(solidDaoManagement.governor(), address(1));
+        assertEq(solidDaoManagement.governor(), governorAddress);
     }
 
     function testPushGuardian() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit GuardianPushed(address(6), address(6), true);
-        solidDaoManagement.pushGuardian(address(6), true);
-        assertEq(solidDaoManagement.guardian(), address(6));
-        assertEq(solidDaoManagement.newGuardian(), address(6));
+        emit GuardianPushed(newGuardianAddress, newGuardianAddress, true);
+        solidDaoManagement.pushGuardian(newGuardianAddress, true);
+        assertEq(solidDaoManagement.guardian(), newGuardianAddress);
+        assertEq(solidDaoManagement.newGuardian(), newGuardianAddress);
     }
 
     function testUnautorizedPushGuardian() public {
         vm.expectRevert(bytes("UNAUTHORIZED"));
-        vm.prank(address(100));
-        solidDaoManagement.pushGuardian(address(5), true);
-        assertEq(solidDaoManagement.guardian(), address(2));
+        vm.prank(otherAddress);
+        solidDaoManagement.pushGuardian(newGovernorAddress, true);
+        assertEq(solidDaoManagement.guardian(), guardianAddress);
     }
 
     function testPullGuardian() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit GuardianPushed(address(2), address(6), false);
-        solidDaoManagement.pushGuardian(address(6), false);
-        assertEq(solidDaoManagement.guardian(), address(2));
-        vm.prank(address(6));
+        emit GuardianPushed(guardianAddress, newGuardianAddress, false);
+        solidDaoManagement.pushGuardian(newGuardianAddress, false);
+        assertEq(solidDaoManagement.guardian(), guardianAddress);
+        vm.prank(newGuardianAddress);
         vm.expectEmit(true, true, true, true);
-        emit GuardianPulled(address(2), address(6));
+        emit GuardianPulled(guardianAddress, newGuardianAddress);
         solidDaoManagement.pullGuardian();
-        assertEq(solidDaoManagement.guardian(), address(6));
-        assertEq(solidDaoManagement.newGuardian(), address(6));
+        assertEq(solidDaoManagement.guardian(), newGuardianAddress);
+        assertEq(solidDaoManagement.newGuardian(), newGuardianAddress);
     }
 
     function testUnauthorizedPullGuardian() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit GuardianPushed(address(2), address(6), false);
-        solidDaoManagement.pushGuardian(address(6), false);
+        emit GuardianPushed(guardianAddress, newGuardianAddress, false);
+        solidDaoManagement.pushGuardian(newGuardianAddress, false);
         vm.expectRevert(bytes("!newGuard"));
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         solidDaoManagement.pullGuardian();
-        assertEq(solidDaoManagement.guardian(), address(2));
+        assertEq(solidDaoManagement.guardian(), guardianAddress);
     }
 
     function testPushPolicy() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit PolicyPushed(address(7), address(7), true);
-        solidDaoManagement.pushPolicy(address(7), true);
-        assertEq(solidDaoManagement.policy(), address(7));
-        assertEq(solidDaoManagement.newPolicy(), address(7));
+        emit PolicyPushed(newPolicyAddress, newPolicyAddress, true);
+        solidDaoManagement.pushPolicy(newPolicyAddress, true);
+        assertEq(solidDaoManagement.policy(), newPolicyAddress);
+        assertEq(solidDaoManagement.newPolicy(), newPolicyAddress);
     }
 
     function testUnautorizedPushPolicy() public {
         vm.expectRevert(bytes("UNAUTHORIZED"));
-        vm.prank(address(100));
-        solidDaoManagement.pushPolicy(address(7), true);
-        assertEq(solidDaoManagement.policy(), address(3));
+        vm.prank(otherAddress);
+        solidDaoManagement.pushPolicy(newPolicyAddress, true);
+        assertEq(solidDaoManagement.policy(), policyAddress);
     }
 
     function testPullPolicy() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit PolicyPushed(address(3), address(7), false);
-        solidDaoManagement.pushPolicy(address(7), false);
-        assertEq(solidDaoManagement.policy(), address(3));
-        vm.prank(address(7));
+        emit PolicyPushed(policyAddress, newPolicyAddress, false);
+        solidDaoManagement.pushPolicy(newPolicyAddress, false);
+        assertEq(solidDaoManagement.policy(), policyAddress);
+        vm.prank(newPolicyAddress);
         vm.expectEmit(true, true, true, true);
-        emit PolicyPulled(address(3), address(7));
+        emit PolicyPulled(policyAddress, newPolicyAddress);
         solidDaoManagement.pullPolicy();
-        assertEq(solidDaoManagement.policy(), address(7));
-        assertEq(solidDaoManagement.newPolicy(), address(7));
+        assertEq(solidDaoManagement.policy(), newPolicyAddress);
+        assertEq(solidDaoManagement.newPolicy(), newPolicyAddress);
     }
 
     function testUnauthorizedPullPolicy() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit PolicyPushed(address(3), address(7), false);
-        solidDaoManagement.pushPolicy(address(7), false);
+        emit PolicyPushed(policyAddress, newPolicyAddress, false);
+        solidDaoManagement.pushPolicy(newPolicyAddress, false);
         vm.expectRevert(bytes("!newPolicy"));
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         solidDaoManagement.pullPolicy();
-        assertEq(solidDaoManagement.policy(), address(3));
+        assertEq(solidDaoManagement.policy(), policyAddress);
     }
 
     function testPushVault() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit VaultPushed(address(8), address(8), true);
-        solidDaoManagement.pushVault(address(8), true);
-        assertEq(solidDaoManagement.vault(), address(8));
-        assertEq(solidDaoManagement.newVault(), address(8));
+        emit VaultPushed(newVaultAddress, newVaultAddress, true);
+        solidDaoManagement.pushVault(newVaultAddress, true);
+        assertEq(solidDaoManagement.vault(), newVaultAddress);
+        assertEq(solidDaoManagement.newVault(), newVaultAddress);
     }
 
     function testUnautorizedPushVault() public {
         vm.expectRevert(bytes("UNAUTHORIZED"));
-        vm.prank(address(100));
-        solidDaoManagement.pushVault(address(8), true);
-        assertEq(solidDaoManagement.vault(), address(4));
+        vm.prank(otherAddress);
+        solidDaoManagement.pushVault(newVaultAddress, true);
+        assertEq(solidDaoManagement.vault(), vaultAddress);
     }
 
     function testPullVault() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit VaultPushed(address(4), address(8), false);
-        solidDaoManagement.pushVault(address(8), false);
-        assertEq(solidDaoManagement.vault(), address(4));
-        vm.prank(address(8));
+        emit VaultPushed(vaultAddress, newVaultAddress, false);
+        solidDaoManagement.pushVault(newVaultAddress, false);
+        assertEq(solidDaoManagement.vault(), vaultAddress);
+        vm.prank(newVaultAddress);
         vm.expectEmit(true, true, true, true);
-        emit VaultPulled(address(4), address(8));
+        emit VaultPulled(vaultAddress, newVaultAddress);
         solidDaoManagement.pullVault();
-        assertEq(solidDaoManagement.vault(), address(8));
-        assertEq(solidDaoManagement.newVault(), address(8));
+        assertEq(solidDaoManagement.vault(), newVaultAddress);
+        assertEq(solidDaoManagement.newVault(), newVaultAddress);
     }
 
     function testUnauthorizedPullVault() public {
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         vm.expectEmit(true, true, true, true);
-        emit VaultPushed(address(4), address(8), false);
-        solidDaoManagement.pushVault(address(8), false);
+        emit VaultPushed(vaultAddress, newVaultAddress, false);
+        solidDaoManagement.pushVault(newVaultAddress, false);
         vm.expectRevert(bytes("!newVault"));
-        vm.prank(address(1));
+        vm.prank(governorAddress);
         solidDaoManagement.pullVault();
-        assertEq(solidDaoManagement.vault(), address(4));
+        assertEq(solidDaoManagement.vault(), vaultAddress);
     }
 
 }

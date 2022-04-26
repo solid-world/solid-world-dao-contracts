@@ -4,9 +4,9 @@ pragma solidity 0.8.13;
 import "forge-std/Test.sol";
 import "../contracts/SolidDaoManagement.sol";
 import "../contracts/SCTERC20.sol";
-import "../contracts/lib/EIP712.sol";
+import "../contracts/lib/ECDSA.sol";
 
-contract SCTERC20Test is Test, EIP712 {
+contract SCTERC20Test is Test {
 
   event Transfer(address indexed from, address indexed to, uint256 value);
   event Approval(address indexed owner, address indexed spender, uint256 value);
@@ -23,8 +23,6 @@ contract SCTERC20Test is Test, EIP712 {
   address internal userTwo = vm.addr(6);
   address internal userThree = vm.addr(7);
   address internal userFour = vm.addr(8);
-
-  constructor() EIP712("SCT", "1") {}
   
   function setUp() public {
     solidDaoManagement = new SolidDaoManagement(
@@ -35,8 +33,8 @@ contract SCTERC20Test is Test, EIP712 {
     );
     sct = new SCTERC20Token(address(solidDaoManagement));
     vm.startPrank(vault);
-    sct.mint(userOne, 1000000000);
-    sct.mint(userTwo, 1000000000);
+    sct.mint(userOne, 1000);
+    sct.mint(userTwo, 1000);
     vm.stopPrank();
   }
 
@@ -53,12 +51,12 @@ contract SCTERC20Test is Test, EIP712 {
   }
 
   function testTotalSupply() public {
-    assertEq(sct.totalSupply(), 2000000000);
+    assertEq(sct.totalSupply(), 2000);
   }
 
   function testBalanceOf() public {
-    assertEq(sct.balanceOf(userOne), 1000000000);
-    assertEq(sct.balanceOf(userTwo), 1000000000);
+    assertEq(sct.balanceOf(userOne), 1000);
+    assertEq(sct.balanceOf(userTwo), 1000);
     assertEq(sct.balanceOf(userThree), 0);
     assertEq(sct.balanceOf(userFour), 0);
   }
@@ -66,17 +64,17 @@ contract SCTERC20Test is Test, EIP712 {
   function testTransferWithSuccess() public {
     vm.prank(userOne);
     vm.expectEmit(true, true, true, true);
-    emit Transfer(userOne, userThree, 500000000);
-    sct.transfer(userThree, 500000000);
-    assertEq(sct.balanceOf(userOne), 500000000);
-    assertEq(sct.balanceOf(userThree), 500000000);
+    emit Transfer(userOne, userThree, 500);
+    sct.transfer(userThree, 500);
+    assertEq(sct.balanceOf(userOne), 500);
+    assertEq(sct.balanceOf(userThree), 500);
   }
 
   function testTransferWhenAmmountExceedsBalance() public {
     vm.prank(userOne);
     vm.expectRevert(bytes("ERC20: transfer amount exceeds balance"));
-    sct.transfer(userThree, 9000000000000);
-    assertEq(sct.balanceOf(userOne), 1000000000);
+    sct.transfer(userThree, 999999);
+    assertEq(sct.balanceOf(userOne), 1000);
     assertEq(sct.balanceOf(userThree), 0);
   }
 
@@ -92,7 +90,7 @@ contract SCTERC20Test is Test, EIP712 {
     vm.prank(userOne);
     vm.expectRevert(bytes("ERC20: transfer to the zero address"));
     sct.transfer(address(0), 1);
-    assertEq(sct.balanceOf(userOne), 1000000000);
+    assertEq(sct.balanceOf(userOne), 1000);
     assertEq(sct.balanceOf(address(0)), 0);
   }
 
@@ -101,64 +99,64 @@ contract SCTERC20Test is Test, EIP712 {
     vm.expectEmit(true, true, true, true);
     emit Approval(userOne, userThree, 999999);
     sct.approve(userThree, 999999);
-    assertEq(sct.balanceOf(userOne), 1000000000);
+    assertEq(sct.balanceOf(userOne), 1000);
     assertEq(sct.allowance(userOne, userThree), 999999);
   }
 
   function testApproveFromZeroAddress() public {
     vm.prank(address(0));
     vm.expectRevert(bytes("ERC20: approve from the zero address"));
-    sct.approve(userOne, 1000000000);
+    sct.approve(userOne, 1000);
     assertEq(sct.allowance(address(0), userOne), 0);
   }
 
   function testApproveToZeroAddress() public {
     vm.prank(userOne);
     vm.expectRevert(bytes("ERC20: approve to the zero address"));
-    sct.approve(address(0), 1000000000);
+    sct.approve(address(0), 1000);
     assertEq(sct.allowance(userOne, address(0)), 0);
   }
 
   function testTransferFromWithSuccess() public {
     vm.prank(userOne);
     vm.expectEmit(true, true, true, true);
-    emit Approval(userOne, userThree, 500000000);
-    sct.approve(userThree, 500000000);
-    assertEq(sct.allowance(userOne, userThree), 500000000);
+    emit Approval(userOne, userThree, 500);
+    sct.approve(userThree, 500);
+    assertEq(sct.allowance(userOne, userThree), 500);
     vm.prank(userThree);
     vm.expectEmit(true, true, true, true);
-    emit Transfer(userOne, userFour, 500000000);
-    sct.transferFrom(userOne, userFour, 500000000);
+    emit Transfer(userOne, userFour, 500);
+    sct.transferFrom(userOne, userFour, 500);
     assertEq(sct.allowance(userOne, userThree), 0);
-    assertEq(sct.balanceOf(userOne), 500000000);
-    assertEq(sct.balanceOf(userFour), 500000000);
+    assertEq(sct.balanceOf(userOne), 500);
+    assertEq(sct.balanceOf(userFour), 500);
   }
 
   function testTransferFromInsufficientAllowance() public {
     vm.prank(userOne);
     vm.expectEmit(true, true, true, true);
-    emit Approval(userOne, userThree, 500000000);
-    sct.approve(userThree, 500000000);
-    assertEq(sct.allowance(userOne, userThree), 500000000);
+    emit Approval(userOne, userThree, 500);
+    sct.approve(userThree, 500);
+    assertEq(sct.allowance(userOne, userThree), 500);
     vm.prank(userThree);
     vm.expectRevert(bytes("ERC20: insufficient allowance"));
-    sct.transferFrom(userOne, userFour, 1000000000);
-    assertEq(sct.allowance(userOne, userThree), 500000000);
-    assertEq(sct.balanceOf(userOne), 1000000000);
+    sct.transferFrom(userOne, userFour, 1000);
+    assertEq(sct.allowance(userOne, userThree), 500);
+    assertEq(sct.balanceOf(userOne), 1000);
     assertEq(sct.balanceOf(userFour), 0);
   }
 
   function testTransferFromInsufficientBalance() public {
     vm.prank(userOne);
     vm.expectEmit(true, true, true, true);
-    emit Approval(userOne, userThree, 1000000000000);
-    sct.approve(userThree, 1000000000000);
-    assertEq(sct.allowance(userOne, userThree), 1000000000000);
+    emit Approval(userOne, userThree, 999999);
+    sct.approve(userThree, 999999);
+    assertEq(sct.allowance(userOne, userThree), 999999);
     vm.prank(userThree);
     vm.expectRevert(bytes("ERC20: transfer amount exceeds balance"));
-    sct.transferFrom(userOne, userFour, 1000000000000);
-    assertEq(sct.allowance(userOne, userThree), 1000000000000);
-    assertEq(sct.balanceOf(userOne), 1000000000);
+    sct.transferFrom(userOne, userFour, 999999);
+    assertEq(sct.allowance(userOne, userThree), 999999);
+    assertEq(sct.balanceOf(userOne), 1000);
     assertEq(sct.balanceOf(userFour), 0);
   }
 
@@ -203,99 +201,99 @@ contract SCTERC20Test is Test, EIP712 {
   function testMintWithSuccess() public {
     vm.prank(vault);
     vm.expectEmit(true, true, true, true);
-    emit Transfer(address(0), userThree, 1000000000);
-    sct.mint(userThree, 1000000000);
-    assertEq(sct.balanceOf(userThree), 1000000000);
-    assertEq(sct.totalSupply(), 3000000000);
+    emit Transfer(address(0), userThree, 1000);
+    sct.mint(userThree, 1000);
+    assertEq(sct.balanceOf(userThree), 1000);
+    assertEq(sct.totalSupply(), 3000);
   }
 
   function testMintWithNoAuthorization() public {
     vm.prank(governor);
     vm.expectRevert(bytes("UNAUTHORIZED"));
-    sct.mint(userThree, 1000000000);
+    sct.mint(userThree, 1000);
     assertEq(sct.balanceOf(userThree), 0);
-    assertEq(sct.totalSupply(), 2000000000);
+    assertEq(sct.totalSupply(), 2000);
   }
 
   function testMintToZeroAddress() public {
     vm.prank(vault);
     vm.expectRevert(bytes("ERC20: mint to the zero address"));
-    sct.mint(address(0), 1000000000);
+    sct.mint(address(0), 1000);
     assertEq(sct.balanceOf(address(0)), 0);
-    assertEq(sct.totalSupply(), 2000000000);
+    assertEq(sct.totalSupply(), 2000);
   }
 
   function testBurnWithSuccess() public {
     vm.prank(userOne);
     vm.expectEmit(true, true, true, true);
-    emit Transfer(userOne, address(0), 1000000000);
-    sct.burn(1000000000);
+    emit Transfer(userOne, address(0), 1000);
+    sct.burn(1000);
     assertEq(sct.balanceOf(userOne), 0);
-    assertEq(sct.totalSupply(), 1000000000);
+    assertEq(sct.totalSupply(), 1000);
   }
 
   function testBurnWithZeroBalance() public {
     vm.prank(userThree);
     vm.expectRevert(bytes("ERC20: burn amount exceeds balance"));
-    sct.burn(1000000000);
+    sct.burn(1000);
     assertEq(sct.balanceOf(userThree), 0);
   }
 
   function testBurnWhenAmmountExceedsBalance() public {
     vm.prank(userOne);
     vm.expectRevert(bytes("ERC20: burn amount exceeds balance"));
-    sct.burn(10000000000000);
-    assertEq(sct.balanceOf(userOne), 1000000000);
+    sct.burn(999999);
+    assertEq(sct.balanceOf(userOne), 1000);
   }
 
   function testBurnZeroAddress() public {
     vm.prank(address(0));
     vm.expectRevert(bytes("ERC20: burn from the zero address"));
-    sct.burn(1000000000);
+    sct.burn(1000);
     assertEq(sct.balanceOf(address(0)), 0);
   }
 
   function testBurnFromWithSuccess() public {
     vm.prank(userOne);
     vm.expectEmit(true, true, true, true);
-    emit Approval(userOne, userThree, 500000000);
-    sct.approve(userThree, 500000000);
-    assertEq(sct.allowance(userOne, userThree), 500000000);
+    emit Approval(userOne, userThree, 500);
+    sct.approve(userThree, 500);
+    assertEq(sct.allowance(userOne, userThree), 500);
     vm.prank(userThree);
     vm.expectEmit(true, true, true, true);
-    emit Transfer(userOne, address(0), 500000000);
-    sct.burnFrom(userOne, 500000000);
+    emit Transfer(userOne, address(0), 500);
+    sct.burnFrom(userOne, 500);
     assertEq(sct.allowance(userOne, userThree), 0);
-    assertEq(sct.balanceOf(userOne), 500000000);
-    assertEq(sct.totalSupply(), 1500000000);
+    assertEq(sct.balanceOf(userOne), 500);
+    assertEq(sct.totalSupply(), 1500);
   }
 
   function testBurnFromInsufficientAllowance() public {
     vm.prank(userOne);
     vm.expectEmit(true, true, true, true);
-    emit Approval(userOne, userThree, 500000000);
-    sct.approve(userThree, 500000000);
-    assertEq(sct.allowance(userOne, userThree), 500000000);
+    emit Approval(userOne, userThree, 500);
+    sct.approve(userThree, 500);
+    assertEq(sct.allowance(userOne, userThree), 500);
     vm.prank(userThree);
     vm.expectRevert(stdError.arithmeticError);
-    sct.burnFrom(userOne, 1000000000000);
-    assertEq(sct.allowance(userOne, userThree), 500000000);
-    assertEq(sct.balanceOf(userOne), 1000000000);
-    assertEq(sct.totalSupply(), 2000000000);
+    sct.burnFrom(userOne, 999999);
+    assertEq(sct.allowance(userOne, userThree), 500);
+    assertEq(sct.balanceOf(userOne), 1000);
+    assertEq(sct.totalSupply(), 2000);
   }
 
   function testBurnFromInsufficientBalance() public {
     vm.prank(userOne);
     vm.expectEmit(true, true, true, true);
-    emit Approval(userOne, userThree, 1000000000000);
-    sct.approve(userThree, 1000000000000);
-    assertEq(sct.allowance(userOne, userThree), 1000000000000);
+    emit Approval(userOne, userThree, 999999);
+    sct.approve(userThree, 999999);
+    assertEq(sct.allowance(userOne, userThree), 999999);
     vm.prank(userThree);
     vm.expectRevert(bytes("ERC20: burn amount exceeds balance"));
-    sct.burnFrom(userOne, 1000000000000);
-    assertEq(sct.allowance(userOne, userThree), 1000000000000);
-    assertEq(sct.balanceOf(userOne), 1000000000);
-    assertEq(sct.totalSupply(), 2000000000);
+    sct.burnFrom(userOne, 999999);
+    assertEq(sct.allowance(userOne, userThree), 999999);
+    assertEq(sct.balanceOf(userOne), 1000);
+    assertEq(sct.totalSupply(), 2000);
   }
 
   function testPermitWithSuccess() public {
