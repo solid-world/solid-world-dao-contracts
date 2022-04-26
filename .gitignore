@@ -27,3 +27,6 @@ secrets.json
 # Hardhat directories
 /artifacts
 /cache
+
+# Foundry outputs and cache
+/out

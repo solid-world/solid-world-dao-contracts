@@ -17,6 +17,7 @@ contract SolidDaoManagementTest is Test {
     event VaultPulled(address indexed from, address indexed to);
 
     SolidDaoManagement private solidDaoManagement;
+    
     function setUp() public {
         solidDaoManagement = new SolidDaoManagement(
             address(1),
