@@ -14,6 +14,15 @@ contract SCTERC20Test is Test {
   SolidDaoManagement private solidDaoManagement;
   SCTERC20Token private sct;
 
+  bytes32 typeHash = keccak256(
+    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+  );
+  bytes32 permitTypeHash = keccak256(
+    "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+  );
+  bytes32 hashedName = keccak256(bytes("SCT"));
+  bytes32 hashedVersion = keccak256(bytes("1"));
+
   address internal governor = vm.addr(1);
   address internal guardian = vm.addr(2);
   address internal policy = vm.addr(3);
@@ -256,14 +265,14 @@ contract SCTERC20Test is Test {
   function testBurnFromWithSuccess() public {
     vm.prank(userOne);
     vm.expectEmit(true, true, true, true);
-    emit Approval(userOne, userThree, 500);
-    sct.approve(userThree, 500);
-    assertEq(sct.allowance(userOne, userThree), 500);
-    vm.prank(userThree);
+    emit Approval(userOne, userTwo, 500);
+    sct.approve(userTwo, 500);
+    assertEq(sct.allowance(userOne, userTwo), 500);
+    vm.prank(userTwo);
     vm.expectEmit(true, true, true, true);
     emit Transfer(userOne, address(0), 500);
     sct.burnFrom(userOne, 500);
-    assertEq(sct.allowance(userOne, userThree), 0);
+    assertEq(sct.allowance(userOne, userTwo), 0);
     assertEq(sct.balanceOf(userOne), 500);
     assertEq(sct.totalSupply(), 1500);
   }
@@ -271,13 +280,13 @@ contract SCTERC20Test is Test {
   function testBurnFromInsufficientAllowance() public {
     vm.prank(userOne);
     vm.expectEmit(true, true, true, true);
-    emit Approval(userOne, userThree, 500);
-    sct.approve(userThree, 500);
-    assertEq(sct.allowance(userOne, userThree), 500);
-    vm.prank(userThree);
+    emit Approval(userOne, userTwo, 500);
+    sct.approve(userTwo, 500);
+    assertEq(sct.allowance(userOne, userTwo), 500);
+    vm.prank(userTwo);
     vm.expectRevert(stdError.arithmeticError);
     sct.burnFrom(userOne, 999999);
-    assertEq(sct.allowance(userOne, userThree), 500);
+    assertEq(sct.allowance(userOne, userTwo), 500);
     assertEq(sct.balanceOf(userOne), 1000);
     assertEq(sct.totalSupply(), 2000);
   }
@@ -285,30 +294,22 @@ contract SCTERC20Test is Test {
   function testBurnFromInsufficientBalance() public {
     vm.prank(userOne);
     vm.expectEmit(true, true, true, true);
-    emit Approval(userOne, userThree, 999999);
-    sct.approve(userThree, 999999);
-    assertEq(sct.allowance(userOne, userThree), 999999);
-    vm.prank(userThree);
+    emit Approval(userOne, userTwo, 999999);
+    sct.approve(userTwo, 999999);
+    assertEq(sct.allowance(userOne, userTwo), 999999);
+    vm.prank(userTwo);
     vm.expectRevert(bytes("ERC20: burn amount exceeds balance"));
     sct.burnFrom(userOne, 999999);
-    assertEq(sct.allowance(userOne, userThree), 999999);
+    assertEq(sct.allowance(userOne, userTwo), 999999);
     assertEq(sct.balanceOf(userOne), 1000);
     assertEq(sct.totalSupply(), 2000);
   }
 
   function testPermitWithSuccess() public {
-    bytes32 typeHash = keccak256(
-      "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-    );
-    bytes32 hashedName = keccak256(bytes("SCT"));
-    bytes32 hashedVersion = keccak256(bytes("1"));
     bytes32 domainSeparator = keccak256(
       abi.encode(typeHash, hashedName, hashedVersion, block.chainid, address(sct))
     );
     uint256 nonce = vm.getNonce(userOne);
-    bytes32 permitTypeHash = keccak256(
-      "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-    );
     bytes32 structHash = keccak256(
       abi.encode(permitTypeHash, userOne, userTwo, 1000, nonce, 1700000000)
     );
@@ -323,18 +324,10 @@ contract SCTERC20Test is Test {
   }
 
   function testPermitExpiredDeadline() public {
-    bytes32 typeHash = keccak256(
-      "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-    );
-    bytes32 hashedName = keccak256(bytes("SCT"));
-    bytes32 hashedVersion = keccak256(bytes("1"));
     bytes32 domainSeparator = keccak256(
       abi.encode(typeHash, hashedName, hashedVersion, block.chainid, address(sct))
     );
     uint256 nonce = vm.getNonce(userOne);
-    bytes32 permitTypeHash = keccak256(
-      "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-    );
     bytes32 structHash = keccak256(
       abi.encode(permitTypeHash, userOne, userTwo, 1000, nonce, 1700000000)
     );
@@ -348,18 +341,10 @@ contract SCTERC20Test is Test {
   }
 
   function testPermitInvalidSignature() public {
-    bytes32 typeHash = keccak256(
-      "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-    );
-    bytes32 hashedName = keccak256(bytes("SCT"));
-    bytes32 hashedVersion = keccak256(bytes("1"));
     bytes32 domainSeparator = keccak256(
       abi.encode(typeHash, hashedName, hashedVersion, block.chainid, address(sct))
     );
     uint256 nonce = vm.getNonce(userOne);
-    bytes32 permitTypeHash = keccak256(
-      "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-    );
     bytes32 structHash = keccak256(
       abi.encode(permitTypeHash, userOne, userTwo, 1000, nonce, 1700000000)
     );
@@ -373,18 +358,10 @@ contract SCTERC20Test is Test {
   }
 
   function testPermitToZeroAddress() public {
-    bytes32 typeHash = keccak256(
-      "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-    );
-    bytes32 hashedName = keccak256(bytes("SCT"));
-    bytes32 hashedVersion = keccak256(bytes("1"));
     bytes32 domainSeparator = keccak256(
       abi.encode(typeHash, hashedName, hashedVersion, block.chainid, address(sct))
     );
     uint256 nonce = vm.getNonce(userOne);
-    bytes32 permitTypeHash = keccak256(
-      "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-    );
     bytes32 structHash = keccak256(
       abi.encode(permitTypeHash, userOne, address(0), 1000, nonce, 1700000000)
     );
