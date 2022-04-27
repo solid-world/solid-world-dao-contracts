@@ -76,7 +76,13 @@ Instructions for install Foundry can be found in the documentation:
 
 - [Foundry Book](https://book.getfoundry.sh/index.html)
 
-After install you can execute unit tests:
+Before run tests, update forge to map forge-std lib:
+
+```sh
+forge update lib/forge-std
+```
+
+After that you can execute unit tests:
 
 ```sh
 npm run test
