@@ -82,6 +82,12 @@ Before run tests, update forge to map forge-std lib:
 forge update lib/forge-std
 ```
 
+To compile all smart contracts run:
+
+```sh
+forge build
+```
+
 After that you can execute unit tests:
 
 ```sh
