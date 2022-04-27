@@ -87,7 +87,7 @@ contract SCTERC20Test is Test {
     assertEq(sct.balanceOf(userThree), 0);
   }
 
-  function testTransferWhenAmmountIsZero() public {
+  function testTransferWhenBalanceIsZero() public {
     vm.prank(userThree);
     vm.expectRevert(bytes("ERC20: transfer amount exceeds balance"));
     sct.transfer(userFour, 1);
