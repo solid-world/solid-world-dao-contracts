@@ -56,6 +56,7 @@ contract SCTCarbonTreasuryTest is Test {
     vm.startPrank(governor);
     sctTreasury.initialize();
     sctTreasury.disableTimelock();
+    vm.roll(block.number + 100); 
     sctTreasury.disableTimelock();
     sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
     sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
@@ -88,6 +89,193 @@ contract SCTCarbonTreasuryTest is Test {
 
   function testBaseSupply() public {
     assertEq(sctTreasury.baseSupply(), 0);
+  }
+
+  function testInitializeWithSuccess() public {
+    vm.prank(governor);
+    sctTreasury.initialize();
+    assertTrue(sctTreasury.initialized());
+  }
+
+  function testInitializeUnauthorized() public {
+    vm.prank(userOne);
+    vm.expectRevert(bytes("UNAUTHORIZED"));
+    sctTreasury.initialize();
+    assertFalse(sctTreasury.initialized());
+  }
+
+  function testOrderTimelockReserveTokenWithSuccess() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    vm.expectEmit(true, true, true, true);
+    emit PermissionOrdered(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    vm.stopPrank();
+  }
+
+  function testOrderTimelockReserveTokenUnauthorized() public {
+    vm.prank(governor);
+    sctTreasury.initialize();
+    vm.prank(userOne);
+    vm.expectRevert(bytes("UNAUTHORIZED"));
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+  }
+
+  function testOrderTimelockReserveTokenInvalidAddress() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    vm.expectRevert(bytes("SCT Treasury: invalid address"));
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(0));
+    vm.stopPrank();
+  }
+
+  function testOrderTimelockReserveTokenTimelockDisabled() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.disableTimelock();
+    vm.roll(block.number + 100);
+    sctTreasury.disableTimelock();
+    vm.expectRevert(bytes("SCT Treasury: timelock is disabled, use enable"));
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    vm.stopPrank();
+  }
+
+  function testOrderTimelockReserveManagerWithSuccess() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    vm.expectEmit(true, true, true, true);
+    emit PermissionOrdered(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
+    vm.stopPrank();
+  }
+
+  function testOrderTimelockReserveManagerUnauthorized() public {
+    vm.prank(governor);
+    sctTreasury.initialize();
+    vm.prank(userOne);
+    vm.expectRevert(bytes("UNAUTHORIZED"));
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
+  }
+
+  function testOrderTimelockReserveManagerInvalidAddress() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    vm.expectRevert(bytes("SCT Treasury: invalid address"));
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVEMANAGER, address(0));
+    vm.stopPrank();
+  }
+
+  function testOrderTimelockReserveManagerTimelockDisabled() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.disableTimelock();
+    vm.roll(block.number + 100);
+    sctTreasury.disableTimelock();
+    vm.expectRevert(bytes("SCT Treasury: timelock is disabled, use enable"));
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVEMANAGER, address(carbonCredit));
+    vm.stopPrank();
+  }
+
+
+  function testExecuteWithSuccess() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    vm.roll(block.number + 10);
+    vm.expectEmit(true, true, true, true);
+    emit Permissioned(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit), true);
+    sctTreasury.execute(0);
+    vm.stopPrank();
+  }
+
+  function testExecuteTimelockNotComplete() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    vm.roll(block.number + 9);
+    vm.expectRevert(bytes("SCT Treasury: timelock not complete"));
+    sctTreasury.execute(0);
+    vm.stopPrank();
+  }
+
+  function testExecuteOrderAlreadyExecuted() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    vm.roll(block.number + 10);
+    vm.expectEmit(true, true, true, true);
+    emit Permissioned(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit), true);
+    sctTreasury.execute(0);
+    vm.expectRevert(bytes("SCT Treasury: order has already been executed"));
+    sctTreasury.execute(0);
+    vm.stopPrank();
+  }
+
+  function testExecuteOrderNullified() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    vm.roll(block.number + 10);
+    sctTreasury.nullify(0);
+    vm.expectRevert(bytes("SCT Treasury: order has been nullified"));
+    sctTreasury.execute(0);
+    vm.stopPrank();
+  }
+
+  function testExecuteTimelockDisabled() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    sctTreasury.disableTimelock(); 
+    vm.roll(block.number + 100);   
+    sctTreasury.disableTimelock();
+    vm.expectRevert(bytes("SCT Treasury: timelock is disabled, use enable"));
+    sctTreasury.execute(0);
+    vm.stopPrank();
+  }
+
+  function testNullifyWithSuccess() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    sctTreasury.nullify(0);
+    vm.stopPrank();
+  }
+
+  function testNullifyUnauthorized() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    vm.stopPrank();
+    vm.prank(userOne);
+    vm.expectRevert(bytes("UNAUTHORIZED"));
+    sctTreasury.nullify(0);
+  }
+
+  function testEnableTimelockWithSuccess() public {
+    setUpPermissions();
+    vm.prank(governor);
+    vm.expectEmit(true, true, true, true);
+    emit ChangedTimelock(true);
+    sctTreasury.enableTimelock();
+    assertTrue(sctTreasury.timelockEnabled());
+  }
+
+  function testEnableTimelockUnautorized() public {
+    setUpPermissions();
+    vm.prank(userOne);
+    vm.expectRevert(bytes("UNAUTHORIZED"));
+    sctTreasury.enableTimelock();
+    assertFalse(sctTreasury.timelockEnabled());
+  }
+
+  function testEnableTimelockAlreadyEnabled() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    vm.expectRevert(bytes("SCT Treasury: timelock already enabled"));
+    sctTreasury.enableTimelock();
+    vm.stopPrank();
+    assertTrue(sctTreasury.timelockEnabled());
   }
 
 }
