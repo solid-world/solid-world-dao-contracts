@@ -121,19 +121,6 @@
 				"internalType": "uint256",
 				"name": "amount",
 				"type": "uint256"
-			}
-		],
-		"name": "Deposited",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "status",
-				"type": "uint8"
 			},
 			{
 				"indexed": false,
@@ -148,12 +135,6 @@
 	{
 		"anonymous": false,
 		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "offerId",
-				"type": "uint256"
-			},
 			{
 				"indexed": true,
 				"internalType": "address",
@@ -174,24 +155,12 @@
 			},
 			{
 				"indexed": false,
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
 				"internalType": "uint256",
 				"name": "amount",
 				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "totalValue",
-				"type": "uint256"
 			}
 		],
-		"name": "Sold",
+		"name": "Deposited",
 		"type": "event"
 	},
 	{
@@ -372,24 +341,11 @@
 	},
 	{
 		"inputs": [],
-		"name": "carbonProjects",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "baseSupply",
 		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "tokenId",
+				"name": "",
 				"type": "uint256"
 			}
 		],
@@ -402,7 +358,7 @@
 		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "tons",
+				"name": "",
 				"type": "uint256"
 			}
 		],
@@ -425,7 +381,7 @@
 				"type": "bool"
 			}
 		],
-		"stateMutability": "view",
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
