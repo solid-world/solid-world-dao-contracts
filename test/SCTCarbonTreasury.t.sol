@@ -62,6 +62,24 @@ contract SCTCarbonTreasuryTest is Test {
     sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
     vm.stopPrank();
   }
+
+  function setUpCarbonProject () public {
+    setUpPermissions();
+    vm.startPrank(manager);
+    sctTreasury.createOrUpdateCarbonProject( SCTCarbonTreasury.CarbonProject ({
+      token: address(carbonCredit),
+      tokenId: 1,
+      tons: 10000,
+      flatRate: 1,
+      sdgPremium: 1,
+      daysToRealization: 1,
+      closenessPremium: 1,
+      isActive: true,
+      isCertified: false,
+      isRedeemed: false
+    }));
+    vm.stopPrank();
+  }
   
   function testTotalReserves() public {
     assertEq(sctTreasury.totalReserves(), 0);
@@ -176,7 +194,6 @@ contract SCTCarbonTreasuryTest is Test {
     vm.stopPrank();
   }
 
-
   function testExecuteWithSuccess() public {
     vm.startPrank(governor);
     sctTreasury.initialize();
@@ -277,5 +294,171 @@ contract SCTCarbonTreasuryTest is Test {
     vm.stopPrank();
     assertTrue(sctTreasury.timelockEnabled());
   }
+
+  function testDisableTimelockWithSuccess() public {
+    setUpPermissions();
+    vm.prank(governor);
+    sctTreasury.enableTimelock();
+    vm.prank(governor);
+    vm.expectEmit(true, true, true, true);
+    emit ChangedTimelock(false);
+    sctTreasury.disableTimelock();
+    assertFalse(sctTreasury.timelockEnabled());
+  }
+
+  function testDisableTimelockUnautorized() public {
+    setUpPermissions();
+    vm.prank(governor);
+    sctTreasury.enableTimelock();
+    vm.prank(userOne);
+    vm.expectRevert(bytes("UNAUTHORIZED"));
+    sctTreasury.disableTimelock();
+    assertTrue(sctTreasury.timelockEnabled());
+  }
+
+  function testDisableTimelockAlreadyDisabled() public {
+    setUpPermissions();
+    vm.startPrank(governor);
+    vm.expectRevert(bytes("SCT Treasury: timelock already disabled"));
+    sctTreasury.disableTimelock();
+    vm.stopPrank();
+    assertFalse(sctTreasury.timelockEnabled());
+  }
+
+  function testEnableReserveManagerWithSuccess() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.disableTimelock();
+    vm.roll(block.number + 100); 
+    sctTreasury.disableTimelock();
+    vm.expectEmit(true, true, true, true);
+    emit Permissioned(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager, true);
+    sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
+    vm.stopPrank();
+  }
+
+  function testEnableReserveManagerUnauthorized() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.disableTimelock();
+    vm.roll(block.number + 100); 
+    sctTreasury.disableTimelock();
+    vm.stopPrank();
+    vm.prank(userOne);
+    vm.expectRevert(bytes("UNAUTHORIZED"));
+    sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
+  }
+
+  function testEnableReserveManagerTimelockEnabled() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    vm.expectRevert(bytes("SCT Treasury: timelock enabled"));
+    sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVEMANAGER, address(carbonCredit));
+    vm.stopPrank();
+  }
+
+  //Tests disable permission
+
+  function testCreateCarbonProjectWithSuccess() public {
+    setUpPermissions();
+    vm.prank(manager);
+    vm.expectEmit(true, true, true, true);
+    emit UpdatedInfo(address(carbonCredit), 1, true);
+    sctTreasury.createOrUpdateCarbonProject( SCTCarbonTreasury.CarbonProject ({
+      token: address(carbonCredit),
+      tokenId: 1,
+      tons: 10000,
+      flatRate: 1,
+      sdgPremium: 1,
+      daysToRealization: 1,
+      closenessPremium: 1,
+      isActive: true,
+      isCertified: false,
+      isRedeemed: false
+    }));
+    (address token, uint256 tokenId , uint256 tons, , , , , bool isActive, ,) = sctTreasury.carbonProjects(address(carbonCredit), 1);
+    assertEq(token, address(carbonCredit));
+    assertEq(tokenId, 1);
+    assertEq(tons, 10000);
+    assertEq(isActive, true);
+  }
+
+  function testCreateOrUpdateCarbonProjectUnauthorized() public {
+    setUpPermissions();
+    vm.prank(governor);
+    vm.expectRevert(bytes("SCT Treasury: reserve manager not permitted"));
+    sctTreasury.createOrUpdateCarbonProject( SCTCarbonTreasury.CarbonProject ({
+      token: address(carbonCredit),
+      tokenId: 1,
+      tons: 10000,
+      flatRate: 1,
+      sdgPremium: 1,
+      daysToRealization: 1,
+      closenessPremium: 1,
+      isActive: true,
+      isCertified: false,
+      isRedeemed: false
+    }));
+    (address token, uint256 tokenId , uint256 tons, , , , , bool isActive, ,) = sctTreasury.carbonProjects(address(carbonCredit), 1);
+    assertEq(token, address(0));
+    assertEq(tokenId, 0);
+    assertEq(tons, 0);
+    assertEq(isActive, false);
+  }
+
+  function testCreateOrUpdateCarbonProjectReserveTokenNotPermitted() public {
+    setUpPermissions();
+    vm.prank(manager);
+    vm.expectRevert(bytes("SCT Treasury: reserve token not permitted"));
+    sctTreasury.createOrUpdateCarbonProject( SCTCarbonTreasury.CarbonProject ({
+      token: address(sctERC20),
+      tokenId: 1,
+      tons: 10000,
+      flatRate: 1,
+      sdgPremium: 1,
+      daysToRealization: 1,
+      closenessPremium: 1,
+      isActive: true,
+      isCertified: false,
+      isRedeemed: false
+    }));
+    (address token, uint256 tokenId , uint256 tons, , , , , bool isActive, ,) = sctTreasury.carbonProjects(address(sctERC20), 1);
+    assertEq(token, address(0));
+    assertEq(tokenId, 0);
+    assertEq(tons, 0);
+    assertEq(isActive, false);
+  }
+
+  function testUpdateCarbonProjectWithSuccess() public {
+    setUpCarbonProject();
+    vm.prank(manager);
+    vm.expectEmit(true, true, true, true);
+    emit UpdatedInfo(address(carbonCredit), 1, false);
+    sctTreasury.createOrUpdateCarbonProject( SCTCarbonTreasury.CarbonProject ({
+      token: address(carbonCredit),
+      tokenId: 1,
+      tons: 9999,
+      flatRate: 1,
+      sdgPremium: 1,
+      daysToRealization: 1,
+      closenessPremium: 1,
+      isActive: false,
+      isCertified: false,
+      isRedeemed: false
+    }));
+    (address token, uint256 tokenId , uint256 tons, , , , , bool isActive, ,) = sctTreasury.carbonProjects(address(carbonCredit), 1);
+    assertEq(token, address(carbonCredit));
+    assertEq(tokenId, 1);
+    assertEq(tons, 9999);
+    assertEq(isActive, false);
+  }
+
+  //Tests deposit
+
+  //Tests createOffer
+
+  //Tests cancelOffer
+
+  //Tests acceptOffer
 
 }
