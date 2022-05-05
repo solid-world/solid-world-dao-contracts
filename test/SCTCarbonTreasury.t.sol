@@ -78,13 +78,38 @@ contract SCTCarbonTreasuryTest is Test {
       isCertified: false,
       isRedeemed: false
     }));
+    sctTreasury.createOrUpdateCarbonProject( SCTCarbonTreasury.CarbonProject ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      tons: 20000,
+      flatRate: 1,
+      sdgPremium: 1,
+      daysToRealization: 1,
+      closenessPremium: 1,
+      isActive: true,
+      isCertified: false,
+      isRedeemed: false
+    }));
     vm.stopPrank();
   }
 
   function setUpCarbonToken() public {
     vm.startPrank(governor);
     carbonCredit.mint(userOne, 1, 10000, 'data');
-    carbonCredit.mint(userTwo, 2, 10000, 'data');
+    carbonCredit.mint(userTwo, 2, 20000, 'data');
+    vm.stopPrank();
+  }
+
+  function setUpDeposit() public {
+    setUpCarbonProject();
+    setUpCarbonToken();
+    vm.startPrank(userOne);
+    carbonCredit.setApprovalForAll(address(sctTreasury), true);
+    sctTreasury.depositReserveToken(address(carbonCredit), 1, 10000, address(userOne));
+    vm.stopPrank();
+    vm.startPrank(userTwo);
+    carbonCredit.setApprovalForAll(address(sctTreasury), true);
+    sctTreasury.depositReserveToken(address(carbonCredit), 2, 20000, address(userTwo));
     vm.stopPrank();
   }
   
@@ -136,7 +161,8 @@ contract SCTCarbonTreasuryTest is Test {
     emit PermissionOrdered(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
     vm.stopPrank();
-    ( , address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    require(managing == SCTCarbonTreasury.STATUS.RESERVETOKEN, 'status not RESERVETOKEN');
     assertEq(toPermit, address(carbonCredit));
     assertEq(timelockEnd, 10);
     assertEq(nullify, false);
@@ -183,7 +209,8 @@ contract SCTCarbonTreasuryTest is Test {
     emit PermissionOrdered(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
     vm.stopPrank();
-    ( , address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    require(managing == SCTCarbonTreasury.STATUS.RESERVEMANAGER, 'status not RESERVEMANAGER');
     assertEq(toPermit, manager);
     assertEq(timelockEnd, 10);
     assertEq(nullify, false);
@@ -233,7 +260,8 @@ contract SCTCarbonTreasuryTest is Test {
     sctTreasury.execute(0);
     vm.stopPrank();
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit)), true);
-    ( , address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    require(managing == SCTCarbonTreasury.STATUS.RESERVETOKEN, 'status not RESERVETOKEN');
     assertEq(toPermit, address(carbonCredit));
     assertEq(timelockEnd, 10);
     assertEq(nullify, false);
@@ -249,7 +277,8 @@ contract SCTCarbonTreasuryTest is Test {
     sctTreasury.execute(0);
     vm.stopPrank();
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit)), false);
-    ( , address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    require(managing == SCTCarbonTreasury.STATUS.RESERVETOKEN, 'status not RESERVETOKEN');
     assertEq(toPermit, address(carbonCredit));
     assertEq(timelockEnd, 10);
     assertEq(nullify, false);
@@ -268,7 +297,8 @@ contract SCTCarbonTreasuryTest is Test {
     sctTreasury.execute(0);
     vm.stopPrank();
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit)), true);
-    ( , address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    require(managing == SCTCarbonTreasury.STATUS.RESERVETOKEN, 'status not RESERVETOKEN');
     assertEq(toPermit, address(carbonCredit));
     assertEq(timelockEnd, 10);
     assertEq(nullify, false);
@@ -285,7 +315,8 @@ contract SCTCarbonTreasuryTest is Test {
     sctTreasury.execute(0);
     vm.stopPrank();
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit)), false);
-    ( , address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    require(managing == SCTCarbonTreasury.STATUS.RESERVETOKEN, 'status not RESERVETOKEN');
     assertEq(toPermit, address(carbonCredit));
     assertEq(timelockEnd, 10);
     assertEq(nullify, true);
@@ -303,7 +334,8 @@ contract SCTCarbonTreasuryTest is Test {
     sctTreasury.execute(0);
     vm.stopPrank();
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit)), false);
-    ( , address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    require(managing == SCTCarbonTreasury.STATUS.RESERVETOKEN, 'status not RESERVETOKEN');
     assertEq(toPermit, address(carbonCredit));
     assertEq(timelockEnd, 10);
     assertEq(nullify, false);
@@ -316,7 +348,8 @@ contract SCTCarbonTreasuryTest is Test {
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
     sctTreasury.nullify(0);
     vm.stopPrank();
-    ( , address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    require(managing == SCTCarbonTreasury.STATUS.RESERVETOKEN, 'status not RESERVETOKEN');
     assertEq(toPermit, address(carbonCredit));
     assertEq(timelockEnd, 10);
     assertEq(nullify, true);
@@ -331,7 +364,8 @@ contract SCTCarbonTreasuryTest is Test {
     vm.prank(userOne);
     vm.expectRevert(bytes("UNAUTHORIZED"));
     sctTreasury.nullify(0);
-    ( , address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
+    require(managing == SCTCarbonTreasury.STATUS.RESERVETOKEN, 'status not RESERVETOKEN');
     assertEq(toPermit, address(carbonCredit));
     assertEq(timelockEnd, 10);
     assertEq(nullify, false);
@@ -698,10 +732,428 @@ contract SCTCarbonTreasuryTest is Test {
     assertEq(sctTreasury.baseSupply(), 0);
   }
 
-  //Tests createOffer
+  function testCreateOfferWithSuccess() public {
+    setUpDeposit();
+    vm.startPrank(userOne);
+    sctERC20.approve(address(sctTreasury), 5000);
+    vm.expectEmit(true, true, true, true);
+    emit CreatedOffer(1, address(carbonCredit), 2, address(userOne), 2000, 5000);
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userOne,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.stopPrank();
+    assertEq(sctERC20.balanceOf(address(userOne)), 5000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 5000);
+    assertEq(sctTreasury.offerIdCounter(), 1);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    assertEq(token, address(carbonCredit));
+    assertEq(tokenId, 2);
+    assertEq(buyer, address(userOne));
+    assertEq(amount, 2000);
+    assertEq(totalValue, 5000);
+  }
 
-  //Tests cancelOffer
+  function testCreateOfferProjectNotActive() public {
+    setUpDeposit();
+    vm.startPrank(userOne);
+    sctERC20.approve(address(sctTreasury), 5000);
+    vm.expectRevert(bytes("SCT Treasury: carbon project not active"));
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 3,
+      buyer: userOne,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.stopPrank();
+    assertEq(sctERC20.balanceOf(address(userOne)), 10000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
+    assertEq(sctTreasury.offerIdCounter(), 0);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    assertEq(token, address(0));
+    assertEq(tokenId, 0);
+    assertEq(buyer, address(0));
+    assertEq(amount, 0);
+    assertEq(totalValue, 0);
+  }
 
-  //Tests acceptOffer
+  function testCreateOfferInsuficientAmountDeposited() public {
+    setUpDeposit();
+    vm.startPrank(userTwo);
+    sctERC20.approve(address(sctTreasury), 20000);
+    vm.expectRevert(bytes("SCT Treasury: ERC1155 deposited insuficient"));
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 1,
+      buyer: userTwo,
+      amount: 15000,
+      totalValue: 20000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.stopPrank();
+    assertEq(sctERC20.balanceOf(address(userTwo)), 20000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
+    assertEq(sctTreasury.offerIdCounter(), 0);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    assertEq(token, address(0));
+    assertEq(tokenId, 0);
+    assertEq(buyer, address(0));
+    assertEq(amount, 0);
+    assertEq(totalValue, 0);
+  }
+
+  function testCreateOfferTotalValueLessThanAmount() public {
+    setUpDeposit();
+    vm.startPrank(userOne);
+    sctERC20.approve(address(sctTreasury), 5000);
+    vm.expectRevert(bytes("SCT Treasury: SCT total value needs to be more or equal than ERC1155 amount"));
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userOne,
+      amount: 10000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.stopPrank();
+    assertEq(sctERC20.balanceOf(address(userOne)), 10000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
+    assertEq(sctTreasury.offerIdCounter(), 0);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    assertEq(token, address(0));
+    assertEq(tokenId, 0);
+    assertEq(buyer, address(0));
+    assertEq(amount, 0);
+    assertEq(totalValue, 0);
+  }
+
+  function testCreateOfferMsgSenderNotBuyer() public {
+    setUpDeposit();
+    vm.startPrank(userOne);
+    sctERC20.approve(address(sctTreasury), 5000);
+    vm.expectRevert(bytes("SCT Treasury: msg.sender is not the buyer"));
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userTwo,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.stopPrank();
+    assertEq(sctERC20.balanceOf(address(userOne)), 10000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
+    assertEq(sctTreasury.offerIdCounter(), 0);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    assertEq(token, address(0));
+    assertEq(tokenId, 0);
+    assertEq(buyer, address(0));
+    assertEq(amount, 0);
+    assertEq(totalValue, 0);
+  }
+
+  function testCreateOfferNotAllowedSct() public {
+    setUpDeposit();
+    vm.startPrank(userOne);
+    sctERC20.approve(address(sctTreasury), 4000);
+    vm.expectRevert(bytes("SCT Treasury: buyer not allowed this contract spend SCT"));
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userOne,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.stopPrank();
+    assertEq(sctERC20.balanceOf(address(userOne)), 10000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
+    assertEq(sctTreasury.offerIdCounter(), 0);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    assertEq(token, address(0));
+    assertEq(tokenId, 0);
+    assertEq(buyer, address(0));
+    assertEq(amount, 0);
+    assertEq(totalValue, 0);
+  }
+
+  function testCreateOfferSctBalanceInsuficient() public {
+    setUpDeposit();
+    vm.startPrank(userThree);
+    sctERC20.approve(address(sctTreasury), 5000);
+    vm.expectRevert(bytes("ERC20: transfer amount exceeds balance"));
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userThree,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.stopPrank();
+    assertEq(sctERC20.balanceOf(address(userThree)), 0);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
+    assertEq(sctTreasury.offerIdCounter(), 0);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    assertEq(token, address(0));
+    assertEq(tokenId, 0);
+    assertEq(buyer, address(0));
+    assertEq(amount, 0);
+    assertEq(totalValue, 0);
+  }
+
+  function testCancelOfferWithSuccess() public {
+    setUpDeposit();
+    vm.startPrank(userOne);
+    sctERC20.approve(address(sctTreasury), 5000);
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userOne,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.expectEmit(true, true, true, true);
+    emit CanceledOffer(1, address(carbonCredit), 2, address(userOne), 2000, 5000);
+    sctTreasury.cancelOffer(1);
+    vm.stopPrank();
+    assertEq(sctERC20.balanceOf(address(userOne)), 10000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
+    assertEq(sctTreasury.offerIdCounter(), 1);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.CANCELED, 'statusOffer not CANCELED');
+    assertEq(token, address(carbonCredit));
+    assertEq(tokenId, 2);
+    assertEq(buyer, address(userOne));
+    assertEq(amount, 2000);
+    assertEq(totalValue, 5000);
+  }
+
+  function testCancelOfferNotOpen() public {
+    setUpDeposit();
+    vm.startPrank(userOne);
+    sctERC20.approve(address(sctTreasury), 10000);
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userOne,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userOne,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    sctTreasury.cancelOffer(1);
+    vm.expectRevert(bytes("SCT Treasury: offer is not OPEN"));
+    sctTreasury.cancelOffer(1);
+    vm.stopPrank();
+    assertEq(sctERC20.balanceOf(address(userOne)), 5000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 5000);
+    assertEq(sctTreasury.offerIdCounter(), 2);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(2);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    assertEq(token, address(carbonCredit));
+    assertEq(tokenId, 2);
+    assertEq(buyer, address(userOne));
+    assertEq(amount, 2000);
+    assertEq(totalValue, 5000);
+  }
+
+  function testCancelOfferMsgSenderNotBuyer() public {
+    setUpDeposit();
+    vm.startPrank(userOne);
+    sctERC20.approve(address(sctTreasury), 5000);
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userOne,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.stopPrank();
+    vm.prank(userFour);
+    vm.expectRevert(bytes("SCT Treasury: msg.sender is not the buyer"));
+    sctTreasury.cancelOffer(1);
+    assertEq(sctERC20.balanceOf(address(userOne)), 5000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 5000);
+    assertEq(sctTreasury.offerIdCounter(), 1);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    assertEq(token, address(carbonCredit));
+    assertEq(tokenId, 2);
+    assertEq(buyer, address(userOne));
+    assertEq(amount, 2000);
+    assertEq(totalValue, 5000);
+  }
+
+  function testAcceptOfferWithSuccess() public {
+    setUpDeposit();
+    vm.startPrank(userOne);
+    sctERC20.approve(address(sctTreasury), 5000);
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userOne,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.stopPrank();
+    vm.prank(userTwo);
+    vm.expectEmit(true, true, true, true);
+    emit Sold(1, address(carbonCredit), 2, address(userTwo), address(userOne), 2000, 5000);
+    sctTreasury.acceptOffer(1);
+    assertEq(sctERC20.balanceOf(address(userOne)), 5000);
+    assertEq(sctERC20.balanceOf(address(userTwo)), 23000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
+    assertEq(carbonCredit.balanceOf(address(userOne), 2), 2000);
+    assertEq(carbonCredit.balanceOf(address(userTwo), 2), 0);
+    assertEq(carbonCredit.balanceOf(address(sctTreasury), 2), 18000);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.EXECUTED, 'statusOffer not EXECUTED');
+    assertEq(token, address(carbonCredit));
+    assertEq(tokenId, 2);
+    assertEq(buyer, address(userOne));
+    assertEq(amount, 2000);
+    assertEq(totalValue, 5000);
+  }
+
+  function testAcceptOfferNotActive() public {
+    setUpDeposit();
+    vm.startPrank(userOne);
+    sctERC20.approve(address(sctTreasury), 5000);
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userOne,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.stopPrank();
+    vm.prank(manager);
+    sctTreasury.createOrUpdateCarbonProject( SCTCarbonTreasury.CarbonProject ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      tons: 20000,
+      flatRate: 1,
+      sdgPremium: 1,
+      daysToRealization: 1,
+      closenessPremium: 1,
+      isActive: false,
+      isCertified: false,
+      isRedeemed: false
+    }));
+    vm.prank(userTwo);
+    vm.expectRevert(bytes("SCT Treasury: carbon project not active"));
+    sctTreasury.acceptOffer(1);
+    assertEq(sctERC20.balanceOf(address(userOne)), 5000);
+    assertEq(sctERC20.balanceOf(address(userTwo)), 20000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 5000);
+    assertEq(carbonCredit.balanceOf(address(userOne), 2), 0);
+    assertEq(carbonCredit.balanceOf(address(userTwo), 2), 0);
+    assertEq(carbonCredit.balanceOf(address(sctTreasury), 2), 20000);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    assertEq(token, address(carbonCredit));
+    assertEq(tokenId, 2);
+    assertEq(buyer, address(userOne));
+    assertEq(amount, 2000);
+    assertEq(totalValue, 5000);
+  }
+
+  function testAcceptOfferNotOpen() public {
+    setUpDeposit();
+    vm.startPrank(userOne);
+    sctERC20.approve(address(sctTreasury), 5000);
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 2,
+      buyer: userOne,
+      amount: 2000,
+      totalValue: 5000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    sctTreasury.cancelOffer(1);
+    vm.stopPrank();
+    vm.prank(userTwo);
+    vm.expectRevert(bytes("SCT Treasury: offer is not OPEN"));
+    sctTreasury.acceptOffer(1);
+    assertEq(sctERC20.balanceOf(address(userOne)), 10000);
+    assertEq(sctERC20.balanceOf(address(userTwo)), 20000);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
+    assertEq(carbonCredit.balanceOf(address(userOne), 2), 0);
+    assertEq(carbonCredit.balanceOf(address(userTwo), 2), 0);
+    assertEq(carbonCredit.balanceOf(address(sctTreasury), 2), 20000);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.CANCELED, 'statusOffer not CANCELED');
+    assertEq(token, address(carbonCredit));
+    assertEq(tokenId, 2);
+    assertEq(buyer, address(userOne));
+    assertEq(amount, 2000);
+    assertEq(totalValue, 5000);
+  }
+
+  function testAcceptOfferCallerDepositedBalanceInsuficient() public {
+    setUpDeposit();
+    vm.startPrank(userTwo);
+    sctERC20.approve(address(sctTreasury), 20000);
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 1,
+      buyer: userTwo,
+      amount: 10000,
+      totalValue: 10000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    sctTreasury.createOffer(SCTCarbonTreasury.Offer ({
+      token: address(carbonCredit),
+      tokenId: 1,
+      buyer: userTwo,
+      amount: 10000,
+      totalValue: 10000,
+      statusOffer: SCTCarbonTreasury.StatusOffer.OPEN
+    }));
+    vm.stopPrank();
+    vm.startPrank(userOne);
+    sctTreasury.acceptOffer(1);
+    vm.expectRevert(bytes("SCT Treasury: caller deposited balance insuficient"));
+    sctTreasury.acceptOffer(2);
+    vm.stopPrank();
+    assertEq(sctERC20.balanceOf(address(userOne)), 10000);
+    assertEq(sctERC20.balanceOf(address(userTwo)), 0);
+    assertEq(sctERC20.balanceOf(address(sctTreasury)), 10000);
+    assertEq(carbonCredit.balanceOf(address(userOne), 1), 0);
+    assertEq(carbonCredit.balanceOf(address(userTwo), 1), 10000);
+    assertEq(carbonCredit.balanceOf(address(sctTreasury), 1), 0);
+    (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(2);
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    assertEq(token, address(carbonCredit));
+    assertEq(tokenId, 1);
+    assertEq(buyer, address(userTwo));
+    assertEq(amount, 10000);
+    assertEq(totalValue, 10000);
+  }
 
 }

@@ -18,7 +18,7 @@
 * To set and active Carbon Project you need to call createOrUpdateCarbonProject function, passing isActive field as true.
 * Only reserve manager can execute this function
 * Only reserve tokens are accepted
-3.1. Call setCarbonProject function sending CarbonProject struct:
+3.1. Call createOrUpdateCarbonProject function sending CarbonProject struct:
 
 {
   address token; //address of ERC1155 Carbon Credit smart contract
