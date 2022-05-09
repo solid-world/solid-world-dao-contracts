@@ -520,6 +520,19 @@ contract SCTCarbonTreasuryTest is Test {
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager), false);
   }
 
+  function testEnableReserveManagerInvalidAddress() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.permissionToDisableTimelock();
+    vm.roll(block.number + 100); 
+    sctTreasury.disableTimelock();
+    vm.stopPrank();
+    vm.prank(policy);
+    vm.expectRevert(bytes("SCT Treasury: invalid address"));
+    sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVEMANAGER, address(0));
+    assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVEMANAGER, address(0)), false);
+  }
+
   function testEnableReserveManagerTimelockEnabled() public {
     vm.prank(governor);
     sctTreasury.initialize();
@@ -555,6 +568,19 @@ contract SCTCarbonTreasuryTest is Test {
     vm.expectRevert(bytes("UNAUTHORIZED"));
     sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit)), false);
+  }
+
+  function testEnableReserveTokenInvalidAddress() public {
+    vm.startPrank(governor);
+    sctTreasury.initialize();
+    sctTreasury.permissionToDisableTimelock();
+    vm.roll(block.number + 100); 
+    sctTreasury.disableTimelock();
+    vm.stopPrank();
+    vm.prank(policy);
+    vm.expectRevert(bytes("SCT Treasury: invalid address"));
+    sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(0));
+    assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(0)), false);
   }
 
   function testEnableReserveTokenTimelockEnabled() public {
