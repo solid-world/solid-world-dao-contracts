@@ -17,7 +17,7 @@ contract SCTCarbonTreasuryTest is Test {
   event ChangedTimelock(bool timelock);
   event SetOnChainGovernanceTimelock(uint256 blockNumber);
   event Permissioned(SCTCarbonTreasury.STATUS indexed status, address token, bool result);
-  event PermissionOrdered(SCTCarbonTreasury.STATUS indexed status, address token);
+  event PermissionOrdered(SCTCarbonTreasury.STATUS indexed status, address token, uint256 index);
 
   SolidDaoManagement private solidDaoManagement;
   SCTERC20Token private sctERC20;
@@ -39,8 +39,8 @@ contract SCTCarbonTreasuryTest is Test {
   function setUp() public {
     solidDaoManagement = new SolidDaoManagement(
       governor,
-      policy,
       guardian,
+      policy,
       vault
     );
     sctERC20 = new SCTERC20Token(address(solidDaoManagement));
@@ -55,9 +55,11 @@ contract SCTCarbonTreasuryTest is Test {
   function setUpPermissions() public {
     vm.startPrank(governor);
     sctTreasury.initialize();
+    sctTreasury.permissionToDisableTimelock();
+    vm.roll(block.number + 1000); 
     sctTreasury.disableTimelock();
-    vm.roll(block.number + 100); 
-    sctTreasury.disableTimelock();
+    vm.stopPrank();
+    vm.startPrank(policy);
     sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
     sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
     vm.stopPrank();
@@ -141,6 +143,10 @@ contract SCTCarbonTreasuryTest is Test {
     assertEq(sctTreasury.baseSupply(), 0);
   }
 
+  function testTotalPermissionOrder() public {
+    assertEq(sctTreasury.totalPermissionOrder(), 0);
+  }
+
   function testInitializeWithSuccess() public {
     vm.prank(governor);
     sctTreasury.initialize();
@@ -155,12 +161,12 @@ contract SCTCarbonTreasuryTest is Test {
   }
 
   function testOrderTimelockReserveTokenWithSuccess() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.prank(policy);
     vm.expectEmit(true, true, true, true);
-    emit PermissionOrdered(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    emit PermissionOrdered(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit), 1);
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
-    vm.stopPrank();
     (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
     require(managing == SCTCarbonTreasury.STATUS.RESERVETOKEN, 'status not RESERVETOKEN');
     assertEq(toPermit, address(carbonCredit));
@@ -180,11 +186,11 @@ contract SCTCarbonTreasuryTest is Test {
   }
 
   function testOrderTimelockReserveTokenInvalidAddress() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.prank(policy);
     vm.expectRevert(bytes("SCT Treasury: invalid address"));
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(0));
-    vm.stopPrank();
     vm.expectRevert();
     sctTreasury.permissionOrder(0);
   }
@@ -192,23 +198,24 @@ contract SCTCarbonTreasuryTest is Test {
   function testOrderTimelockReserveTokenTimelockDisabled() public {
     vm.startPrank(governor);
     sctTreasury.initialize();
-    sctTreasury.disableTimelock();
+    sctTreasury.permissionToDisableTimelock();
     vm.roll(block.number + 100);
     sctTreasury.disableTimelock();
+    vm.stopPrank();
+    vm.prank(policy);
     vm.expectRevert(bytes("SCT Treasury: timelock is disabled, use enable"));
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
-    vm.stopPrank();
     vm.expectRevert();
     sctTreasury.permissionOrder(0);
   }
 
   function testOrderTimelockReserveManagerWithSuccess() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.prank(policy);
     vm.expectEmit(true, true, true, true);
-    emit PermissionOrdered(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
+    emit PermissionOrdered(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager, 1);
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
-    vm.stopPrank();
     (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
     require(managing == SCTCarbonTreasury.STATUS.RESERVEMANAGER, 'status not RESERVEMANAGER');
     assertEq(toPermit, manager);
@@ -228,11 +235,11 @@ contract SCTCarbonTreasuryTest is Test {
   }
 
   function testOrderTimelockReserveManagerInvalidAddress() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.prank(policy);
     vm.expectRevert(bytes("SCT Treasury: invalid address"));
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVEMANAGER, address(0));
-    vm.stopPrank();
     vm.expectRevert();
     sctTreasury.permissionOrder(0);
   }
@@ -240,19 +247,21 @@ contract SCTCarbonTreasuryTest is Test {
   function testOrderTimelockReserveManagerTimelockDisabled() public {
     vm.startPrank(governor);
     sctTreasury.initialize();
-    sctTreasury.disableTimelock();
+    sctTreasury.permissionToDisableTimelock();
     vm.roll(block.number + 100);
     sctTreasury.disableTimelock();
+    vm.stopPrank();
+    vm.prank(policy);
     vm.expectRevert(bytes("SCT Treasury: timelock is disabled, use enable"));
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
-    vm.stopPrank();
     vm.expectRevert();
     sctTreasury.permissionOrder(0);
   }
 
   function testExecuteWithSuccess() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.startPrank(policy);
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
     vm.roll(block.number + 10);
     vm.expectEmit(true, true, true, true);
@@ -269,8 +278,9 @@ contract SCTCarbonTreasuryTest is Test {
   }
 
   function testExecuteTimelockNotComplete() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.startPrank(policy);
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
     vm.roll(block.number + 9);
     vm.expectRevert(bytes("SCT Treasury: timelock not complete"));
@@ -286,8 +296,9 @@ contract SCTCarbonTreasuryTest is Test {
   }
 
   function testExecuteOrderAlreadyExecuted() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.startPrank(policy);
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
     vm.roll(block.number + 10);
     vm.expectEmit(true, true, true, true);
@@ -306,14 +317,16 @@ contract SCTCarbonTreasuryTest is Test {
   }
 
   function testExecuteOrderNullified() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.prank(policy);
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
     vm.roll(block.number + 10);
+    vm.prank(governor);
     sctTreasury.nullify(0);
+    vm.prank(policy);
     vm.expectRevert(bytes("SCT Treasury: order has been nullified"));
     sctTreasury.execute(0);
-    vm.stopPrank();
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit)), false);
     (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
     require(managing == SCTCarbonTreasury.STATUS.RESERVETOKEN, 'status not RESERVETOKEN');
@@ -324,15 +337,18 @@ contract SCTCarbonTreasuryTest is Test {
   }
 
   function testExecuteTimelockDisabled() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.prank(policy);
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
-    sctTreasury.disableTimelock(); 
+    vm.startPrank(governor);
+    sctTreasury.permissionToDisableTimelock(); 
     vm.roll(block.number + 100);   
     sctTreasury.disableTimelock();
+    vm.stopPrank();
+    vm.prank(policy);
     vm.expectRevert(bytes("SCT Treasury: timelock is disabled, use enable"));
     sctTreasury.execute(0);
-    vm.stopPrank();
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit)), false);
     (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
     require(managing == SCTCarbonTreasury.STATUS.RESERVETOKEN, 'status not RESERVETOKEN');
@@ -343,9 +359,11 @@ contract SCTCarbonTreasuryTest is Test {
   }
 
   function testNullifyWithSuccess() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.prank(policy);
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
+    vm.prank(governor);
     sctTreasury.nullify(0);
     vm.stopPrank();
     (SCTCarbonTreasury.STATUS managing, address toPermit, uint256 timelockEnd, bool nullify, bool executed) = sctTreasury.permissionOrder(0);
@@ -357,10 +375,10 @@ contract SCTCarbonTreasuryTest is Test {
   }
 
   function testNullifyUnauthorized() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.prank(policy);
     sctTreasury.orderTimelock(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
-    vm.stopPrank();
     vm.prank(userOne);
     vm.expectRevert(bytes("UNAUTHORIZED"));
     sctTreasury.nullify(0);
@@ -379,6 +397,7 @@ contract SCTCarbonTreasuryTest is Test {
     emit ChangedTimelock(true);
     sctTreasury.enableTimelock();
     assertTrue(sctTreasury.timelockEnabled());
+    assertEq(sctTreasury.onChainGovernanceTimelock(), 0);
   }
 
   function testEnableTimelockUnautorized() public {
@@ -387,6 +406,7 @@ contract SCTCarbonTreasuryTest is Test {
     vm.expectRevert(bytes("UNAUTHORIZED"));
     sctTreasury.enableTimelock();
     assertFalse(sctTreasury.timelockEnabled());
+    assertEq(sctTreasury.onChainGovernanceTimelock(), 0);
   }
 
   function testEnableTimelockAlreadyEnabled() public {
@@ -396,27 +416,71 @@ contract SCTCarbonTreasuryTest is Test {
     sctTreasury.enableTimelock();
     vm.stopPrank();
     assertTrue(sctTreasury.timelockEnabled());
+    assertEq(sctTreasury.onChainGovernanceTimelock(), 0);
   }
 
-  function testDisableTimelockWithSuccess() public {
+  function testPermissionToDisableTimelockWithSuccess() public {
     setUpPermissions();
-    vm.prank(governor);
+    vm.startPrank(governor);
     sctTreasury.enableTimelock();
-    vm.prank(governor);
     vm.expectEmit(true, true, true, true);
-    emit ChangedTimelock(false);
-    sctTreasury.disableTimelock();
-    assertFalse(sctTreasury.timelockEnabled());
+    emit SetOnChainGovernanceTimelock(block.number + 100);
+    sctTreasury.permissionToDisableTimelock();
+    vm.stopPrank();
+    assertTrue(sctTreasury.timelockEnabled());
+    assertEq(sctTreasury.onChainGovernanceTimelock(), block.number + 100);
   }
 
-  function testDisableTimelockUnautorized() public {
+  function testPermissionToDisableTimelockUnauthorized() public {
     setUpPermissions();
     vm.prank(governor);
     sctTreasury.enableTimelock();
     vm.prank(userOne);
     vm.expectRevert(bytes("UNAUTHORIZED"));
+    sctTreasury.permissionToDisableTimelock();
+    assertTrue(sctTreasury.timelockEnabled());
+    assertEq(sctTreasury.onChainGovernanceTimelock(), 0);
+  }
+
+  function testDisableTimelockWithSuccess() public {
+    setUpPermissions();
+    vm.startPrank(governor);
+    sctTreasury.enableTimelock();
+    sctTreasury.permissionToDisableTimelock();
+    vm.roll(block.number + 100);
+    vm.expectEmit(true, true, true, true);
+    emit ChangedTimelock(false);
+    sctTreasury.disableTimelock();
+    vm.stopPrank();
+    assertFalse(sctTreasury.timelockEnabled());
+    assertEq(sctTreasury.onChainGovernanceTimelock(), 0);
+  }
+
+  function testDisableTimelockUnautorized() public {
+    setUpPermissions();
+    vm.startPrank(governor);
+    sctTreasury.enableTimelock();
+    sctTreasury.permissionToDisableTimelock();
+    vm.stopPrank();
+    vm.roll(block.number + 100);
+    vm.prank(userOne);
+    vm.expectRevert(bytes("UNAUTHORIZED"));
     sctTreasury.disableTimelock();
     assertTrue(sctTreasury.timelockEnabled());
+    assertEq(sctTreasury.onChainGovernanceTimelock(), block.number);
+  }
+
+  function testDisableTimelockGovernanceNotExpired() public {
+    setUpPermissions();
+    vm.startPrank(governor);
+    sctTreasury.enableTimelock();
+    sctTreasury.permissionToDisableTimelock();
+    vm.roll(block.number + 99);
+    vm.expectRevert(bytes("SCT Treasury: governance timelock not expired yet"));
+    sctTreasury.disableTimelock();
+    vm.stopPrank();
+    assertTrue(sctTreasury.timelockEnabled());
+    assertEq(sctTreasury.onChainGovernanceTimelock(), block.number + 1);
   }
 
   function testDisableTimelockAlreadyDisabled() public {
@@ -426,25 +490,27 @@ contract SCTCarbonTreasuryTest is Test {
     sctTreasury.disableTimelock();
     vm.stopPrank();
     assertFalse(sctTreasury.timelockEnabled());
+    assertEq(sctTreasury.onChainGovernanceTimelock(), 0);
   }
 
   function testEnableReserveManagerWithSuccess() public {
     vm.startPrank(governor);
     sctTreasury.initialize();
-    sctTreasury.disableTimelock();
+    sctTreasury.permissionToDisableTimelock();
     vm.roll(block.number + 100); 
     sctTreasury.disableTimelock();
+    vm.stopPrank();
+    vm.prank(policy);
     vm.expectEmit(true, true, true, true);
     emit Permissioned(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager, true);
     sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
-    vm.stopPrank();
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager), true);
   }
 
   function testEnableReserveManagerUnauthorized() public {
     vm.startPrank(governor);
     sctTreasury.initialize();
-    sctTreasury.disableTimelock();
+    sctTreasury.permissionToDisableTimelock();
     vm.roll(block.number + 100); 
     sctTreasury.disableTimelock();
     vm.stopPrank();
@@ -455,8 +521,9 @@ contract SCTCarbonTreasuryTest is Test {
   }
 
   function testEnableReserveManagerTimelockEnabled() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.prank(policy);
     vm.expectRevert(bytes("SCT Treasury: timelock enabled"));
     sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
     vm.stopPrank();
@@ -466,20 +533,21 @@ contract SCTCarbonTreasuryTest is Test {
   function testEnableReserveTokenWithSuccess() public {
     vm.startPrank(governor);
     sctTreasury.initialize();
-    sctTreasury.disableTimelock();
+    sctTreasury.permissionToDisableTimelock();
     vm.roll(block.number + 100); 
     sctTreasury.disableTimelock();
+    vm.stopPrank();
+    vm.prank(policy);
     vm.expectEmit(true, true, true, true);
     emit Permissioned(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit), true);
     sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
-    vm.stopPrank();
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit)), true);
   }
 
   function testEnableReserveTokenUnauthorized() public {
     vm.startPrank(governor);
     sctTreasury.initialize();
-    sctTreasury.disableTimelock();
+    sctTreasury.permissionToDisableTimelock();
     vm.roll(block.number + 100); 
     sctTreasury.disableTimelock();
     vm.stopPrank();
@@ -490,17 +558,17 @@ contract SCTCarbonTreasuryTest is Test {
   }
 
   function testEnableReserveTokenTimelockEnabled() public {
-    vm.startPrank(governor);
+    vm.prank(governor);
     sctTreasury.initialize();
+    vm.prank(policy);
     vm.expectRevert(bytes("SCT Treasury: timelock enabled"));
     sctTreasury.enable(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
-    vm.stopPrank();
     assertEq(sctTreasury.permissions(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit)), false);
   }
 
   function testDisableReserveManagerWithSuccess() public {
     setUpPermissions();
-    vm.prank(governor);
+    vm.prank(policy);
     vm.expectEmit(true, true, true, true);
     emit Permissioned(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager, false);
     sctTreasury.disable(SCTCarbonTreasury.STATUS.RESERVEMANAGER, manager);
@@ -517,7 +585,7 @@ contract SCTCarbonTreasuryTest is Test {
 
   function testDisableReserveTokenWithSuccess() public {
     setUpPermissions();
-    vm.prank(governor);
+    vm.prank(policy);
     vm.expectEmit(true, true, true, true);
     emit Permissioned(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit), false);
     sctTreasury.disable(SCTCarbonTreasury.STATUS.RESERVETOKEN, address(carbonCredit));
@@ -777,7 +845,7 @@ contract SCTCarbonTreasuryTest is Test {
     assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
     assertEq(sctTreasury.offerIdCounter(), 0);
     (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
-    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.NOT_DEFINED, 'statusOffer not NOT_DEFINED');
     assertEq(token, address(0));
     assertEq(tokenId, 0);
     assertEq(buyer, address(0));
@@ -803,7 +871,7 @@ contract SCTCarbonTreasuryTest is Test {
     assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
     assertEq(sctTreasury.offerIdCounter(), 0);
     (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
-    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.NOT_DEFINED, 'statusOffer not NOT_DEFINED');
     assertEq(token, address(0));
     assertEq(tokenId, 0);
     assertEq(buyer, address(0));
@@ -829,7 +897,7 @@ contract SCTCarbonTreasuryTest is Test {
     assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
     assertEq(sctTreasury.offerIdCounter(), 0);
     (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
-    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.NOT_DEFINED, 'statusOffer not NOT_DEFINED');
     assertEq(token, address(0));
     assertEq(tokenId, 0);
     assertEq(buyer, address(0));
@@ -855,7 +923,7 @@ contract SCTCarbonTreasuryTest is Test {
     assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
     assertEq(sctTreasury.offerIdCounter(), 0);
     (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
-    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.NOT_DEFINED, 'statusOffer not NOT_DEFINED');
     assertEq(token, address(0));
     assertEq(tokenId, 0);
     assertEq(buyer, address(0));
@@ -881,7 +949,7 @@ contract SCTCarbonTreasuryTest is Test {
     assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
     assertEq(sctTreasury.offerIdCounter(), 0);
     (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
-    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.NOT_DEFINED, 'statusOffer not NOT_DEFINED');
     assertEq(token, address(0));
     assertEq(tokenId, 0);
     assertEq(buyer, address(0));
@@ -907,7 +975,7 @@ contract SCTCarbonTreasuryTest is Test {
     assertEq(sctERC20.balanceOf(address(sctTreasury)), 0);
     assertEq(sctTreasury.offerIdCounter(), 0);
     (address token, uint256 tokenId, address buyer, uint256 amount, uint256 totalValue, SCTCarbonTreasury.StatusOffer statusOffer) = sctTreasury.offers(1);
-    require(statusOffer == SCTCarbonTreasury.StatusOffer.OPEN, 'statusOffer not OPEN');
+    require(statusOffer == SCTCarbonTreasury.StatusOffer.NOT_DEFINED, 'statusOffer not NOT_DEFINED');
     assertEq(token, address(0));
     assertEq(tokenId, 0);
     assertEq(buyer, address(0));
