@@ -14,30 +14,6 @@ import "./interfaces/IERC1155.sol";
  */
 contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
 
-    event Deposited(address indexed token, uint256 indexed tokenId, address indexed owner, uint256 amount);
-    event CreatedOffer(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed buyer, uint256 amount, uint256 totalValue);
-    event CanceledOffer(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed buyer, uint256 amount, uint256 totalValue);
-    event Sold(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed owner, address buyer, uint256 amount, uint256 totalValue);
-    event UpdatedInfo(address indexed token, uint256 indexed tokenId, bool isActive);
-    event ChangedTimelock(bool timelock);
-    event SetOnChainGovernanceTimelock(uint256 blockNumber);
-    event Permissioned(STATUS indexed status, address token, bool result);
-    event PermissionOrdered(STATUS indexed status, address token);
-
-    /**
-     * @notice SCT
-     * @dev immutable variable to store SCT ERC20 token address
-     * @return address
-     */
-    ISCT public immutable SCT;
-    
-    /**
-     * @notice totalReserves
-     * @dev variable to store SCT ERC20 token address
-     * @return uint256
-     */
-    uint256 public totalReserves;
-
     /**
      * @notice CarbonProject
      * @dev struct to store carbon project details
@@ -66,34 +42,15 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     }
 
     /**
-     * @notice carbonProjects
-     * @dev mapping with token and tokenId as keys to store CarbonProjects
-     * @dev return CarbonProject
-     */
-    mapping(address => mapping(uint256 => CarbonProject)) public carbonProjects; 
-
-    /**
-     * @notice carbonProjectTons
-     * @dev mapping with token and tokenId as keys to store total amount of ERC1155 carbon project deposited in this contract
-     * @return uint256
-     */
-    mapping(address => mapping(uint256 => uint256)) public carbonProjectTons;
-
-    /**
-     * @notice carbonProjectBalances
-     * @dev mapping with token, tokenId and owner address as keys to store the amount of each ERC1155 carbon project owner deposited
-     * @return uint256
-     */
-    mapping(address => mapping(uint256 => mapping(address => uint256))) public carbonProjectBalances;
-
-    /**
      * @notice Offer
      * @dev enum of offer status
-     * @dev 0 OPEN
-     * @dev 1 EXECUTED
-     * @dev 2 CANCELED
+     * @dev 0 NOT_DEFINED
+     * @dev 1 OPEN
+     * @dev 2 EXECUTED
+     * @dev 3 CANCELED
      */
     enum StatusOffer {
+        NOT_DEFINED,
         OPEN,
         EXECUTED,
         CANCELED
@@ -117,20 +74,6 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         uint256 totalValue;
         StatusOffer statusOffer;
     }
-
-    /**
-     * @notice offers
-     * @dev mapping with offerId as key to store Offers
-     * @dev return Offer
-     */
-    mapping(uint256 => Offer) public offers;
-
-    /**
-     * @notice offerIdCounter
-     * @dev variable to count the ids of offers
-     * @return uint256
-     */
-    uint256 public offerIdCounter;
 
     /**
      * @notice STATUS
@@ -159,6 +102,65 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         bool nullify;
         bool executed;
     }
+
+    event Deposited(address indexed token, uint256 indexed tokenId, address indexed owner, uint256 amount);
+    event CreatedOffer(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed buyer, uint256 amount, uint256 totalValue);
+    event CanceledOffer(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed buyer, uint256 amount, uint256 totalValue);
+    event Sold(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed owner, address buyer, uint256 amount, uint256 totalValue);
+    event UpdatedInfo(address indexed token, uint256 indexed tokenId, bool isActive);
+    event ChangedTimelock(bool timelock);
+    event SetOnChainGovernanceTimelock(uint256 blockNumber);
+    event Permissioned(STATUS indexed status, address token, bool result);
+    event PermissionOrdered(STATUS indexed status, address token, uint256 index);
+
+    /**
+     * @notice SCT
+     * @dev immutable variable to store SCT ERC20 token address
+     * @return address
+     */
+    ISCT public immutable SCT;
+    
+    /**
+     * @notice totalReserves
+     * @dev variable to store SCT ERC20 token address
+     * @return uint256
+     */
+    uint256 public totalReserves;
+
+    /**
+     * @notice carbonProjects
+     * @dev mapping with token and tokenId as keys to store CarbonProjects
+     * @dev return CarbonProject
+     */
+    mapping(address => mapping(uint256 => CarbonProject)) public carbonProjects; 
+
+    /**
+     * @notice carbonProjectTons
+     * @dev mapping with token and tokenId as keys to store total amount of ERC1155 carbon project deposited in this contract
+     * @return uint256
+     */
+    mapping(address => mapping(uint256 => uint256)) public carbonProjectTons;
+
+    /**
+     * @notice carbonProjectBalances
+     * @dev mapping with token, tokenId and owner address as keys to store the amount of each ERC1155 carbon project owner deposited
+     * @return uint256
+     */
+    mapping(address => mapping(uint256 => mapping(address => uint256))) public carbonProjectBalances;
+
+    /**
+     * @notice offers
+     * @dev mapping with offerId as key to store Offers
+     * @dev return Offer
+     */
+    mapping(uint256 => Offer) public offers;
+
+    /**
+     * @notice offerIdCounter
+     * @dev variable to count the ids of offers
+     * @return uint256
+     */
+    uint256 public offerIdCounter;
 
     /**
      * @notice registry
@@ -241,48 +243,11 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         initialized = true;
     }
 
-    /**
-     * @notice depositReserveToken
-     * @notice function to deposit an _amount of ERC1155 carbon project token in SCT Treasury and mint the same _amount of SCT
-     * @dev only permitted reserve tokens are accepted
-     * @dev only active carbon projects are accepted
-     * @dev owner ERC1155 carbon project token balance needs to be more or equal than _amount
-     * @dev owner need to allow this contract spend ERC1155 carbon project token before execute this function
-     * @dev update _owner carbonProjectBalances and smart contract carbonProjectTons
-     * @param _token address
-     * @param _tokenId unint256
-     * @param _amount unint256
-     * @param _owner address
-     * @return true
-     */
-    function depositReserveToken(
-        address _token,
-        uint256 _tokenId,
-        uint256 _amount,
-        address _owner
-    ) external returns (bool) {
-        require(permissions[STATUS.RESERVETOKEN][_token], "SCT Treasury: reserve token not permitted");
-        require(carbonProjects[_token][_tokenId].isActive, "SCT Treasury: carbon project not active");
-        require((IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount, "SCT Treasury: owner insuficient ERC1155 balance");
-        require((IERC1155(_token).isApprovedForAll(_owner, address(this))) , "SCT Treasury: owner not approved this contract spend ERC1155");
-
-        IERC1155(_token).safeTransferFrom(
-            _owner, 
-            address(this), 
-            _tokenId, 
-            _amount, 
-            "data"
-        );
-
-        SCT.mint(_owner, _amount);
-
-        carbonProjectBalances[_token][_tokenId][_owner] += _amount;
-        carbonProjectTons[_token][_tokenId] += _amount;
-        totalReserves += _amount;
-
-        emit Deposited(_token, _tokenId, _owner, _amount);
-        return true;
-    }
+    /*
+    ************************************************************
+    ** OFFER AREA
+    ************************************************************
+    */
 
     /**
      * @notice createOffer
@@ -384,6 +349,12 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         return true;
     }
 
+    /*
+    ************************************************************
+    ** CARBON PROJECT AREA
+    ************************************************************
+    */
+
     /**
      * @notice createOrUpdateCarbonProject
      * @notice function to create or update carbon project
@@ -403,9 +374,58 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     }
 
     /**
+     * @notice depositReserveToken
+     * @notice function to deposit an _amount of ERC1155 carbon project token in SCT Treasury and mint the same _amount of SCT
+     * @dev only permitted reserve tokens are accepted
+     * @dev only active carbon projects are accepted
+     * @dev owner ERC1155 carbon project token balance needs to be more or equal than _amount
+     * @dev owner need to allow this contract spend ERC1155 carbon project token before execute this function
+     * @dev update _owner carbonProjectBalances and smart contract carbonProjectTons
+     * @param _token address
+     * @param _tokenId unint256
+     * @param _amount unint256
+     * @param _owner address
+     * @return true
+     */
+    function depositReserveToken(
+        address _token,
+        uint256 _tokenId,
+        uint256 _amount,
+        address _owner
+    ) external returns (bool) {
+        require(permissions[STATUS.RESERVETOKEN][_token], "SCT Treasury: reserve token not permitted");
+        require(carbonProjects[_token][_tokenId].isActive, "SCT Treasury: carbon project not active");
+        require((IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount, "SCT Treasury: owner insuficient ERC1155 balance");
+        require((IERC1155(_token).isApprovedForAll(_owner, address(this))) , "SCT Treasury: owner not approved this contract spend ERC1155");
+
+        IERC1155(_token).safeTransferFrom(
+            _owner, 
+            address(this), 
+            _tokenId, 
+            _amount, 
+            "data"
+        );
+
+        SCT.mint(_owner, _amount);
+
+        carbonProjectBalances[_token][_tokenId][_owner] += _amount;
+        carbonProjectTons[_token][_tokenId] += _amount;
+        totalReserves += _amount;
+
+        emit Deposited(_token, _tokenId, _owner, _amount);
+        return true;
+    }
+
+    /*
+    ************************************************************
+    ** POLICY MANAGEMENT AREA
+    ************************************************************
+    */
+
+    /**
      * @notice enable
      * @notice function to enable permission
-     * @dev only governor can call this function
+     * @dev only policy can call this function
      * @dev timelock needs to be disabled
      * @dev if timelock is enable use orderTimelock function
      * @param _status STATUS
@@ -415,7 +435,8 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     function enable(
         STATUS _status,
         address _address
-    ) external onlyGovernor returns(bool) {
+    ) external onlyPolicy returns(bool) {
+        require(_address != address(0), "SCT Treasury: invalid address");
         require(!timelockEnabled, "SCT Treasury: timelock enabled");
 
         permissions[_status][_address] = true;
@@ -431,7 +452,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     /**
      * @notice disable
      * @notice function to disable permission
-     * @dev only governor can call this function
+     * @dev only policy can call this function
      * @param _status STATUS
      * @param _address address
      * @return true
@@ -439,8 +460,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     function disable(
         STATUS _status, 
         address _address
-    ) external onlyGovernor returns(bool) {
-
+    ) external onlyPolicy returns(bool) {
         permissions[_status][_address] = false;
 
         emit Permissioned(_status, _address, false);
@@ -465,7 +485,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     /**
      * @notice orderTimelock
      * @notice function to create order for address receive permission
-     * @dev only governor can call this function
+     * @dev only policy can call this function
      * @param _status STATUS
      * @param _address address
      * @return true
@@ -473,7 +493,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     function orderTimelock(
         STATUS _status,
         address _address
-    ) external onlyGovernor returns(bool) {
+    ) external onlyPolicy returns(bool) {
         require(_address != address(0), "SCT Treasury: invalid address");
         require(timelockEnabled, "SCT Treasury: timelock is disabled, use enable");
 
@@ -488,18 +508,18 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
             })
         );
 
-        emit PermissionOrdered(_status, _address);
+        emit PermissionOrdered(_status, _address, permissionOrder.length);
         return true;
     }
 
     /**
      * @notice execute
      * @notice function to enable ordered permission
-     * @dev only governor can call this function
+     * @dev only policy can call this function
      * @param _index uint256
      * @return true
      */
-    function execute(uint256 _index) external onlyGovernor returns(bool) {
+    function execute(uint256 _index) external onlyPolicy returns(bool) {
         require(timelockEnabled, "SCT Treasury: timelock is disabled, use enable");
 
         Order memory info = permissionOrder[_index];
@@ -518,6 +538,12 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         emit Permissioned(info.managing, info.toPermit, true);
         return true;
     }
+
+    /*
+    ************************************************************
+    ** GOVERNOR MANAGEMENT AREA
+    ************************************************************
+    */
 
     /**
      * @notice nullify
@@ -547,19 +573,36 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
      * @notice disableTimelock
      * @notice function to disable timelock
      * @dev only governor can call this function
-     * @dev if onChainGovernanceTimelock is less or equal than block number this fucntion set timelockEnabled to false
-     * @dev if onChainGovernanceTimelock is more than block number this function set new onChainGovernanceTimelock
+     * @dev onChainGovernanceTimelock need to be less or equal than block number
      */
     function disableTimelock() external onlyGovernor {
         require(timelockEnabled, "SCT Treasury: timelock already disabled");
-        if (onChainGovernanceTimelock != 0 && onChainGovernanceTimelock <= block.number) {
-            timelockEnabled = false;
-            emit ChangedTimelock(false);
-        } else {
-            onChainGovernanceTimelock = block.number + (blocksNeededForOrder * 10);
-            emit SetOnChainGovernanceTimelock(onChainGovernanceTimelock);
-        }
+        require(onChainGovernanceTimelock != 0 && onChainGovernanceTimelock <= block.number, "SCT Treasury: governance timelock not expired yet");
+        timelockEnabled = false;
+        onChainGovernanceTimelock = 0;
+        emit ChangedTimelock(false);
     }
+
+    /**
+     * @notice permissionToDisableTimelock
+     * @notice function to set onChainGovernanceTimelock to disable timelock
+     * @dev only governor can call this function
+     * @dev this function set new onChainGovernanceTimelock
+     */
+    function permissionToDisableTimelock() external onlyGovernor {
+        require(timelockEnabled, "SCT Treasury: timelock already disabled");
+        onChainGovernanceTimelock = block.number + (blocksNeededForOrder * 10);
+        emit SetOnChainGovernanceTimelock(onChainGovernanceTimelock);
+    }
+
+    /**
+     * @notice totalPermissionOrder
+     * @notice view function that returns total permissionOrder entries
+     * @return uint256
+     */
+    function totalPermissionOrder() external view returns (uint256) {
+        return permissionOrder.length;
+    }    
 
     /**
      * @notice baseSupply

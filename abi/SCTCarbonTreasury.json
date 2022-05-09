@@ -177,6 +177,12 @@
 				"internalType": "address",
 				"name": "token",
 				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
 			}
 		],
 		"name": "PermissionOrdered",
@@ -1023,6 +1029,13 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "permissionToDisableTimelock",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "enum SCTCarbonTreasury.STATUS",
@@ -1110,6 +1123,19 @@
 				"internalType": "bool",
 				"name": "",
 				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalPermissionOrder",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",

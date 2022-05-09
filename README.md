@@ -12,13 +12,13 @@ Source: https://mumbai.polygonscan.com/address/0x54005ab145e74d6354fe81390523e67
 
 ### SCTERC20 Token
 
-Address: 0x19b20cEacef5993697F8a5F0be1C071E406329dE
-Source: https://mumbai.polygonscan.com/address/0x19b20cEacef5993697F8a5F0be1C071E406329dE#code
+Address: 0x8fEa7A87FC01305e48C7F7d69609b243f98D4648
+Source: https://mumbai.polygonscan.com/address/0x8fEa7A87FC01305e48C7F7d69609b243f98D4648#code
 
 ### SCT Carbon Treasury
 
-Address: 0x9E16dAa388447E103A12cA61E4D19254B6d21d5e
-Source: https://mumbai.polygonscan.com/address/0x9E16dAa388447E103A12cA61E4D19254B6d21d5e#code
+Address: 0xd0c087bd1e939e56ef064dbab2dbbcb87013fea0
+Source: https://mumbai.polygonscan.com/address/0xd0c087bd1e939e56ef064dbab2dbbcb87013fea0#code
 
 ## Testnet Carbon Credit Token
 ### Marketplace ERC1155
