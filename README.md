@@ -149,7 +149,7 @@ The detailed results obtained can be consulted on the mythx dashboard.
 
 ## Previous scans reports of Solid World DAO smart contracts
 
-- [2022-05-16](https://github.com/solid-world/solid-world-dao-contracts/blob/main/test-logs/REPORT_2022_05_16.md)
+- [2022-05-16](https://github.com/solid-world/solid-world-dao-contracts/blob/2fac0379e22546c481245bd7f4fd1d42ecfd3733/test-logs/REPORT_2022_05_16.md)
 
 ## More info about deploy and tests
  
