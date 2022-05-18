@@ -3,7 +3,6 @@
 # SCT Carbon Treasury
  
 ## 1. Disable and Enable Timelock
-------
  
 ### 1.1. Disable Timelock
  
@@ -25,7 +24,6 @@ To enable the timelock you can call the function `enableTimelock()`.
 > * When the function `enableTimelock()` is executed, SCT Carbon Treasury smart contract set `timelockEnabled` to `true`
  
 ## 2. Add Permissions When Timelock is Disabled
-------
  
 ### 2.1. Set Carbon Credit ERC1155 as Reserve Token in SCT Carbon Treasury using enable function
  
@@ -42,7 +40,6 @@ To set manager address as reserve manager you need to register wallet address ca
 > * This function only can be executed when timelock is disabled
  
 ## 3. Add Permissions When Timelock is Enabled
-------
  
 ### 3.1. Set Carbon Credit ERC1155 as Reserve Token in SCT Carbon Treasury using orderTimelock function
  
@@ -73,7 +70,6 @@ To nullify one pending `Order` you can call the `nullify()` function passing the
 > * The `Order` will be nullified and it will no longer be possible to execute
  
 ## 4. Create and edit carbon project
-------
 ### 4.1. Create and Set Carbon Project as active in SCT Carbon Treasury
  
 To set an active Carbon Project you need to call `createOrUpdateCarbonProject()` function, setting the `isActive` field as `true`.
@@ -114,7 +110,6 @@ Example: `["0x593ab3970524891343A76534067dcc595eCfbEDa",2,9999999999999999,1,1,1
 > * Establishing the token and tokenId as an inactive `CarbonProject`, it is not possible to deposit this token in the SCT Carbon Treasury
  
 ## 5. Make a deposit, create, cancel and accept offer
-------
  
 ### 5.1. Deposit Carbon Credit in SCT Carbon Treasury
  

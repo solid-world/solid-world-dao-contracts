@@ -18,6 +18,7 @@ Source: https://mumbai.polygonscan.com/address/0xd0c087bd1e939e56ef064dbab2dbbcb
 
 ## Testnet Carbon Credit Token
 To access the Carbon Credit and the NFT addresses of Solid Marketplace Mumbai Testnet Smart Contracts please check this repository https://github.com/solid-world/solid-world-marketplace-contracts
+
 ## Testnet Dao Management Wallets
 
 ### Governor
@@ -99,6 +100,57 @@ All tests can be found in the folder `./test`.
 
 The output of tests can be found in the folder `./out`.
  
+
+## Scan smart contracts with Mythx
+
+All smart contracts in this repository were scanned with the mythx security tool:
+
+- [Mythx](https://mythx.io/)
+
+To install mythx and run an analysis you can follow these steps.
+
+First you must install python:
+
+```sh
+python3-pip
+```
+
+Then you need to install mythx-cli:
+
+```sh
+pip3 install mythx-cli
+```
+
+Now you can check if it is installed correctly
+
+```sh
+mythx --help
+```
+
+If you have any issue with markupsake, downgrade the markupsake to version 2.0.1:
+
+```sh
+pip install markupsafe==2.0.1
+```
+
+Before running an analysis, you also need to add the api key:
+
+```sh
+export MYTHX_API_KEY=''
+```
+
+And finally, you can select a smart contract and perform a complete code analysis, for example:
+
+```sh
+mythx analyze contracts/SolidDaoManagement.sol --mode standard
+```
+
+The detailed results obtained can be consulted on the mythx dashboard.
+
+## Previous scans reports of Solid World DAO smart contracts
+
+- [2022-05-16](https://github.com/solid-world/solid-world-dao-contracts/blob/2fac0379e22546c481245bd7f4fd1d42ecfd3733/test-logs/REPORT_2022_05_16.md)
+
 ## More info about deploy and tests
  
 For a detailed view of how to deploy, set, adjust and test the smart contracts of this repository, access the routes files:
