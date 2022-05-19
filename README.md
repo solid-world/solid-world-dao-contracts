@@ -1,37 +1,49 @@
 # solid-world-dao-contracts
 
-Solid World DAO Smart Contracts
+[![MythXBadge](https://badgen.net/https/api.mythx.io/v1/projects/c7145fbf-0af1-4614-a82d-e478fb0cdb47/badge/data?cache=300&icon=https://raw.githubusercontent.com/ConsenSys/mythx-github-badge/main/logo_white.svg)](https://docs.mythx.io/dashboard/github-badges)
+
+This repository contains all Solid World DAO Smart Contracts.
+
+For more information about DAO visit our site: https://solid.world
 
 ## Testnet contract addresses and source codes
 The smart contracts was deployed at Polygon Mumbai Test Network and the source code was verified on Polygon scan.
+
 ### SCT Solid Dao Management (authority)
-Address: `0x54005ab145e74d6354fe81390523e67dc40da64f`
-Source: https://mumbai.polygonscan.com/address/0x54005ab145e74d6354fe81390523e67dc40da64f#code
+
+- Address: `0x54005ab145e74d6354fe81390523e67dc40da64f`
+- Source: https://mumbai.polygonscan.com/address/0x54005ab145e74d6354fe81390523e67dc40da64f#code
 
 ### SCTERC20 Token
-Address: `0x8fEa7A87FC01305e48C7F7d69609b243f98D4648`
-Source: https://mumbai.polygonscan.com/address/0x8fEa7A87FC01305e48C7F7d69609b243f98D4648#code
+
+- Address: `0x8fEa7A87FC01305e48C7F7d69609b243f98D4648`
+- Source: https://mumbai.polygonscan.com/address/0x8fEa7A87FC01305e48C7F7d69609b243f98D4648#code
 
 ### SCT Carbon Treasury
-Address: `0xd0c087bd1e939e56ef064dbab2dbbcb87013fea0`
-Source: https://mumbai.polygonscan.com/address/0xd0c087bd1e939e56ef064dbab2dbbcb87013fea0#code
+
+- Address: `0xd0c087bd1e939e56ef064dbab2dbbcb87013fea0`
+- Source: https://mumbai.polygonscan.com/address/0xd0c087bd1e939e56ef064dbab2dbbcb87013fea0#code
 
 ## Testnet Carbon Credit Token
-To access the Carbon Credit and the NFT addresses of Solid Marketplace Mumbai Testnet Smart Contracts please check this repository https://github.com/solid-world/solid-world-marketplace-contracts
+
+To access the Carbon Credit and the NFT addresses of Solid Marketplace on Mumbai Testnet Smart Contracts please check this repository https://github.com/solid-world/solid-world-marketplace-contracts
 
 ## Testnet Dao Management Wallets
 
 ### Governor
-Address: `0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299`
-Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299
+
+- Address: `0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299`
+- Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299
 
 ### Policy
-Address: `0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299`
-Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299
+
+- Address: `0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299`
+- Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299
 
 ### Guardian
-Address: `0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299`
-Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299
+
+- Address: `0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299`
+- Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299
 
 ## How to deploy to network
 
@@ -147,13 +159,15 @@ mythx analyze contracts/SolidDaoManagement.sol --mode standard
 
 The detailed results obtained can be consulted on the mythx dashboard.
 
-## Previous scans reports of Solid World DAO smart contracts
+## Previous security reports of Solid World DAO smart contracts
 
-- [2022-05-16](https://github.com/solid-world/solid-world-dao-contracts/blob/2fac0379e22546c481245bd7f4fd1d42ecfd3733/test-logs/REPORT_2022_05_16.md)
+Here you can access the complete reports of the analyzes that have already been performed:
+
+- [Report from 2022-05-16](https://github.com/solid-world/solid-world-dao-contracts/blob/2fac0379e22546c481245bd7f4fd1d42ecfd3733/test-logs/REPORT_2022_05_16.md)
 
 ## More info about deploy and tests
  
-For a detailed view of how to deploy, set, adjust and test the smart contracts of this repository, access the routes files:
+For a detailed view of how to deploy, set, adjust and test the smart contracts of this repository, access the router files:
  
 [Deploy Router](https://github.com/solid-world/solid-world-dao-contracts/blob/main/router.md)
  
