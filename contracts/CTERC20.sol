@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 
 pragma solidity 0.8.13;
 
@@ -11,22 +11,47 @@ import "./lib/ERC20Permit.sol";
  * @author Solid World DAO
  * @notice CT Token ERC-20 Template
  */
-contract CTERC20TokenTemplate is ERC20Permit, ISCT {
+contract CTERC20TokenTemplate is ERC20Permit {
 
-    constructor(address _treasury, string memory _name, string memory _symbol) {
-        ERC20("CT", "CT", 18);
-        ERC20Permit("CT");
+    // Treasury that manages this Token
+    address public treasury;
+
+    // Contract deployer
+    address public deployer;
+
+    // Is the Treasury initalized
+    bool public isInitialized;
+
+    // @notice: This modifier allows only the Treasury of the token perform the operation
+    modifier onlyTreasury() {
+        require(isInitialized, "Token needs to be initialized");
+        require(msg.sender == treasury, "Only Treasury can perform this operation");
+        _;
+    }
+
+    constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol, 18) ERC20Permit(_name) {
+        deployer = msg.sender;
     }    
 
-    function mint(address account_, uint256 amount_) external override onlyVault {
+
+    // @notice: After Token and Tresury have been deployed the Deployer need to initialize the Token informing 
+    // which Treasury is going to manage him.
+    function initialize(address _treasury) external {
+        require(deployer == msg.sender, "Only Deployer must initialize the token");
+        require(!isInitialized, "Token already has been initialized");
+        treasury = _treasury;
+        isInitialized = true;
+    }
+
+    function mint(address account_, uint256 amount_) external onlyTreasury {
         _mint(account_, amount_);
     }
 
-    function burn(uint256 amount) external override {
+    function burn(uint256 amount) external {
         _burn(msg.sender, amount);
     }
 
-    function burnFrom(address account_, uint256 amount_) external override {
+    function burnFrom(address account_, uint256 amount_) external {
         _burnFrom(account_, amount_);
     }
 
