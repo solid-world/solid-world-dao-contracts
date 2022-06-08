@@ -3,22 +3,20 @@
 pragma solidity 0.8.13;
 
 import "./interfaces/IERC20.sol";
-import "./interfaces/ISCT.sol";
 import "./interfaces/IERC20Permit.sol";
 import "./lib/ERC20Permit.sol";
-import "./lib/SolidDaoManaged.sol";
 
 /**
- * @title SCT ERC-20 Token
+ * @title CT ERC-20 Token Template
  * @author Solid World DAO
- * @notice SCT Token
+ * @notice CT Token ERC-20 Template
  */
-contract SCTERC20Token is ERC20Permit, ISCT, SolidDaoManaged {
+contract CTERC20TokenTemplate is ERC20Permit, ISCT {
 
-    constructor(address _authority)
-        ERC20("SCT", "SCT", 9)
-        ERC20Permit("SCT")
-        SolidDaoManaged(ISolidDaoManagement(_authority)) {}
+    constructor(address _treasury, string memory _name, string memory _symbol) {
+        ERC20("CT", "CT", 18);
+        ERC20Permit("CT");
+    }    
 
     function mint(address account_, uint256 amount_) external override onlyVault {
         _mint(account_, amount_);
