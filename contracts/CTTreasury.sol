@@ -1,18 +1,18 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 
 pragma solidity 0.8.13;
 
 import "./lib/SolidDaoManaged.sol";
 import "./lib/ERC1155Receiver.sol";
-import "./interfaces/ISCT.sol";
+import "./interfaces/ICT.sol";
 import "./interfaces/IERC1155.sol";
 
 /**
- * @title SCT Carbon Treasury
+ * @title Carbon Token Treasury (CTTTreasury) Template
  * @author Solid World DAO
- * @notice SCT Carbon Credits Treasury
+ * @notice CT Treasury Template
  */
-contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
+contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
 
     /**
      * @notice CarbonProject
@@ -42,51 +42,6 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     }
 
     /**
-     * @notice Offer
-     * @dev enum of offer status
-     * @dev 0 NOT_DEFINED
-     * @dev 1 OPEN
-     * @dev 2 EXECUTED
-     * @dev 3 CANCELED
-     */
-    enum StatusOffer {
-        NOT_DEFINED,
-        OPEN,
-        EXECUTED,
-        CANCELED
-    }
-
-    /**
-     * @notice Offer
-     * @dev struct to store ERC1155 carbon project buy offers
-     * @param token: ERC1155 carbon project smart contract address 
-     * @param tokenId: ERC1155 carbon project token id
-     * @param buyer: address of buyer
-     * @param amount: amount of ERC1155 carbon project tokens to buy
-     * @param totalValue: amount of SCT tokens to pay for the sale
-     * @param statusOffer: enum StatusOffer
-     */
-    struct Offer {
-        address token;
-        uint256 tokenId;
-        address buyer;
-        uint256 amount;
-        uint256 totalValue;
-        StatusOffer statusOffer;
-    }
-
-    /**
-     * @notice STATUS
-     * @dev enum of permisions types
-     * @dev 0 RESERVETOKEN
-     * @dev 1 RESERVEMANAGER
-     */
-    enum STATUS {
-        RESERVETOKEN,
-        RESERVEMANAGER
-    }
-
-    /**
      * @notice Order
      * @dev struct to store orders created on the timelock
      * @param managing: STATUS enum to be enabled
@@ -101,11 +56,20 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         uint256 timelockEnd;
         bool nullify;
         bool executed;
-    }
+    }   
 
+    /**
+     * @notice STATUS
+     * @dev enum of permisions types
+     * @dev 0 RESERVETOKEN
+     * @dev 1 RESERVEMANAGER
+     */
+    enum STATUS {
+        RESERVETOKEN,
+        RESERVEMANAGER
+    }
+    
     event Deposited(address indexed token, uint256 indexed tokenId, address indexed owner, uint256 amount);
-    event CreatedOffer(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed buyer, uint256 amount, uint256 totalValue);
-    event CanceledOffer(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed buyer, uint256 amount, uint256 totalValue);
     event Sold(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed owner, address buyer, uint256 amount, uint256 totalValue);
     event UpdatedInfo(address indexed token, uint256 indexed tokenId, bool isActive);
     event ChangedTimelock(bool timelock);
@@ -114,11 +78,25 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     event PermissionOrdered(STATUS indexed status, address token, uint256 index);
 
     /**
-     * @notice SCT
-     * @dev immutable variable to store SCT ERC20 token address
+     * @notice ERC-20 Carbon Token address 
+     * @dev immutable variable to store CT ERC20 token address
      * @return address
      */
-    ISCT public immutable SCT;
+    ICT public immutable CT;
+
+    /**
+     * @notice DAO Treasury Address where the profits of the operations must be sent to 
+     * @dev immutable address to store DAO contract address
+     * @return address
+     */
+    address public immutable DAOTreasury;
+
+    /**
+     * @notice category of the Carbon Project this treasury manages
+     * @dev variable to store the name of the category this contract manages. This is for info purposes.
+     * @return string
+    */
+    string public category;
     
     /**
      * @notice totalReserves
@@ -149,20 +127,6 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
     mapping(address => mapping(uint256 => mapping(address => uint256))) public carbonProjectBalances;
 
     /**
-     * @notice offers
-     * @dev mapping with offerId as key to store Offers
-     * @dev return Offer
-     */
-    mapping(uint256 => Offer) public offers;
-
-    /**
-     * @notice offerIdCounter
-     * @dev variable to count the ids of offers
-     * @return uint256
-     */
-    uint256 public offerIdCounter;
-
-    /**
      * @notice registry
      * @dev mapping with STATUS as key to store an array of addresses
      * @return array of addresses
@@ -175,14 +139,14 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
      * @return bool
      */
     mapping(STATUS => mapping(address => bool)) public permissions;
-    
+
     /**
      * @notice permissionOrder
      * @dev array of Orders
      * @dev return Order[]
      */
     Order[] public permissionOrder;
-
+    
     /**
      * @notice blocksNeededForOrder
      * @dev immutable variable set in constructor to store number of blocks that order needed to stay in queue to be executed 
@@ -216,20 +180,26 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
      * @dev this is executed when this contract is deployed
      * @dev set timelockEnabled and initialized to false
      * @dev set blocksNeededForOrder
-     * @param _authority address
-     * @param _sct address
+     * @param _authority Solid DAO Manager contract address
+     * @param _ct address of the CT (Carbon Token) this treasury will manange 
      * @param _timelock unint256
+     * @param _category string to store the name of the category this contract manages. This is for info purposes.
      */
     constructor(
         address _authority,
-        address _sct,
-        uint256 _timelock
+        address _ct,
+        uint256 _timelock,
+        string memory _category,
+        address _daoTreasury
     ) SolidDaoManaged(ISolidDaoManagement(_authority)) {
-        require(_sct != address(0), "SCT Treasury: invalid SCT address");
-        SCT = ISCT(_sct);
+        require(_ct != address(0), "CT Treasury: invalid CT address");
+        require(_daoTreasury != address(0), "CT Treasury: invalid DAO Treasury");
+        CT = ICT(_ct);
         timelockEnabled = false;
         initialized = false;
         blocksNeededForOrder = _timelock;
+        category = _category;
+        DAOTreasury = _daoTreasury;
     }
 
     /**
@@ -243,109 +213,12 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
         initialized = true;
     }
 
-    /*
-    ************************************************************
-    ** OFFER AREA
-    ************************************************************
-    */
-
+    
     /**
-     * @notice createOffer
-     * @notice function to create an offer to buy deposited ERC1155 carbon project tokens
-     * @notice when the offer is created the buyer deposits _offer.totalValue SCT tokens in this smart contract
-     * @notice to remove an OPEN offer, buyer needs to cancel the offer using cancelOffer function
-     * @dev only active carbon projects are accepted
-     * @dev ERC1155 carbon project tokens deposited in this smart contract needs to be equal or more than _offer.amount
-     * @dev SCT _offer.totalValue needs to be equal or more than ERC1155 carbon project tokens _offer.amount
-     * @dev only _offer.buyer can call this function
-     * @dev msg.sender need to approve this smart contract spend _offer.totalValue of SCT tokens before execute this function
-     * @dev to prevent msg.sender lose his SCT tokens this function automatically set offer status to OPEN
-     * @param _offer struct Offer
-     * @return offerId uint256
-     */
-    function createOffer(Offer memory _offer) external returns (uint256) {
-        require(carbonProjects[_offer.token][_offer.tokenId].isActive, "SCT Treasury: carbon project not active");
-        require(carbonProjectTons[_offer.token][_offer.tokenId]  >= _offer.amount, "SCT Treasury: ERC1155 deposited insuficient");
-        require(_offer.totalValue >= _offer.amount, "SCT Treasury: SCT total value needs to be more or equal than ERC1155 amount");
-        require(_offer.buyer == msg.sender, "SCT Treasury: msg.sender is not the buyer");
-        require((SCT.allowance(msg.sender, address(this))) >= _offer.totalValue, "SCT Treasury: buyer not allowed this contract spend SCT");
-
-        SCT.transferFrom(msg.sender, address(this), _offer.totalValue);
-
-        offerIdCounter ++;
-        offers[offerIdCounter] = _offer;
-        offers[offerIdCounter].statusOffer = StatusOffer.OPEN;
-
-        emit CreatedOffer(offerIdCounter, _offer.token, _offer.tokenId, msg.sender, _offer.amount, _offer.totalValue);
-        return offerIdCounter;
-    }
-
-    /**
-     * @notice cancelOffer
-     * @notice function to cancel an offer to buy deposited ERC1155 carbon project tokens
-     * @notice when the offer is canceled the msg.sender recieve the amount of offer.totalValue SCT tokens from this smart contract
-     * @dev only OPEN offers can be canceled
-     * @dev only offer.buyer can call this function
-     * @dev change offer.statusOffer to CANCELED
-     * @param _offerId uint256 offerId
-     * @return true
-     */
-    function cancelOffer(uint256 _offerId) external returns (bool) {
-        require(offers[_offerId].statusOffer == StatusOffer.OPEN, "SCT Treasury: offer is not OPEN");
-        require(offers[_offerId].buyer == msg.sender, "SCT Treasury: msg.sender is not the buyer");
-
-        offers[_offerId].statusOffer = StatusOffer.CANCELED;
-
-        SCT.transfer(msg.sender, offers[_offerId].totalValue);
-
-        emit CanceledOffer(_offerId, offers[_offerId].token, offers[_offerId].tokenId, msg.sender, offers[_offerId].amount, offers[_offerId].totalValue);
-        return true;
-    }
-
-    /**
-     * @notice acceptOffer
-     * @notice function to accept an offer to buy offer.amount from msg.sender/owner ERC1155 carbon project tokens deposited in this contract
-     * @notice burns the offer.amount of SCT deposited in this contract 
-     * @notice transfers the difference between offer.totalValue and offer.amount of SCT deposited in this contract to msg.sender/owner
-     * @notice transfers to the buyer the offer.amount of ERC1155 carbon project tokens deposited in this contract
-     * @dev for security reasons, to execute a sale in this contract it is necessary buyer create some offer first and only OPEN offers are accepted
-     * @dev only active carbon projects can be sold
-     * @dev only OPEN offer can be executed in this function
-     * @dev msg.sender/owner ERC1155 carbon project tokens balance needs to be equal or more than offer.amount
-     * @dev update owner carbonProjectBalances and smart contract carbonProjectTons
-     * @dev change offer.statusOffer to EXECUTED
-     * @param _offerId offer id
+     * @notice TODO: sell issue #49
      * @return true     
      */
-    function acceptOffer(uint256 _offerId) external returns (bool) {
-
-        Offer memory offer = offers[_offerId];
-
-        require(carbonProjects[offer.token][offer.tokenId].isActive, "SCT Treasury: carbon project not active");
-        require(offer.statusOffer == StatusOffer.OPEN, "SCT Treasury: offer is not OPEN");
-        require(carbonProjectBalances[offer.token][offer.tokenId][msg.sender] >= offer.amount, "SCT Treasury: caller deposited balance insuficient");
-
-        offers[_offerId].statusOffer = StatusOffer.EXECUTED;
-
-        carbonProjectBalances[offer.token][offer.tokenId][msg.sender] -= offer.amount;
-        carbonProjectTons[offer.token][offer.tokenId] -= offer.amount;
-        totalReserves -= offer.amount;
-
-        SCT.burn(offer.amount);
-
-        if(offer.totalValue - offer.amount > 0) {
-            SCT.transfer(msg.sender, offer.totalValue - offer.amount);
-        }
-        
-        IERC1155(offer.token).safeTransferFrom( 
-            address(this), 
-            offer.buyer,
-            offer.tokenId, 
-            offer.amount, 
-            "data"
-        );
-
-        emit Sold(_offerId, offer.token, offer.tokenId, msg.sender, offer.buyer, offer.amount, offer.totalValue);
+    function sell() external returns (bool) {
         return true;
     }
 
@@ -406,7 +279,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
             "data"
         );
 
-        SCT.mint(_owner, _amount);
+        CT.mint(_owner, _amount);
 
         carbonProjectBalances[_token][_tokenId][_owner] += _amount;
         carbonProjectTons[_token][_tokenId] += _amount;
@@ -610,7 +483,7 @@ contract SCTCarbonTreasury is SolidDaoManaged, ERC1155Receiver {
      * @return uint256
      */
     function baseSupply() external view returns (uint256) {
-        return SCT.totalSupply();
+        return CT.totalSupply();
     }
 
     /**
