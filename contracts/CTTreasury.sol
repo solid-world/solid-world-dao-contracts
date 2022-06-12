@@ -77,6 +77,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
     event Permissioned(STATUS indexed status, address token, bool result);
     event PermissionOrdered(STATUS indexed status, address token, uint256 index);
 
+
     /**
      * @notice ERC-20 Carbon Token address 
      * @dev immutable variable to store CT ERC20 token address
@@ -176,6 +177,13 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
     uint256 public onChainGovernanceTimelock;
 
     /**
+     * @notice daoLiquidityFee
+     * @dev variable to store the DAO Liquidity Fee
+     * @return uint256
+     */
+    uint256 public daoLiquidityFee;
+
+    /**
      * @notice constructor
      * @dev this is executed when this contract is deployed
      * @dev set timelockEnabled and initialized to false
@@ -184,13 +192,16 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
      * @param _ct address of the CT (Carbon Token) this treasury will manange 
      * @param _timelock unint256
      * @param _category string to store the name of the category this contract manages. This is for info purposes.
+     * @param _daoTreasury address to store the address of the DAO Vault Smart Contract.
+     * @param _daoLiquidityFee uint256 to store the DAO Liquidity Fee.
      */
     constructor(
         address _authority,
         address _ct,
         uint256 _timelock,
         string memory _category,
-        address _daoTreasury
+        address _daoTreasury,
+        uint256 _daoLiquidityFee
     ) SolidDaoManaged(ISolidDaoManagement(_authority)) {
         require(_ct != address(0), "CT Treasury: invalid CT address");
         require(_daoTreasury != address(0), "CT Treasury: invalid DAO Treasury");
@@ -200,6 +211,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
         blocksNeededForOrder = _timelock;
         category = _category;
         DAOTreasury = _daoTreasury;
+        daoLiquidityFee = _daoLiquidityFee;
     }
 
     /**
@@ -259,6 +271,49 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
      * @param _amount unint256
      * @param _owner address
      * @return true
+        Transaction:
+        Investor pays X ERC-1155 to CT treasury
+        CT Contract mints [X*BV] new CT
+        CT Contract sends [X*BV*(1-LF)] amount of CT to Investor
+        CT Contract sends[X*BV*LF] amount of CT to DAO
+
+        THE MATH:
+
+        X = ERC-1155 amount
+        D = project discount rate (weekly)
+        N = weeks from delivery
+        LF = DAO liquidity fee (this should be parametrized by the DAO voting)
+
+        Basic Value
+        BV = (1-D)^N
+        MINTED = X * BV
+
+        User pays X in ERC-1155
+        User gets XBV(1-LF) in CT
+        DAO gets XBVLF in CT
+
+        CT means Commodity Token for that category
+        EXAMPLE:
+
+        Carbon Project
+        We have project ‘Good Reforestation Kenya’ that is 260.5 weeks (5 years) from certification. The following project parameters have been set:D = 0.0984% (5% APY)
+        N = 260.5
+
+        This means current BV is
+        BV = (1-0.000984)^260.5 ≈ 0.774
+
+        DAO parameters
+        LF = 2%
+        Exchange
+        ‘Good Reforestation Kenya’ would like to turn their forward agreements into CTs, so they could sell them. They have been given 10 000 credits in their agreement and they want to exchange it all.
+        X = 10 000
+
+        Who gets what
+        Good Reforestation Kenya sends the RCT contract 10 000 ERC-1155 reflecting their project
+        DAO recieves 10 0000.7740.02 ≈ 155 RCT
+        Good Reforestation Kenya recieves 10 000 * 0.774 * (1-0.02) ≈ 7585 RCT
+
+
      */
     function depositReserveToken(
         address _token,
@@ -417,6 +472,17 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
     ** GOVERNOR MANAGEMENT AREA
     ************************************************************
     */
+
+    /**
+    * @notice function where the Governor sets the DAO liquidity fee
+    * @dev only governor can call this function
+    * @return true if everything goes well
+    * @param _daoLiquidityFee uint256 to store the DAO Liquidity Fee
+    */
+    function setDAOLiquidityFee(uint256 _daoLiquidityFee) external onlyGovernor returns(bool) {
+        daoLiquidityFee = _daoLiquidityFee;
+        return true;
+    }
 
     /**
      * @notice nullify
