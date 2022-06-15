@@ -4,6 +4,7 @@ pragma solidity 0.8.13;
 
 import "./lib/SolidDaoManaged.sol";
 import "./lib/ERC1155Receiver.sol";
+import "./lib/SolidMath.sol";
 import "./interfaces/ICT.sol";
 import "./interfaces/IERC1155.sol";
 
@@ -20,10 +21,8 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
      * @param token: ERC1155 smart contract address 
      * @param tokenId: ERC1155 carbon project token id
      * @param tons: total amount of carbon project tokens
-     * @param flatRate: premium price variable
-     * @param sdgPremium: premium price variable
-     * @param daysToRealization: premium price variable
-     * @param closenessPremium: premium price variable
+     * @param contractExpectedDueDate: the carbon credit contract expected due date to be informed in seconds
+     * @param projectDiscountRate: fee that will be charged from the investor when commodify the project
      * @param isActive: boolean status of carbon project in this smart contract
      * @param isCertified: boolean verra status of carbon project certificate
      * @param isRedeemed: boolean status of carbon project redeem
@@ -32,10 +31,8 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
         address token;
         uint256 tokenId;
         uint256 tons;
-        uint256 flatRate;
-        uint256 sdgPremium;
-        uint256 daysToRealization;
-        uint256 closenessPremium;
+        uint256 contractExpectedDueDate;
+        uint256 projectDiscountRate;
         bool isActive;
         bool isCertified;
         bool isRedeemed;
@@ -84,13 +81,6 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
      * @return address
      */
     ICT public immutable CT;
-
-    /**
-     * @notice DAO Treasury Address where the profits of the operations must be sent to 
-     * @dev immutable address to store DAO contract address
-     * @return address
-     */
-    address public immutable DAOTreasury;
 
     /**
      * @notice category of the Carbon Project this treasury manages
@@ -177,6 +167,13 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
     uint256 public onChainGovernanceTimelock;
 
     /**
+     * @notice DAO Treasury Address where the profits of the operations must be sent to 
+     * @dev immutable address to store DAO contract address
+     * @return address
+     */
+    address public DAOTreasury;
+
+    /**
      * @notice daoLiquidityFee
      * @dev variable to store the DAO Liquidity Fee
      * @return uint256
@@ -226,13 +223,6 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
     }
 
     
-    /**
-     * @notice TODO: sell issue #49
-     * @return true     
-     */
-    function sell() external returns (bool) {
-        return true;
-    }
 
     /*
     ************************************************************
@@ -321,26 +311,41 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
         uint256 _amount,
         address _owner
     ) external returns (bool) {
-        require(permissions[STATUS.RESERVETOKEN][_token], "SCT Treasury: reserve token not permitted");
-        require(carbonProjects[_token][_tokenId].isActive, "SCT Treasury: carbon project not active");
-        require((IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount, "SCT Treasury: owner insuficient ERC1155 balance");
-        require((IERC1155(_token).isApprovedForAll(_owner, address(this))) , "SCT Treasury: owner not approved this contract spend ERC1155");
+        require(permissions[STATUS.RESERVETOKEN][_token], "CT Treasury: reserve token not permitted");
+        require(carbonProjects[_token][_tokenId].isActive, "CT Treasury: carbon project not active");
+        require((IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount, "CT Treasury: owner insuficient ERC1155 balance");
+        require((IERC1155(_token).isApprovedForAll(_owner, address(this))) , "CT Treasury: owner not approved this contract spend ERC1155");
+        
+        //TODO: Waiting for Rez new formula's definition
+        // (bool mathOK, uint256 weeksFromDelivery) = SolidMath.weeksInThePeriod(block.timestamp, carbonProjects[_token][_tokenId].contractExpectedDueDate);
+        // require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
 
-        IERC1155(_token).safeTransferFrom(
-            _owner, 
-            address(this), 
-            _tokenId, 
-            _amount, 
-            "data"
-        );
+        // IERC1155(_token).safeTransferFrom(
+        //     _owner, 
+        //     address(this), 
+        //     _tokenId, 
+        //     _amount, 
+        //     "data"
+        // );
 
-        CT.mint(_owner, _amount);
 
-        carbonProjectBalances[_token][_tokenId][_owner] += _amount;
-        carbonProjectTons[_token][_tokenId] += _amount;
-        totalReserves += _amount;
+        // uint256 basicValue = (1-carbonProjects[_token][_tokenId].projectDiscountRate)^weeksFromDelivery;
 
-        emit Deposited(_token, _tokenId, _owner, _amount);
+        // CT.mint(_owner, _amount);
+
+        // carbonProjectBalances[_token][_tokenId][_owner] += _amount;
+        // carbonProjectTons[_token][_tokenId] += _amount;
+        // totalReserves += _amount;
+
+        // emit Deposited(_token, _tokenId, _owner, _amount);
+        return true;
+    }
+
+    /**
+     * @notice TODO: sell issue #49
+     * @return true     
+     */
+    function sell() external returns (bool) {
         return true;
     }
 
@@ -481,6 +486,17 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
     */
     function setDAOLiquidityFee(uint256 _daoLiquidityFee) external onlyGovernor returns(bool) {
         daoLiquidityFee = _daoLiquidityFee;
+        return true;
+    }
+
+    /**
+    * @notice function where the Governor sets the DAO Smart Contract address
+    * @dev only governor can call this function
+    * @return true if everything goes well
+    * @param _daoAddress address to store the DAO Smart Contract address
+    */
+    function setDAOLiquidityFee(address _daoAddress) external onlyGovernor returns(bool) {
+        DAOTreasury = _daoAddress;
         return true;
     }
 
