@@ -28,15 +28,18 @@ task('deploy', 'Deploys DAO Management, SCT and Treasury contracts')
     await solidDaoManagement.deployed()
     console.log('DAO Management Address: '.padStart(24), pico.green(solidDaoManagement.address));
 
-    const SctToken = await ethers.getContractFactory('SCTERC20Token', deployerWallet);
-    const sctToken = await SctToken.deploy(solidDaoManagement.address);
-    console.log('SCT Token Address: '.padStart(24), pico.green(sctToken.address));
+    const CTToken = await ethers.getContractFactory('CTERC20TokenTemplate', deployerWallet);
+    const ctToken = await CTToken.deploy("CTTest", "CTTest");
+    console.log('CT Token Address: '.padStart(24), pico.green(ctToken.address));
 
-    const Treasury = await ethers.getContractFactory('SCTCarbonTreasury', deployerWallet);
+    const Treasury = await ethers.getContractFactory('CTTreasury', deployerWallet);
     const treasury = await Treasury.deploy(
       solidDaoManagement.address,
-      sctToken.address,
-      0
+      ctToken.address,
+      0,
+      "REED+",
+      "0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299",
+      2
     );
     console.log('Treasury Address: '.padStart(24), pico.green(treasury.address));
   });
