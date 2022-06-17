@@ -261,49 +261,6 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
      * @param _amount unint256
      * @param _owner address
      * @return true
-        Transaction:
-        Investor pays X ERC-1155 to CT treasury
-        CT Contract mints [X*BV] new CT
-        CT Contract sends [X*BV*(1-LF)] amount of CT to Investor
-        CT Contract sends[X*BV*LF] amount of CT to DAO
-
-        THE MATH:
-
-        X = ERC-1155 amount
-        D = project discount rate (weekly)
-        N = weeks from delivery
-        LF = DAO liquidity fee (this should be parametrized by the DAO voting)
-
-        Basic Value
-        BV = (1-D)^N
-        MINTED = X * BV
-
-        User pays X in ERC-1155
-        User gets XBV(1-LF) in CT
-        DAO gets XBVLF in CT
-
-        CT means Commodity Token for that category
-        EXAMPLE:
-
-        Carbon Project
-        We have project ‘Good Reforestation Kenya’ that is 260.5 weeks (5 years) from certification. The following project parameters have been set:D = 0.0984% (5% APY)
-        N = 260.5
-
-        This means current BV is
-        BV = (1-0.000984)^260.5 ≈ 0.774
-
-        DAO parameters
-        LF = 2%
-        Exchange
-        ‘Good Reforestation Kenya’ would like to turn their forward agreements into CTs, so they could sell them. They have been given 10 000 credits in their agreement and they want to exchange it all.
-        X = 10 000
-
-        Who gets what
-        Good Reforestation Kenya sends the RCT contract 10 000 ERC-1155 reflecting their project
-        DAO recieves 10 0000.7740.02 ≈ 155 RCT
-        Good Reforestation Kenya recieves 10 000 * 0.774 * (1-0.02) ≈ 7585 RCT
-
-
      */
     function depositReserveToken(
         address _token,
@@ -316,28 +273,24 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
         require((IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount, "CT Treasury: owner insuficient ERC1155 balance");
         require((IERC1155(_token).isApprovedForAll(_owner, address(this))) , "CT Treasury: owner not approved this contract spend ERC1155");
         
-        //TODO: Waiting for Rez new formula's definition
-        // (bool mathOK, uint256 weeksFromDelivery) = SolidMath.weeksInThePeriod(block.timestamp, carbonProjects[_token][_tokenId].contractExpectedDueDate);
-        // require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
+        (bool mathOK, uint256 weeksFromDelivery) = SolidMath.weeksInThePeriod(block.timestamp, carbonProjects[_token][_tokenId].contractExpectedDueDate);
+        require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
 
-        // IERC1155(_token).safeTransferFrom(
-        //     _owner, 
-        //     address(this), 
-        //     _tokenId, 
-        //     _amount, 
-        //     "data"
-        // );
+        IERC1155(_token).safeTransferFrom(
+            _owner, 
+            address(this), 
+            _tokenId, 
+            _amount, 
+            "data"
+        );
 
+        CT.mint(_owner, _amount);
 
-        // uint256 basicValue = (1-carbonProjects[_token][_tokenId].projectDiscountRate)^weeksFromDelivery;
+        carbonProjectBalances[_token][_tokenId][_owner] += _amount;
+        carbonProjectTons[_token][_tokenId] += _amount;
+        totalReserves += _amount;
 
-        // CT.mint(_owner, _amount);
-
-        // carbonProjectBalances[_token][_tokenId][_owner] += _amount;
-        // carbonProjectTons[_token][_tokenId] += _amount;
-        // totalReserves += _amount;
-
-        // emit Deposited(_token, _tokenId, _owner, _amount);
+        emit Deposited(_token, _tokenId, _owner, _amount);
         return true;
     }
 
@@ -347,6 +300,17 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
      */
     function sell() external returns (bool) {
         return true;
+    }
+
+    /**
+    @notice informs the investor a simulated return for deposit project's tokens
+     */
+    function simulateDepositWeekPeriod(uint256 _numWeeks, uint256 _rate, uint256 _rateExponent, uint256 _totalToken, uint256 _daoFee) pure public returns (uint256 toProjectOwner, uint256 toDAO) {        
+        if (_numWeeks == 1) {
+            return weekSimulator(_rate, _rateExponent, _totalToken, _daoFee);
+        } else {
+            return severalWeeksSimulator(_numWeeks, _rate, _rateExponent, _totalToken, _daoFee);
+        }
     }
 
     /*
