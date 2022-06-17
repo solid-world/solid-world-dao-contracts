@@ -307,9 +307,9 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
      */
     function simulateDepositWeekPeriod(uint256 _numWeeks, uint256 _rate, uint256 _rateExponent, uint256 _totalToken, uint256 _daoFee) pure public returns (uint256 toProjectOwner, uint256 toDAO) {        
         if (_numWeeks == 1) {
-            return weekSimulator(_rate, _rateExponent, _totalToken, _daoFee);
+            return SolidMath.weekSimulator(_rate, _rateExponent, _totalToken, _daoFee);
         } else {
-            return severalWeeksSimulator(_numWeeks, _rate, _rateExponent, _totalToken, _daoFee);
+            return SolidMath.severalWeeksSimulator(_numWeeks, _rate, _rateExponent, _totalToken, _daoFee);
         }
     }
 
