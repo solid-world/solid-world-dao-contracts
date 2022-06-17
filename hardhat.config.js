@@ -13,14 +13,19 @@ module.exports = {
     version: '0.8.13',
     settings: {
       optimizer: {
-        enabled: true,
-        runs: 10
+        enabled: false,
+        runs: 0
       }
     }
   },
   networks: {
     rinkeby: {
       url: 'https://rinkeby.infura.io/v3/' + infuraKey,
+      gas: 10000000,
+      accounts: accountsSecrets
+    },
+    goerli: {
+      url: 'https://goerli.infura.io/v3/' + infuraKey,
       gas: 10000000,
       accounts: accountsSecrets
     },

@@ -13,7 +13,7 @@ import "./interfaces/IERC1155.sol";
  * @author Solid World DAO
  * @notice CT Treasury Template
  */
-contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
+contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
 
     /**
      * @notice CarbonProject
@@ -268,6 +268,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
         uint256 _amount,
         address _owner
     ) external returns (bool) {
+        require(initialized, "Contract was not initialized yet");
         require(permissions[STATUS.RESERVETOKEN][_token], "CT Treasury: reserve token not permitted");
         require(carbonProjects[_token][_tokenId].isActive, "CT Treasury: carbon project not active");
         require((IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount, "CT Treasury: owner insuficient ERC1155 balance");
@@ -275,6 +276,8 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
         
         (bool mathOK, uint256 weeksFromDelivery) = SolidMath.weeksInThePeriod(block.timestamp, carbonProjects[_token][_tokenId].contractExpectedDueDate);
         require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
+
+        (, uint256 projectAmount, uint256 daoAmount) = payout(weeksFromDelivery, _amount, carbonProjects[_token][_tokenId].projectDiscountRate, daoLiquidityFee);
 
         IERC1155(_token).safeTransferFrom(
             _owner, 
@@ -284,7 +287,8 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
             "data"
         );
 
-        CT.mint(_owner, _amount);
+        CT.mint(_owner, projectAmount);
+        CT.mint(DAOTreasury, daoAmount);
 
         carbonProjectBalances[_token][_tokenId][_owner] += _amount;
         carbonProjectTons[_token][_tokenId] += _amount;
@@ -305,12 +309,8 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
     /**
     @notice informs the investor a simulated return for deposit project's tokens
      */
-    function simulateDepositWeekPeriod(uint256 _numWeeks, uint256 _rate, uint256 _rateExponent, uint256 _totalToken, uint256 _daoFee) pure public returns (uint256 toProjectOwner, uint256 toDAO) {        
-        if (_numWeeks == 1) {
-            return SolidMath.weekSimulator(_rate, _rateExponent, _totalToken, _daoFee);
-        } else {
-            return SolidMath.severalWeeksSimulator(_numWeeks, _rate, _rateExponent, _totalToken, _daoFee);
-        }
+    function simulateDepositWeekPeriod(uint256 _numWeeks, uint256 _rate, uint256 _totalToken, uint256 _daoFee) pure public returns (uint256 basisValue, uint256 toProjectOwner, uint256 toDAO) {        
+        return payout(_numWeeks, _totalToken, _rate, _daoFee);
     }
 
     /*
