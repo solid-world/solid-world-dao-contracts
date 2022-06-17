@@ -31,14 +31,6 @@ library SolidMath {
         return (true, numberOfWeeks);
     }
 
-    /*
-SPDX-License-Identifier: MIT
-*/
-
-pragma solidity 0.8.14;
-
-contract Rate {
-
     function factorial(uint256 _num) pure public returns (uint256) {
         if (_num ==0 || _num==1) {
             return 1;
@@ -129,6 +121,4 @@ contract Rate {
         toDAO = (tmp*_daoFee)/100;
         return (toProjectOwner, toDAO);
     }
-}
-
 }
