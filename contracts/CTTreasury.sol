@@ -274,10 +274,10 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         require((IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount, "CT Treasury: owner insuficient ERC1155 balance");
         require((IERC1155(_token).isApprovedForAll(_owner, address(this))) , "CT Treasury: owner not approved this contract spend ERC1155");
         
-        (bool mathOK, uint256 weeksFromDelivery) = SolidMath.weeksInThePeriod(block.timestamp, carbonProjects[_token][_tokenId].contractExpectedDueDate);
+        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksInThePeriod(block.timestamp, carbonProjects[_token][_tokenId].contractExpectedDueDate);
         require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
 
-        (, uint256 projectAmount, uint256 daoAmount) = payout(weeksFromDelivery, _amount, carbonProjects[_token][_tokenId].projectDiscountRate, daoLiquidityFee);
+        (, uint256 projectAmount, uint256 daoAmount) = payout(weeksUntilDelivery, _amount, carbonProjects[_token][_tokenId].projectDiscountRate, daoLiquidityFee);
 
         IERC1155(_token).safeTransferFrom(
             _owner, 
