@@ -29,10 +29,11 @@ abstract contract SolidMath {
         if (_contractExpectedDueDate < _initialDate) {
             return (false, 0);
         }
-        if ((_contractExpectedDueDate - _initialDate ) < WEEKS_IN_SECONDS) {
-            return (true, 1);
-        }
         uint256 numberOfWeeks = (_contractExpectedDueDate - _initialDate ) / WEEKS_IN_SECONDS;
+        uint256 remainder = (_contractExpectedDueDate - _initialDate ) % WEEKS_IN_SECONDS;
+        if (remainder >= 5) {
+            numberOfWeeks++;
+        }
         return (true, numberOfWeeks);
     }
 
