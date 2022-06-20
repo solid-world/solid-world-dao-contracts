@@ -48,10 +48,10 @@ abstract contract SolidMath {
 
     function payout(uint256 _numWeeks, uint256 _totalToken, uint256 _rate, uint256 _daoFee) pure public returns (uint256, uint256, uint256) {        
         uint256 basicValue = calcBasicValue(_numWeeks, _rate);
-        uint256 coeficient = BASIS * 100;
+        uint256 coefficient = BASIS * 100;
         uint256 totalBasicValue = _totalToken * basicValue;
-        uint256 userResult = (totalBasicValue * (100-_daoFee)) / coeficient;
-        uint256 daoResult = (totalBasicValue * _daoFee) / coeficient;
+        uint256 userResult = (totalBasicValue * (100-_daoFee)) / coefficient;
+        uint256 daoResult = (totalBasicValue * _daoFee) / coefficient;
         return (basicValue, userResult, daoResult);
     }    
 }
