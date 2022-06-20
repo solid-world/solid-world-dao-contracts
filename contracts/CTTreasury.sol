@@ -459,7 +459,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
     * @return true if everything goes well
     * @param _daoAddress address to store the DAO Smart Contract address
     */
-    function setDAOLiquidityFee(address _daoAddress) external onlyGovernor returns(bool) {
+    function setDAOAddress(address _daoAddress) external onlyGovernor returns(bool) {
         DAOTreasury = _daoAddress;
         return true;
     }
