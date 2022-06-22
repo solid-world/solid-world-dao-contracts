@@ -37,11 +37,12 @@ abstract contract SolidMath {
         return (true, numberOfWeeks);
     }
 
-      function calcBasicValue(uint256 _numWeeks, uint256 _rate) pure public returns (uint256) {                
+    function calcBasicValue(uint256 _numWeeks, uint256 _rate) pure public returns (uint256) {                
         uint256 invertDiscountRate = BASIS - _rate;
         uint256 basicValue = invertDiscountRate;
-        for (uint256 i=1; i < _numWeeks; i++) {
+        for (uint16 i=1; i < _numWeeks; ) {
             basicValue = (basicValue * invertDiscountRate) / BASIS;
+            unchecked { i++; }
         }
         return basicValue;
     }
