@@ -63,9 +63,47 @@ npx hardhat verify --network {rinkeby | ropsten | main | mumbai} DEPLOYED_CONTRA
 
 ## Available tasks
 
+### Print accounts
+
 Decrypts and prints JSON accounts stored in the root directory (e.g. `UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299`):
 ```sh
 npx hardhat print-accounts
+```
+
+### CT Treasury Setup and Seed 
+
+These tasks can be used to automatize the creation of CT Treasuries for tests.
+
+- Add funds to deployer, policy and guardian accounts on target network
+- Create `secrets.json` (see `secrets.json.example`): add Etherscan API key and Infura API key
+- Create `.env` (see `.env.example`): add deployer, guardian and policy credentials
+- Add to `.env` ERC-1155 carbon project token address
+- Add to `.env` CT Treasuries addresses
+- Before execute these tasks, you need to deploy ERC-1155 carbon project token and mint the tokens to deployer account
+
+Initialize CT Treasuries:
+```sh
+npx hardhat initialize
+```
+
+Disable CT Treasuries timelocks:
+```sh
+npx hardhat disable-timelock
+```
+
+Enable CT Treasuries reserve carbon project tokens and reserve managers:
+```sh
+npx hardhat enable-permissions
+```
+
+Seed CT Treasuries with carbon projects:
+```sh
+npx hardhat project-seed
+```
+
+Deposit carbon project tokens in CT Treasuries:
+```sh
+npx hardhat deposit-seed
 ```
 
 ## Run unit tests

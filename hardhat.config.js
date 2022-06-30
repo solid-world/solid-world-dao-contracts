@@ -1,8 +1,15 @@
 require("@nomiclabs/hardhat-etherscan");
 require('@nomiclabs/hardhat-ethers');
 require('dotenv').config()
+
 require('./tasks/deploy');
 require('./tasks/print-accounts');
+require('./tasks/ct-treasury-setup/initialize');
+require('./tasks/ct-treasury-setup/disable-timelock');
+require('./tasks/ct-treasury-setup/enable-permissions');
+require('./tasks/ct-treasury-seed/project-seed');
+require('./tasks/ct-treasury-seed/deposit-seed');
+
 const { accountsSecrets, mnemonic, etherscanApiKey, infuraKey } = require('./secrets.json');
 
 /**
