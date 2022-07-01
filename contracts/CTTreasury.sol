@@ -277,7 +277,13 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksInThePeriod(block.timestamp, carbonProjects[_token][_tokenId].contractExpectedDueDate);
         require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
 
-        (, uint256 projectAmount, uint256 daoAmount) = payout(weeksUntilDelivery, _amount, carbonProjects[_token][_tokenId].projectDiscountRate, daoLiquidityFee);
+        (, uint256 projectAmount, uint256 daoAmount) = payout(
+            weeksUntilDelivery,
+            _amount,
+            carbonProjects[_token][_tokenId].projectDiscountRate,
+            daoLiquidityFee,
+            CT.decimals()
+        );
 
         IERC1155(_token).safeTransferFrom(
             _owner, 
@@ -309,8 +315,13 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
     /**
     @notice informs the investor a simulated return for deposit project's tokens
      */
-    function simulateDepositWeekPeriod(uint256 _numWeeks, uint256 _rate, uint256 _totalToken, uint256 _daoFee) pure public returns (uint256 basisValue, uint256 toProjectOwner, uint256 toDAO) {        
-        return payout(_numWeeks, _totalToken, _rate, _daoFee);
+    function simulateDepositWeekPeriod(
+        uint256 _numWeeks,
+        uint256 _rate,
+        uint256 _totalToken,
+        uint256 _daoFee
+    ) view public returns (uint256 basisValue, uint256 toProjectOwner, uint256 toDAO) {
+        return payout(_numWeeks, _totalToken, _rate, _daoFee, CT.decimals());
     }
 
     /*

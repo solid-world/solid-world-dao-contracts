@@ -37,7 +37,11 @@ abstract contract SolidMath {
         return (true, numberOfWeeks);
     }
 
-    function calcBasicValue(uint256 _numWeeks, uint256 _rate) pure public returns (uint256) {                
+    /**
+     * @param _numWeeks uint256
+     * @param _rate uint256 1% = 10000, 0.0984% = 984
+     */
+    function calcBasicValue(uint256 _numWeeks, uint256 _rate) pure public returns (uint256) {
         uint256 invertDiscountRate = BASIS - _rate;
         uint256 basicValue = invertDiscountRate;
         for (uint16 i=1; i < _numWeeks; ) {
@@ -47,12 +51,25 @@ abstract contract SolidMath {
         return basicValue;
     }
 
-    function payout(uint256 _numWeeks, uint256 _totalToken, uint256 _rate, uint256 _daoFee) pure public returns (uint256, uint256, uint256) {        
+    /**
+     * @param _numWeeks uint256
+     * @param _totalToken uint256
+     * @param _rate uint256 1% = 10000, 0.0984% = 984
+     * @param _daoFee uint256 1% = 1
+     * @param _ctDecimals uint8
+     */
+    function payout(
+        uint256 _numWeeks,
+        uint256 _totalToken,
+        uint256 _rate,
+        uint256 _daoFee,
+        uint8 _ctDecimals
+    ) pure public returns (uint256, uint256, uint256) {
         uint256 basicValue = calcBasicValue(_numWeeks, _rate);
         uint256 coefficient = BASIS * 100;
-        uint256 totalBasicValue = _totalToken * basicValue;
+        uint256 totalBasicValue = _totalToken * basicValue * 10 ** _ctDecimals;
         uint256 userResult = (totalBasicValue * (100-_daoFee)) / coefficient;
         uint256 daoResult = (totalBasicValue * _daoFee) / coefficient;
         return (basicValue, userResult, daoResult);
-    }    
+    }
 }
