@@ -8,12 +8,27 @@
 			},
 			{
 				"internalType": "address",
-				"name": "_sct",
+				"name": "_ct",
 				"type": "address"
 			},
 			{
 				"internalType": "uint256",
 				"name": "_timelock",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_category",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_daoTreasury",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_daoLiquidityFee",
 				"type": "uint256"
 			}
 		],
@@ -38,98 +53,12 @@
 		"inputs": [
 			{
 				"indexed": false,
-				"internalType": "uint256",
-				"name": "offerId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "totalValue",
-				"type": "uint256"
-			}
-		],
-		"name": "CanceledOffer",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
 				"internalType": "bool",
 				"name": "timelock",
 				"type": "bool"
 			}
 		],
 		"name": "ChangedTimelock",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "offerId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "totalValue",
-				"type": "uint256"
-			}
-		],
-		"name": "CreatedOffer",
 		"type": "event"
 	},
 	{
@@ -168,7 +97,7 @@
 		"inputs": [
 			{
 				"indexed": true,
-				"internalType": "enum SCTCarbonTreasury.STATUS",
+				"internalType": "enum CTTreasury.STATUS",
 				"name": "status",
 				"type": "uint8"
 			},
@@ -193,7 +122,7 @@
 		"inputs": [
 			{
 				"indexed": true,
-				"internalType": "enum SCTCarbonTreasury.STATUS",
+				"internalType": "enum CTTreasury.STATUS",
 				"name": "status",
 				"type": "uint8"
 			},
@@ -302,10 +231,10 @@
 	},
 	{
 		"inputs": [],
-		"name": "SCT",
+		"name": "CT",
 		"outputs": [
 			{
-				"internalType": "contract ISCT",
+				"internalType": "contract ICT",
 				"name": "",
 				"type": "address"
 			}
@@ -314,22 +243,29 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
+		"inputs": [],
+		"name": "DAOTreasury",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "WEEKS_IN_SECONDS",
+		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "_offerId",
+				"name": "",
 				"type": "uint256"
 			}
 		],
-		"name": "acceptOffer",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -375,19 +311,24 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "_offerId",
+				"name": "_numWeeks",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_rate",
 				"type": "uint256"
 			}
 		],
-		"name": "cancelOffer",
+		"name": "calcBasicValue",
 		"outputs": [
 			{
-				"internalType": "bool",
+				"internalType": "uint256",
 				"name": "",
-				"type": "bool"
+				"type": "uint256"
 			}
 		],
-		"stateMutability": "nonpayable",
+		"stateMutability": "pure",
 		"type": "function"
 	},
 	{
@@ -475,22 +416,12 @@
 			},
 			{
 				"internalType": "uint256",
-				"name": "flatRate",
+				"name": "contractExpectedDueDate",
 				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
-				"name": "sdgPremium",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "daysToRealization",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "closenessPremium",
+				"name": "projectDiscountRate",
 				"type": "uint256"
 			},
 			{
@@ -513,54 +444,16 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "token",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "tokenId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "buyer",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "totalValue",
-						"type": "uint256"
-					},
-					{
-						"internalType": "enum SCTCarbonTreasury.StatusOffer",
-						"name": "statusOffer",
-						"type": "uint8"
-					}
-				],
-				"internalType": "struct SCTCarbonTreasury.Offer",
-				"name": "_offer",
-				"type": "tuple"
-			}
-		],
-		"name": "createOffer",
+		"inputs": [],
+		"name": "category",
 		"outputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "string",
 				"name": "",
-				"type": "uint256"
+				"type": "string"
 			}
 		],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -584,22 +477,12 @@
 					},
 					{
 						"internalType": "uint256",
-						"name": "flatRate",
+						"name": "contractExpectedDueDate",
 						"type": "uint256"
 					},
 					{
 						"internalType": "uint256",
-						"name": "sdgPremium",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "daysToRealization",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "closenessPremium",
+						"name": "projectDiscountRate",
 						"type": "uint256"
 					},
 					{
@@ -618,7 +501,7 @@
 						"type": "bool"
 					}
 				],
-				"internalType": "struct SCTCarbonTreasury.CarbonProject",
+				"internalType": "struct CTTreasury.CarbonProject",
 				"name": "_carbonProject",
 				"type": "tuple"
 			}
@@ -632,6 +515,19 @@
 			}
 		],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "daoLiquidityFee",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -671,7 +567,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
+				"internalType": "enum CTTreasury.STATUS",
 				"name": "_status",
 				"type": "uint8"
 			},
@@ -702,7 +598,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
+				"internalType": "enum CTTreasury.STATUS",
 				"name": "_status",
 				"type": "uint8"
 			},
@@ -757,7 +653,7 @@
 				"type": "address"
 			},
 			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
+				"internalType": "enum CTTreasury.STATUS",
 				"name": "_status",
 				"type": "uint8"
 			}
@@ -815,63 +711,6 @@
 			}
 		],
 		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "offerIdCounter",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "offers",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "totalValue",
-				"type": "uint256"
-			},
-			{
-				"internalType": "enum SCTCarbonTreasury.StatusOffer",
-				"name": "statusOffer",
-				"type": "uint8"
-			}
-		],
-		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -968,7 +807,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
+				"internalType": "enum CTTreasury.STATUS",
 				"name": "_status",
 				"type": "uint8"
 			},
@@ -993,6 +832,55 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
+				"name": "_numWeeks",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_totalToken",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_rate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_daoFee",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint8",
+				"name": "_ctDecimals",
+				"type": "uint8"
+			}
+		],
+		"name": "payout",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
@@ -1000,7 +888,7 @@
 		"name": "permissionOrder",
 		"outputs": [
 			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
+				"internalType": "enum CTTreasury.STATUS",
 				"name": "managing",
 				"type": "uint8"
 			},
@@ -1038,7 +926,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
+				"internalType": "enum CTTreasury.STATUS",
 				"name": "",
 				"type": "uint8"
 			},
@@ -1062,7 +950,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
+				"internalType": "enum CTTreasury.STATUS",
 				"name": "",
 				"type": "uint8"
 			},
@@ -1084,6 +972,19 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "sell",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "contract ISolidDaoManagement",
@@ -1094,6 +995,88 @@
 		"name": "setAuthority",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_daoAddress",
+				"type": "address"
+			}
+		],
+		"name": "setDAOAddress",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_daoLiquidityFee",
+				"type": "uint256"
+			}
+		],
+		"name": "setDAOLiquidityFee",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_numWeeks",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_rate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_totalToken",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_daoFee",
+				"type": "uint256"
+			}
+		],
+		"name": "simulateDepositWeekPeriod",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "basisValue",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "toProjectOwner",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "toDAO",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -1152,6 +1135,35 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_initialDate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_contractExpectedDueDate",
+				"type": "uint256"
+			}
+		],
+		"name": "weeksInThePeriod",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "pure",
 		"type": "function"
 	}
 ]

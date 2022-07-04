@@ -1,7 +1,7 @@
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
-const { getPolicy, getGuardian} = require('./accounts');
-const ctTreasuryAbi = require('../../abi/SCTCarbonTreasury.json');
+const { getPolicy, getGuardian} = require('../accounts');
+const ctTreasuryAbi = require('../../abi/CTTreasury.json');
 
 task('enable-permissions', 'Enable CT Treasury Permissions')
   .setAction(async (taskArgs, hre) => {
@@ -17,7 +17,7 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
 
     const carbonProjectTokenAddress =  process.env.CARBON_PROJECT_ERC1155_ADDRESS;
     const treasuryAddresses = process.env.CTTREASURIES_ADDRESSES.split(',');
-    
+
     console.log(pico.dim('Carbon Project Token: '.padStart(10) + pico.green(carbonProjectTokenAddress)));
     console.log(pico.dim('CT Treasuries: '.padStart(10) + pico.green(treasuryAddresses)));
 
@@ -30,7 +30,7 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
       const enableToken = await ctTreasuryContract.enable(0, carbonProjectTokenAddress)
       await enableToken.wait()
       console.log('CT Treasury enable carbon project token tx: '.padStart(24), pico.green(enableToken.hash));
-    
+
       const enableManager = await ctTreasuryContract.enable(1, guardianWallet.address)
       await enableManager.wait()
       console.log('CT Treasury enable manager tx: '.padStart(24), pico.green(enableManager.hash));
@@ -39,5 +39,5 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
     });
 
     console.log('All enable-permissions tasks finished with success');
-    
+
   });

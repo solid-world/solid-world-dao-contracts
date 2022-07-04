@@ -3,18 +3,23 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "_authority",
+				"name": "_governor",
 				"type": "address"
 			},
 			{
 				"internalType": "address",
-				"name": "_sct",
+				"name": "_guardian",
 				"type": "address"
 			},
 			{
-				"internalType": "uint256",
-				"name": "_timelock",
-				"type": "uint256"
+				"internalType": "address",
+				"name": "_policy",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_vault",
+				"type": "address"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -37,93 +42,19 @@
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "offerId",
-				"type": "uint256"
-			},
-			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "token",
+				"name": "from",
 				"type": "address"
 			},
 			{
 				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
 				"internalType": "address",
-				"name": "buyer",
+				"name": "to",
 				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "totalValue",
-				"type": "uint256"
 			}
 		],
-		"name": "CanceledOffer",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "timelock",
-				"type": "bool"
-			}
-		],
-		"name": "ChangedTimelock",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "offerId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "Deposited",
+		"name": "GovernorPulled",
 		"type": "event"
 	},
 	{
@@ -131,173 +62,43 @@
 		"inputs": [
 			{
 				"indexed": true,
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "status",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "totalValue",
-				"type": "uint256"
-			}
-		],
-		"name": "CreatedOffer",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "offerId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
 				"internalType": "address",
-				"name": "token",
+				"name": "from",
 				"type": "address"
 			},
 			{
 				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
 				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "totalValue",
-				"type": "uint256"
-			}
-		],
-		"name": "Sold",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "status",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			}
-		],
-		"name": "PermissionOrdered",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "status",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "token",
+				"name": "to",
 				"type": "address"
 			},
 			{
 				"indexed": false,
 				"internalType": "bool",
-				"name": "result",
+				"name": "_effectiveImmediately",
 				"type": "bool"
 			}
 		],
-		"name": "Permissioned",
+		"name": "GovernorPushed",
 		"type": "event"
 	},
 	{
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "blockNumber",
-				"type": "uint256"
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
 			}
 		],
-		"name": "SetOnChainGovernanceTimelock",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "offerId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "totalValue",
-				"type": "uint256"
-			}
-		],
-		"name": "Sold",
+		"name": "GuardianPulled",
 		"type": "event"
 	},
 	{
@@ -306,56 +107,112 @@
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "token",
+				"name": "from",
 				"type": "address"
 			},
 			{
 				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
 			},
 			{
 				"indexed": false,
 				"internalType": "bool",
-				"name": "isActive",
+				"name": "_effectiveImmediately",
 				"type": "bool"
 			}
 		],
-		"name": "UpdatedInfo",
+		"name": "GuardianPushed",
 		"type": "event"
 	},
 	{
-		"inputs": [],
-		"name": "SCT",
-		"outputs": [
+		"anonymous": false,
+		"inputs": [
 			{
-				"internalType": "contract ISCT",
-				"name": "",
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
 				"type": "address"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function"
+		"name": "PolicyPulled",
+		"type": "event"
 	},
 	{
+		"anonymous": false,
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "_offerId",
-				"type": "uint256"
-			}
-		],
-		"name": "acceptOffer",
-		"outputs": [
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
 			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
 				"internalType": "bool",
-				"name": "",
+				"name": "_effectiveImmediately",
 				"type": "bool"
 			}
 		],
-		"stateMutability": "nonpayable",
-		"type": "function"
+		"name": "PolicyPushed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "VaultPulled",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "_effectiveImmediately",
+				"type": "bool"
+			}
+		],
+		"name": "VaultPushed",
+		"type": "event"
 	},
 	{
 		"inputs": [],
@@ -364,19 +221,6 @@
 			{
 				"internalType": "contract ISolidDaoManagement",
 				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "carbonProjects",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "token",
 				"type": "address"
 			}
 		],
@@ -385,12 +229,12 @@
 	},
 	{
 		"inputs": [],
-		"name": "baseSupply",
+		"name": "governor",
 		"outputs": [
 			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -398,341 +242,106 @@
 	},
 	{
 		"inputs": [],
-		"name": "blocksNeededForOrder",
+		"name": "guardian",
 		"outputs": [
 			{
-				"internalType": "uint256",
-				"name": "tons",
-				"type": "uint256"
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_offerId",
-				"type": "uint256"
-			}
-		],
-		"name": "cancelOffer",
+		"inputs": [],
+		"name": "newGovernor",
 		"outputs": [
 			{
-				"internalType": "bool",
+				"internalType": "address",
 				"name": "",
-				"type": "bool"
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "carbonProjectBalances",
+		"inputs": [],
+		"name": "newGuardian",
 		"outputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "address",
 				"name": "",
-				"type": "uint256"
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"inputs": [
+		"inputs": [],
+		"name": "newPolicy",
+		"outputs": [
 			{
 				"internalType": "address",
 				"name": "",
 				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "carbonProjectTons",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "carbonProjects",
+		"inputs": [],
+		"name": "newVault",
 		"outputs": [
 			{
 				"internalType": "address",
-				"name": "token",
+				"name": "",
 				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tons",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "flatRate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "sdgPremium",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "daysToRealization",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "closenessPremium",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "isActive",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "isCertified",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "isRedeemed",
-				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "token",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "tokenId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "buyer",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "totalValue",
-						"type": "uint256"
-					},
-					{
-						"internalType": "enum SCTCarbonTreasury.StatusOffer",
-						"name": "statusOffer",
-						"type": "uint8"
-					}
-				],
-				"internalType": "struct SCTCarbonTreasury.Offer",
-				"name": "_offer",
-				"type": "tuple"
-			}
-		],
-		"name": "createOffer",
+		"inputs": [],
+		"name": "policy",
 		"outputs": [
 			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "token",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "tokenId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "tons",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "flatRate",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "sdgPremium",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "daysToRealization",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "closenessPremium",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "isActive",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "isCertified",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "isRedeemed",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct SCTCarbonTreasury.CarbonProject",
-				"name": "_carbonProject",
-				"type": "tuple"
-			}
-		],
-		"name": "createOrUpdateCarbonProject",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "address",
-				"name": "_token",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "_owner",
+				"name": "",
 				"type": "address"
 			}
 		],
-		"name": "depositReserveToken",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "_status",
-				"type": "uint8"
-			},
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "disable",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
+		"inputs": [],
+		"name": "pullGovernor",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
 		"inputs": [],
-		"name": "disableTimelock",
+		"name": "pullGuardian",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "pullPolicy",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "pullVault",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -740,30 +349,17 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "_status",
-				"type": "uint8"
+				"internalType": "address",
+				"name": "_newGovernor",
+				"type": "address"
 			},
 			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "enable",
-		"outputs": [
-			{
 				"internalType": "bool",
-				"name": "",
+				"name": "_effectiveImmediately",
 				"type": "bool"
 			}
 		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "enableTimelock",
+		"name": "pushGovernor",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -771,196 +367,36 @@
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "_index",
-				"type": "uint256"
-			}
-		],
-		"name": "execute",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "address",
-				"name": "_address",
+				"name": "_newGuardian",
 				"type": "address"
 			},
 			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "_status",
-				"type": "uint8"
-			}
-		],
-		"name": "indexInRegistry",
-		"outputs": [
-			{
 				"internalType": "bool",
-				"name": "",
+				"name": "_effectiveImmediately",
 				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "initialize",
+		"name": "pushGuardian",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "initialized",
-		"outputs": [
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_newPolicy",
+				"type": "address"
+			},
 			{
 				"internalType": "bool",
-				"name": "",
+				"name": "_effectiveImmediately",
 				"type": "bool"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_index",
-				"type": "uint256"
-			}
-		],
-		"name": "nullify",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "offerIdCounter",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "offers",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "totalValue",
-				"type": "uint256"
-			},
-			{
-				"internalType": "enum SCTCarbonTreasury.StatusOffer",
-				"name": "statusOffer",
-				"type": "uint8"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "onChainGovernanceTimelock",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
-			},
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
-			},
-			{
-				"internalType": "bytes",
-				"name": "",
-				"type": "bytes"
-			}
-		],
-		"name": "onERC1155BatchReceived",
-		"outputs": [
-			{
-				"internalType": "bytes4",
-				"name": "",
-				"type": "bytes4"
-			}
-		],
+		"name": "pushPolicy",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
@@ -968,150 +404,18 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "",
+				"name": "_newVault",
 				"type": "address"
 			},
 			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bytes",
-				"name": "",
-				"type": "bytes"
+				"internalType": "bool",
+				"name": "_effectiveImmediately",
+				"type": "bool"
 			}
 		],
-		"name": "onERC1155Received",
-		"outputs": [
-			{
-				"internalType": "bytes4",
-				"name": "",
-				"type": "bytes4"
-			}
-		],
+		"name": "pushVault",
+		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "_status",
-				"type": "uint8"
-			},
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "orderTimelock",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "permissionOrder",
-		"outputs": [
-			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "managing",
-				"type": "uint8"
-			},
-			{
-				"internalType": "address",
-				"name": "toPermit",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "timelockEnd",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "nullify",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "executed",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "",
-				"type": "uint8"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "permissions",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "enum SCTCarbonTreasury.STATUS",
-				"name": "",
-				"type": "uint8"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "registry",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -1128,45 +432,13 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "bytes4",
-				"name": "interfaceId",
-				"type": "bytes4"
-			}
-		],
-		"name": "supportsInterface",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [],
-		"name": "timelockEnabled",
+		"name": "vault",
 		"outputs": [
 			{
-				"internalType": "bool",
+				"internalType": "address",
 				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "totalReserves",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",

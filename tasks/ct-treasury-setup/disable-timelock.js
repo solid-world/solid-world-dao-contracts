@@ -1,7 +1,7 @@
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
-const { getDeployer } = require('./accounts');
-const ctTreasuryAbi = require('../../abi/SCTCarbonTreasury.json');
+const { getDeployer } = require('../accounts');
+const ctTreasuryAbi = require('../../abi/CTTreasury.json');
 
 task('disable-timelock', 'Disable CT Treasury Timelock')
   .setAction(async (taskArgs, hre) => {

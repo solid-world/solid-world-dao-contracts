@@ -1,7 +1,7 @@
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
-const { getGuardian } = require('./accounts');
-const ctTreasuryAbi = require('../../abi/SCTCarbonTreasury.json');
+const { getGuardian } = require('../accounts');
+const ctTreasuryAbi = require('../../abi/CTTreasury.json');
 
 task('project-seed', 'Create Carbon Projects in CT Treasuries')
   .setAction(async (taskArgs, hre) => {
@@ -17,7 +17,7 @@ task('project-seed', 'Create Carbon Projects in CT Treasuries')
 
     if (!carbonProjectTokenAddress.length) {
       throw 'ERROR: To run project-seed task you need to provide CARBON_PROJECT_ERC1155_ADDRESS'
-    }    
+    }
 
     const treasuryAddresses = process.env.CTTREASURIES_ADDRESSES.split(',');
     console.log(pico.dim('CT Treasuries: '.padStart(10) + pico.green(treasuryAddresses)));
