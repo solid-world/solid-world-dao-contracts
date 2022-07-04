@@ -1,7 +1,7 @@
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
 const { getGuardian } = require('../accounts');
-const ctTreasuryAbi = require('../../abi/SCTCarbonTreasury.json');
+const ctTreasuryAbi = require('../../abi/CTTreasury.json');
 
 task('project-seed', 'Create Carbon Projects in CT Treasuries')
   .setAction(async (taskArgs, hre) => {

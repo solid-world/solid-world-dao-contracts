@@ -1,7 +1,7 @@
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
 const { getPolicy, getGuardian} = require('../accounts');
-const ctTreasuryAbi = require('../../abi/SCTCarbonTreasury.json');
+const ctTreasuryAbi = require('../../abi/CTTreasury.json');
 
 task('enable-permissions', 'Enable CT Treasury Permissions')
   .setAction(async (taskArgs, hre) => {
