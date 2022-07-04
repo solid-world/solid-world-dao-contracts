@@ -70,6 +70,13 @@ Decrypts and prints JSON accounts stored in the root directory (e.g. `UTC--2022-
 npx hardhat print-accounts
 ```
 
+### Exporting ABI files
+
+It is mandatory to update ABI files after changing contract signatures: 
+```sh
+npx hardhat export-abi
+```
+
 ### CT Treasury Setup and Seed 
 
 These tasks can be used to automatize the creation of CT Treasuries for tests.
