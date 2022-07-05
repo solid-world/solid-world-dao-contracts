@@ -23,7 +23,7 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
 
     console.log('\n');
 
-    treasuryAddresses.forEach(async function (address) {
+    for (const address of treasuryAddresses) {
       const ctTreasuryContract = new ethers.Contract(address, ctTreasuryAbi, policyWallet);
       console.log('Start enable-permissions CT Treasury address: '.padStart(24), pico.green(address));
 
@@ -36,7 +36,7 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
       console.log('CT Treasury enable manager tx: '.padStart(24), pico.green(enableManager.hash));
 
       console.log('Finish enable-permissions CT Treasury address: '.padStart(24), pico.green(address));
-    });
+    }
 
     console.log('All enable-permissions tasks finished with success');
 
