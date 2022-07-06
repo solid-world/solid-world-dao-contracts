@@ -17,7 +17,7 @@ task('disable-timelock', 'Disable CT Treasury Timelock')
 
     console.log('\n');
 
-    treasuryAddresses.forEach(async function (address) {
+    for (const address of treasuryAddresses) {
       const ctTreasuryContract = new ethers.Contract(address, ctTreasuryAbi, deployerWallet);
       console.log('Start disable-timelock CT Treasury address: '.padStart(24), pico.green(address));
 
@@ -30,7 +30,7 @@ task('disable-timelock', 'Disable CT Treasury Timelock')
       console.log('CT Treasury disable timelock tx: '.padStart(24), pico.green(disable.hash));
 
       console.log('Finish disable-timelock CT Treasury address: '.padStart(24), pico.green(address));
-    });
+    }
 
     console.log('All disable-timelock tasks finished with success');
 

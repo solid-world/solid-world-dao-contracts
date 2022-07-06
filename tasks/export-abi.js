@@ -10,6 +10,7 @@ task('export-abi', 'exports ABI files of contracts')
       'artifacts/contracts/CTERC20.sol/CTERC20TokenTemplate.json',
       'artifacts/contracts/CTTreasury.sol/CTTreasury.json',
       'artifacts/contracts/SolidDaoManagement.sol/SolidDaoManagement.json',
+      'artifacts/contracts/tokens/ERC1155-flat.sol/CarbonCredit.json',
     ];
 
     files.forEach((file) => {

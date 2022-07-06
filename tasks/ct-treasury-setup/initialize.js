@@ -17,7 +17,7 @@ task('initialize', 'Initialize CT Treasury')
 
     console.log('\n');
 
-    treasuryAddresses.forEach(async function (address) {
+    for (const address of treasuryAddresses) {
       const ctTreasuryContract = new ethers.Contract(address, ctTreasuryAbi, deployerWallet);
       console.log('Start initialize CT Treasury address: '.padStart(24), pico.green(address));
 
@@ -26,7 +26,7 @@ task('initialize', 'Initialize CT Treasury')
       console.log('CT Treasury initialize tx: '.padStart(24), pico.green(initialize.hash));
 
       console.log('Finish initialize CT Treasury address: '.padStart(24), pico.green(address));
-    });
+    }
 
     console.log('All initialize tasks finished with success');
 

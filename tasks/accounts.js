@@ -63,8 +63,8 @@ async function getDeployer(ethers) {
  * @return {Promise<import('ethers').Wallet>}
  */
  async function getPolicy(ethers) {
-  assert(!!process.env.POLICY_JSON, "Guardian's JSON wallet is missing.");
-  assert(!!process.env.POLICY_PASSWORD, "Guardian's password is missing.");
+  assert(!!process.env.POLICY_JSON, "Policy's JSON wallet is missing.");
+  assert(!!process.env.POLICY_PASSWORD, "Policy's password is missing.");
 
   const file = process.env.POLICY_JSON;
   const password = process.env.POLICY_PASSWORD;
