@@ -1,19 +1,28 @@
+const assert = require('node:assert');
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
 const { getDeployer } = require('../accounts');
+const { parseCommaSeparatedValues } = require('../utils');
 const ctTreasuryAbi = require('../../abi/CTTreasury.json');
 
 task('initialize', 'Initialize CT Treasury')
+  .addParam(
+    'treasuries',
+    'Comma-separated treasury addresses (fallback to env.CTTREASURIES_ADDRESSES)',
+    process.env.CTTREASURIES_ADDRESSES,
+  )
   .setAction(async (taskArgs, hre) => {
+    assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.")
+
     await hre.run('compile')
 
     const { ethers } = hre;
 
     const deployerWallet = await getDeployer(ethers);
-    console.log(pico.dim('Governor: '.padStart(10) + pico.green(deployerWallet.address)));
+    console.log('Governor:', pico.green(deployerWallet.address));
 
-    const treasuryAddresses = process.env.CTTREASURIES_ADDRESSES.split(',');
-    console.log(pico.dim('CT Treasuries: '.padStart(10) + pico.green(treasuryAddresses)));
+    const treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries)
+    console.log('Treasuries:', treasuryAddresses);
 
     console.log('\n');
 
