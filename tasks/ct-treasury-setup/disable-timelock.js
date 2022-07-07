@@ -12,16 +12,16 @@ task('disable-timelock', 'Disable CT Treasury Timelock')
     process.env.CTTREASURIES_ADDRESSES,
   )
   .setAction(async (taskArgs, hre) => {
-    assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.")
+    assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.");
 
-    await hre.run('compile')
+    await hre.run('compile');
 
     const { ethers } = hre;
 
     const deployerWallet = await getDeployer(ethers);
     console.log('Governor:', pico.green(deployerWallet.address));
 
-    const treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries)
+    const treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries);
     console.log('Treasuries:', treasuryAddresses);
 
     console.log('\n');

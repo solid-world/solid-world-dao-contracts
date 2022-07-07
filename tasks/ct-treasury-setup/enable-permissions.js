@@ -17,10 +17,10 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
     process.env.CTTREASURIES_ADDRESSES,
   )
   .setAction(async (taskArgs, hre) => {
-    assert(taskArgs.erc1155 !== '', "Argument '--erc1155' should not be empty.")
-    assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.")
+    assert(taskArgs.erc1155 !== '', "Argument '--erc1155' should not be empty.");
+    assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.");
 
-    await hre.run('compile')
+    await hre.run('compile');
 
     const { ethers } = hre;
 
@@ -33,7 +33,7 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
     const carbonProjectTokenAddress = taskArgs.erc1155;
     console.log('Carbon Project Token:', pico.green(carbonProjectTokenAddress));
 
-    const treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries)
+    const treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries);
     console.log('Treasuries:', treasuryAddresses);
 
     console.log('\n');

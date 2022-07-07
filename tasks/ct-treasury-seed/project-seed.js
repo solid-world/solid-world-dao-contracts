@@ -17,10 +17,10 @@ task('project-seed', 'Create Carbon Projects in CT Treasuries')
     process.env.CTTREASURIES_ADDRESSES,
   )
   .setAction(async (taskArgs, hre) => {
-    assert(taskArgs.erc1155 !== '', "Argument '--erc1155' should not be empty.")
-    assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.")
+    assert(taskArgs.erc1155 !== '', "Argument '--erc1155' should not be empty.");
+    assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.");
 
-    await hre.run('compile')
+    await hre.run('compile');
 
     const { ethers } = hre;
 
@@ -30,7 +30,7 @@ task('project-seed', 'Create Carbon Projects in CT Treasuries')
     const carbonProjectTokenAddress = taskArgs.erc1155;
     console.log('Carbon Project Token:', pico.green(carbonProjectTokenAddress));
 
-    const treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries)
+    const treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries);
     console.log('Treasuries:', treasuryAddresses);
     assert(treasuryAddresses.length === 5, 'To run project-seed task you need to provide 5 treasuries');
 
