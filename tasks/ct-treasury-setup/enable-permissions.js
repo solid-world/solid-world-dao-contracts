@@ -1,10 +1,25 @@
+const assert = require('node:assert');
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
 const { getPolicy, getGuardian} = require('../accounts');
+const { parseCommaSeparatedValues } = require('../utils');
 const ctTreasuryAbi = require('../../abi/CTTreasury.json');
 
 task('enable-permissions', 'Enable CT Treasury Permissions')
+  .addParam(
+    'erc1155',
+    'ERC-1155 token address (fallback to env.CARBON_PROJECT_ERC1155_ADDRESS)',
+    process.env.CARBON_PROJECT_ERC1155_ADDRESS,
+  )
+  .addParam(
+    'treasuries',
+    'Comma-separated treasury addresses (fallback to env.CTTREASURIES_ADDRESSES)',
+    process.env.CTTREASURIES_ADDRESSES,
+  )
   .setAction(async (taskArgs, hre) => {
+    assert(taskArgs.erc1155 !== '', "Argument '--erc1155' should not be empty.")
+    assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.")
+
     await hre.run('compile')
 
     const { ethers } = hre;
@@ -15,11 +30,11 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
     console.log(pico.dim('Policy: '.padStart(10) + pico.green(policyWallet.address)));
     console.log(pico.dim('Guardian: '.padStart(10) + pico.green(guardianWallet.address)));
 
-    const carbonProjectTokenAddress =  process.env.CARBON_PROJECT_ERC1155_ADDRESS;
-    const treasuryAddresses = process.env.CTTREASURIES_ADDRESSES.split(',');
+    const carbonProjectTokenAddress = taskArgs.erc1155;
+    console.log('Carbon Project Token:', pico.green(carbonProjectTokenAddress));
 
-    console.log(pico.dim('Carbon Project Token: '.padStart(10) + pico.green(carbonProjectTokenAddress)));
-    console.log(pico.dim('CT Treasuries: '.padStart(10) + pico.green(treasuryAddresses)));
+    const treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries)
+    console.log('Treasuries:', treasuryAddresses);
 
     console.log('\n');
 
