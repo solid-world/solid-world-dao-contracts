@@ -1,10 +1,25 @@
+const assert = require('node:assert');
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
 const { getGuardian } = require('../accounts');
+const { parseCommaSeparatedValues } = require('../utils');
 const ctTreasuryAbi = require('../../abi/CTTreasury.json');
 
 task('project-seed', 'Create Carbon Projects in CT Treasuries')
+  .addParam(
+    'erc1155',
+    'ERC-1155 token address (fallback to env.CARBON_PROJECT_ERC1155_ADDRESS)',
+    process.env.CARBON_PROJECT_ERC1155_ADDRESS,
+  )
+  .addParam(
+    'treasuries',
+    'Comma-separated treasury addresses (fallback to env.CTTREASURIES_ADDRESSES)',
+    process.env.CTTREASURIES_ADDRESSES,
+  )
   .setAction(async (taskArgs, hre) => {
+    assert(taskArgs.erc1155 !== '', "Argument '--erc1155' should not be empty.")
+    assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.")
+
     await hre.run('compile')
 
     const { ethers } = hre;
@@ -12,19 +27,12 @@ task('project-seed', 'Create Carbon Projects in CT Treasuries')
     const guardianWallet = await getGuardian(ethers);
     console.log(pico.dim('Guardian: '.padStart(10) + pico.green(guardianWallet.address)));
 
-    const carbonProjectTokenAddress = process.env.CARBON_PROJECT_ERC1155_ADDRESS;
-    console.log(pico.dim('Carbon Project Token: '.padStart(10) + pico.green(carbonProjectTokenAddress)));
+    const carbonProjectTokenAddress = taskArgs.erc1155;
+    console.log('Carbon Project Token:', pico.green(carbonProjectTokenAddress));
 
-    if (!carbonProjectTokenAddress.length) {
-      throw 'ERROR: To run project-seed task you need to provide CARBON_PROJECT_ERC1155_ADDRESS'
-    }
-
-    const treasuryAddresses = process.env.CTTREASURIES_ADDRESSES.split(',');
-    console.log(pico.dim('CT Treasuries: '.padStart(10) + pico.green(treasuryAddresses)));
-
-    if (treasuryAddresses.length !== 5) {
-      throw 'ERROR: To run project-seed task you need to provide 5 CTTREASURIES_ADDRESSES'
-    }
+    const treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries)
+    console.log('Treasuries:', treasuryAddresses);
+    assert(treasuryAddresses.length === 5, 'To run project-seed task you need to provide 5 treasuries');
 
     console.log('\n');
 
