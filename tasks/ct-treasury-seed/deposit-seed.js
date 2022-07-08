@@ -70,15 +70,15 @@ task('deposit-seed', 'Deposits predefined amount of ERC1155 to CT Treasury')
       assert(treasuryAddress != null, 'Treasury address is undefined.')
       const treasuryContract = new ethers.Contract(treasuryAddress, ctTreasuryAbi, ownerWallet);
 
-      const depositTx = await treasuryContract.depositReserveToken(
+      const tx = await treasuryContract.depositReserveToken(
         carbonProjectTokenAddress,
         projectId,
         tokenAmount,
         ownerWallet.address
       );
-      await depositTx.wait();
+      await tx.wait();
 
-      console.log('Deposit Project %s tx: %s', pico.green(projectId), pico.green(depositTx.hash));
+      console.log('Deposit Project %s tx: %s', pico.green(projectId), pico.green(tx.hash));
     }
 
     console.log('All deposit-seed tasks finished with success');
