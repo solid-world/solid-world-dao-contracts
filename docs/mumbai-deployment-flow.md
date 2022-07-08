@@ -20,6 +20,6 @@ sequenceDiagram
     dao->>dao: Seed CT Treasuries with carbon projects
     Note over dao: $ npx hardhat project-seed --network mumbai
     dao->>dao: Deposit carbon project tokens in CT Treasuries
-    Note over dao: $ npx hardhat deposit-seed --network mumbai
+    Note over dao: $ npx hardhat deposit-seed --multiple-treasuries --network mumbai
     Backend->>Backend: Update Treasury and ERC20 addresses
 ```
