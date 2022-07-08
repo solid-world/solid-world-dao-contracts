@@ -2,11 +2,13 @@ const { task } = require('hardhat/config');
 const pico = require('picocolors');
 const { getAccounts, getDeployer} = require('./accounts');
 
-task('deploy', 'Deploys DAO Management, SCT and Treasury contracts')
+task('deploy', 'Deploys DAO Management, predefined Treasury and ERC20 contracts')
+  .addFlag('multipleTreasuries', 'Includes multiple predefined treasuries and ERC20 tokens deployment')
   .setAction(async (taskArgs, hre) => {
     await hre.run('compile')
 
     const { ethers } = hre;
+    const { multipleTreasuries } = taskArgs;
 
     const deployerWallet = await getDeployer(ethers);
 
@@ -38,34 +40,25 @@ task('deploy', 'Deploys DAO Management, SCT and Treasury contracts')
      */
 
     /** @type {[string, string][]} Array of tuples - [treasury's category, ERC20 token's symbol] */
-    const treasuries = [
-      ['ForestConservation', 'CTFC'],
-      ['Livestock', 'CTL'],
-      ['WasteManagement', 'CTWM'],
-      ['Agriculture', 'CTA'],
-      ['EnergyProduction', 'CTEP'],
-    ];
+    let treasuries;
 
-    const CTToken = await ethers.getContractFactory('CTERC20TokenTemplate', deployerWallet);
-    const Treasury = await ethers.getContractFactory('CTTreasury', deployerWallet);
+    if (multipleTreasuries) {
+      treasuries = [
+        ['ForestConservation', 'CTFC'],
+        ['Livestock', 'CTL'],
+        ['WasteManagement', 'CTWM'],
+        ['Agriculture', 'CTA'],
+        ['EnergyProduction', 'CTEP'],
+      ];
+    } else {
+      treasuries = [['ForestConservation', 'CTFC']];
+    }
 
-    for await (const [treasuryName, tokenSymbol] of treasuries) {
-      console.log('Deploying %s treasury...', pico.green(treasuryName));
-
-      const ctToken = await CTToken.deploy(tokenSymbol, tokenSymbol);
-
-      const treasury = await Treasury.deploy(
-        solidDaoManagement.address,
-        ctToken.address,
-        0,
-        treasuryName,
-        "0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299",
-        2
-      );
-
-      console.log('Treasury Address: '.padStart(24), pico.green(treasury.address));
-      console.log('CT Token Address: '.padStart(24), pico.green(ctToken.address));
-
-      await ctToken.initialize(treasury.address)
+    for (const [treasuryName, tokenSymbol] of treasuries) {
+      await hre.run('deploy-treasury', {
+        solidDaoManagement: solidDaoManagement.address,
+        treasuryName: treasuryName,
+        tokenSymbol: tokenSymbol,
+      })
     }
   });
