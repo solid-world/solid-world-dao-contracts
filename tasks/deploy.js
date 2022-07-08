@@ -2,13 +2,13 @@ const { task } = require('hardhat/config');
 const pico = require('picocolors');
 const { getAccounts, getDeployer} = require('./accounts');
 
-task('deploy', 'Deploys DAO Management, SCT and Treasury contracts')
-  .addFlag('withTreasuries', 'Include predefined treasuries and ERC20 tokens deployment')
+task('deploy', 'Deploys DAO Management, predefined Treasury and ERC20 contracts')
+  .addFlag('multipleTreasuries', 'Includes multiple predefined treasuries and ERC20 tokens deployment')
   .setAction(async (taskArgs, hre) => {
     await hre.run('compile')
 
     const { ethers } = hre;
-    const { withTreasuries } = taskArgs;
+    const { multipleTreasuries } = taskArgs;
 
     const deployerWallet = await getDeployer(ethers);
 
@@ -38,22 +38,27 @@ task('deploy', 'Deploys DAO Management, SCT and Treasury contracts')
     /**
      * Treasuries and ERC20 tokens deployment
      */
-    if (withTreasuries) {
-      /** @type {[string, string][]} Array of tuples - [treasury's category, ERC20 token's symbol] */
-      const treasuries = [
+
+    /** @type {[string, string][]} Array of tuples - [treasury's category, ERC20 token's symbol] */
+    let treasuries;
+
+    if (multipleTreasuries) {
+      treasuries = [
         ['ForestConservation', 'CTFC'],
         ['Livestock', 'CTL'],
         ['WasteManagement', 'CTWM'],
         ['Agriculture', 'CTA'],
         ['EnergyProduction', 'CTEP'],
       ];
+    } else {
+      treasuries = [['ForestConservation', 'CTFC']];
+    }
 
-      for (const [treasuryName, tokenSymbol] of treasuries) {
-        await hre.run('deploy-treasury', {
-          solidDaoManagement: solidDaoManagement.address,
-          treasuryName: treasuryName,
-          tokenSymbol: tokenSymbol,
-        })
-      }
+    for (const [treasuryName, tokenSymbol] of treasuries) {
+      await hre.run('deploy-treasury', {
+        solidDaoManagement: solidDaoManagement.address,
+        treasuryName: treasuryName,
+        tokenSymbol: tokenSymbol,
+      })
     }
   });

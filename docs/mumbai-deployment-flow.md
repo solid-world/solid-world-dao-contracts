@@ -8,7 +8,7 @@ sequenceDiagram
     market->>market: Create dummy projects
     Note over market: Change "marketPlaceAddress" in create-project.js to just deployed SolidMarketplace address<br>––––––––––––<br>$ npx hardhat run ./mock/create-projects.js  --network mumbai
     dao->>dao: Deploy DAO Contracts
-    Note over dao: $ npx hardhat deploy --with-treasuries --network mumbai <br>––––––––––––<br>Deployed contracts: <br>1. SolidDaoManagement<br> 2. CTERC20TokenTemplate (deploy and initialize)<br> 3. CTTreasury<br> (5 predefined treasuries and erc20 tokens are deployed.)
+    Note over dao: $ npx hardhat deploy --multiple-treasuries --network mumbai <br>––––––––––––<br>Deployed contracts: <br>1. SolidDaoManagement<br> 2. CTERC20TokenTemplate (deploy and initialize)<br> 3. CTTreasury<br> (5 predefined treasuries and erc20 tokens are deployed.)
     dao->>dao: Update .env
     Note over dao: CARBON_PROJECT_ERC1155_ADDRESS - it is a CarbonCredit address deployed on the 1st step<br>CTTREASURIES_ADDRESSES - they are treasury addresses deployed on the previous step
     dao->>dao: Initialize Treasuries
