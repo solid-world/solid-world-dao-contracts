@@ -11,17 +11,22 @@ task('initialize', 'Initialize CT Treasury')
     'Comma-separated treasury addresses (fallback to env.CTTREASURIES_ADDRESSES)',
     process.env.CTTREASURIES_ADDRESSES,
   )
+  .addFlag('multipleTreasuries', 'Proceeds multiple treasuries')
   .setAction(async (taskArgs, hre) => {
     assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.");
 
     await hre.run('compile');
 
     const { ethers } = hre;
+    const { multipleTreasuries } = taskArgs;
 
     const deployerWallet = await getDeployer(ethers);
     console.log('Governor:', pico.green(deployerWallet.address));
 
-    const treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries);
+    let treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries);
+    if (!multipleTreasuries) {
+      treasuryAddresses = treasuryAddresses.slice(0, 1);
+    }
     console.log('Treasuries:', treasuryAddresses);
 
     console.log('\n');

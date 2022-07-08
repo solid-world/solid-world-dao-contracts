@@ -16,6 +16,7 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
     'Comma-separated treasury addresses (fallback to env.CTTREASURIES_ADDRESSES)',
     process.env.CTTREASURIES_ADDRESSES,
   )
+  .addFlag('multipleTreasuries', 'Proceeds multiple treasuries')
   .setAction(async (taskArgs, hre) => {
     assert(taskArgs.erc1155 !== '', "Argument '--erc1155' should not be empty.");
     assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.");
@@ -23,6 +24,7 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
     await hre.run('compile');
 
     const { ethers } = hre;
+    const { multipleTreasuries } = taskArgs;
 
     const policyWallet = await getPolicy(ethers);
     const guardianWallet = await getGuardian(ethers);
@@ -33,7 +35,10 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
     const carbonProjectTokenAddress = taskArgs.erc1155;
     console.log('Carbon Project Token:', pico.green(carbonProjectTokenAddress));
 
-    const treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries);
+    let treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries);
+    if (!multipleTreasuries) {
+      treasuryAddresses = treasuryAddresses.slice(0, 1);
+    }
     console.log('Treasuries:', treasuryAddresses);
 
     console.log('\n');
