@@ -35,33 +35,17 @@ task('deposit-seed', 'Deposit ERC1155 in CT Treasuries')
     console.log('Treasuries:', treasuryAddresses);
     assert(treasuryAddresses.length === 5, 'To run deposit-seed task you need to provide 5 treasuries');
 
-    console.log('\n');
-
-    console.log('Starting approvals...');
+    console.log('\nStarting approvals...');
 
     const carbonProjectTokenContract = new ethers.Contract(carbonProjectTokenAddress, carbonCreditAbi, ownerWallet);
 
-    const approve1 = await carbonProjectTokenContract.setApprovalForAll(treasuryAddresses[0], true);
-    await approve1.wait();
-    console.log('Approve CT Treasury 1 tx: '.padStart(24), pico.green(approve1.hash));
+    for (const [index, treasuryAddress] of treasuryAddresses.entries()) {
+      const approveTx = await carbonProjectTokenContract.setApprovalForAll(treasuryAddress, true);
+      await approveTx.wait();
+      console.log('Approve CT Treasury %s tx: %s', pico.green(index), pico.green(approveTx.hash));
+    }
 
-    const approve2 = await carbonProjectTokenContract.setApprovalForAll(treasuryAddresses[1], true);
-    await approve2.wait();
-    console.log('Approve CT Treasury 2 tx: '.padStart(24), pico.green(approve2.hash));
-
-    const approve3 = await carbonProjectTokenContract.setApprovalForAll(treasuryAddresses[2], true);
-    await approve3.wait();
-    console.log('Approve CT Treasury 3 tx: '.padStart(24), pico.green(approve3.hash));
-
-    const approve4 = await carbonProjectTokenContract.setApprovalForAll(treasuryAddresses[3], true);
-    await approve4.wait();
-    console.log('Approve CT Treasury 4 tx: '.padStart(24), pico.green(approve4.hash));
-
-    const approve5 = await carbonProjectTokenContract.setApprovalForAll(treasuryAddresses[4], true);
-    await approve5.wait();
-    console.log('Approve CT Treasury 5 tx: '.padStart(24), pico.green(approve5.hash));
-
-    console.log('Starting deposits...');
+    console.log('\nStarting deposits...');
 
     const deposits = [
       { projectId: 1,  tokenAmount: 5000,  treasuryAddress: treasuryAddresses[0] },
