@@ -57,15 +57,15 @@ task('deposit-seed', 'Deposits predefined amount of ERC1155 to CT Treasury')
     /**
      * @type {Array<{ projectId: number, tokenAmount: number, treasuryAddressIndex: number }>}
      */
-    let deposits;
+    let projects_;
 
     if (multipleTreasuries) {
-      deposits = projects;
+      projects_ = projects;
     } else {
-      deposits = projects.slice(0, 1);
+      projects_ = projects.filter(project => project.treasuryAddressIndex === 0);
     }
 
-    for (const { projectId, tokenAmount, treasuryAddressIndex } of deposits) {
+    for (const { projectId, tokenAmount, treasuryAddressIndex } of projects_) {
       const treasuryAddress = treasuryAddresses[treasuryAddressIndex];
       assert(treasuryAddress != null, 'Treasury address is undefined.')
       const treasuryContract = new ethers.Contract(treasuryAddress, ctTreasuryAbi, ownerWallet);

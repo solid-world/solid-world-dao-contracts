@@ -18,7 +18,7 @@ sequenceDiagram
     dao->>dao: Enable Treasuries reserve carbon project tokens and reserve managers
     Note over dao: $ npx hardhat enable-permissions --network mumbai
     dao->>dao: Seed CT Treasuries with carbon projects
-    Note over dao: $ npx hardhat project-seed --network mumbai
+    Note over dao: $ npx hardhat project-seed --multiple-treasuries --network mumbai
     dao->>dao: Deposit carbon project tokens in CT Treasuries
     Note over dao: $ npx hardhat deposit-seed --multiple-treasuries --network mumbai
     Backend->>Backend: Update Treasury and ERC20 addresses
