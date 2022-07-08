@@ -5,6 +5,7 @@ const { getDeployer } = require('../accounts');
 const { parseCommaSeparatedValues } = require('../utils');
 const ctTreasuryAbi = require('../../abi/CTTreasury.json');
 const carbonCreditAbi = require('../../abi/CarbonCredit.json');
+const projects = require('./projects.json');
 
 task('deposit-seed', 'Deposits predefined amount of ERC1155 to CT Treasury')
   .addParam(
@@ -54,35 +55,18 @@ task('deposit-seed', 'Deposits predefined amount of ERC1155 to CT Treasury')
     console.log('\nStarting deposits...');
 
     /**
-     * @type {Array<{ projectId: number, tokenAmount: number, treasuryAddress: string | undefined }>}
+     * @type {Array<{ projectId: number, tokenAmount: number, treasuryAddressIndex: number }>}
      */
     let deposits;
 
-    if (!multipleTreasuries) {
-      deposits = [
-        { projectId: 1,  tokenAmount: 5000,  treasuryAddress: treasuryAddresses[0] }
-      ];
+    if (multipleTreasuries) {
+      deposits = projects;
     } else {
-      deposits = [
-        { projectId: 1,  tokenAmount: 5000,  treasuryAddress: treasuryAddresses[0] },
-        { projectId: 2,  tokenAmount: 6000,  treasuryAddress: treasuryAddresses[0] },
-        { projectId: 3,  tokenAmount: 7000,  treasuryAddress: treasuryAddresses[0] },
-        { projectId: 4,  tokenAmount: 15000, treasuryAddress: treasuryAddresses[3] },
-        { projectId: 5,  tokenAmount: 9000,  treasuryAddress: treasuryAddresses[1] },
-        { projectId: 6,  tokenAmount: 10000, treasuryAddress: treasuryAddresses[3] },
-        { projectId: 7,  tokenAmount: 10000, treasuryAddress: treasuryAddresses[0] },
-        { projectId: 8,  tokenAmount: 11000, treasuryAddress: treasuryAddresses[3] },
-        { projectId: 9,  tokenAmount: 7000,  treasuryAddress: treasuryAddresses[3] },
-        { projectId: 10, tokenAmount: 20000, treasuryAddress: treasuryAddresses[0] },
-        { projectId: 11, tokenAmount: 13000, treasuryAddress: treasuryAddresses[0] },
-        { projectId: 12, tokenAmount: 18000, treasuryAddress: treasuryAddresses[0] },
-        { projectId: 13, tokenAmount: 25000, treasuryAddress: treasuryAddresses[2] },
-        { projectId: 14, tokenAmount: 14000, treasuryAddress: treasuryAddresses[4] },
-        { projectId: 15, tokenAmount: 10000, treasuryAddress: treasuryAddresses[0] },
-      ];
+      deposits = projects.slice(0, 1);
     }
 
-    for (const { projectId, tokenAmount, treasuryAddress } of deposits) {
+    for (const { projectId, tokenAmount, treasuryAddressIndex } of deposits) {
+      const treasuryAddress = treasuryAddresses[treasuryAddressIndex];
       assert(treasuryAddress != null, 'Treasury address is undefined.')
       const treasuryContract = new ethers.Contract(treasuryAddress, ctTreasuryAbi, ownerWallet);
 
