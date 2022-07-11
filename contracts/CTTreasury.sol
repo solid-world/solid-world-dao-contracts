@@ -111,13 +111,6 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
     mapping(address => mapping(uint256 => uint256)) public carbonProjectTons;
 
     /**
-     * @notice carbonProjectBalances
-     * @dev mapping with token, tokenId and owner address as keys to store the amount of each ERC1155 carbon project owner deposited
-     * @return uint256
-     */
-    mapping(address => mapping(uint256 => mapping(address => uint256))) public carbonProjectBalances;
-
-    /**
      * @notice registry
      * @dev mapping with STATUS as key to store an array of addresses
      * @return array of addresses
@@ -296,7 +289,6 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         CT.mint(_owner, projectAmount);
         CT.mint(DAOTreasury, daoAmount);
 
-        carbonProjectBalances[_token][_tokenId][_owner] += _amount;
         carbonProjectTons[_token][_tokenId] += _amount;
         totalReserves += _amount;
 
@@ -323,14 +315,11 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         address _token,
         uint256 _tokenId,
         uint256 _amountToSell,
-        // address _owner,
         address _buyer
     ) external returns (bool) {
-        require(initialized, "Contract was not initialized yet");
         require(permissions[STATUS.RESERVETOKEN][_token], "CT Treasury: reserve token not permitted");
         require(carbonProjects[_token][_tokenId].isActive, "CT Treasury: carbon project not active");
         require(carbonProjectTons[_token][_tokenId] >= _amountToSell, "CT Treasury: carbon project insuficient ERC1155 balance");
-        // require(carbonProjectBalances[_token][_tokenId][_owner] >= _amountToSell, "CT Treasury: owner carbon project insuficient ERC1155 balance");
 
         (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksInThePeriod(block.timestamp, carbonProjects[_token][_tokenId].contractExpectedDueDate);
         require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
@@ -359,7 +348,6 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         CT.transferFrom(_buyer, DAOTreasury, daoAmount);
         CT.burnFrom(_buyer, projectAmount);
 
-        // carbonProjectBalances[_token][_tokenId][_owner] -= _amountToSell;
         carbonProjectTons[_token][_tokenId] -= _amountToSell;
         totalReserves -= _amountToSell;
 
