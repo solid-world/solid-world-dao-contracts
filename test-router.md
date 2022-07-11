@@ -114,7 +114,18 @@ Example: `["0xC814c7BbF175F541f4Da27f9d8E7Ce12aa981497",1,5000,1672444800,1,fals
 To make a deposit in CT Carbon Treasury `owner` can call `depositReserveToken()` function setting address of Carbon Project Credit `_token`, token id `_tokenId`, amount to deposit `_amount` and address of owner in `_owner` as parameters.
  
 > * Before execute deposit function the owner needs to allow CT Carbon Treasury spend same amount of Carbon Project Credit Tokens using ERC1155 `setApprovalForAll()` function
-> * This function mint to the `_owner` the same amount of Carbon Project Credit deposited in CT tokens, increase `_owner` `carbonProjectBalances` and smart contract `carbonProjectTons`
+> * This function mint to the `_owner` the same amount of Carbon Project Credit deposited in CT tokens, increase `_token` and `_tokenId` deposited `carbonProjectTons` value
 > * Only active `carbonProject` can be deposited
+
+## 5. Make a sell
+ 
+### 5.1. Buy Carbon Project Credit in CT Carbon Treasury
+ 
+To buy Carbon Project Credit in CT Carbon Treasury `_buyer_` can call `sell()` function setting address of Carbon Project Credit `_token`, token id `_tokenId`, amount of Carbon Projesct Credit to sell `_amountToSell` and address of buyer in `_buyer` as parameters.
+ 
+> * Before execute sell function the `_buyer` needs to allow CT Carbon Treasury spend the amount to pay of CT ERC20 tokens using ERC20 `approve()` function
+> * This function transfer from de CT Treasury to the `_buyer_` the `_amountToSell` of Carbon Project Credit tokens, transfer from the `_buyer` to the DAO address the calculated fee amount of CTERC20, burn from the `_buyer` the amount of CTERC20 to pay for the project and decrease `_token` and `_tokenId` deposited `carbonProjectTons` value
+> * Only active `carbonProject` can be selled
+> * The  `_token` and `_tokenId` balance `carbonProjectTons` value nedds to be equal or more than `_amountToSell`
  
 

@@ -61,6 +61,12 @@ For verification the contract after deployment run:
 npx hardhat verify --network {rinkeby | ropsten | main | mumbai} DEPLOYED_CONTRACT_ADDRESS PARAM1 PARAM_N
 ```
 
+For deploy multiple treasuries for tests, run:
+
+```
+$ npx hardhat deploy --multiple-treasuries --network  {rinkeby | ropsten | main | mumbai}
+```
+
 ## Available tasks
 
 ### Print accounts
@@ -81,36 +87,40 @@ npx hardhat export-abi
 
 These tasks can be used to automatize the creation of CT Treasuries for tests.
 
+For overview of how deploy and set CT Treasury for test, see the [Deployment Flow Diagram](https://github.com/solid-world/solid-world-dao-contracts/blob/v0.9.1/docs/mumbai-deployment-flow.md)
+
 - Add funds to deployer, policy and guardian accounts on target network
 - Create `secrets.json` (see `secrets.json.example`): add Etherscan API key and Infura API key
 - Create `.env` (see `.env.example`): add deployer, guardian and policy credentials
-- Add to `.env` ERC-1155 carbon project token address
-- Add to `.env` CT Treasuries addresses
+- Add to `.env` `CARBON_PROJECT_ERC1155_ADDRESS` (ERC-1155 carbon project token address)
+- Add to `.env` `CTTREASURIES_ADDRESSES` (CT Treasuries addresses that you wanna run the tasks)
 - Before execute these tasks, you need to deploy ERC-1155 carbon project token and mint the tokens to deployer account
+
+If you wanna run the tasks in multiple treasuries, use the flag `--multiple-treasuries`
 
 Initialize CT Treasuries:
 ```sh
-npx hardhat initialize
+npx hardhat initialize --network  {rinkeby | ropsten | main | mumbai}
 ```
 
 Disable CT Treasuries timelocks:
 ```sh
-npx hardhat disable-timelock
+npx hardhat disable-timelock --network  {rinkeby | ropsten | main | mumbai}
 ```
 
 Enable CT Treasuries reserve carbon project tokens and reserve managers:
 ```sh
-npx hardhat enable-permissions
+npx hardhat enable-permissions --network  {rinkeby | ropsten | main | mumbai}
 ```
 
 Seed CT Treasuries with carbon projects:
 ```sh
-npx hardhat project-seed
+npx hardhat project-seed --network  {rinkeby | ropsten | main | mumbai}
 ```
 
 Deposit carbon project tokens in CT Treasuries:
 ```sh
-npx hardhat deposit-seed
+npx hardhat deposit-seed --network  {rinkeby | ropsten | main | mumbai}
 ```
 
 ## Run unit tests
