@@ -48,7 +48,10 @@ task('deposit-seed', 'Deposits predefined amount of ERC1155 to CT Treasury')
 
     for (const [index, treasuryAddress] of treasuryAddresses.entries()) {
       const approveTx = await carbonProjectTokenContract.setApprovalForAll(treasuryAddress, true);
-      await approveTx.wait();
+      const receipt = await approveTx.wait();
+      if (receipt.status !== 1) {
+        throw new Error(`Transaction failed. Tx: ${receipt.transactionHash}`)
+      }
       console.log('Approve CT Treasury %s tx: %s', pico.green(index + 1), pico.green(approveTx.hash));
     }
 
@@ -76,7 +79,10 @@ task('deposit-seed', 'Deposits predefined amount of ERC1155 to CT Treasury')
         tokenAmount,
         ownerWallet.address
       );
-      await tx.wait();
+      const receipt = await tx.wait();
+      if (receipt.status !== 1) {
+        throw new Error(`Transaction failed. Tx: ${receipt.transactionHash}`)
+      }
 
       console.log('Deposit Project %s tx: %s', pico.green(projectId), pico.green(tx.hash));
     }

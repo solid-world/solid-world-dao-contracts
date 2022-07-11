@@ -62,7 +62,10 @@ task('project-seed', 'Create Carbon Projects in CT Treasuries')
       const tx = await treasuryContract.createOrUpdateCarbonProject([
         carbonProjectTokenAddress, projectId, tokenAmount, deliveryDate, 1, true, false, false
       ]);
-      await tx.wait();
+      const receipt = await tx.wait();
+      if (receipt.status !== 1) {
+        throw new Error(`Transaction failed. Tx: ${receipt.transactionHash}`)
+      }
 
       console.log('Add Project %s tx: %s', pico.green(projectId), pico.green(tx.hash));
     }

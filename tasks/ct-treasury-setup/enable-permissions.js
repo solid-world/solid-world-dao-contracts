@@ -48,11 +48,17 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
       console.log('Start enable-permissions CT Treasury address: '.padStart(24), pico.green(address));
 
       const enableToken = await ctTreasuryContract.enable(0, carbonProjectTokenAddress)
-      await enableToken.wait()
+      const enableTokenReceipt = await enableToken.wait()
+      if (enableTokenReceipt.status !== 1) {
+        throw new Error(`Transaction failed. Tx: ${enableTokenReceipt.transactionHash}`)
+      }
       console.log('CT Treasury enable carbon project token tx: '.padStart(24), pico.green(enableToken.hash));
 
       const enableManager = await ctTreasuryContract.enable(1, guardianWallet.address)
-      await enableManager.wait()
+      const enableManagerReceipt = await enableManager.wait()
+      if (enableManagerReceipt.status !== 0) {
+        throw new Error(`Transaction failed. Tx: ${enableManagerReceipt.transactionHash}`)
+      }
       console.log('CT Treasury enable manager tx: '.padStart(24), pico.green(enableManager.hash));
 
       console.log('Finish enable-permissions CT Treasury address: '.padStart(24), pico.green(address));

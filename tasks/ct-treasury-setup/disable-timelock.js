@@ -36,11 +36,17 @@ task('disable-timelock', 'Disable CT Treasury Timelock')
       console.log('Start disable-timelock CT Treasury address: '.padStart(24), pico.green(address));
 
       const disablePermit = await ctTreasuryContract.permissionToDisableTimelock();
-      await disablePermit.wait();
+      const disablePermitReceipt = await disablePermit.wait();
+      if (disablePermitReceipt.status !== 1) {
+        throw new Error(`Transaction failed. Tx: ${disablePermitReceipt.transactionHash}`)
+      }
       console.log('CT Treasury permit to disable timelock tx: '.padStart(24), pico.green(disablePermit.hash));
 
       const disable = await ctTreasuryContract.disableTimelock()
-      await disable.wait()
+      const disableTimelockReceipt = await disable.wait()
+      if (disableTimelockReceipt.status !== 1) {
+        throw new Error(`Transaction failed. Tx: ${disableTimelockReceipt.transactionHash}`)
+      }
       console.log('CT Treasury disable timelock tx: '.padStart(24), pico.green(disable.hash));
 
       console.log('Finish disable-timelock CT Treasury address: '.padStart(24), pico.green(address));

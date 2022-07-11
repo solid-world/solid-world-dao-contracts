@@ -36,7 +36,10 @@ task('initialize', 'Initialize CT Treasury')
       console.log('Start initialize CT Treasury address: '.padStart(24), pico.green(address));
 
       const initialize = await ctTreasuryContract.initialize();
-      await initialize.wait();
+      const receipt = await initialize.wait();
+      if (receipt.status !== 1) {
+        throw new Error(`Transaction failed. Tx: ${receipt.transactionHash}`)
+      }
       console.log('CT Treasury initialize tx: '.padStart(24), pico.green(initialize.hash));
 
       console.log('Finish initialize CT Treasury address: '.padStart(24), pico.green(address));
