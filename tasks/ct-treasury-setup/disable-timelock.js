@@ -1,19 +1,33 @@
+const assert = require('node:assert');
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
 const { getDeployer } = require('../accounts');
+const { parseCommaSeparatedValues } = require('../utils');
 const ctTreasuryAbi = require('../../abi/CTTreasury.json');
 
 task('disable-timelock', 'Disable CT Treasury Timelock')
+  .addParam(
+    'treasuries',
+    'Comma-separated treasury addresses (fallback to env.CTTREASURIES_ADDRESSES)',
+    process.env.CTTREASURIES_ADDRESSES,
+  )
+  .addFlag('multipleTreasuries', 'Proceeds multiple treasuries')
   .setAction(async (taskArgs, hre) => {
-    await hre.run('compile')
+    assert(taskArgs.treasuries !== '', "Argument '--treasuries' should not be empty.");
+
+    await hre.run('compile');
 
     const { ethers } = hre;
+    const { multipleTreasuries } = taskArgs;
 
     const deployerWallet = await getDeployer(ethers);
-    console.log(pico.dim('Governor: '.padStart(10) + pico.green(deployerWallet.address)));
+    console.log('Governor:', pico.green(deployerWallet.address));
 
-    const treasuryAddresses = process.env.CTTREASURIES_ADDRESSES.split(',');
-    console.log(pico.dim('CT Treasuries: '.padStart(10) + pico.green(treasuryAddresses)));
+    let treasuryAddresses = parseCommaSeparatedValues(taskArgs.treasuries);
+    if (!multipleTreasuries) {
+      treasuryAddresses = treasuryAddresses.slice(0, 1);
+    }
+    console.log('Treasuries:', treasuryAddresses);
 
     console.log('\n');
 
@@ -22,11 +36,17 @@ task('disable-timelock', 'Disable CT Treasury Timelock')
       console.log('Start disable-timelock CT Treasury address: '.padStart(24), pico.green(address));
 
       const disablePermit = await ctTreasuryContract.permissionToDisableTimelock();
-      await disablePermit.wait();
+      const disablePermitReceipt = await disablePermit.wait();
+      if (disablePermitReceipt.status !== 1) {
+        throw new Error(`Transaction failed. Tx: ${disablePermitReceipt.transactionHash}`)
+      }
       console.log('CT Treasury permit to disable timelock tx: '.padStart(24), pico.green(disablePermit.hash));
 
       const disable = await ctTreasuryContract.disableTimelock()
-      await disable.wait()
+      const disableTimelockReceipt = await disable.wait()
+      if (disableTimelockReceipt.status !== 1) {
+        throw new Error(`Transaction failed. Tx: ${disableTimelockReceipt.transactionHash}`)
+      }
       console.log('CT Treasury disable timelock tx: '.padStart(24), pico.green(disable.hash));
 
       console.log('Finish disable-timelock CT Treasury address: '.padStart(24), pico.green(address));
