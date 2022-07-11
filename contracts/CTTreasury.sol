@@ -67,7 +67,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
     }
     
     event Deposited(address indexed token, uint256 indexed tokenId, address indexed owner, uint256 amount);
-    event Sold(uint256 offerId, address indexed token, uint256 indexed tokenId, address indexed owner, address buyer, uint256 amount, uint256 totalValue);
+    event Sold(address indexed token, uint256 indexed tokenId, address indexed buyer, uint256 carbonProjectTokenAmount, uint256 ctTokenAmount);
     event UpdatedInfo(address indexed token, uint256 indexed tokenId, bool isActive);
     event ChangedTimelock(bool timelock);
     event SetOnChainGovernanceTimelock(uint256 blockNumber);
@@ -305,10 +305,65 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
     }
 
     /**
-     * @notice TODO: sell issue #49
+     * @notice sell
+     * @notice function to sell an _amountToSell of ERC1155 carbon project to _buyer upon payment of the projectAmount price and daoAmount fees in CT Tokens
+     * @dev only permitted reserve tokens are accepted
+     * @dev only active carbon projects are accepted
+     * @dev CT Treasury ERC1155 token balance needs to be more or equal than _amountToSell
+     * @dev _buyer CT token balance needs to be more or equal than amountToPay
+     * @dev _buyer need to allow this contract spend amountToPay CT token before execute this function
+     * @dev update CT Treasury carbonProjectTons balance
+     * @param _token address
+     * @param _tokenId unint256
+     * @param _amountToSell unint256
+     * @param _buyer address
      * @return true     
      */
-    function sell() external returns (bool) {
+    function sell(
+        address _token,
+        uint256 _tokenId,
+        uint256 _amountToSell,
+        // address _owner,
+        address _buyer
+    ) external returns (bool) {
+        require(initialized, "Contract was not initialized yet");
+        require(permissions[STATUS.RESERVETOKEN][_token], "CT Treasury: reserve token not permitted");
+        require(carbonProjects[_token][_tokenId].isActive, "CT Treasury: carbon project not active");
+        require(carbonProjectTons[_token][_tokenId] >= _amountToSell, "CT Treasury: carbon project insuficient ERC1155 balance");
+        // require(carbonProjectBalances[_token][_tokenId][_owner] >= _amountToSell, "CT Treasury: owner carbon project insuficient ERC1155 balance");
+
+        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksInThePeriod(block.timestamp, carbonProjects[_token][_tokenId].contractExpectedDueDate);
+        require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
+
+        (, uint256 projectAmount, uint256 daoAmount) = payout(
+            weeksUntilDelivery,
+            _amountToSell,
+            carbonProjects[_token][_tokenId].projectDiscountRate,
+            daoLiquidityFee,
+            CT.decimals()
+        );
+
+        uint256 amountToPay = projectAmount + daoAmount;
+
+        require((CT.balanceOf(_buyer)) >= amountToPay, "CT Treasury: buyer insuficient CT Token balance");
+        require((CT.allowance(_buyer, address(this))) >= amountToPay, "CT Treasury: buyer not approved this contract spend CT Token");
+
+        IERC1155(_token).safeTransferFrom( 
+            address(this), 
+            _buyer,
+            _tokenId, 
+            _amountToSell, 
+            "data"
+        );
+
+        CT.transferFrom(_buyer, DAOTreasury, daoAmount);
+        CT.burnFrom(_buyer, projectAmount);
+
+        // carbonProjectBalances[_token][_tokenId][_owner] -= _amountToSell;
+        carbonProjectTons[_token][_tokenId] -= _amountToSell;
+        totalReserves -= _amountToSell;
+
+        emit Sold(_token, _tokenId, _buyer, _amountToSell, amountToPay);
         return true;
     }
 
