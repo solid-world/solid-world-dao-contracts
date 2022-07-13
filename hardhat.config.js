@@ -12,7 +12,7 @@ require('./tasks/ct-treasury-setup/enable-permissions');
 require('./tasks/ct-treasury-seed/project-seed');
 require('./tasks/ct-treasury-seed/deposit-seed');
 
-const { accountsSecrets, mnemonic, etherscanApiKey, infuraKey } = require('./secrets.json');
+const { accountsSecrets, etherscanApiKey, polygonscanApiKey, infuraKey } = require('./secrets.json');
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -41,17 +41,7 @@ module.exports = {
     ropsten: {
       url: 'https://ropsten.infura.io/v3/' + infuraKey,
       gas: 10000000,
-      accounts: { mnemonic: mnemonic }
-    },
-    testnet: {
-      url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
-      gas: 10000000,
-      accounts: { mnemonic: mnemonic }
-    },
-    main: {
-      url: 'https://bsc-dataseed.binance.org/',
-      gas: 10000000,
-      accounts: { mnemonic: mnemonic }
+      accounts: accountsSecrets
     },
     mumbai: {
       url: 'https://rpc-mumbai.maticvigil.com',
@@ -60,11 +50,17 @@ module.exports = {
     },
     polygon: {
       url: 'https://polygon-rpc.com',
-      accounts: { mnemonic: mnemonic },
+      accounts: accountsSecrets,
       timeout: 100000,
     }
   },
-  etherscan: {
-    apiKey: etherscanApiKey
-  },
+	etherscan: {
+		apiKey: {
+			rinkeby: etherscanApiKey,
+      goerli: etherscanApiKey,
+			ropsten: etherscanApiKey,
+			polygonMumbai: polygonscanApiKey,
+			polygon: polygonscanApiKey
+		}
+	}
 };

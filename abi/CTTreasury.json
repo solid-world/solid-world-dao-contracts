@@ -159,12 +159,6 @@
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "offerId",
-				"type": "uint256"
-			},
-			{
 				"indexed": true,
 				"internalType": "address",
 				"name": "token",
@@ -179,25 +173,19 @@
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
 				"name": "buyer",
 				"type": "address"
 			},
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "amount",
+				"name": "carbonProjectTokenAmount",
 				"type": "uint256"
 			},
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "totalValue",
+				"name": "ctTokenAmount",
 				"type": "uint256"
 			}
 		],
@@ -329,35 +317,6 @@
 			}
 		],
 		"stateMutability": "pure",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "carbonProjectBalances",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -972,7 +931,28 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_token",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_tokenId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_amountToSell",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_buyer",
+				"type": "address"
+			}
+		],
 		"name": "sell",
 		"outputs": [
 			{

@@ -56,7 +56,7 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
 
       const enableManager = await ctTreasuryContract.enable(1, guardianWallet.address)
       const enableManagerReceipt = await enableManager.wait()
-      if (enableManagerReceipt.status !== 0) {
+      if (enableManagerReceipt.status !== 1) {
         throw new Error(`Transaction failed. Tx: ${enableManagerReceipt.transactionHash}`)
       }
       console.log('CT Treasury enable manager tx: '.padStart(24), pico.green(enableManager.hash));

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 //Example of Carbon Credit token ERC-1155
 
 // File: @openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol
