@@ -6,23 +6,60 @@ This repository contains all Solid World DAO Smart Contracts.
 
 For more information about DAO visit our site: https://solid.world
 
-## Testnet contract addresses and source codes
+## Testnet contract addresses and verified codes
+
 The smart contracts was deployed at Polygon Mumbai Test Network and the source code was verified on Polygon scan.
 
-### SCT Solid Dao Management (authority)
+#### Solid Dao Management (Authority)
 
-- Address: `0x54005ab145e74d6354fe81390523e67dc40da64f`
-- Source: https://mumbai.polygonscan.com/address/0x54005ab145e74d6354fe81390523e67dc40da64f#code
+- Address: `0xE3D044eB20160894E9DA09B12F2fD5A4B120B7FD`
+- Source: https://mumbai.polygonscan.com/address/0xE3D044eB20160894E9DA09B12F2fD5A4B120B7FD#code
 
-### SCTERC20 Token
+### Test CT ERC20 Tokens and CT Treasuries
 
-- Address: `0x8fEa7A87FC01305e48C7F7d69609b243f98D4648`
-- Source: https://mumbai.polygonscan.com/address/0x8fEa7A87FC01305e48C7F7d69609b243f98D4648#code
+#### Forest Conservation
 
-### SCT Carbon Treasury
+- CT Treasury Address: 0xF6f092322aE97d9587a8ECb24FdAeA21789069ED
+- Source: https://mumbai.polygonscan.com/address/0xF6f092322aE97d9587a8ECb24FdAeA21789069ED#code
 
-- Address: `0xd0c087bd1e939e56ef064dbab2dbbcb87013fea0`
-- Source: https://mumbai.polygonscan.com/address/0xd0c087bd1e939e56ef064dbab2dbbcb87013fea0#code
+- CT Token Address:  0xB86E0aac28069bc93c458F0753ec3ba3acd70DAF
+- Source: https://mumbai.polygonscan.com/address/0xB86E0aac28069bc93c458F0753ec3ba3acd70DAF#code
+
+
+#### Livestock
+
+- CT Treasury Address: 0xD5f90a386531082508C05bb83E291d88C86033E1
+- Source: https://mumbai.polygonscan.com/address/0xD5f90a386531082508C05bb83E291d88C86033E1#code
+
+- CT Token Address:  0x2c1dA70b73BF922A1Fc3E2239b152FF50963F6FB
+- Source: https://mumbai.polygonscan.com/address/0x2c1dA70b73BF922A1Fc3E2239b152FF50963F6FB#code
+
+
+#### Waste Management
+
+- CT Treasury Address: 0x5911A373902c95f207Ed1b5589D05D03a013257a
+- Source: https://mumbai.polygonscan.com/address/0x5911A373902c95f207Ed1b5589D05D03a013257a#code
+
+- CT Token Address:  0x2733F7842b3d49A976217fE66285D73077E500ea
+- Source: https://mumbai.polygonscan.com/address/0x2733F7842b3d49A976217fE66285D73077E500ea#code
+
+
+#### Agriculture
+
+- CT Treasury Address: 0x5911A373902c95f207Ed1b5589D05D03a013257a
+- Source: https://mumbai.polygonscan.com/address/0x5911A373902c95f207Ed1b5589D05D03a013257a#code
+
+- CT Token Address:  0x67BC82123d91fdF926BFC681C896272351d15065
+- Source: https://mumbai.polygonscan.com/address/0x67BC82123d91fdF926BFC681C896272351d15065#code
+
+#### Energy Production
+
+- CT Treasury Address: 0x62DFE4d624aE80C62bB847eEC7683AC6fc6f494e
+- Source: https://mumbai.polygonscan.com/address/0x62DFE4d624aE80C62bB847eEC7683AC6fc6f494e#code
+
+- CT Token Address:  0xD15aDC5425e4661720A70B93fAc8CAB28d9c258C
+- Source: https://mumbai.polygonscan.com/address/0xD15aDC5425e4661720A70B93fAc8CAB28d9c258C#code
+
 
 ## Testnet Carbon Credit Token
 
@@ -35,15 +72,15 @@ To access the Carbon Credit and the NFT addresses of Solid Marketplace on Mumbai
 - Address: `0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299`
 - Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299
 
-### Policy
-
-- Address: `0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299`
-- Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299
-
 ### Guardian
 
-- Address: `0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299`
-- Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299
+- Address: `0x94cd0f84fec287f2426e90f0d6653ba8fa29bd8e`
+- Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-29-25.630697000Z--94cd0f84fec287f2426e90f0d6653ba8fa29bd8e
+
+### Policy
+
+- Address: `0x513906d9b238955b7e4a499ad98e0b90f9503eb4`
+- Source: https://github.com/solid-world/solid-world-dao-contracts/blob/f72db030ba5ee792252e46743ee0511bff503e68/UTC--2022-01-25T14-29-49.236558000Z--513906d9b238955b7e4a499ad98e0b90f9503eb4
 
 ## How to deploy to network
 

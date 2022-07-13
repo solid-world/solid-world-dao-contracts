@@ -1,6 +1,7 @@
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
 const { getDeployer } = require('./accounts');
+const { setTimeout } = require("timers/promises");
 
 task('deploy-treasury', 'Deploys Treasury contract and corresponded ERC20 Token')
   .addParam('solidDaoManagement', 'Address of SolidDaoManagement contract')
@@ -36,8 +37,47 @@ task('deploy-treasury', 'Deploys Treasury contract and corresponded ERC20 Token'
       2
     );
 
-    await ctToken.initialize(treasury.address)
-
-    console.log('Treasury Address: '.padStart(24), pico.green(treasury.address));
     console.log('CT Token Address: '.padStart(24), pico.green(ctToken.address));
+    console.log('Treasury Address: '.padStart(24), pico.green(treasury.address));
+    console.log('Verifing treasury...', pico.green(treasuryName));
+
+    await setTimeout(20000);
+
+    try {
+      await run("verify:verify", {
+        address: ctToken.address,
+        constructorArguments: [
+          tokenSymbol,
+          tokenSymbol
+        ]
+      });
+  
+      await run("verify:verify", {
+        address: treasury.address,
+        constructorArguments: [
+          solidDaoManagement,
+          ctToken.address,
+          0,
+          treasuryName,
+          '0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299',
+          2
+        ]
+      });
+    } catch (err) {
+      if (err.message.includes("Reason: Already Verified")) {
+        console.log("Contract is already verified!");
+      } else {
+        console.log(err.message)
+      }
+    }
+
+    const initializeCtToken = await ctToken.initialize(treasury.address)
+    const receiptInitializeCtToken = await initializeCtToken.wait();
+
+    if (receiptInitializeCtToken.status !== 1) {
+      console.log(`initialize CT Token transaction failed: ${receiptInitializeCtToken.transactionHash}`)
+    }
+
+    console.log('CT Token initialized', pico.green(receiptInitializeCtToken.transactionHash));
+
   });

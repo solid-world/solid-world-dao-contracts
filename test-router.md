@@ -119,12 +119,20 @@ To make a deposit in CT Carbon Treasury `owner` can call `depositReserveToken()`
 
 ## 5. Make a sell
  
-### 5.1. Buy Carbon Project Credit in CT Carbon Treasury
+### 5.1 Get the total price to be paid for Carbon Project Credit tokens
+
+To get the correct amount in CT Tokens to be paid for buy you need to call `payout()` function providing `weeksUntilDelivery` of Carbon Project, `_amountToSell`, `projectDiscountRate` of Carbon Project,`daoLiquidityFee` of Treasury and CTERC20 token decimals `18` as parameters.
+
+This function returns the projectAmount and daoAmount values.
+
+> * To get Carbon Project informations for use in this function you can call `carbonProject` and set the `_token` and `_tokenId` as parameters
+
+### 5.2. Buy Carbon Project Credit in CT Carbon Treasury
  
 To buy Carbon Project Credit in CT Carbon Treasury `_buyer` can call `sell()` function setting address of Carbon Project Credit `_token`, token id `_tokenId`, amount of Carbon Project Credit to buy `_amountToSell` and address of buyer in `_buyer` as parameters.
  
 > * Before execute sell function the `_buyer` needs to allow CT Carbon Treasury spend the amount to pay of CT ERC20 tokens using ERC20 `approve()` function
 > * This function transfer from de CT Treasury to the `_buyer_` the `_amountToSell` of Carbon Project Credit tokens, transfer from the `_buyer` to the DAO address the calculated fee amount of CTERC20, burn from the `_buyer` the amount of CTERC20 to pay for the project and decrease `_token` and `_tokenId` deposited `carbonProjectTons` value
-> * Only active `carbonProject` can be selled
+> * Only active `carbonProject` can be sold
 > * The  `_token` and `_tokenId` balance `carbonProjectTons` value nedds to be equal or more than `_amountToSell`
  

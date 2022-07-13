@@ -1,6 +1,7 @@
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
 const { getAccounts, getDeployer} = require('./accounts');
+const { setTimeout } = require("timers/promises");
 
 task('deploy', 'Deploys DAO Management, predefined Treasury and ERC20 contracts')
   .addFlag('multipleTreasuries', 'Includes multiple predefined treasuries and ERC20 tokens deployment')
@@ -34,6 +35,30 @@ task('deploy', 'Deploys DAO Management, predefined Treasury and ERC20 contracts'
     );
     await solidDaoManagement.deployed()
     console.log('DAO Management Address: '.padStart(24), pico.green(solidDaoManagement.address));
+
+    console.log('Verifing...', pico.green('DAO Management'));
+
+    await setTimeout(20000);
+
+    try {
+      await run("verify:verify", {
+        address: solidDaoManagement.address,
+        constructorArguments: [
+          governor,
+          guardian,
+          policy,
+          vault,
+        ]
+      })
+    } catch (err) {
+      if (err.message.includes("Reason: Already Verified")) {
+        console.log("Contract is already verified!");
+      } else {
+        console.log(err.message);
+      }
+    }
+
+    console.log('Finish verify ', pico.green('DAO Management'));
 
     /**
      * Treasuries and ERC20 tokens deployment

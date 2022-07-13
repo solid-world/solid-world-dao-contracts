@@ -12,7 +12,7 @@ require('./tasks/ct-treasury-setup/enable-permissions');
 require('./tasks/ct-treasury-seed/project-seed');
 require('./tasks/ct-treasury-seed/deposit-seed');
 
-const { accountsSecrets, mnemonic, etherscanApiKey, infuraKey } = require('./secrets.json');
+const { accountsSecrets, etherscanApiKey, polygonscanApiKey, infuraKey } = require('./secrets.json');
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -43,16 +43,6 @@ module.exports = {
       gas: 10000000,
       accounts: accountsSecrets
     },
-    testnet: {
-      url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
-      gas: 10000000,
-      accounts: accountsSecrets
-    },
-    main: {
-      url: 'https://bsc-dataseed.binance.org/',
-      gas: 10000000,
-      accounts: accountsSecrets
-    },
     mumbai: {
       url: 'https://rpc-mumbai.maticvigil.com',
       accounts: accountsSecrets,
@@ -64,7 +54,13 @@ module.exports = {
       timeout: 100000,
     }
   },
-  etherscan: {
-    apiKey: etherscanApiKey
-  },
+	etherscan: {
+		apiKey: {
+			rinkeby: etherscanApiKey,
+      goerli: etherscanApiKey,
+			ropsten: etherscanApiKey,
+			polygonMumbai: polygonscanApiKey,
+			polygon: polygonscanApiKey
+		}
+	}
 };
