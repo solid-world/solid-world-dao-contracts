@@ -5,11 +5,12 @@ const { setTimeout } = require("timers/promises");
 
 task('deploy', 'Deploys DAO Management, predefined Treasury and ERC20 contracts')
   .addFlag('multipleTreasuries', 'Includes multiple predefined treasuries and ERC20 tokens deployment')
+  .addFlag('noVerify', 'Skip contracts verification')
   .setAction(async (taskArgs, hre) => {
     await hre.run('compile')
 
     const { ethers } = hre;
-    const { multipleTreasuries } = taskArgs;
+    const { multipleTreasuries, noVerify } = taskArgs;
 
     const deployerWallet = await getDeployer(ethers);
 
@@ -36,29 +37,31 @@ task('deploy', 'Deploys DAO Management, predefined Treasury and ERC20 contracts'
     await solidDaoManagement.deployed()
     console.log('DAO Management Address: '.padStart(24), pico.green(solidDaoManagement.address));
 
-    console.log('Verifing...', pico.green('DAO Management'));
+    if (!noVerify) {
+      console.log('Verifying...', pico.green('DAO Management'));
 
-    await setTimeout(20000);
+      await setTimeout(20000);
 
-    try {
-      await run("verify:verify", {
-        address: solidDaoManagement.address,
-        constructorArguments: [
-          governor,
-          guardian,
-          policy,
-          vault,
-        ]
-      })
-    } catch (err) {
-      if (err.message.includes("Reason: Already Verified")) {
-        console.log("Contract is already verified!");
-      } else {
-        console.log(err.message);
+      try {
+        await run("verify:verify", {
+          address: solidDaoManagement.address,
+          constructorArguments: [
+            governor,
+            guardian,
+            policy,
+            vault,
+          ]
+        })
+      } catch (err) {
+        if (err.message.includes("Reason: Already Verified")) {
+          console.log("Contract is already verified!");
+        } else {
+          console.log(err.message);
+        }
       }
-    }
 
-    console.log('Finish verify ', pico.green('DAO Management'));
+      console.log('Finish verify ', pico.green('DAO Management'));
+    }
 
     /**
      * Treasuries and ERC20 tokens deployment
