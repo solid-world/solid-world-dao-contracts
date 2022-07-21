@@ -8,6 +8,7 @@ task('deploy-treasury', 'Deploys Treasury contract and corresponded ERC20 Token'
   .addParam('treasuryName', 'Name of the treasury')
   .addOptionalParam('tokenName', 'Name of the corresponded ERC20 token')
   .addParam('tokenSymbol', 'Symbol of the corresponded ERC20 token')
+  .addFlag('noVerify', 'Skip contracts verification')
   .setAction(async (taskArgs, hre) => {
     await hre.run('compile')
 
@@ -16,7 +17,8 @@ task('deploy-treasury', 'Deploys Treasury contract and corresponded ERC20 Token'
       solidDaoManagement,
       treasuryName,
       tokenSymbol,
-      tokenName = tokenSymbol
+      tokenName = tokenSymbol,
+      noVerify
     } = taskArgs;
 
     const deployerWallet = await getDeployer(ethers);
@@ -39,35 +41,38 @@ task('deploy-treasury', 'Deploys Treasury contract and corresponded ERC20 Token'
 
     console.log('CT Token Address: '.padStart(24), pico.green(ctToken.address));
     console.log('Treasury Address: '.padStart(24), pico.green(treasury.address));
-    console.log('Verifing treasury...', pico.green(treasuryName));
 
-    await setTimeout(20000);
+    if (!noVerify) {
+      console.log('Verifying treasury...', pico.green(treasuryName));
 
-    try {
-      await run("verify:verify", {
-        address: ctToken.address,
-        constructorArguments: [
-          tokenSymbol,
-          tokenSymbol
-        ]
-      });
-  
-      await run("verify:verify", {
-        address: treasury.address,
-        constructorArguments: [
-          solidDaoManagement,
-          ctToken.address,
-          0,
-          treasuryName,
-          '0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299',
-          2
-        ]
-      });
-    } catch (err) {
-      if (err.message.includes("Reason: Already Verified")) {
-        console.log("Contract is already verified!");
-      } else {
-        console.log(err.message)
+      await setTimeout(20000);
+
+      try {
+        await run("verify:verify", {
+          address: ctToken.address,
+          constructorArguments: [
+            tokenSymbol,
+            tokenSymbol
+          ]
+        });
+
+        await run("verify:verify", {
+          address: treasury.address,
+          constructorArguments: [
+            solidDaoManagement,
+            ctToken.address,
+            0,
+            treasuryName,
+            '0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299',
+            2
+          ]
+        });
+      } catch (err) {
+        if (err.message.includes("Reason: Already Verified")) {
+          console.log("Contract is already verified!");
+        } else {
+          console.log(err.message)
+        }
       }
     }
 
