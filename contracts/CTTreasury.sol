@@ -361,7 +361,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      * @param _token address
      * @param _tokenId unint256
      * @param _amountOut unint256
-     * @return uint256 - ERC20 amount that payer needs to pay. Returns -1 if there is an error in calculation.
+     * @return amountIn uint256 - ERC20 amount that payer needs to pay. Returns 0 if there is an error in calculation.
      */
     function simulateSell(address _token, uint256 _tokenId, uint256 _amountOut) view public returns (uint256 amountIn) {
         (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksInThePeriod(
@@ -370,7 +370,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         );
 
         if (!mathOK) {
-            return -1;
+            return 0;
         }
 
         (, uint256 projectAmount, uint256 daoAmount) = payout(
