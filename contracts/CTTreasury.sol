@@ -356,6 +356,35 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
     }
 
     /**
+     * @notice simulateSell
+     * @notice Simulates swapping erc20 to erc1155
+     * @param _token address
+     * @param _tokenId unint256
+     * @param _amountOut unint256
+     * @return uint256 - ERC20 amount that payer needs to pay. Returns -1 if there is an error in calculation.
+     */
+    function simulateSell(address _token, uint256 _tokenId, uint256 _amountOut) view public returns (uint256 amountIn) {
+        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksInThePeriod(
+            block.timestamp,
+            carbonProjects[_token][_tokenId].contractExpectedDueDate
+        );
+
+        if (!mathOK) {
+            return -1;
+        }
+
+        (, uint256 projectAmount, uint256 daoAmount) = payout(
+            weeksUntilDelivery,
+            _amountOut,
+            carbonProjects[_token][_tokenId].projectDiscountRate,
+            daoLiquidityFee,
+            CT.decimals()
+        );
+
+        return projectAmount + daoAmount;
+    }
+
+    /**
     @notice informs the investor a simulated return for deposit project's tokens
      */
     function simulateDepositWeekPeriod(
