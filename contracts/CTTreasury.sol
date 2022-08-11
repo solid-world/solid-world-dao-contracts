@@ -356,32 +356,38 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
     }
 
     /**
-     * @notice simulateSell
+     * @notice simulateSwap
      * @notice Simulates swapping erc20 to erc1155
      * @param _token address
      * @param _tokenId unint256
-     * @param _amountOut unint256
-     * @return amountIn uint256 - ERC20 amount that payer needs to pay. Returns 0 if there is an error in calculation.
+     * @param _amountIn unint256
+     * @return amountOut uint256 - Total minted amount of ERC20. Returns 0 if there is an error in calculation.
+     * @return daoAmount uint256 - How many ERC20 tokens DAO receives
+     * @return userAmount uint256 - How many ERC20 tokens user receives
      */
-    function simulateSell(address _token, uint256 _tokenId, uint256 _amountOut) view public returns (uint256 amountIn) {
+    function simulateSwap(
+        address _token, uint256 _tokenId, uint256 _amountIn
+    ) view public returns (
+        uint256 amountOut, uint256 daoAmount, uint256 userAmount
+    ) {
         (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksInThePeriod(
             block.timestamp,
             carbonProjects[_token][_tokenId].contractExpectedDueDate
         );
 
         if (!mathOK) {
-            return 0;
+            return (0, 0, 0);
         }
 
-        (, uint256 projectAmount, uint256 daoAmount) = payout(
+        (, uint256 projectAmount, uint256 daoAmount_) = payout(
             weeksUntilDelivery,
-            _amountOut,
+            _amountIn,
             carbonProjects[_token][_tokenId].projectDiscountRate,
             daoLiquidityFee,
             CT.decimals()
         );
 
-        return projectAmount + daoAmount;
+        return (projectAmount + daoAmount_, daoAmount_, projectAmount);
     }
 
     /**
