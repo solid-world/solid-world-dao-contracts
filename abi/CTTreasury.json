@@ -1073,15 +1073,25 @@
 			},
 			{
 				"internalType": "uint256",
-				"name": "_amountOut",
+				"name": "_amountIn",
 				"type": "uint256"
 			}
 		],
-		"name": "simulateSell",
+		"name": "simulateSwap",
 		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "amountIn",
+				"name": "amountOut",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "daoAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "userAmount",
 				"type": "uint256"
 			}
 		],
