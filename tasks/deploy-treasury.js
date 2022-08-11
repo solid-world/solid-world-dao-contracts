@@ -1,7 +1,7 @@
 const { task } = require('hardhat/config');
 const pico = require('picocolors');
 const { getDeployer } = require('./accounts');
-const { setTimeout } = require("timers/promises");
+const { verifyContract } = require('./utils');
 
 task('deploy-treasury', 'Deploys Treasury contract and corresponded ERC20 Token')
   .addParam('solidDaoManagement', 'Address of SolidDaoManagement contract')
@@ -42,40 +42,6 @@ task('deploy-treasury', 'Deploys Treasury contract and corresponded ERC20 Token'
     console.log('CT Token Address: '.padStart(24), pico.green(ctToken.address));
     console.log('Treasury Address: '.padStart(24), pico.green(treasury.address));
 
-    if (!noVerify) {
-      console.log('Verifying treasury...', pico.green(treasuryName));
-
-      await setTimeout(20000);
-
-      try {
-        await run("verify:verify", {
-          address: ctToken.address,
-          constructorArguments: [
-            tokenSymbol,
-            tokenSymbol
-          ]
-        });
-
-        await run("verify:verify", {
-          address: treasury.address,
-          constructorArguments: [
-            solidDaoManagement,
-            ctToken.address,
-            0,
-            treasuryName,
-            '0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299',
-            2
-          ]
-        });
-      } catch (err) {
-        if (err.message.includes("Reason: Already Verified")) {
-          console.log("Contract is already verified!");
-        } else {
-          console.log(err.message)
-        }
-      }
-    }
-
     const initializeCtToken = await ctToken.initialize(treasury.address)
     const receiptInitializeCtToken = await initializeCtToken.wait();
 
@@ -84,5 +50,28 @@ task('deploy-treasury', 'Deploys Treasury contract and corresponded ERC20 Token'
     }
 
     console.log('CT Token initialized', pico.green(receiptInitializeCtToken.transactionHash));
+
+    if (!noVerify) {
+      console.log('Verifying treasury...', pico.green(treasuryName));
+
+      const ctVerification = verifyContract(hre, ctToken.address, [
+        tokenSymbol,
+        tokenSymbol
+      ])
+
+      const treasuryVerification = verifyContract(hre, treasury.address, [
+        solidDaoManagement,
+        ctToken.address,
+        0,
+        treasuryName,
+        '0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299',
+        2
+      ])
+
+      await Promise.all([
+        ctVerification,
+        treasuryVerification,
+      ])
+    }
 
   });
