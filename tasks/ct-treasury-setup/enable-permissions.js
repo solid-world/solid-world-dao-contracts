@@ -8,8 +8,8 @@ const ctTreasuryAbi = require('../../abi/CTTreasury.json');
 task('enable-permissions', 'Enable CT Treasury Permissions')
   .addParam(
     'erc1155',
-    'ERC-1155 token address (fallback to env.CARBON_PROJECT_ERC1155_ADDRESS)',
-    process.env.CARBON_PROJECT_ERC1155_ADDRESS,
+    'ERC-1155 token address (fallback to env.CARBON_CREDIT_CONTRACT_ADDRESS)',
+    process.env.CARBON_CREDIT_CONTRACT_ADDRESS,
   )
   .addParam(
     'treasuries',
@@ -25,6 +25,8 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
 
     const { ethers } = hre;
     const { multipleTreasuries } = taskArgs;
+
+    console.log('Opening wallets...');
 
     const policyWallet = await getPolicy(ethers);
     const guardianWallet = await getGuardian(ethers);

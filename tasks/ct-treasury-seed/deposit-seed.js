@@ -10,8 +10,8 @@ const projects = require('./projects.json');
 task('deposit-seed', 'Deposits predefined amount of ERC1155 to CT Treasury')
   .addParam(
     'erc1155',
-    'ERC-1155 token address (fallback to env.CARBON_PROJECT_ERC1155_ADDRESS)',
-    process.env.CARBON_PROJECT_ERC1155_ADDRESS,
+    'ERC-1155 token address (fallback to env.CARBON_CREDIT_CONTRACT_ADDRESS)',
+    process.env.CARBON_CREDIT_CONTRACT_ADDRESS,
   )
   .addParam(
     'treasuries',

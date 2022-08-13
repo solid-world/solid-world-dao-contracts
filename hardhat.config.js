@@ -19,7 +19,7 @@ const { accountsSecrets, etherscanApiKey, polygonscanApiKey, infuraKey } = requi
  */
 module.exports = {
   solidity: {
-    version: '0.8.13',
+    version: '0.8.16',
     settings: {
       optimizer: {
         enabled: false,
@@ -44,12 +44,12 @@ module.exports = {
       accounts: accountsSecrets
     },
     mumbai: {
-      url: 'https://rpc-mumbai.maticvigil.com',
+      url: 'https://polygon-mumbai.infura.io/v3/' + infuraKey,
       accounts: accountsSecrets,
       timeout: 100000,
     },
     polygon: {
-      url: 'https://polygon-rpc.com',
+      url: 'https://polygon-mainnet.infura.io/v3/'+ infuraKey,
       accounts: accountsSecrets,
       timeout: 100000,
     }

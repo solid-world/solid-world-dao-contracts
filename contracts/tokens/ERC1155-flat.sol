@@ -6,7 +6,7 @@
 
 // OpenZeppelin Contracts (last updated v4.5.0) (utils/Address.sol)
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.16;
 
 /**
  * @dev Collection of functions related to the address type
@@ -204,7 +204,7 @@ library AddressUpgradeable {
 
 // OpenZeppelin Contracts (last updated v4.5.0) (proxy/utils/Initializable.sol)
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.16;
 
 
 /**
@@ -286,7 +286,7 @@ abstract contract Initializable {
 
 // OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.16;
 
 
 /**
@@ -326,7 +326,7 @@ abstract contract ContextUpgradeable is Initializable {
 
 // OpenZeppelin Contracts v4.4.1 (access/Ownable.sol)
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.16;
 
 
 
@@ -416,7 +416,7 @@ abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.16;
 
 /**
  * @dev Interface of the ERC165 standard, as defined in the
@@ -444,7 +444,7 @@ interface IERC165Upgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.16;
 
 
 
@@ -488,7 +488,7 @@ abstract contract ERC165Upgradeable is Initializable, IERC165Upgradeable {
 
 // OpenZeppelin Contracts (last updated v4.5.0) (token/ERC1155/IERC1155Receiver.sol)
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.16;
 
 
 /**
@@ -548,7 +548,7 @@ interface IERC1155ReceiverUpgradeable is IERC165Upgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC1155/IERC1155.sol)
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.16;
 
 
 /**
@@ -675,7 +675,7 @@ interface IERC1155Upgradeable is IERC165Upgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC1155/extensions/IERC1155MetadataURI.sol)
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.16;
 
 
 /**
@@ -699,7 +699,7 @@ interface IERC1155MetadataURIUpgradeable is IERC1155Upgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC1155/ERC1155.sol)
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.16;
 
 
 
@@ -1175,7 +1175,7 @@ contract ERC1155Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradea
 // File: CarbonCredit.sol
 
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.16;
 
 
 
