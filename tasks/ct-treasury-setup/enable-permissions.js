@@ -26,6 +26,8 @@ task('enable-permissions', 'Enable CT Treasury Permissions')
     const { ethers } = hre;
     const { multipleTreasuries } = taskArgs;
 
+    console.log('Opening wallets...');
+
     const policyWallet = await getPolicy(ethers);
     const guardianWallet = await getGuardian(ethers);
 

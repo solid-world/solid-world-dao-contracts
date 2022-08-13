@@ -35,6 +35,8 @@ async function getDeployer(ethers) {
   const file = process.env.DEPLOYER_JSON;
   const password = process.env.DEPLOYER_PASSWORD;
 
+  console.log('getDeployer - opening file', file);
+
   const json = await fs.readFile(file, 'utf8');
   const wallet = await ethers.Wallet.fromEncryptedJson(json, password);
   return new ethers.Wallet(wallet.privateKey, ethers.provider);
@@ -52,6 +54,8 @@ async function getDeployer(ethers) {
   const file = process.env.GUARDIAN_JSON;
   const password = process.env.GUARDIAN_PASSWORD;
 
+  console.log('getGuardian - opening file', file);
+
   const json = await fs.readFile(file, 'utf8');
   const wallet = await ethers.Wallet.fromEncryptedJson(json, password);
   return new ethers.Wallet(wallet.privateKey, ethers.provider);
@@ -68,6 +72,8 @@ async function getDeployer(ethers) {
 
   const file = process.env.POLICY_JSON;
   const password = process.env.POLICY_PASSWORD;
+
+  console.log('getPolicy - opening file', file);
 
   const json = await fs.readFile(file, 'utf8');
   const wallet = await ethers.Wallet.fromEncryptedJson(json, password);
