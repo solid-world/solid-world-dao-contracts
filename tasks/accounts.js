@@ -8,18 +8,18 @@ const assert = require('../lib/assert');
  */
 async function getAccounts(deployerAddress) {
   assert(
-    !!process.env.ADDRESS_GOVERNOR || !!deployerAddress,
+    !!process.env.GOVERNOR_ADDRESS || !!deployerAddress,
     "Governer's address is missing."
   );
-  assert(!!process.env.ADDRESS_GUARDIAN, "Guardian's address is missing.");
-  assert(!!process.env.ADDRESS_POLICY, "Policy's address is missing.");
-  assert(!!process.env.ADDRESS_VAULT, "Vault's address is missing.");
+  assert(!!process.env.GUARDIAN_ADDRESS, "Guardian's address is missing.");
+  assert(!!process.env.POLICY_ADDRESS, "Policy's address is missing.");
+  assert(!!process.env.VAULT_ADDRESS, "Vault's address is missing.");
 
   return {
-    governor: process.env.ADDRESS_GOVERNOR || deployerAddress,
-    guardian: process.env.ADDRESS_GUARDIAN,
-    policy: process.env.ADDRESS_POLICY,
-    vault: process.env.ADDRESS_VAULT,
+    governor: process.env.GOVERNOR_ADDRESS || deployerAddress,
+    guardian: process.env.GUARDIAN_ADDRESS,
+    policy: process.env.POLICY_ADDRESS,
+    vault: process.env.VAULT_ADDRESS,
   };
 }
 

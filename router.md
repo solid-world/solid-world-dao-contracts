@@ -4,7 +4,7 @@
 
 ### 1. Deploy CT SolidDaoManagement
 
-1.1. Deploy SolidDaoManagement and set `governor`, `guardian`, `policy` and `vault` addresses in constructor.
+1.1. Deploy SolidDaoManagement and set `governor`, `guardian`, `policy` and `vault` addresses in .env file or OS environment variables.
 
 ### 2. Deploy CTERC20 Token
 

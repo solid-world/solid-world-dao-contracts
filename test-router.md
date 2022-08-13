@@ -70,6 +70,7 @@ To nullify one pending `Order` you can call the `nullify()` function passing the
 > * The `Order` will be nullified and it will no longer be possible to execute
  
 ## 4. Create and edit carbon project
+
 ### 4.1. Create and Set Carbon Project as active in CT Carbon Treasury
  
 To set an active Carbon Project you need to call `createOrUpdateCarbonProject()` function, setting the `isActive` field as `true`.
