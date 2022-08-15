@@ -6,7 +6,7 @@ sequenceDiagram
     market->>market: Deploy Marketplace contracts
     Note over market: $ npx hardhat run ./scripts/deploy.js --network goerli <br>––––––––––––<br>Deployed contracts: <br>1. SolidAccessControl <br>2. NFT <br>3. CarbonCredit <br>4. SolidMarketplace
     market->>market: Create dummy projects
-    Note over market: Change "SOLID_MARKETPLACE_ADDRESS" in .env to just deployed SolidMarketplace address<br>––––––––––––<br>$ npx hardhat run ./mock/create-projects.js  --network goerli
+    Note over market: <br>SOLID_MARKETPLACE_ADDRESS=0xJustDeployedMarketplaceAddress npx hardhat run ./mock/create-projects.js  --network goerli
     dao->>dao: Deploy DAO Contracts
     Note over dao: $ npx hardhat deploy --multiple-treasuries --network goerli <br>––––––––––––<br>Deployed contracts: <br>1. SolidDaoManagement<br> 2. CTERC20TokenTemplate (deploy and initialize)<br> 3. CTTreasury<br> (5 predefined treasuries and erc20 tokens are deployed.)
     dao->>dao: Update .env
