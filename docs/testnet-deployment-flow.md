@@ -6,11 +6,11 @@ sequenceDiagram
     market->>market: Deploy Marketplace contracts
     Note over market: $ npx hardhat run ./scripts/deploy.js --network goerli <br>––––––––––––<br>Deployed contracts: <br>1. SolidAccessControl <br>2. NFT <br>3. CarbonCredit <br>4. SolidMarketplace
     market->>market: Create dummy projects
-    Note over market: Change "SOLID_MARKETPLACE_ADDRESS" in .env to just deployed SolidMarketplace address<br>––––––––––––<br>$ npx hardhat run ./mock/create-projects.js  --network goerli
+    Note over market: Change "MARKETPLACE_CONTRACT_ADDRESS" in .env to just deployed SolidMarketplace address<br>––––––––––––<br>$ npx hardhat run ./mock/create-projects.js  --network goerli
     dao->>dao: Deploy DAO Contracts
     Note over dao: $ npx hardhat deploy --multiple-treasuries --network goerli <br>––––––––––––<br>Deployed contracts: <br>1. SolidDaoManagement<br> 2. CTERC20TokenTemplate (deploy and initialize)<br> 3. CTTreasury<br> (5 predefined treasuries and erc20 tokens are deployed.)
     dao->>dao: Update .env
-    Note over dao: CARBON_PROJECT_ERC1155_ADDRESS - it is a CarbonCredit address deployed on the 1st step<br>CTTREASURIES_ADDRESSES - they are treasury addresses deployed on the previous step
+    Note over dao: CARBON_CREDIT_CONTRACT_ADDRESS - it is a CarbonCredit address deployed on the 1st step<br>CTTREASURIES_ADDRESSES - they are treasury addresses deployed on the previous step
     dao->>dao: Initialize Treasuries
     Note over dao: $ npx hardhat initialize --multiple-treasuries --network goerli
     dao->>dao: Disable Treasuries timelocks:
