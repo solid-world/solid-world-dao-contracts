@@ -29,10 +29,10 @@ async function getAccounts(deployerAddress) {
  * @return {Promise<import('ethers').Wallet>}
  */
 async function getDeployer(ethers) {
-  assert(!!process.env.DEPLOYER_JSON, "Deployer's JSON wallet is missing.");
+  assert(!!process.env.DEPLOYER_WALLET_JSON, "Deployer's JSON wallet is missing.");
   assert(!!process.env.DEPLOYER_PASSWORD, "Deployer's password is missing.");
 
-  const file = process.env.DEPLOYER_JSON;
+  const file = process.env.DEPLOYER_WALLET_JSON;
   const password = process.env.DEPLOYER_PASSWORD;
 
   console.log('getDeployer - opening file', file);
@@ -48,10 +48,10 @@ async function getDeployer(ethers) {
  * @return {Promise<import('ethers').Wallet>}
  */
  async function getGuardian(ethers) {
-  assert(!!process.env.GUARDIAN_JSON, "Guardian's JSON wallet is missing.");
+  assert(!!process.env.GUARDIAN_WALLET_JSON, "Guardian's JSON wallet is missing.");
   assert(!!process.env.GUARDIAN_PASSWORD, "Guardian's password is missing.");
 
-  const file = process.env.GUARDIAN_JSON;
+  const file = process.env.GUARDIAN_WALLET_JSON;
   const password = process.env.GUARDIAN_PASSWORD;
 
   console.log('getGuardian - opening file', file);
@@ -67,10 +67,10 @@ async function getDeployer(ethers) {
  * @return {Promise<import('ethers').Wallet>}
  */
  async function getPolicy(ethers) {
-  assert(!!process.env.POLICY_JSON, "Policy's JSON wallet is missing.");
+  assert(!!process.env.POLICY_WALLET_JSON, "Policy's JSON wallet is missing.");
   assert(!!process.env.POLICY_PASSWORD, "Policy's password is missing.");
 
-  const file = process.env.POLICY_JSON;
+  const file = process.env.POLICY_WALLET_JSON;
   const password = process.env.POLICY_PASSWORD;
 
   console.log('getPolicy - opening file', file);
