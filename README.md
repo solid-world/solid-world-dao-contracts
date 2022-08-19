@@ -80,6 +80,11 @@ For overview of how deploy and set CT Treasury for test, see the [Deployment Flo
 
 If you want to run the tasks in multiple treasuries, use the flag `--multiple-treasuries`
 
+Enable CT Treasuries reserve carbon project tokens and reserve managers:
+```sh
+npx hardhat enable-permissions --network  {rinkeby | goerli | main | mumbai}
+```
+
 Initialize CT Treasuries:
 ```sh
 npx hardhat initialize --network  {rinkeby | goerli | main | mumbai}
@@ -90,10 +95,6 @@ Disable CT Treasuries timelocks:
 npx hardhat disable-timelock --network  {rinkeby | goerli | main | mumbai}
 ```
 
-Enable CT Treasuries reserve carbon project tokens and reserve managers:
-```sh
-npx hardhat enable-permissions --network  {rinkeby | goerli | main | mumbai}
-```
 
 Seed CT Treasuries with carbon projects:
 ```sh
