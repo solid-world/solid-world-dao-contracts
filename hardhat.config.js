@@ -1,4 +1,4 @@
-require("@nomiclabs/hardhat-etherscan");
+require('@nomiclabs/hardhat-etherscan');
 require('@nomiclabs/hardhat-ethers');
 require('dotenv').config()
 
@@ -12,7 +12,11 @@ require('./tasks/ct-treasury-setup/enable-permissions');
 require('./tasks/ct-treasury-seed/project-seed');
 require('./tasks/ct-treasury-seed/deposit-seed');
 
-const { accountsSecrets, etherscanApiKey, polygonscanApiKey, infuraKey } = require('./secrets.json');
+const {
+  POLYGONSCAN_API_KEY = '',
+  ETHERSCAN_API_KEY = '',
+  INFURA_KEY = '',
+} = process.env
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -29,38 +33,33 @@ module.exports = {
   },
   networks: {
     rinkeby: {
-      url: 'https://rinkeby.infura.io/v3/' + infuraKey,
+      url: 'https://rinkeby.infura.io/v3/' + INFURA_KEY,
       gas: 10000000,
-      accounts: accountsSecrets
     },
     goerli: {
-      url: 'https://goerli.infura.io/v3/' + infuraKey,
+      url: 'https://goerli.infura.io/v3/' + INFURA_KEY,
       gas: 10000000,
-      accounts: accountsSecrets
     },
     ropsten: {
-      url: 'https://ropsten.infura.io/v3/' + infuraKey,
+      url: 'https://ropsten.infura.io/v3/' + INFURA_KEY,
       gas: 10000000,
-      accounts: accountsSecrets
     },
     mumbai: {
-      url: 'https://polygon-mumbai.infura.io/v3/' + infuraKey,
-      accounts: accountsSecrets,
+      url: 'https://polygon-mumbai.infura.io/v3/' + INFURA_KEY,
       timeout: 100000,
     },
     polygon: {
-      url: 'https://polygon-mainnet.infura.io/v3/'+ infuraKey,
-      accounts: accountsSecrets,
+      url: 'https://polygon-mainnet.infura.io/v3/' + INFURA_KEY,
       timeout: 100000,
     }
   },
-	etherscan: {
-		apiKey: {
-			rinkeby: etherscanApiKey,
-      goerli: etherscanApiKey,
-			ropsten: etherscanApiKey,
-			polygonMumbai: polygonscanApiKey,
-			polygon: polygonscanApiKey
-		}
-	}
+  etherscan: {
+    apiKey: {
+      rinkeby: ETHERSCAN_API_KEY,
+      goerli: ETHERSCAN_API_KEY,
+      ropsten: ETHERSCAN_API_KEY,
+      polygonMumbai: POLYGONSCAN_API_KEY,
+      polygon: POLYGONSCAN_API_KEY
+    }
+  }
 };
