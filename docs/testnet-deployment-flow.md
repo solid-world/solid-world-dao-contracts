@@ -39,10 +39,13 @@ sequenceDiagram
     backoffice->>backoffice: 11. Adjust Backoffice .env file
     Note over backoffice: Specify the backend URL to be used, recompile and deploy it
     
-    backoffice->>backoffice: 12. Create Practice Changes using Backoffice website	
+    backoffice->>backoffice: 12. Create SDG's using Backoffice website	
+    Note over backoffice: Add new 16 SDG's Tags to use in the projects
+    
+    backoffice->>backoffice: 13. Create Practice Changes using Backoffice website	
     Note over backoffice: Add new Practice Change Tags to use in the projects
     
-    backoffice->>backoffice: 13. Create projects using Backoffice website	
+    backoffice->>backoffice: 14. Create projects using Backoffice website	
     Note over backoffice: Add new projects and fill all the Project and Financial Info
     
     market->>market: [OLD] Create dummy projects
