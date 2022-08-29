@@ -12,22 +12,25 @@ sequenceDiagram
     initialSetup->>initialSetup: 2. Define Accounts and Wallets
     Note over initialSetup: Governor <br> Guardian <br> Policy <br> Vault
     
-    market->>market: 3. Deploy Marketplace contracts
+    dao->>dao: 3. Create .env
+    Note over dao: accessControlContract <br>NFTContract <br>CarbonCreditContract <br>solidMarketplaceContract
+    
+    market->>market: 4. Deploy Marketplace contracts
     Note over market: $ npx hardhat run ./scripts/deploy.js --network goerli <br>––––––––––––<br>Deployed contracts: <br>1. accessControlContract <br>2. NFTContract <br>3. CarbonCreditContract <br>4. solidMarketplaceContract
     
-    dao->>dao: 4. Deploy DAO Contracts
+    dao->>dao: 5. Deploy DAO Contracts
     Note over dao: $ npx hardhat deploy --multiple-treasuries --network goerli <br>––––––––––––<br>Deployed contracts: <br>1. SolidDaoManagement<br> 2. CTERC20TokenTemplate (deploy and initialize)<br> 3. CTTreasury<br> (5 predefined treasuries and erc20 tokens are deployed.)
     
-    dao->>dao: 5. Update .env
+    dao->>dao: 6. Update .env
     Note over dao: CARBON_CREDIT_CONTRACT_ADDRESS - it is a CarbonCredit address deployed on the step 3. <br>––––––––––––<br>CTTREASURIES_ADDRESSES - they are treasury addresses deployed on the previous step
     
-    dao->>dao: 6. Execute task ENABLING
+    dao->>dao: 7. Execute task ENABLING
     Note over dao: Task that enables Marketplace-Carbon Credit to be used at Treasuries <br>––––––––––––<br>(--multiple-treasuries activated)
     
-    dao->>dao: 7. Execute task to initialize Treasuries
+    dao->>dao: 8. Execute task to initialize Treasuries
     Note over dao: (--multiple-treasuries activated) <br>––––––––––––<br>$ npx hardhat initialize --multiple-treasuries --network goerli
     
-    backend->>backend: 8. Create Database
+    backend->>backend: 9. Create Database
     Note over backend: Use solid-world-marketplace-backend/sql/export_only_db_model.sql file
     
     dao->>dao: 9. Adjust .env Variables
