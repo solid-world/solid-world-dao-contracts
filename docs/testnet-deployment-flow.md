@@ -22,7 +22,7 @@ sequenceDiagram
     Note over dao: $ npx hardhat deploy --multiple-treasuries --network goerli <br>––––––––––––<br>Deployed contracts: <br>1. SolidDaoManagement<br> 2. CTERC20TokenTemplate (deploy and initialize)<br> 3. CTTreasury<br> (5 predefined treasuries and erc20 tokens are deployed.)
     
     dao->>dao: 6. Update .env
-    Note over dao: CARBON_CREDIT_CONTRACT_ADDRESS - it is a CarbonCredit address deployed on the step 3. <br>––––––––––––<br>CTTREASURIES_ADDRESSES - they are treasury addresses deployed on the previous step
+    Note over dao: CARBON_CREDIT_CONTRACT_ADDRESS - it is a CarbonCredit address deployed on the step 3. <br>––––––––––––<br>CTTREASURIES_ADDRESSES - they are treasury addresses deployed on the previous step<br> <br>––––––––––––<br> Update NFTContract <br>Update CarbonCreditContract <br>Update solidMarketplaceContract
     
     dao->>dao: 7. Execute task ENABLING
     Note over dao: Task that enables Marketplace-Carbon Credit to be used at Treasuries <br>––––––––––––<br>(--multiple-treasuries activated)
@@ -33,22 +33,22 @@ sequenceDiagram
     backend->>backend: 9. Create Database
     Note over backend: Use solid-world-marketplace-backend/sql/export_only_db_model.sql file
     
-    dao->>dao: 9. Adjust .env Variables
+    dao->>dao: 10. Adjust .env Variables
     Note over dao: Adjust Env Variables of solid-world-marketplace-backend with new database credentials and start its service
     
-    backend->>backend: 10. Insert Treasuries into DB via Swagger
+    backend->>backend: 11. Insert Treasuries into DB via Swagger
     Note over backend: JSON Objects to include treasuries into DB via Swagger / API
     
-    backoffice->>backoffice: 11. Adjust Backoffice .env file
+    backoffice->>backoffice: 12. Adjust Backoffice .env file
     Note over backoffice: Specify the backend URL to be used, recompile and deploy it
     
-    backoffice->>backoffice: 12. Create SDG's using Backoffice website	
+    backoffice->>backoffice: 13. Create SDG's using Backoffice website	
     Note over backoffice: Add new 16 SDG's Tags to use in the projects
     
-    backoffice->>backoffice: 13. Create Practice Changes using Backoffice website	
+    backoffice->>backoffice: 14. Create Practice Changes using Backoffice website	
     Note over backoffice: Add new Practice Change Tags to use in the projects
     
-    backoffice->>backoffice: 14. Create projects using Backoffice website	
+    backoffice->>backoffice: 15. Create projects using Backoffice website	
     Note over backoffice: Add new projects and fill all the Project and Financial Info
     
     market->>market: [OLD] Create dummy projects
