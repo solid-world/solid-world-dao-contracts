@@ -34,7 +34,7 @@ sequenceDiagram
     Note over backend: Use solid-world-marketplace-backend/sql/export_only_db_model.sql file
     
     dao->>dao: 10. Adjust .env Variables
-    Note over dao: Adjust Env Variables of solid-world-marketplace-backend with new database credentials and start its service
+    Note over dao: Adjust Env Variables of solid-world-marketplace-backend with new database credentials and start its service <br>––––––––––––<br> Change "MARKETPLACE_CONTRACT_ADDRESS" in .env to just deployed SolidMarketplace address
     
     backend->>backend: 11. Insert Treasuries into DB via Swagger
     Note over backend: JSON Objects to include treasuries into DB via Swagger / API
@@ -49,25 +49,20 @@ sequenceDiagram
     Note over backoffice: Add new Practice Change Tags to use in the projects
     
     backoffice->>backoffice: 15. Create projects using Backoffice website	
-    Note over backoffice: Add new projects and fill all the Project and Financial Info
-    
-    market->>market: [OLD] Create dummy projects
-    Note over market: Change "MARKETPLACE_CONTRACT_ADDRESS" in .env to just deployed SolidMarketplace address<br>––––––––––––<br>$ npx hardhat run ./mock/create-projects.js  --network goerli
-    
- 
-    
-    dao->>dao: Disable Treasuries timelocks:
+    Note over backoffice: Add new projects and fill all the Project and Financial Info <br>––––––––––––<br> Or add the projects automatically with: <br>$ npx hardhat run ./mock/create-projects.js  --network goerli
+        
+    dao->>dao: 16. Disable Treasuries timelocks:
     Note over dao: $ npx hardhat disable-timelock --multiple-treasuries --network goerli
     
-    dao->>dao: Enable Treasuries reserve carbon project tokens and reserve managers
+    dao->>dao: 17. Enable Treasuries reserve carbon project tokens and reserve managers
     Note over dao: $ npx hardhat enable-permissions --multiple-treasuries --network goerli
     
-    dao->>dao: Seed CT Treasuries with carbon projects
+    dao->>dao: 18. Seed CT Treasuries with carbon projects
     Note over dao: $ npx hardhat project-seed --multiple-treasuries --network goerli
     
-    dao->>dao: Deposit carbon project tokens in CT Treasuries
+    dao->>dao: 19. Deposit carbon project tokens in CT Treasuries
     Note over dao: $ npx hardhat deposit-seed --multiple-treasuries --network goerli
     
-    backend->>backend: Update Treasury and ERC20 addresses
+    backend->>backend: 20. Update Treasury and ERC20 addresses
     
 ```
