@@ -85,7 +85,13 @@
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "amount",
+				"name": "carbonProjectTokenAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "ctTokenAmount",
 				"type": "uint256"
 			}
 		],
