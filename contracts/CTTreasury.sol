@@ -66,7 +66,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         RESERVEMANAGER
     }
 
-    event Deposited(address indexed token, uint256 indexed tokenId, address indexed owner, uint256 amount);
+    event Deposited(address indexed token, uint256 indexed tokenId, address indexed owner, uint256 carbonProjectTokenAmount, uint256 ctTokenAmount);
     event Sold(address indexed token, uint256 indexed tokenId, address indexed buyer, uint256 carbonProjectTokenAmount, uint256 ctTokenAmount);
     event UpdatedInfo(address indexed token, uint256 indexed tokenId, bool isActive);
     event ChangedTimelock(bool timelock);
@@ -292,7 +292,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         carbonProjectTons[_token][_tokenId] += _amount;
         totalReserves += _amount;
 
-        emit Deposited(_token, _tokenId, _owner, _amount);
+        emit Deposited(_token, _tokenId, _owner, _amount, projectAmount + daoAmount);
         return true;
     }
 
