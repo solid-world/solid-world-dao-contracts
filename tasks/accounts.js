@@ -1,5 +1,5 @@
 const fs = require('fs/promises');
-const assert = require('../lib/assert');
+const assert = require('node:assert');
 
 /**
  * Returns addresses required for DAO Management contract

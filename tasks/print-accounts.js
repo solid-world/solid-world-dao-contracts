@@ -1,7 +1,7 @@
 const fs = require('fs/promises');
 const { task } = require('hardhat/config');
 const ethers = require('ethers');
-const assert = require('../lib/assert');
+const assert = require('node:assert');
 
 const files = [
   'UTC--2022-01-25T14-28-49.222357000Z--8b3a08b22d25c60e4b2bfd984e331568eca4c299',
