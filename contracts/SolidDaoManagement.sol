@@ -2,7 +2,6 @@
 pragma solidity 0.8.16;
 
 import "./interfaces/ISolidDaoManagement.sol";
-
 import "./lib/SolidDaoManaged.sol";
 
 /**

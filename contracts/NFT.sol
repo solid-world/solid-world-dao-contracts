@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "./lib/Strings.sol";
+import "./lib/StringsExtra.sol";
 
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
@@ -47,7 +47,7 @@ contract NFT is Initializable, ERC721Upgradeable, OwnableUpgradeable {
         override
         returns (string memory)
     {
-        return Strings.strConcat(baseMetadataURI, Strings.uint2str(_id));
+        return StringsExtra.strConcat(baseMetadataURI, StringsExtra.uint2str(_id));
     }
 
     /**

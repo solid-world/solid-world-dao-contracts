@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.16;
 
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./lib/SolidDaoManaged.sol";
-import "./lib/ERC1155Receiver.sol";
 import "./lib/SolidMath.sol";
 import "./interfaces/ICT.sol";
-import "./interfaces/IERC1155.sol";
 
 /**
  * @title Carbon Token Treasury (CTTTreasury) Template

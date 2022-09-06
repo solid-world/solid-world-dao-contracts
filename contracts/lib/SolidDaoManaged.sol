@@ -6,7 +6,7 @@ import "../interfaces/ISolidDaoManagement.sol";
 /**
  * @title Solid Dao Managed
  * @author Solid World DAO
- * @notice Abstract contratc to implement Solid Dao Management and access control modifiers 
+ * @notice Abstract contratc to implement Solid Dao Management and access control modifiers
  */
 abstract contract SolidDaoManaged {
 
@@ -24,7 +24,7 @@ abstract contract SolidDaoManaged {
         authority = _authority;
         emit AuthorityUpdated(_authority);
     }
-    
+
     /**
     * @notice Function modifier that can be used in other smart contracts
     * @dev Only governor address can call functions marked by this modifier
@@ -33,7 +33,7 @@ abstract contract SolidDaoManaged {
         require(msg.sender == authority.governor(), UNAUTHORIZED);
         _;
     }
-    
+
     /**
     * @notice Function modifier that can be used in other smart contracts
     * @dev Only guardian address can call functions marked by this modifier
@@ -42,7 +42,7 @@ abstract contract SolidDaoManaged {
         require(msg.sender == authority.guardian(), UNAUTHORIZED);
         _;
     }
-    
+
     /**
     * @notice Function modifier that can be used in other smart contracts
     * @dev Only policy address can call functions marked by this modifier
@@ -65,7 +65,7 @@ abstract contract SolidDaoManaged {
     * @notice Function to set and update Solid Dao Management smart contract address
     * @dev Emit AuthorityUpdated event
     * @param _newAuthority Address of the new Solid Dao Management smart contract
-    */ 
+    */
     function setAuthority(ISolidDaoManagement _newAuthority) external onlyGovernor {
         authority = _newAuthority;
         emit AuthorityUpdated(_newAuthority);
