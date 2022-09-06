@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity 0.8.16;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./SolidAccessControl.sol";
 import "./NFT.sol";
 import "./CarbonCredit.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract SolidMarketplace is Initializable, OwnableUpgradeable {
     uint256 public currentTokenID;
