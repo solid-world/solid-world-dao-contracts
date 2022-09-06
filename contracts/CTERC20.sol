@@ -2,9 +2,7 @@
 
 pragma solidity 0.8.16;
 
-import "./interfaces/IERC20.sol";
-import "./interfaces/IERC20Permit.sol";
-import "./lib/ERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 
 /**
  * @title CT ERC-20 Token Template
@@ -29,12 +27,12 @@ contract CTERC20TokenTemplate is ERC20Permit {
         _;
     }
 
-    constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol, 18) ERC20Permit(_name) {
+    constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) ERC20Permit(_name) {
         deployer = msg.sender;
-    }    
+    }
 
 
-    // @notice: After Token and Tresury have been deployed the Deployer need to initialize the Token informing 
+    // @notice: After Token and Tresury have been deployed the Deployer need to initialize the Token informing
     // which Treasury is going to manage him.
     function initialize(address _treasury) external {
         require(deployer == msg.sender, "Only Deployer must initialize the token");

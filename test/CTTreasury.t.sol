@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 
 import "../contracts/CTTreasury.sol";
 import "../contracts/SolidDaoManagement.sol";
-import "../contracts/tokens/ERC1155-flat.sol";
+import "../contracts/CarbonCredit.sol";
 import "../contracts/CTERC20.sol";
 
 
