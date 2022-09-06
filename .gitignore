@@ -21,7 +21,6 @@ remix.log
 node_modules
 
 # Secrets
-secrets.json
 .env
 
 # Hardhat directories

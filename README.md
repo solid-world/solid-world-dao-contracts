@@ -30,7 +30,6 @@ To access the Carbon Credit and the NFT addresses of Solid Marketplace on Goerli
 ## How to deploy to network
 
 - Add fund to deployer account on target network
-- Create `secrets.json` (see `secrets.json.example`): add Etherscan API key and Infura API key
 - Create `.env` (see `.env.example`): add deployer's creds, guardian, policy and vault addresses
 - Run the following command:
 
@@ -72,7 +71,6 @@ These tasks can be used to automatize the creation of CT Treasuries for tests.
 For overview of how deploy and set CT Treasury for test, see the [Deployment Flow Diagram](https://github.com/solid-world/solid-world-dao-contracts/blob/v0.9.1/docs/mumbai-deployment-flow.md)
 
 - Add funds to deployer, policy and guardian accounts on target network
-- Create `secrets.json` (see `secrets.json.example`): add Etherscan API key and Infura API key
 - Create `.env` (see `.env.example`): add deployer, guardian and policy credentials
 - Add to `.env` `CARBON_CREDIT_CONTRACT_ADDRESS` (ERC-1155 carbon project token address)
 - Add to `.env` `CTTREASURIES_ADDRESSES` (CT Treasuries addresses that you wanna run the tasks)
