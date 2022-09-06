@@ -7,10 +7,13 @@ task('export-abi', 'exports ABI files of contracts')
     await hre.run('compile');
 
     const files = [
+      'artifacts/contracts/CarbonCredit.sol/CarbonCredit.json',
       'artifacts/contracts/CTERC20.sol/CTERC20TokenTemplate.json',
       'artifacts/contracts/CTTreasury.sol/CTTreasury.json',
+      'artifacts/contracts/NFT.sol/NFT.json',
+      'artifacts/contracts/SolidAccessControl.sol/SolidAccessControl.json',
       'artifacts/contracts/SolidDaoManagement.sol/SolidDaoManagement.json',
-      'artifacts/contracts/tokens/ERC1155-flat.sol/CarbonCredit.json',
+      'artifacts/contracts/SolidMarketplace.sol/SolidMarketplace.json',
     ];
 
     files.forEach((file) => {
