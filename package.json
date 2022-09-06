@@ -16,9 +16,11 @@
     "url": "https://github.com/solid-world/solid-world-dao-contracts/issues"
   },
   "homepage": "https://github.com/solid-world/solid-world-dao-contracts#readme",
-  "devDependencies": {
+  "dependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
+    "@openzeppelin/contracts": "^4.7.3",
+    "@openzeppelin/contracts-upgradeable": "^4.7.3",
     "dotenv": "^16.0.0",
     "ethers": "^5.5.1",
     "hardhat": "^2.6.2",
