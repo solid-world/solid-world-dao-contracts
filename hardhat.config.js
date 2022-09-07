@@ -1,16 +1,11 @@
+const fs = require('node:fs');
 require('@nomiclabs/hardhat-etherscan');
 require('@nomiclabs/hardhat-ethers');
+require('hardhat-deploy');
 require('dotenv').config()
+const { ethers } = require('ethers')
 
-require('./tasks/deploy');
-require('./tasks/deploy-treasury');
 require('./tasks/export-abi');
-require('./tasks/print-accounts');
-require('./tasks/ct-treasury-setup/initialize');
-require('./tasks/ct-treasury-setup/disable-timelock');
-require('./tasks/ct-treasury-setup/enable-permissions');
-require('./tasks/ct-treasury-seed/project-seed');
-require('./tasks/ct-treasury-seed/deposit-seed');
 
 const {
   POLYGONSCAN_API_KEY = '',
@@ -61,5 +56,34 @@ module.exports = {
       polygonMumbai: POLYGONSCAN_API_KEY,
       polygon: POLYGONSCAN_API_KEY
     }
+  },
+  namedAccounts: {
+    deployer: decodePrivateKey(
+      process.env.DEPLOYER_JSON,
+      process.env.DEPLOYER_PASSWORD
+    ),
+    governor: {
+      polygon: process.env.GOVERNER_ADDRESS,
+      goerli: process.env.GOVERNER_ADDRESS
+    },
+    guardian: {
+      polygon: process.env.GUARDIAN_ADDRESS,
+      goerli: process.env.GUARDIAN_ADDRESS
+    },
+    policy: {
+      polygon: process.env.POLICY_ADDRESS,
+      goerli: process.env.POLICY_ADDRESS
+    },
+    vault: {
+      polygon: process.env.VAULT_ADDRESS,
+      goerli: process.env.VAULT_ADDRESS
+    },
+    daoTreasury: '0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299'
   }
-};
+}
+
+function decodePrivateKey(jsonFile, password) {
+  const json = fs.readFileSync(jsonFile, 'utf8')
+  const wallet = ethers.Wallet.fromEncryptedJsonSync(json, password)
+  return 'privatekey://' + wallet.privateKey
+}
