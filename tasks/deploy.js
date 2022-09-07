@@ -3,7 +3,7 @@ const pico = require('picocolors');
 const { getAccounts, getDeployer} = require('./accounts');
 const { verifyContract } = require('./utils');
 
-task('deploy', 'Deploys DAO Management, predefined Treasury and ERC20 contracts')
+task('deploy_deprecated', 'Deploys DAO Management, predefined Treasury and ERC20 contracts')
   .addFlag('multipleTreasuries', 'Includes multiple predefined treasuries and ERC20 tokens deployment')
   .addFlag('noVerify', 'Skip contracts verification')
   .setAction(async (taskArgs, hre) => {
