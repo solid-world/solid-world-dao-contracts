@@ -5,15 +5,7 @@ require('hardhat-deploy');
 require('dotenv').config()
 const { ethers } = require('ethers')
 
-require('./tasks/deploy');
-require('./tasks/deploy-treasury');
 require('./tasks/export-abi');
-require('./tasks/print-accounts');
-require('./tasks/ct-treasury-setup/initialize');
-require('./tasks/ct-treasury-setup/disable-timelock');
-require('./tasks/ct-treasury-setup/enable-permissions');
-require('./tasks/ct-treasury-seed/project-seed');
-require('./tasks/ct-treasury-seed/deposit-seed');
 
 const {
   POLYGONSCAN_API_KEY = '',
