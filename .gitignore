@@ -26,6 +26,7 @@ node_modules
 # Hardhat directories
 /artifacts
 /cache
+/deployments/localhost
 
 # Foundry outputs and cache
 /out

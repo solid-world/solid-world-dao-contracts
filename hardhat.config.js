@@ -46,6 +46,10 @@ module.exports = {
     polygon: {
       url: 'https://polygon-mainnet.infura.io/v3/' + INFURA_KEY,
       timeout: 100000,
+    },
+    localhost: {
+      url: 'http://127.0.0.1:8545',
+      timeout: 10000,
     }
   },
   etherscan: {
@@ -64,19 +68,23 @@ module.exports = {
     ),
     governor: {
       polygon: process.env.GOVERNER_ADDRESS,
-      goerli: process.env.GOVERNER_ADDRESS
+      goerli: process.env.GOVERNER_ADDRESS,
+      localhost: process.env.GOVERNER_ADDRESS,
     },
     guardian: {
       polygon: process.env.GUARDIAN_ADDRESS,
-      goerli: process.env.GUARDIAN_ADDRESS
+      goerli: process.env.GUARDIAN_ADDRESS,
+      localhost: process.env.GUARDIAN_ADDRESS,
     },
     policy: {
       polygon: process.env.POLICY_ADDRESS,
-      goerli: process.env.POLICY_ADDRESS
+      goerli: process.env.POLICY_ADDRESS,
+      localhost: process.env.POLICY_ADDRESS,
     },
     vault: {
       polygon: process.env.VAULT_ADDRESS,
-      goerli: process.env.VAULT_ADDRESS
+      goerli: process.env.VAULT_ADDRESS,
+      localhost: process.env.VAULT_ADDRESS,
     },
     daoTreasury: '0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299'
   }
