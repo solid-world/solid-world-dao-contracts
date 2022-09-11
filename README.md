@@ -6,6 +6,29 @@ This repository contains all Solid World DAO Smart Contracts.
 
 For more information about DAO visit our site: https://solid.world
 
+## Deployment
+
+Copy and populate environment variables:
+```shell
+cp .env.example .env
+```
+
+In order to deploy to localhost run:
+```shell
+yarn hardhat deploy --network localhost
+```
+Supported networks: localhost, goerli, polygon.
+
+## How to export addresses and ABI?
+
+In order to export contract addresses and ABI files to _contract-deployment.json_ run:
+```shell
+yarn hardhat export --export contract-deployment.json --network localhost
+```
+Supported networks: localhost, goerli, polygon.
+
+# Outdated Section
+
 ## Testnet Carbon Credit Token
 
 To access the Carbon Credit and the NFT addresses of Solid Marketplace on Goerli Testnet Smart Contracts please check this repository https://github.com/solid-world/solid-world-marketplace-contracts
