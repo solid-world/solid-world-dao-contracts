@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import "../contracts/Erc20Deployer.sol";
 import "../contracts/CTERC20.sol";
 
-contract CTTreasuryTest is Test {
+contract Erc20DeployerTest is Test {
     Erc20Deployer private erc20Deployer;
 
     address root = address(this);
