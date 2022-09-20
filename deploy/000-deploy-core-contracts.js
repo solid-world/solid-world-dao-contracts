@@ -1,14 +1,13 @@
 const func = async ({ getNamedAccounts, deployments }) => {
-  const { deployer, governor, guardian, policy, vault } =
-    await getNamedAccounts()
+  const { deployer } = await getNamedAccounts()
 
-  await deployments.deploy('SolidDaoManagement', {
+  const erc20Deployer = await deployments.deploy('Erc20Deployer', {
     from: deployer,
-    args: [governor, guardian, policy, vault],
+    args: [],
     log: true
   })
 
-  const SolidAccessControl = await deployments.deploy('SolidAccessControl', {
+  await deployments.deploy('SolidWorldManager', {
     from: deployer,
     args: [],
     log: true,
@@ -17,52 +16,7 @@ const func = async ({ getNamedAccounts, deployments }) => {
       execute: {
         init: {
           methodName: 'initialize',
-          args: []
-        }
-      }
-    }
-  })
-
-  const Nft = await deployments.deploy('NFT', {
-    from: deployer,
-    args: [],
-    log: true,
-    proxy: {
-      proxyContract: 'OpenZeppelinTransparentProxy',
-      execute: {
-        init: {
-          methodName: 'initialize',
-          args: ['NFT', 'NFT']
-        }
-      }
-    }
-  })
-
-  const CarbonCredit = await deployments.deploy('CarbonCredit', {
-    from: deployer,
-    args: [],
-    log: true,
-    proxy: {
-      proxyContract: 'OpenZeppelinTransparentProxy',
-      execute: {
-        init: {
-          methodName: 'initialize',
-          args: ['CarbonCredit']
-        }
-      }
-    }
-  })
-
-  await deployments.deploy('SolidMarketplace', {
-    from: deployer,
-    args: [],
-    log: true,
-    proxy: {
-      proxyContract: 'OpenZeppelinTransparentProxy',
-      execute: {
-        init: {
-          methodName: 'initialize',
-          args: [Nft.address, CarbonCredit.address, SolidAccessControl.address]
+          args: [erc20Deployer.address]
         }
       }
     }
