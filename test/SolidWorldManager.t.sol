@@ -12,7 +12,12 @@ contract SolidWorldManagerTest is Test {
 
     function setUp() public {
         manager = new SolidWorldManager();
-        manager.initialize(new Erc20Deployer());
+
+        CarbonCredit forwardContractBatch = new CarbonCredit();
+        forwardContractBatch.initialize("");
+        forwardContractBatch.transferOwnership(address(manager));
+
+        manager.initialize(new Erc20Deployer(), forwardContractBatch);
     }
 
     function testAddCategory() public {
@@ -70,7 +75,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(block.timestamp + 12),
                 discountRate: 1,
-                owner: address(this)
+                owner: vm.addr(1)
             })
         );
 
@@ -92,7 +97,7 @@ contract SolidWorldManagerTest is Test {
         assertEq(totalAmount, 10);
         assertEq(expectedDueDate, uint32(block.timestamp + 12));
         assertEq(discountRate, 1);
-        assertEq(owner, address(this));
+        assertEq(owner, vm.addr(1));
     }
 
     function testAddMultipleBatches() public {
@@ -109,7 +114,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(block.timestamp + 12),
                 discountRate: 1,
-                owner: address(this)
+                owner: vm.addr(1)
             })
         );
 
@@ -121,13 +126,34 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 20,
                 expectedDueDate: uint32(block.timestamp + 24),
                 discountRate: 1,
-                owner: address(this)
+                owner: vm.addr(1)
             })
         );
 
         assertEq(manager.getBatchIdsByProject(5).length, 2);
         assertEq(manager.getBatchIdsByProject(5)[0], 7);
         assertEq(manager.getBatchIdsByProject(5)[1], 11);
+    }
+
+    function testAddBatchIssuesERC1155Tokens() public {
+        manager.addCategory(3, "Test token", "TT");
+        manager.addProject(3, 5);
+
+        assertEq(manager.forwardContractBatch().balanceOf(address(this), 7), 0);
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                totalAmount: 10,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: vm.addr(1)
+            })
+        );
+
+        assertEq(manager.forwardContractBatch().balanceOf(vm.addr(1), 7), 10);
     }
 
     function testFailAddBatchWhenProjectDoesntExist() public {
@@ -139,7 +165,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(block.timestamp + 12),
                 discountRate: 1,
-                owner: address(this)
+                owner: vm.addr(1)
             })
         );
     }
@@ -156,7 +182,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(block.timestamp + 12),
                 discountRate: 1,
-                owner: address(this)
+                owner: vm.addr(1)
             })
         );
 
@@ -168,7 +194,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(block.timestamp + 12),
                 discountRate: 1,
-                owner: address(this)
+                owner: vm.addr(1)
             })
         );
     }
@@ -202,7 +228,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(block.timestamp),
                 discountRate: 1,
-                owner: address(0)
+                owner: vm.addr(1)
             })
         );
     }
@@ -219,7 +245,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(block.timestamp - 1),
                 discountRate: 1,
-                owner: address(0)
+                owner: vm.addr(1)
             })
         );
     }

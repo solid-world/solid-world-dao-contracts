@@ -4,6 +4,7 @@ pragma solidity 0.8.16;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./Erc20Deployer.sol";
+import "./CarbonCredit.sol";
 
 contract SolidWorldManager is Initializable, OwnableUpgradeable {
     /**
@@ -30,6 +31,11 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable {
      * @notice Contract that deploys new arbitrary ERC-20 contract. Allows this contract to mint tokens.
      */
     Erc20Deployer erc20Deployer;
+
+    /**
+     * @notice Contract that operates forward contract batch tokens (ERC-1155). Allows this contract to mint tokens.
+     */
+    CarbonCredit public forwardContractBatch;
 
     /**
      * @notice Mapping is used for checking if Category ID is already added
@@ -79,8 +85,12 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable {
      */
     mapping(uint256 => uint256[]) internal projectBatches;
 
-    function initialize(Erc20Deployer _erc20Deployer) public initializer {
+    function initialize(Erc20Deployer _erc20Deployer, CarbonCredit _forwardContractBatch)
+        public
+        initializer
+    {
         erc20Deployer = _erc20Deployer;
+        forwardContractBatch = _forwardContractBatch;
         __Ownable_init();
     }
 
@@ -116,6 +126,8 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable {
         batchIds[batch.id] = true;
         batches[batch.id] = batch;
         projectBatches[batch.projectId].push(batch.id);
+
+        forwardContractBatch.mint(batch.owner, batch.id, batch.totalAmount, new bytes(0));
     }
 
     function getProjectIdsByCategory(uint256 categoryId) public view returns (uint256[] memory) {
