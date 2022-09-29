@@ -56,6 +56,174 @@ contract SolidWorldManagerTest is Test {
         manager.addProject(3, 5);
     }
 
+    function testAddBatch() public {
+        manager.addCategory(3, "Test token", "TT");
+        manager.addProject(3, 5);
+
+        assertEq(manager.batchIds(7), false);
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                totalAmount: 10,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: address(this)
+            })
+        );
+
+        assertEq(manager.batchIds(7), true);
+
+        (
+            uint256 id,
+            uint8 status,
+            uint256 projectId,
+            uint256 totalAmount,
+            uint32 expectedDueDate,
+            uint8 discountRate,
+            address owner
+        ) = manager.batches(7);
+
+        assertEq(id, 7);
+        assertEq(status, 0);
+        assertEq(projectId, 5);
+        assertEq(totalAmount, 10);
+        assertEq(expectedDueDate, uint32(block.timestamp + 12));
+        assertEq(discountRate, 1);
+        assertEq(owner, address(this));
+    }
+
+    function testAddMultipleBatches() public {
+        manager.addCategory(3, "Test token", "TT");
+        manager.addProject(3, 5);
+
+        assertEq(manager.getBatchIdsByProject(5).length, 0);
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                totalAmount: 10,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: address(this)
+            })
+        );
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 11,
+                status: 0,
+                projectId: 5,
+                totalAmount: 20,
+                expectedDueDate: uint32(block.timestamp + 24),
+                discountRate: 1,
+                owner: address(this)
+            })
+        );
+
+        assertEq(manager.getBatchIdsByProject(5).length, 2);
+        assertEq(manager.getBatchIdsByProject(5)[0], 7);
+        assertEq(manager.getBatchIdsByProject(5)[1], 11);
+    }
+
+    function testFailAddBatchWhenProjectDoesntExist() public {
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                totalAmount: 10,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: address(this)
+            })
+        );
+    }
+
+    function testFailAddBatchWhenBatchAlreadyAdded() public {
+        manager.addCategory(3, "Test token", "TT");
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                totalAmount: 10,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: address(this)
+            })
+        );
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                totalAmount: 10,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: address(this)
+            })
+        );
+    }
+
+    function testFailAddBatchWhenOwnerIsNotDefined() public {
+        manager.addCategory(3, "Test token", "TT");
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                totalAmount: 10,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: address(0)
+            })
+        );
+    }
+
+    function testFailAddBatchWhenDueDateIsNow() public {
+        manager.addCategory(3, "Test token", "TT");
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                totalAmount: 10,
+                expectedDueDate: uint32(block.timestamp),
+                discountRate: 1,
+                owner: address(0)
+            })
+        );
+    }
+
+    function testFailAddBatchWhenDueDateInThePast() public {
+        manager.addCategory(3, "Test token", "TT");
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                totalAmount: 10,
+                expectedDueDate: uint32(block.timestamp - 1),
+                discountRate: 1,
+                owner: address(0)
+            })
+        );
+    }
+
     function assertNotEq(address a, address b) private {
         if (a == b) {
             emit log("Error: a != b not satisfied [address]");
