@@ -1,13 +1,13 @@
 const func = async ({ getNamedAccounts, deployments }) => {
   const { deployer } = await getNamedAccounts()
 
-  const erc20Deployer = await deployments.deploy('Erc20Deployer', {
+  const Erc20Deployer = await deployments.deploy('Erc20Deployer', {
     from: deployer,
     args: [],
     log: true
   })
 
-  const forwardContractBatch = await deployments.deploy('CarbonCredit', {
+  const ForwardContractBatch = await deployments.deploy('CarbonCredit', {
     from: deployer,
     args: [],
     log: true,
@@ -22,7 +22,7 @@ const func = async ({ getNamedAccounts, deployments }) => {
     }
   })
 
-  await deployments.deploy('SolidWorldManager', {
+  const SolidWorldManager = await deployments.deploy('SolidWorldManager', {
     from: deployer,
     args: [],
     log: true,
@@ -31,11 +31,20 @@ const func = async ({ getNamedAccounts, deployments }) => {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [erc20Deployer.address, forwardContractBatch.address]
+          args: [Erc20Deployer.address, ForwardContractBatch.address]
         }
       }
     }
   })
+
+  if (ForwardContractBatch.newlyDeployed) {
+    await deployments.execute(
+      'CarbonCredit',
+      { from: deployer, log: true },
+      'transferOwnership',
+      SolidWorldManager.address
+    )
+  }
 }
 
 module.exports = func
