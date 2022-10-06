@@ -1,0 +1,43 @@
+name: Tests
+
+on: [push]
+
+jobs:
+  test:
+    timeout-minutes: 5
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [18]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'yarn'
+
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+
+    - uses: actions/cache@v2
+      with:
+        path: ~/.cargo
+        key: ${{ runner.os }}-${{ env.FOUNDRY_VERSION }}
+
+    - name: Install Foundry
+      uses: foundry-rs/foundry-toolchain@v1
+      with:
+        version: nightly
+
+    - name: Run tests
+      run: yarn test
+
+    - name: Run snapshot
+      run: forge snapshot >> $GITHUB_STEP_SUMMARY
