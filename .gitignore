@@ -30,3 +30,5 @@ node_modules
 
 # Foundry outputs and cache
 /out
+
+.idea

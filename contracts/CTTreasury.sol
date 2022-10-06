@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: BUSL-1.1
-
 pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol";
@@ -11,10 +10,8 @@ import "./interfaces/ICT.sol";
 /**
  * @title Carbon Token Treasury (CTTTreasury) Template
  * @author Solid World DAO
- * @notice CT Treasury Template
  */
-contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
-
+contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
     /**
      * @notice CarbonProject
      * @dev struct to store carbon project details
@@ -66,14 +63,25 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         RESERVEMANAGER
     }
 
-    event Deposited(address indexed token, uint256 indexed tokenId, address indexed owner, uint256 carbonProjectTokenAmount, uint256 ctTokenAmount);
-    event Sold(address indexed token, uint256 indexed tokenId, address indexed buyer, uint256 carbonProjectTokenAmount, uint256 ctTokenAmount);
+    event Deposited(
+        address indexed token,
+        uint256 indexed tokenId,
+        address indexed owner,
+        uint256 carbonProjectTokenAmount,
+        uint256 ctTokenAmount
+    );
+    event Sold(
+        address indexed token,
+        uint256 indexed tokenId,
+        address indexed buyer,
+        uint256 carbonProjectTokenAmount,
+        uint256 ctTokenAmount
+    );
     event UpdatedInfo(address indexed token, uint256 indexed tokenId, bool isActive);
     event ChangedTimelock(bool timelock);
     event SetOnChainGovernanceTimelock(uint256 blockNumber);
     event Permissioned(STATUS indexed status, address token, bool result);
     event PermissionOrdered(STATUS indexed status, address token, uint256 index);
-
 
     /**
      * @notice ERC-20 Carbon Token address
@@ -86,7 +94,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      * @notice category of the Carbon Project this treasury manages
      * @dev variable to store the name of the category this contract manages. This is for info purposes.
      * @return string
-    */
+     */
     string public category;
 
     /**
@@ -215,13 +223,11 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         initialized = true;
     }
 
-
-
     /*
-    ************************************************************
-    ** CARBON PROJECT AREA
-    ************************************************************
-    */
+     ************************************************************
+     ** CARBON PROJECT AREA
+     ************************************************************
+     */
 
     /**
      * @notice createOrUpdateCarbonProject
@@ -231,9 +237,18 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      * @param _carbonProject CarbonProject
      * @return true
      */
-    function createOrUpdateCarbonProject(CarbonProject memory _carbonProject) external returns (bool) {
-        require(permissions[STATUS.RESERVEMANAGER][msg.sender], "SCT Treasury: reserve manager not permitted");
-        require(permissions[STATUS.RESERVETOKEN][_carbonProject.token], "SCT Treasury: reserve token not permitted");
+    function createOrUpdateCarbonProject(CarbonProject memory _carbonProject)
+        external
+        returns (bool)
+    {
+        require(
+            permissions[STATUS.RESERVEMANAGER][msg.sender],
+            "SCT Treasury: reserve manager not permitted"
+        );
+        require(
+            permissions[STATUS.RESERVETOKEN][_carbonProject.token],
+            "SCT Treasury: reserve token not permitted"
+        );
 
         carbonProjects[_carbonProject.token][_carbonProject.tokenId] = _carbonProject;
 
@@ -262,15 +277,30 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         address _owner
     ) external returns (bool) {
         require(initialized, "Contract was not initialized yet");
-        require(permissions[STATUS.RESERVETOKEN][_token], "CT Treasury: reserve token not permitted");
-        require(carbonProjects[_token][_tokenId].isActive, "CT Treasury: carbon project not active");
-        require((IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount, "CT Treasury: owner insuficient ERC1155 balance");
-        require((IERC1155(_token).isApprovedForAll(_owner, address(this))) , "CT Treasury: owner not approved this contract spend ERC1155");
+        require(
+            permissions[STATUS.RESERVETOKEN][_token],
+            "CT Treasury: reserve token not permitted"
+        );
+        require(
+            carbonProjects[_token][_tokenId].isActive,
+            "CT Treasury: carbon project not active"
+        );
+        require(
+            (IERC1155(_token).balanceOf(_owner, _tokenId)) >= _amount,
+            "CT Treasury: owner insuficient ERC1155 balance"
+        );
+        require(
+            (IERC1155(_token).isApprovedForAll(_owner, address(this))),
+            "CT Treasury: owner not approved this contract spend ERC1155"
+        );
 
-        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksInThePeriod(block.timestamp, carbonProjects[_token][_tokenId].contractExpectedDueDate);
+        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksBetween(
+            block.timestamp,
+            carbonProjects[_token][_tokenId].contractExpectedDueDate
+        );
         require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
 
-        (, uint256 projectAmount, uint256 daoAmount) = payout(
+        (uint256 projectAmount, uint256 daoAmount) = SolidMath.payout(
             weeksUntilDelivery,
             _amount,
             carbonProjects[_token][_tokenId].projectDiscountRate,
@@ -278,13 +308,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
             CT.decimals()
         );
 
-        IERC1155(_token).safeTransferFrom(
-            _owner,
-            address(this),
-            _tokenId,
-            _amount,
-            "data"
-        );
+        IERC1155(_token).safeTransferFrom(_owner, address(this), _tokenId, _amount, "data");
 
         CT.mint(_owner, projectAmount);
         CT.mint(DAOTreasury, daoAmount);
@@ -317,14 +341,26 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         uint256 _amountToSell,
         address _buyer
     ) external returns (bool) {
-        require(permissions[STATUS.RESERVETOKEN][_token], "CT Treasury: reserve token not permitted");
-        require(carbonProjects[_token][_tokenId].isActive, "CT Treasury: carbon project not active");
-        require(carbonProjectTons[_token][_tokenId] >= _amountToSell, "CT Treasury: carbon project insuficient ERC1155 balance");
+        require(
+            permissions[STATUS.RESERVETOKEN][_token],
+            "CT Treasury: reserve token not permitted"
+        );
+        require(
+            carbonProjects[_token][_tokenId].isActive,
+            "CT Treasury: carbon project not active"
+        );
+        require(
+            carbonProjectTons[_token][_tokenId] >= _amountToSell,
+            "CT Treasury: carbon project insuficient ERC1155 balance"
+        );
 
-        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksInThePeriod(block.timestamp, carbonProjects[_token][_tokenId].contractExpectedDueDate);
+        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksBetween(
+            block.timestamp,
+            carbonProjects[_token][_tokenId].contractExpectedDueDate
+        );
         require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
 
-        (, uint256 projectAmount, uint256 daoAmount) = payout(
+        (uint256 projectAmount, uint256 daoAmount) = SolidMath.payout(
             weeksUntilDelivery,
             _amountToSell,
             carbonProjects[_token][_tokenId].projectDiscountRate,
@@ -334,16 +370,16 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
 
         uint256 amountToPay = projectAmount + daoAmount;
 
-        require((CT.balanceOf(_buyer)) >= amountToPay, "CT Treasury: buyer insuficient CT Token balance");
-        require((CT.allowance(_buyer, address(this))) >= amountToPay, "CT Treasury: buyer not approved this contract spend CT Token");
-
-        IERC1155(_token).safeTransferFrom(
-            address(this),
-            _buyer,
-            _tokenId,
-            _amountToSell,
-            "data"
+        require(
+            (CT.balanceOf(_buyer)) >= amountToPay,
+            "CT Treasury: buyer insuficient CT Token balance"
         );
+        require(
+            (CT.allowance(_buyer, address(this))) >= amountToPay,
+            "CT Treasury: buyer not approved this contract spend CT Token"
+        );
+
+        IERC1155(_token).safeTransferFrom(address(this), _buyer, _tokenId, _amountToSell, "data");
 
         CT.transferFrom(_buyer, DAOTreasury, daoAmount);
         CT.burnFrom(_buyer, projectAmount);
@@ -366,11 +402,19 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      * @return userAmount uint256 - How many ERC20 tokens user receives
      */
     function simulateSwap(
-        address _token, uint256 _tokenId, uint256 _amountIn
-    ) view public returns (
-        uint256 amountOut, uint256 daoAmount, uint256 userAmount
-    ) {
-        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksInThePeriod(
+        address _token,
+        uint256 _tokenId,
+        uint256 _amountIn
+    )
+        public
+        view
+        returns (
+            uint256 amountOut,
+            uint256 daoAmount,
+            uint256 userAmount
+        )
+    {
+        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksBetween(
             block.timestamp,
             carbonProjects[_token][_tokenId].contractExpectedDueDate
         );
@@ -379,7 +423,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
             return (0, 0, 0);
         }
 
-        (, uint256 projectAmount, uint256 daoAmount_) = payout(
+        (uint256 projectAmount, uint256 daoAmount_) = SolidMath.payout(
             weeksUntilDelivery,
             _amountIn,
             carbonProjects[_token][_tokenId].projectDiscountRate,
@@ -398,15 +442,15 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
         uint256 _rate,
         uint256 _totalToken,
         uint256 _daoFee
-    ) view public returns (uint256 basisValue, uint256 toProjectOwner, uint256 toDAO) {
-        return payout(_numWeeks, _totalToken, _rate, _daoFee, CT.decimals());
+    ) public view returns (uint256 toProjectOwner, uint256 toDAO) {
+        return SolidMath.payout(_numWeeks, _totalToken, _rate, _daoFee, CT.decimals());
     }
 
     /*
-    ************************************************************
-    ** POLICY MANAGEMENT AREA
-    ************************************************************
-    */
+     ************************************************************
+     ** POLICY MANAGEMENT AREA
+     ************************************************************
+     */
 
     /**
      * @notice enable
@@ -418,10 +462,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      * @param _address address
      * @return true
      */
-    function enable(
-        STATUS _status,
-        address _address
-    ) external onlyPolicy returns(bool) {
+    function enable(STATUS _status, address _address) external onlyPolicy returns (bool) {
         require(_address != address(0), "SCT Treasury: invalid address");
         require(!timelockEnabled, "SCT Treasury: timelock enabled");
 
@@ -443,10 +484,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      * @param _address address
      * @return true
      */
-    function disable(
-        STATUS _status,
-        address _address
-    ) external onlyPolicy returns(bool) {
+    function disable(STATUS _status, address _address) external onlyPolicy returns (bool) {
         permissions[_status][_address] = false;
 
         emit Permissioned(_status, _address, false);
@@ -476,10 +514,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      * @param _address address
      * @return true
      */
-    function orderTimelock(
-        STATUS _status,
-        address _address
-    ) external onlyPolicy returns(bool) {
+    function orderTimelock(STATUS _status, address _address) external onlyPolicy returns (bool) {
         require(_address != address(0), "SCT Treasury: invalid address");
         require(timelockEnabled, "SCT Treasury: timelock is disabled, use enable");
 
@@ -505,7 +540,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      * @param _index uint256
      * @return true
      */
-    function execute(uint256 _index) external onlyPolicy returns(bool) {
+    function execute(uint256 _index) external onlyPolicy returns (bool) {
         require(timelockEnabled, "SCT Treasury: timelock is disabled, use enable");
 
         Order memory info = permissionOrder[_index];
@@ -526,29 +561,29 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
     }
 
     /*
-    ************************************************************
-    ** GOVERNOR MANAGEMENT AREA
-    ************************************************************
-    */
+     ************************************************************
+     ** GOVERNOR MANAGEMENT AREA
+     ************************************************************
+     */
 
     /**
-    * @notice function where the Governor sets the DAO liquidity fee
-    * @dev only governor can call this function
-    * @return true if everything goes well
-    * @param _daoLiquidityFee uint256 to store the DAO Liquidity Fee
-    */
-    function setDAOLiquidityFee(uint256 _daoLiquidityFee) external onlyGovernor returns(bool) {
+     * @notice function where the Governor sets the DAO liquidity fee
+     * @dev only governor can call this function
+     * @return true if everything goes well
+     * @param _daoLiquidityFee uint256 to store the DAO Liquidity Fee
+     */
+    function setDAOLiquidityFee(uint256 _daoLiquidityFee) external onlyGovernor returns (bool) {
         daoLiquidityFee = _daoLiquidityFee;
         return true;
     }
 
     /**
-    * @notice function where the Governor sets the DAO Smart Contract address
-    * @dev only governor can call this function
-    * @return true if everything goes well
-    * @param _daoAddress address to store the DAO Smart Contract address
-    */
-    function setDAOAddress(address _daoAddress) external onlyGovernor returns(bool) {
+     * @notice function where the Governor sets the DAO Smart Contract address
+     * @dev only governor can call this function
+     * @return true if everything goes well
+     * @param _daoAddress address to store the DAO Smart Contract address
+     */
+    function setDAOAddress(address _daoAddress) external onlyGovernor returns (bool) {
         DAOTreasury = _daoAddress;
         return true;
     }
@@ -560,7 +595,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      * @param _index uint256
      * @return true
      */
-    function nullify(uint256 _index) external onlyGovernor returns(bool) {
+    function nullify(uint256 _index) external onlyGovernor returns (bool) {
         permissionOrder[_index].nullify = true;
         return true;
     }
@@ -585,7 +620,10 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      */
     function disableTimelock() external onlyGovernor {
         require(timelockEnabled, "SCT Treasury: timelock already disabled");
-        require(onChainGovernanceTimelock != 0 && onChainGovernanceTimelock <= block.number, "SCT Treasury: governance timelock not expired yet");
+        require(
+            onChainGovernanceTimelock != 0 && onChainGovernanceTimelock <= block.number,
+            "SCT Treasury: governance timelock not expired yet"
+        );
         timelockEnabled = false;
         onChainGovernanceTimelock = 0;
         emit ChangedTimelock(false);
@@ -625,7 +663,13 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      * @notice onERC1155Received
      * @notice virtual function to allow contract accept ERC1155 tokens
      */
-    function onERC1155Received(address, address, uint256, uint256, bytes memory) public virtual returns (bytes4) {
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes memory
+    ) public virtual returns (bytes4) {
         return this.onERC1155Received.selector;
     }
 
@@ -633,8 +677,13 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver, SolidMath {
      * @notice onERC1155BatchReceived
      * @notice virtual function to allow contract accept ERC1155 tokens
      */
-    function onERC1155BatchReceived(address, address, uint256[] memory, uint256[] memory, bytes memory) public virtual returns (bytes4) {
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] memory,
+        uint256[] memory,
+        bytes memory
+    ) public virtual returns (bytes4) {
         return this.onERC1155BatchReceived.selector;
     }
-
 }

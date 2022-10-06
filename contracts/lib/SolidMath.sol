@@ -1,75 +1,81 @@
-// SPDX-License-Identifier: BUSL-1.1
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
 
+import "./ABDKMath64x64.sol";
+
 /**
- * @dev Solid DAO Math Operations and Constants.
+ * @notice Solid World DAO Math Operations and Constants.
+ * @author Solid World DAO
  */
-abstract contract SolidMath {
-
-    uint256 constant public WEEKS_IN_SECONDS = 604800;
-
+library SolidMath {
     /**
-    @notice BASIS define in which basis value the interest rate per week must be informed
-    */
-    uint256 constant BASIS = 1000000;
-
-    /**
-     * @dev Calculates the number of weeks between a period
-     * @param _initialDate uint256 initial date to be informed in seconds
-     * @param _contractExpectedDueDate uint256 the carbon credit contract expected due date to be informed in seconds
+     * @dev The basis value in which the `interest rate per week` must be expressed
+     * @dev 100% = 1_000_000
      */
-    function weeksInThePeriod(uint256 _initialDate, uint256 _contractExpectedDueDate) public pure returns(bool, uint256) {
-        if (_contractExpectedDueDate < WEEKS_IN_SECONDS) {
+    uint constant BASIS = 1_000_000;
+
+    uint constant HALF_A_WEEK = 3 days + 12 hours;
+
+    /**
+     * @dev Computes the number of weeks between two dates
+     * @param startDate start date expressed in seconds
+     * @param endDate end date expressed in seconds
+     */
+    function weeksBetween(uint startDate, uint endDate) public pure returns (bool, uint) {
+        if (startDate < 1 weeks || endDate < 1 weeks || endDate < startDate) {
             return (false, 0);
         }
-        if (_initialDate < WEEKS_IN_SECONDS) {
-            return (false, 0);
+
+        uint secondsBetweenDates = endDate - startDate;
+        uint weeksBetweenDates = secondsBetweenDates / 1 weeks;
+        uint remainder = secondsBetweenDates % 1 weeks;
+        if (remainder >= HALF_A_WEEK) {
+            weeksBetweenDates++;
         }
-        if (_contractExpectedDueDate < _initialDate) {
-            return (false, 0);
-        }
-        uint256 numberOfWeeks = (_contractExpectedDueDate - _initialDate ) / WEEKS_IN_SECONDS;
-        uint256 remainder = (_contractExpectedDueDate - _initialDate ) % WEEKS_IN_SECONDS;
-        if (remainder >= 5) {
-            numberOfWeeks++;
-        }
-        return (true, numberOfWeeks);
+
+        return (true, weeksBetweenDates);
     }
 
     /**
-     * @param _numWeeks uint256
-     * @param _rate uint256 1% = 10000, 0.0984% = 984
+     * @dev Computes discount with `interestRate` after `numWeeks` weeks
+     * @param numWeeks number of weeks until delivery
+     * @param interestRate 1% = 10000, 0.0984% = 984
      */
-    function calcBasicValue(uint256 _numWeeks, uint256 _rate) pure public returns (uint256) {
-        uint256 invertDiscountRate = BASIS - _rate;
-        uint256 basicValue = invertDiscountRate;
-        for (uint16 i=1; i < _numWeeks; ) {
-            basicValue = (basicValue * invertDiscountRate) / BASIS;
-            unchecked { i++; }
+    function computeDiscount(uint interestRate, uint numWeeks) public pure returns (uint) {
+        uint discountRatePoints = BASIS - interestRate;
+
+        if (numWeeks <= 1) {
+            return discountRatePoints;
         }
-        return basicValue;
+
+        int128 discountRate = ABDKMath64x64.div(discountRatePoints, BASIS);
+        int128 totalDiscount = ABDKMath64x64.pow(discountRate, (numWeeks - 1));
+
+        return ABDKMath64x64.mulu(totalDiscount, discountRatePoints);
     }
 
     /**
-     * @param _numWeeks uint256
-     * @param _totalToken uint256
-     * @param _rate uint256 1% = 10000, 0.0984% = 984
-     * @param _daoFee uint256 1% = 1
-     * @param _ctDecimals uint8
+     * @dev Computes the amount of ERC-20 tokens to be payed out to user and DAO
+     * @param numWeeks number of weeks until project delivery
+     * @param totalToken amount of ERC-1155 forward contract batch tokens
+     * @param interestRate 1% = 10000, 0.0984% = 984
+     * @param daoFee 1% = 1
+     * @param ctDecimals commodity token number of decimals
      */
     function payout(
-        uint256 _numWeeks,
-        uint256 _totalToken,
-        uint256 _rate,
-        uint256 _daoFee,
-        uint8 _ctDecimals
-    ) pure public returns (uint256, uint256, uint256) {
-        uint256 basicValue = calcBasicValue(_numWeeks, _rate);
-        uint256 coefficient = BASIS * 100;
-        uint256 totalBasicValue = _totalToken * basicValue * 10 ** _ctDecimals;
-        uint256 userResult = (totalBasicValue * (100-_daoFee)) / coefficient;
-        uint256 daoResult = (totalBasicValue * _daoFee) / coefficient;
-        return (basicValue, userResult, daoResult);
+        uint numWeeks,
+        uint totalToken,
+        uint interestRate,
+        uint daoFee,
+        uint8 ctDecimals
+    ) public pure returns (uint, uint) {
+        uint coefficient = BASIS * 100;
+        uint discount = computeDiscount(interestRate, numWeeks);
+        uint tokensToPayout = totalToken * discount * 10**ctDecimals;
+
+        uint userPayout = (tokensToPayout * (100 - daoFee)) / coefficient;
+        uint daoPayout = (tokensToPayout * daoFee) / coefficient;
+
+        return (userPayout, daoPayout);
     }
 }
