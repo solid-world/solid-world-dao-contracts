@@ -4,8 +4,7 @@
   "description": "Solid World DAO Smart Contracts",
   "scripts": {
     "test": "forge test -vvv",
-    "deploy:local": "hardhat deploy --network localhost",
-    "export": "hardhat export --export contract-deployment.json --network localhost"
+    "deploy:local": "hardhat deploy --network localhost"
   },
   "repository": {
     "type": "git",
