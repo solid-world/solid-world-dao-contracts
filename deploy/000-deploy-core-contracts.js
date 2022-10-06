@@ -1,26 +1,32 @@
-const func = async ({ getNamedAccounts, deployments }) => {
+const { ethers } = require('hardhat')
+
+const LOCALHOST_ID = '31337'
+
+const ensureDeployerHasFunds = async (deployerAddress, chainId) => {
+  if (chainId !== LOCALHOST_ID) {
+    return
+  }
+  const [owner] = await ethers.getSigners()
+
+  await owner.sendTransaction({
+    to: deployerAddress,
+    value: ethers.utils.parseEther('1')
+  })
+}
+
+const func = async ({ getNamedAccounts, deployments, getChainId }) => {
   const { deployer } = await getNamedAccounts()
 
-  const Erc20Deployer = await deployments.deploy('Erc20Deployer', {
-    from: deployer,
-    args: [],
-    log: true
-  })
+  await ensureDeployerHasFunds(deployer, await getChainId())
 
-  const ForwardContractBatch = await deployments.deploy('CarbonCredit', {
-    from: deployer,
-    args: [],
-    log: true,
-    proxy: {
-      proxyContract: 'OpenZeppelinTransparentProxy',
-      execute: {
-        init: {
-          methodName: 'initialize',
-          args: ['']
-        }
-      }
+  const ForwardContractBatchToken = await deployments.deploy(
+    'ForwardContractBatchToken',
+    {
+      from: deployer,
+      args: ['https://solid.world/FCBT/{id}.json'],
+      log: true
     }
-  })
+  )
 
   const SolidWorldManager = await deployments.deploy('SolidWorldManager', {
     from: deployer,
@@ -31,15 +37,15 @@ const func = async ({ getNamedAccounts, deployments }) => {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [Erc20Deployer.address, ForwardContractBatch.address]
+          args: [ForwardContractBatchToken.address]
         }
       }
     }
   })
 
-  if (ForwardContractBatch.newlyDeployed) {
+  if (ForwardContractBatchToken.newlyDeployed) {
     await deployments.execute(
-      'CarbonCredit',
+      'ForwardContractBatchToken',
       { from: deployer, log: true },
       'transferOwnership',
       SolidWorldManager.address

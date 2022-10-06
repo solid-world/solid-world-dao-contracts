@@ -13,11 +13,10 @@ contract SolidWorldManagerTest is Test {
     function setUp() public {
         manager = new SolidWorldManager();
 
-        CarbonCredit forwardContractBatch = new CarbonCredit();
-        forwardContractBatch.initialize("");
+        ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
         forwardContractBatch.transferOwnership(address(manager));
 
-        manager.initialize(new Erc20Deployer(), forwardContractBatch);
+        manager.initialize(forwardContractBatch);
     }
 
     function testAddCategory() public {
@@ -82,13 +81,13 @@ contract SolidWorldManagerTest is Test {
         assertEq(manager.batchIds(7), true);
 
         (
-            uint256 id,
-            uint8 status,
-            uint256 projectId,
-            uint256 totalAmount,
+            uint id,
+            uint projectId,
+            uint totalAmount,
+            address owner,
             uint32 expectedDueDate,
-            uint8 discountRate,
-            address owner
+            uint8 status,
+            uint8 discountRate
         ) = manager.batches(7);
 
         assertEq(id, 7);
