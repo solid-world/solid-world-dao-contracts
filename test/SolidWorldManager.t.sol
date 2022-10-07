@@ -20,12 +20,12 @@ contract SolidWorldManagerTest is Test {
     }
 
     function testAddCategory() public {
-        assertEq(manager.categoryToken(1), address(0));
+        assertEq(address(manager.categoryToken(1)), address(0));
         assertEq(manager.categoryIds(1), false);
 
         manager.addCategory(1, "Test token", "TT");
 
-        assertNotEq(manager.categoryToken(1), address(0));
+        assertNotEq(address(manager.categoryToken(1)), address(0));
         assertEq(manager.categoryIds(1), true);
     }
 
@@ -153,6 +153,59 @@ contract SolidWorldManagerTest is Test {
         );
 
         assertEq(manager.forwardContractBatch().balanceOf(vm.addr(1), 7), 10);
+    }
+
+    function testFailCollateralizeBatchWhenInvalidBatchId() public {
+        manager.collateralizeBatch(1, 0);
+    }
+
+    function testFailCollateralizeBatchWhenNotEnoughFunds() public {
+        manager.addCategory(1, "Test token", "TT");
+        manager.addProject(1, 3);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 5,
+                status: 0,
+                projectId: 3,
+                totalAmount: 100,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: vm.addr(1)
+            })
+        );
+
+        manager.collateralizeBatch(5, 1000);
+    }
+
+    function testCollateralizeBatchMintsERC20AndTransfersERC1155ToManager() public {
+        uint CATEGORY_ID = 1;
+        uint PROJECT_ID = 3;
+        uint BATCH_ID = 5;
+
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 100,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: vm.addr(1)
+            })
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+
+        vm.startPrank(vm.addr(1));
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        manager.collateralizeBatch(BATCH_ID, 100);
+        vm.stopPrank();
+
+        assertEq(forwardContractBatch.balanceOf(vm.addr(1), BATCH_ID), 0);
+        assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(vm.addr(1)), 100);
     }
 
     function testFailAddBatchWhenProjectDoesntExist() public {

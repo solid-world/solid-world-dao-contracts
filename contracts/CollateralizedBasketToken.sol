@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 contract CollateralizedBasketToken is ERC20Burnable, Ownable {
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
 
-    function mint(address account_, uint amount_) public onlyOwner {
-        _mint(account_, amount_);
+    function mint(address account, uint amount) public onlyOwner {
+        _mint(account, amount);
     }
 }

@@ -3,10 +3,11 @@ pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
 
-contract SolidWorldManager is Initializable, OwnableUpgradeable {
+contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155ReceiverUpgradeable {
     /**
      * @param id ID of the batch in the database
      * @param projectId Project ID this batch belongs to
@@ -57,10 +58,10 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable {
     mapping(uint => Batch) public batches;
 
     /**
-     * @notice Mapping determines a respective carbon token address (ERC-20) of a category
-     * @dev CategoryId => CarbonTokenAddress (ERC-20)
+     * @notice Mapping determines a respective CollateralizedBasketToken (ERC-20) of a category
+     * @dev CategoryId => CollateralizedBasketToken address (ERC-20)
      */
-    mapping(uint => address) public categoryToken;
+    mapping(uint => CollateralizedBasketToken) public categoryToken;
 
     /**
      * @notice Mapping determines what projects a category has
@@ -80,6 +81,8 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable {
      */
     mapping(uint => uint[]) internal projectBatches;
 
+    event BatchCollateralized(uint indexed batchId, uint amount, address indexed batchOwner);
+
     function initialize(ForwardContractBatchToken _forwardContractBatch) public initializer {
         forwardContractBatch = _forwardContractBatch;
         __Ownable_init();
@@ -90,24 +93,25 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable {
         uint categoryId,
         string calldata tokenName,
         string calldata tokenSymbol
-    ) public {
+    ) external {
         require(!categoryIds[categoryId], "Add category: categoryId already exists.");
 
         categoryIds[categoryId] = true;
-        categoryToken[categoryId] = address(new CollateralizedBasketToken(tokenName, tokenSymbol));
+        categoryToken[categoryId] = new CollateralizedBasketToken(tokenName, tokenSymbol);
     }
 
     // todo: add authorization
-    function addProject(uint categoryId, uint projectId) public {
+    function addProject(uint categoryId, uint projectId) external {
         require(categoryIds[categoryId], "Add project: unknown categoryId.");
         require(!projectIds[projectId], "Add project: projectId already exists.");
 
         categoryProjects[categoryId].push(projectId);
+        projectCategory[projectId] = categoryId;
         projectIds[projectId] = true;
     }
 
     // todo: add authorization
-    function addBatch(Batch calldata batch) public {
+    function addBatch(Batch calldata batch) external {
         require(projectIds[batch.projectId], "Add batch: This batch belongs to unknown project.");
         require(!batchIds[batch.id], "Add batch: This batch has already been created.");
         require(batch.owner != address(0), "Add batch: Batch owner not defined.");
@@ -122,11 +126,68 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable {
         forwardContractBatch.mint(batch.owner, batch.id, batch.totalAmount, new bytes(0));
     }
 
+    // todo: add authorization
+    function collateralizeBatch(uint batchId, uint amount) external {
+        require(batchIds[batchId], "Collateralise batch: invalid batchId.");
+        require(
+            forwardContractBatch.balanceOf(msg.sender, batchId) >= amount,
+            "Collateralise batch: insufficient Forward Contract Batch balance."
+        );
+
+        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
+        collateralizedToken.mint(msg.sender, amount);
+
+        forwardContractBatch.safeTransferFrom(
+            msg.sender,
+            address(this),
+            batchId,
+            amount,
+            new bytes(0)
+        );
+
+        emit BatchCollateralized(batchId, amount, msg.sender);
+    }
+
     function getProjectIdsByCategory(uint categoryId) public view returns (uint[] memory) {
         return categoryProjects[categoryId];
     }
 
     function getBatchIdsByProject(uint projectId) public view returns (uint[] memory) {
         return projectBatches[projectId];
+    }
+
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes memory
+    ) public virtual returns (bytes4) {
+        return this.onERC1155Received.selector;
+    }
+
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] memory,
+        uint256[] memory,
+        bytes memory
+    ) public virtual returns (bytes4) {
+        return this.onERC1155BatchReceived.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+        return interfaceId == 0xd9b67a26;
+    }
+
+    function _getCollateralizedTokenForBatchId(uint batchId)
+        internal
+        view
+        returns (CollateralizedBasketToken)
+    {
+        uint projectId = batches[batchId].projectId;
+        uint categoryId = projectCategory[projectId];
+
+        return categoryToken[categoryId];
     }
 }
