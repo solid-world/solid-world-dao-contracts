@@ -155,6 +155,50 @@ contract SolidWorldManagerTest is Test {
         assertEq(manager.forwardContractBatch().balanceOf(vm.addr(1), 7), 10);
     }
 
+    function testFailCollateraliseBatchWhenInvalidBatchId() public {
+        manager.collateraliseBatch(1, 0);
+    }
+
+    function testFailCollateraliseBatchWhenNotEnoughFunds() public {
+        manager.addCategory(1, "Test token", "TT");
+        manager.addProject(1, 1);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 1,
+                status: 0,
+                projectId: 1,
+                totalAmount: 100,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: vm.addr(1)
+            })
+        );
+
+        manager.collateraliseBatch(1, 1000);
+    }
+
+    function testCollateraliseBatch() public {
+        manager.addCategory(1, "Test token", "TT");
+        manager.addProject(1, 1);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: 1,
+                status: 0,
+                projectId: 1,
+                totalAmount: 100,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: vm.addr(1)
+            })
+        );
+
+        vm.prank(address(1));
+        manager.collateraliseBatch(1, 100);
+        assertEq(manager.forwardContractBatch().balanceOf(address(1), 1), 0);
+        assertEq(manager.forwardContractBatch().balanceOf(address(manager), 1), 100);
+        assertEq(manager.categoryToken(1).balanceOf(address(1)), 100);
+    }
+
     function testFailAddBatchWhenProjectDoesntExist() public {
         manager.addBatch(
             SolidWorldManager.Batch({

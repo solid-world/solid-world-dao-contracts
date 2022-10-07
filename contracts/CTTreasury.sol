@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./lib/SolidDaoManaged.sol";
 import "./lib/SolidMath.sol";
-import "./interfaces/ICT.sol";
+import "./interfaces/ICollateralizedBasketToken.sol";
 
 /**
  * @title Carbon Token Treasury (CTTTreasury) Template
@@ -88,7 +88,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
      * @dev immutable variable to store CT ERC20 token address
      * @return address
      */
-    ICT public immutable CT;
+    ICollateralizedBasketToken public immutable CT;
 
     /**
      * @notice category of the Carbon Project this treasury manages
@@ -203,7 +203,7 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
     ) SolidDaoManaged(ISolidDaoManagement(_authority)) {
         require(_ct != address(0), "CT Treasury: invalid CT address");
         require(_daoTreasury != address(0), "CT Treasury: invalid DAO Treasury");
-        CT = ICT(_ct);
+        CT = ICollateralizedBasketToken(_ct);
         timelockEnabled = false;
         initialized = false;
         blocksNeededForOrder = _timelock;
