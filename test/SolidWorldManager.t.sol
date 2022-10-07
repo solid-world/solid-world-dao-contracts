@@ -20,12 +20,12 @@ contract SolidWorldManagerTest is Test {
     }
 
     function testAddCategory() public {
-        assertEq(manager.categoryToken(1), address(0));
+        assertEq(address(manager.categoryToken(1)), address(0));
         assertEq(manager.categoryIds(1), false);
 
         manager.addCategory(1, "Test token", "TT");
 
-        assertNotEq(manager.categoryToken(1), address(0));
+        assertNotEq(address(manager.categoryToken(1)), address(0));
         assertEq(manager.categoryIds(1), true);
     }
 
@@ -188,14 +188,19 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 100,
                 expectedDueDate: uint32(block.timestamp + 12),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: address(1)
             })
         );
 
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+
+        vm.prank(address(1));
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+
         vm.prank(address(1));
         manager.collateraliseBatch(1, 100);
-        assertEq(manager.forwardContractBatch().balanceOf(address(1), 1), 0);
-        assertEq(manager.forwardContractBatch().balanceOf(address(manager), 1), 100);
+        assertEq(forwardContractBatch.balanceOf(address(1), 1), 0);
+        assertEq(forwardContractBatch.balanceOf(address(manager), 1), 100);
         assertEq(manager.categoryToken(1).balanceOf(address(1)), 100);
     }
 

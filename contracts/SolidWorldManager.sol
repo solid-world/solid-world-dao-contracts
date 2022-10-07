@@ -3,10 +3,11 @@ pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
 
-contract SolidWorldManager is Initializable, OwnableUpgradeable {
+contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155ReceiverUpgradeable {
     /**
      * @param id ID of the batch in the database
      * @param projectId Project ID this batch belongs to
@@ -127,11 +128,11 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable {
         require(batchIds[batchId], "Collateralise batch: invalid batchId.");
         require(
             forwardContractBatch.balanceOf(msg.sender, batchId) >= amount,
-            "Collateralise batch: insufficient Forward Contract batch balance."
+            "Collateralise batch: insufficient Forward Contract Batch balance."
         );
 
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
-        collateralizedToken.mint(msg.sender, amount);
+        //        collateralizedToken.mint(msg.sender, amount);
 
         forwardContractBatch.safeTransferFrom(
             msg.sender,
@@ -140,6 +141,30 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable {
             amount,
             new bytes(0)
         );
+    }
+
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes memory
+    ) public virtual returns (bytes4) {
+        return this.onERC1155Received.selector;
+    }
+
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] memory,
+        uint256[] memory,
+        bytes memory
+    ) public virtual returns (bytes4) {
+        return this.onERC1155BatchReceived.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId) external view returns (bool) {
+        return interfaceId == 0xd9b67a26;
     }
 
     function _getCollateralizedTokenForBatchId(uint batchId)
