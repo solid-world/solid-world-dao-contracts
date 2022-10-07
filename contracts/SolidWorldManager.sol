@@ -81,6 +81,8 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155Receive
      */
     mapping(uint => uint[]) internal projectBatches;
 
+    event BatchCollateralized(uint indexed batchId, uint amount, address indexed batchOwner);
+
     function initialize(ForwardContractBatchToken _forwardContractBatch) public initializer {
         forwardContractBatch = _forwardContractBatch;
         __Ownable_init();
@@ -104,6 +106,7 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155Receive
         require(!projectIds[projectId], "Add project: projectId already exists.");
 
         categoryProjects[categoryId].push(projectId);
+        projectCategory[projectId] = categoryId;
         projectIds[projectId] = true;
     }
 
@@ -124,7 +127,7 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155Receive
     }
 
     // todo: add authorization
-    function collateraliseBatch(uint batchId, uint amount) external {
+    function collateralizeBatch(uint batchId, uint amount) external {
         require(batchIds[batchId], "Collateralise batch: invalid batchId.");
         require(
             forwardContractBatch.balanceOf(msg.sender, batchId) >= amount,
@@ -132,7 +135,7 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155Receive
         );
 
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
-        //        collateralizedToken.mint(msg.sender, amount);
+        collateralizedToken.mint(msg.sender, amount);
 
         forwardContractBatch.safeTransferFrom(
             msg.sender,
@@ -141,6 +144,16 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155Receive
             amount,
             new bytes(0)
         );
+
+        emit BatchCollateralized(batchId, amount, msg.sender);
+    }
+
+    function getProjectIdsByCategory(uint categoryId) public view returns (uint[] memory) {
+        return categoryProjects[categoryId];
+    }
+
+    function getBatchIdsByProject(uint projectId) public view returns (uint[] memory) {
+        return projectBatches[projectId];
     }
 
     function onERC1155Received(
@@ -163,25 +176,18 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155Receive
         return this.onERC1155BatchReceived.selector;
     }
 
-    function supportsInterface(bytes4 interfaceId) external view returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return interfaceId == 0xd9b67a26;
     }
 
     function _getCollateralizedTokenForBatchId(uint batchId)
         internal
+        view
         returns (CollateralizedBasketToken)
     {
         uint projectId = batches[batchId].projectId;
         uint categoryId = projectCategory[projectId];
 
         return categoryToken[categoryId];
-    }
-
-    function getProjectIdsByCategory(uint categoryId) public view returns (uint[] memory) {
-        return categoryProjects[categoryId];
-    }
-
-    function getBatchIdsByProject(uint projectId) public view returns (uint[] memory) {
-        return projectBatches[projectId];
     }
 }

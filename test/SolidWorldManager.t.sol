@@ -155,11 +155,11 @@ contract SolidWorldManagerTest is Test {
         assertEq(manager.forwardContractBatch().balanceOf(vm.addr(1), 7), 10);
     }
 
-    function testFailCollateraliseBatchWhenInvalidBatchId() public {
-        manager.collateraliseBatch(1, 0);
+    function testFailCollateralizeBatchWhenInvalidBatchId() public {
+        manager.collateralizeBatch(1, 0);
     }
 
-    function testFailCollateraliseBatchWhenNotEnoughFunds() public {
+    function testFailCollateralizeBatchWhenNotEnoughFunds() public {
         manager.addCategory(1, "Test token", "TT");
         manager.addProject(1, 1);
         manager.addBatch(
@@ -174,10 +174,10 @@ contract SolidWorldManagerTest is Test {
             })
         );
 
-        manager.collateraliseBatch(1, 1000);
+        manager.collateralizeBatch(1, 1000);
     }
 
-    function testCollateraliseBatch() public {
+    function testCollateralizeBatchMintsERC20AndTransfersERC1155ToManager() public {
         manager.addCategory(1, "Test token", "TT");
         manager.addProject(1, 1);
         manager.addBatch(
@@ -188,20 +188,20 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 100,
                 expectedDueDate: uint32(block.timestamp + 12),
                 discountRate: 1,
-                owner: address(1)
+                owner: vm.addr(1)
             })
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
 
-        vm.prank(address(1));
+        vm.startPrank(vm.addr(1));
         forwardContractBatch.setApprovalForAll(address(manager), true);
+        manager.collateralizeBatch(1, 100);
+        vm.stopPrank();
 
-        vm.prank(address(1));
-        manager.collateraliseBatch(1, 100);
-        assertEq(forwardContractBatch.balanceOf(address(1), 1), 0);
+        assertEq(forwardContractBatch.balanceOf(vm.addr(1), 1), 0);
         assertEq(forwardContractBatch.balanceOf(address(manager), 1), 100);
-        assertEq(manager.categoryToken(1).balanceOf(address(1)), 100);
+        assertEq(manager.categoryToken(1).balanceOf(vm.addr(1)), 100);
     }
 
     function testFailAddBatchWhenProjectDoesntExist() public {
