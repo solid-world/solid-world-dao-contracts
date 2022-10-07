@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
+import "./lib/SolidMath.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -87,6 +88,9 @@ contract SolidWorldManager is
      */
     mapping(uint => uint[]) internal projectBatches;
 
+    uint public timeAppreciation;
+    uint public collateralizationFee;
+
     event BatchCollateralized(
         uint indexed batchId,
         uint amountIn,
@@ -100,9 +104,16 @@ contract SolidWorldManager is
         address indexed tokensOwner
     );
 
-    function initialize(ForwardContractBatchToken _forwardContractBatch) public initializer {
-        forwardContractBatch = _forwardContractBatch;
+    function initialize(
+        ForwardContractBatchToken _forwardContractBatch,
+        uint _collateralizationFee,
+        uint _timeAppreciation
+    ) public initializer {
         __Ownable_init();
+
+        forwardContractBatch = _forwardContractBatch;
+        collateralizationFee = _collateralizationFee;
+        timeAppreciation = _timeAppreciation;
     }
 
     // todo #121: add authorization
@@ -158,15 +169,23 @@ contract SolidWorldManager is
     ) external nonReentrant {
         require(batchIds[batchId], "Collateralize batch: invalid batchId.");
 
-        uint amountOut = amountIn; // todo #111: implement function to compute ERC1155=>ERC20 output amount
-        require(amountOut >= amountOutMin, "Collateralize batch: amountOut < amountOutMin.");
-
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
-        collateralizedToken.mint(msg.sender, amountOut);
+
+        (uint cbtUserCut, uint cbtDaoCut) = SolidMath.computeCollateralizationOutcome(
+            batches[batchId].expectedDueDate,
+            amountIn,
+            timeAppreciation,
+            collateralizationFee,
+            collateralizedToken.decimals()
+        );
+        require(cbtUserCut >= amountOutMin, "Collateralize batch: amountOut < amountOutMin.");
+
+        collateralizedToken.mint(msg.sender, cbtUserCut);
+        // todo: mint `cbtDaoCut` to DAO
 
         forwardContractBatch.safeTransferFrom(msg.sender, address(this), batchId, amountIn, "");
 
-        emit BatchCollateralized(batchId, amountIn, amountOut, msg.sender);
+        emit BatchCollateralized(batchId, amountIn, cbtUserCut, msg.sender);
     }
 
     /**
@@ -199,6 +218,16 @@ contract SolidWorldManager is
         );
 
         emit TokensDecollateralized(batchId, amountIn, amountOut, msg.sender);
+    }
+
+    // todo #121: add authorization
+    function setCollateralizationFee(uint _collateralizationFee) public {
+        collateralizationFee = _collateralizationFee;
+    }
+
+    // todo #121: add authorization
+    function setTimeAppreciation(uint _timeAppreciation) public {
+        timeAppreciation = _timeAppreciation;
     }
 
     function getProjectIdsByCategory(uint categoryId) public view returns (uint[] memory) {

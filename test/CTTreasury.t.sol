@@ -42,6 +42,7 @@ contract CTTreasuryTest is Test, ERC1155ReceiverTest {
     CTTreasury private treasury;
 
     address root = address(this);
+    uint public constant COLLATERALIZATION_FEE = 200;
     uint256 public constant ONE_WEEK = 604800;
     uint256 public constant ONE_YEAR = 604800 * 52;
     address internal daoTreasuryAddress = vm.addr(1);
@@ -59,7 +60,7 @@ contract CTTreasuryTest is Test, ERC1155ReceiverTest {
             _timelock: 0,
             _category: "foo",
             _daoTreasury: daoTreasuryAddress,
-            _daoLiquidityFee: 2 // 2%
+            _daoLiquidityFee: COLLATERALIZATION_FEE // 2%
         });
         treasury.initialize();
         collateralizedBasketToken.transferOwnership(address(treasury));
@@ -132,17 +133,35 @@ contract CTTreasuryTest is Test, ERC1155ReceiverTest {
         uint longTimePeriodDeviation = 50000000000000000000;
 
         // Payout for 1st week
-        (uint256 userAmountOut1, uint256 daoAmountOut1) = SolidMath.payout(1, 10000, 984, 2, 18);
+        (uint256 userAmountOut1, uint256 daoAmountOut1) = SolidMath.computeCollateralizationOutcome(
+            block.timestamp + 1 weeks + 1 hours,
+            10000,
+            984,
+            COLLATERALIZATION_FEE,
+            18
+        );
         assertApproxEqAbs(userAmountOut1, 9790_356800000_000000000, shortTimePeriodDeviation);
         assertApproxEqAbs(daoAmountOut1, 199_803200000_000000000, shortTimePeriodDeviation);
 
         // Payout after 1 year
-        (uint256 userAmountOut2, uint256 daoAmountOut2) = SolidMath.payout(52, 10000, 984, 2, 18);
+        (uint256 userAmountOut2, uint256 daoAmountOut2) = SolidMath.computeCollateralizationOutcome(
+            block.timestamp + ONE_YEAR + 1 hours,
+            10000,
+            984,
+            COLLATERALIZATION_FEE,
+            18
+        );
         assertApproxEqAbs(userAmountOut2, 9310_666400000_000000000, shortTimePeriodDeviation);
         assertApproxEqAbs(daoAmountOut2, 190_013600000_000000000, shortTimePeriodDeviation);
 
         // Payout after 10 years
-        (uint256 userAmountOut3, uint256 daoAmountOut3) = SolidMath.payout(520, 100000, 984, 2, 18);
+        (uint256 userAmountOut3, uint256 daoAmountOut3) = SolidMath.computeCollateralizationOutcome(
+            block.timestamp + 10 * ONE_YEAR + 1 hours,
+            100000,
+            984,
+            COLLATERALIZATION_FEE,
+            18
+        );
         assertApproxEqAbs(userAmountOut3, 58714_348000000_000000000, longTimePeriodDeviation);
         assertApproxEqAbs(daoAmountOut3, 1198_252000000_000000000, longTimePeriodDeviation);
     }

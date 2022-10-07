@@ -33,7 +33,7 @@ contract SolidWorldManagerTest is Test {
         ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
         forwardContractBatch.transferOwnership(address(manager));
 
-        manager.initialize(forwardContractBatch);
+        manager.initialize(forwardContractBatch, 50, 80_000);
 
         vm.label(vm.addr(1), "Dummy account 1");
     }
