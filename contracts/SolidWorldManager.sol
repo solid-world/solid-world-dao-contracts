@@ -82,6 +82,7 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155Receive
     mapping(uint => uint[]) internal projectBatches;
 
     event BatchCollateralized(uint indexed batchId, uint amount, address indexed batchOwner);
+    event TokensDecollateralized(uint indexed batchId, uint amount, address indexed tokensOwner);
 
     function initialize(ForwardContractBatchToken _forwardContractBatch) public initializer {
         forwardContractBatch = _forwardContractBatch;
@@ -126,13 +127,15 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155Receive
         forwardContractBatch.mint(batch.owner, batch.id, batch.totalAmount, new bytes(0));
     }
 
+    /**
+     * @dev Collateralizes `amount` of ERC1155 tokens with id `batchId` for msg.sender
+     * @dev prior to calling, msg.sender must approve SolidWorldManager to spend its ERC1155 tokens with id `batchId`
+     * @param batchId id of the batch
+     * @param amount tokens to collateralize
+     */
     // todo: add authorization
     function collateralizeBatch(uint batchId, uint amount) external {
-        require(batchIds[batchId], "Collateralise batch: invalid batchId.");
-        require(
-            forwardContractBatch.balanceOf(msg.sender, batchId) >= amount,
-            "Collateralise batch: insufficient Forward Contract Batch balance."
-        );
+        require(batchIds[batchId], "Collateralize batch: invalid batchId.");
 
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
         collateralizedToken.mint(msg.sender, amount);
@@ -146,6 +149,30 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155Receive
         );
 
         emit BatchCollateralized(batchId, amount, msg.sender);
+    }
+
+    /**
+     * @dev Decollateralizes `amount` of ERC20 tokens and sends appropriate ERC1155 tokens with id `batchId` for msg.sender
+     * @dev prior to calling, msg.sender must approve SolidWorldManager to spend `amount` ERC20 tokens
+     * @param batchId id of the batch
+     * @param amount tokens to decollateralize
+     */
+    // todo: add authorization
+    function decollateralizeTokens(uint batchId, uint amount) external {
+        require(batchIds[batchId], "Decollateralize batch: invalid batchId.");
+
+        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
+        collateralizedToken.burnFrom(msg.sender, amount);
+
+        forwardContractBatch.safeTransferFrom(
+            address(this),
+            msg.sender,
+            batchId,
+            amount,
+            new bytes(0)
+        );
+
+        emit TokensDecollateralized(batchId, amount, msg.sender);
     }
 
     function getProjectIdsByCategory(uint categoryId) public view returns (uint[] memory) {

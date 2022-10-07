@@ -10,6 +10,10 @@ contract SolidWorldManagerTest is Test {
     address root = address(this);
     address ownerAddress = vm.addr(1);
 
+    uint constant CATEGORY_ID = 1;
+    uint constant PROJECT_ID = 3;
+    uint constant BATCH_ID = 5;
+
     function setUp() public {
         manager = new SolidWorldManager();
 
@@ -155,18 +159,19 @@ contract SolidWorldManagerTest is Test {
         assertEq(manager.forwardContractBatch().balanceOf(vm.addr(1), 7), 10);
     }
 
-    function testFailCollateralizeBatchWhenInvalidBatchId() public {
-        manager.collateralizeBatch(1, 0);
+    function testCollateralizeBatchWhenInvalidBatchId() public {
+        vm.expectRevert(abi.encodePacked("Collateralize batch: invalid batchId."));
+        manager.collateralizeBatch(CATEGORY_ID, 0);
     }
 
-    function testFailCollateralizeBatchWhenNotEnoughFunds() public {
-        manager.addCategory(1, "Test token", "TT");
-        manager.addProject(1, 3);
+    function testCollateralizeBatchWhenNotEnoughFunds() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             SolidWorldManager.Batch({
-                id: 5,
+                id: BATCH_ID,
                 status: 0,
-                projectId: 3,
+                projectId: PROJECT_ID,
                 totalAmount: 100,
                 expectedDueDate: uint32(block.timestamp + 12),
                 discountRate: 1,
@@ -174,14 +179,16 @@ contract SolidWorldManagerTest is Test {
             })
         );
 
-        manager.collateralizeBatch(5, 1000);
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+
+        vm.startPrank(vm.addr(1));
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        vm.expectRevert(abi.encodePacked("ERC1155: insufficient balance for transfer"));
+        manager.collateralizeBatch(BATCH_ID, 1000);
+        vm.stopPrank();
     }
 
     function testCollateralizeBatchMintsERC20AndTransfersERC1155ToManager() public {
-        uint CATEGORY_ID = 1;
-        uint PROJECT_ID = 3;
-        uint BATCH_ID = 5;
-
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
@@ -206,6 +213,60 @@ contract SolidWorldManagerTest is Test {
         assertEq(forwardContractBatch.balanceOf(vm.addr(1), BATCH_ID), 0);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
         assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(vm.addr(1)), 100);
+    }
+
+    function testDecollateralizeTokensWhenInvalidBatchId() public {
+        vm.expectRevert(abi.encodePacked("Decollateralize batch: invalid batchId."));
+        manager.decollateralizeTokens(BATCH_ID, 10);
+    }
+
+    function testDecollateralizeTokensWhenNotEnoughFunds() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 100,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: vm.addr(1)
+            })
+        );
+
+        vm.expectRevert(abi.encodePacked("ERC20: insufficient allowance"));
+        manager.decollateralizeTokens(5, 1000);
+    }
+
+    function testDecollateralizeTokensBurnsERC20AndReceivesERC1155() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 100,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: vm.addr(1)
+            })
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+
+        vm.startPrank(vm.addr(1));
+        collateralizedToken.approve(address(manager), 75);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        manager.collateralizeBatch(BATCH_ID, 90);
+        manager.decollateralizeTokens(BATCH_ID, 75);
+        vm.stopPrank();
+
+        assertEq(forwardContractBatch.balanceOf(vm.addr(1), BATCH_ID), 100 - 90 + 75);
+        assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 90 - 75);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(vm.addr(1)), 90 - 75);
     }
 
     function testFailAddBatchWhenProjectDoesntExist() public {
