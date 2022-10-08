@@ -21,6 +21,8 @@ contract SolidWorldManagerTest is Test {
         forwardContractBatch.transferOwnership(address(manager));
 
         manager.initialize(forwardContractBatch);
+
+        vm.label(vm.addr(1), "Dummy account 1");
     }
 
     function testAddCategory() public {
