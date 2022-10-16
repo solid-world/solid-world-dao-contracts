@@ -163,7 +163,7 @@ contract SolidWorldManagerTest is Test {
 
     function testCollateralizeBatchWhenInvalidBatchId() public {
         vm.expectRevert(abi.encodePacked("Collateralize batch: invalid batchId."));
-        manager.collateralizeBatch(CATEGORY_ID, 0);
+        manager.collateralizeBatch(CATEGORY_ID, 0, 0);
     }
 
     function testCollateralizeBatchWhenNotEnoughFunds() public {
@@ -186,7 +186,31 @@ contract SolidWorldManagerTest is Test {
         vm.startPrank(vm.addr(1));
         forwardContractBatch.setApprovalForAll(address(manager), true);
         vm.expectRevert(abi.encodePacked("ERC1155: insufficient balance for transfer"));
-        manager.collateralizeBatch(BATCH_ID, 1000);
+        manager.collateralizeBatch(BATCH_ID, 1000, 1000);
+        vm.stopPrank();
+    }
+
+    function testCollateralizeBatchWhenERC20OutputIsLessThanMinimum() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 100,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: vm.addr(1)
+            })
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+
+        vm.startPrank(vm.addr(1));
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        vm.expectRevert(abi.encodePacked("Collateralize batch: amountOut < amountOutMin."));
+        manager.collateralizeBatch(BATCH_ID, 100, 101);
         vm.stopPrank();
     }
 
@@ -209,7 +233,7 @@ contract SolidWorldManagerTest is Test {
 
         vm.startPrank(vm.addr(1));
         forwardContractBatch.setApprovalForAll(address(manager), true);
-        manager.collateralizeBatch(BATCH_ID, 100);
+        manager.collateralizeBatch(BATCH_ID, 100, 100);
         vm.stopPrank();
 
         assertEq(forwardContractBatch.balanceOf(vm.addr(1), BATCH_ID), 0);
@@ -219,7 +243,7 @@ contract SolidWorldManagerTest is Test {
 
     function testDecollateralizeTokensWhenInvalidBatchId() public {
         vm.expectRevert(abi.encodePacked("Decollateralize batch: invalid batchId."));
-        manager.decollateralizeTokens(BATCH_ID, 10);
+        manager.decollateralizeTokens(BATCH_ID, 10, 5);
     }
 
     function testDecollateralizeTokensWhenNotEnoughFunds() public {
@@ -238,7 +262,34 @@ contract SolidWorldManagerTest is Test {
         );
 
         vm.expectRevert(abi.encodePacked("ERC20: insufficient allowance"));
-        manager.decollateralizeTokens(5, 1000);
+        manager.decollateralizeTokens(BATCH_ID, 1000, 500);
+    }
+
+    function testDecollateralizeTokensBurnsWhenERC1155OutputIsLessThanMinimum() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 100,
+                expectedDueDate: uint32(block.timestamp + 12),
+                discountRate: 1,
+                owner: vm.addr(1)
+            })
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+
+        vm.startPrank(vm.addr(1));
+        collateralizedToken.approve(address(manager), 75);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        manager.collateralizeBatch(BATCH_ID, 90, 90);
+        vm.expectRevert(abi.encodePacked("Decollateralize batch: amountOut < amountOutMin."));
+        manager.decollateralizeTokens(BATCH_ID, 75, 100);
+        vm.stopPrank();
     }
 
     function testDecollateralizeTokensBurnsERC20AndReceivesERC1155() public {
@@ -262,8 +313,8 @@ contract SolidWorldManagerTest is Test {
         vm.startPrank(vm.addr(1));
         collateralizedToken.approve(address(manager), 75);
         forwardContractBatch.setApprovalForAll(address(manager), true);
-        manager.collateralizeBatch(BATCH_ID, 90);
-        manager.decollateralizeTokens(BATCH_ID, 75);
+        manager.collateralizeBatch(BATCH_ID, 90, 90);
+        manager.decollateralizeTokens(BATCH_ID, 75, 75);
         vm.stopPrank();
 
         assertEq(forwardContractBatch.balanceOf(vm.addr(1), BATCH_ID), 100 - 90 + 75);

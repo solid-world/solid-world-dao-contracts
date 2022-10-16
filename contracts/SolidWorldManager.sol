@@ -1,13 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
 
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
 
-contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155ReceiverUpgradeable {
+contract SolidWorldManager is
+    Initializable,
+    OwnableUpgradeable,
+    IERC1155ReceiverUpgradeable,
+    ReentrancyGuard
+{
     /**
      * @param id ID of the batch in the database
      * @param projectId Project ID this batch belongs to
@@ -81,8 +87,18 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155Receive
      */
     mapping(uint => uint[]) internal projectBatches;
 
-    event BatchCollateralized(uint indexed batchId, uint amount, address indexed batchOwner);
-    event TokensDecollateralized(uint indexed batchId, uint amount, address indexed tokensOwner);
+    event BatchCollateralized(
+        uint indexed batchId,
+        uint amount,
+        uint amountOut,
+        address indexed batchOwner
+    );
+    event TokensDecollateralized(
+        uint indexed batchId,
+        uint amountIn,
+        uint amountOut,
+        address indexed tokensOwner
+    );
 
     function initialize(ForwardContractBatchToken _forwardContractBatch) public initializer {
         forwardContractBatch = _forwardContractBatch;
@@ -124,55 +140,65 @@ contract SolidWorldManager is Initializable, OwnableUpgradeable, IERC1155Receive
         batchIds[batch.id] = true;
         batches[batch.id] = batch;
         projectBatches[batch.projectId].push(batch.id);
-        forwardContractBatch.mint(batch.owner, batch.id, batch.totalAmount, new bytes(0));
+        forwardContractBatch.mint(batch.owner, batch.id, batch.totalAmount, "");
     }
 
     /**
-     * @dev Collateralizes `amount` of ERC1155 tokens with id `batchId` for msg.sender
+     * @dev Collateralizes `amountIn` of ERC1155 tokens with id `batchId` for msg.sender
      * @dev prior to calling, msg.sender must approve SolidWorldManager to spend its ERC1155 tokens with id `batchId`
+     * @dev nonReentrant, to avoid possible reentrancy after calling safeTransferFrom
      * @param batchId id of the batch
-     * @param amount tokens to collateralize
+     * @param amountIn ERC1155 tokens to collateralize
+     * @param amountOutMin minimum output amount of ERC20 tokens for transaction to succeed
      */
-    // todo: add authorization
-    function collateralizeBatch(uint batchId, uint amount) external {
+    function collateralizeBatch(
+        uint batchId,
+        uint amountIn,
+        uint amountOutMin
+    ) external nonReentrant {
         require(batchIds[batchId], "Collateralize batch: invalid batchId.");
 
+        uint amountOut = amountIn; //todo: implement function to compute ERC1155=>ERC20 output amount
+        require(amountOut >= amountOutMin, "Collateralize batch: amountOut < amountOutMin.");
+
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
-        collateralizedToken.mint(msg.sender, amount);
+        collateralizedToken.mint(msg.sender, amountOut);
 
-        forwardContractBatch.safeTransferFrom(
-            msg.sender,
-            address(this),
-            batchId,
-            amount,
-            new bytes(0)
-        );
+        forwardContractBatch.safeTransferFrom(msg.sender, address(this), batchId, amountIn, "");
 
-        emit BatchCollateralized(batchId, amount, msg.sender);
+        emit BatchCollateralized(batchId, amountIn, amountOut, msg.sender);
     }
 
     /**
-     * @dev Decollateralizes `amount` of ERC20 tokens and sends appropriate ERC1155 tokens with id `batchId` for msg.sender
-     * @dev prior to calling, msg.sender must approve SolidWorldManager to spend `amount` ERC20 tokens
+     * @dev Decollateralizes `amountIn` of ERC20 tokens and sends `amountOut` ERC1155 tokens with id `batchId` for msg.sender
+     * @dev prior to calling, msg.sender must approve SolidWorldManager to spend `amountIn` ERC20 tokens
+     * @dev nonReentrant, to avoid possible reentrancy after calling safeTransferFrom
      * @param batchId id of the batch
-     * @param amount tokens to decollateralize
+     * @param amountIn ERC20 tokens to decollateralize
+     * @param amountOutMin minimum output amount of ERC1155 tokens for transaction to succeed
      */
-    // todo: add authorization
-    function decollateralizeTokens(uint batchId, uint amount) external {
+    function decollateralizeTokens(
+        uint batchId,
+        uint amountIn,
+        uint amountOutMin
+    ) external nonReentrant {
         require(batchIds[batchId], "Decollateralize batch: invalid batchId.");
 
+        uint amountOut = amountIn; //todo: implement function to compute ERC20=>ERC1155 output amount
+        require(amountOut >= amountOutMin, "Decollateralize batch: amountOut < amountOutMin.");
+
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
-        collateralizedToken.burnFrom(msg.sender, amount);
+        collateralizedToken.burnFrom(msg.sender, amountIn);
 
         forwardContractBatch.safeTransferFrom(
             address(this),
             msg.sender,
             batchId,
-            amount,
+            amountOut,
             new bytes(0)
         );
 
-        emit TokensDecollateralized(batchId, amount, msg.sender);
+        emit TokensDecollateralized(batchId, amountIn, amountOut, msg.sender);
     }
 
     function getProjectIdsByCategory(uint categoryId) public view returns (uint[] memory) {
