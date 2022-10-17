@@ -83,12 +83,15 @@ contract SolidWorldManager is
      */
     mapping(uint => uint[]) internal projectBatches;
 
-    uint public collateralizationFee;
-
     /**
      * @notice Contract that operates forward contract batch tokens (ERC-1155). Allows this contract to mint tokens.
      */
     ForwardContractBatchToken public forwardContractBatch;
+
+    /**
+     * @notice Fee charged by DAO when collateralizing forward contract batch tokens.
+     */
+    uint16 public collateralizationFee;
 
     event BatchCollateralized(
         uint indexed batchId,
@@ -103,10 +106,10 @@ contract SolidWorldManager is
         address indexed tokensOwner
     );
 
-    function initialize(ForwardContractBatchToken _forwardContractBatch, uint _collateralizationFee)
-        public
-        initializer
-    {
+    function initialize(
+        ForwardContractBatchToken _forwardContractBatch,
+        uint16 _collateralizationFee
+    ) public initializer {
         __Ownable_init();
 
         forwardContractBatch = _forwardContractBatch;
@@ -218,7 +221,7 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
-    function setCollateralizationFee(uint _collateralizationFee) public {
+    function setCollateralizationFee(uint16 _collateralizationFee) public {
         collateralizationFee = _collateralizationFee;
     }
 
