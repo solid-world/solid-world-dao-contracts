@@ -19,11 +19,11 @@ contract SolidWorldManager is
      * @param id ID of the batch in the database
      * @param projectId Project ID this batch belongs to
      * @param totalAmount Amount of carbon tons in the batch, this amount will be minted as forward contract batch tokens (ERC-1155)
-     * @notice Structure that holds necessary information for minting forward commodity tokens (ERC-20).
+     * @notice Structure that holds necessary information for minting collateralized basket tokens (ERC-20).
      * @param owner Address who receives forward contract batch tokens (ERC-1155)
-     * @param expectedDueDate When the batch is about to be delivered; affects on how many forward commodity tokens (ERC-20) may be minted
+     * @param expectedDueDate When the batch is about to be delivered; affects on how many collateralized basket tokens (ERC-20) may be minted
      * @param status Status for the batch (ex. CAN_BE_DEPOSITED | IS_ACCUMULATING | READY_FOR_DELIVERY etc.)
-     * @param discountRate Coefficient that affects on how many forward commodity tokens (ERC-20) may be minted / ton
+     * @param discountRate Coefficient that affects on how many collateralized basket tokens (ERC-20) may be minted / ton. Forward is worth less than spot.
      */
     struct Batch {
         uint id;
@@ -32,13 +32,8 @@ contract SolidWorldManager is
         address owner;
         uint32 expectedDueDate;
         uint8 status;
-        uint8 discountRate;
+        uint24 discountRate;
     }
-
-    /**
-     * @notice Contract that operates forward contract batch tokens (ERC-1155). Allows this contract to mint tokens.
-     */
-    ForwardContractBatchToken public forwardContractBatch;
 
     /**
      * @notice Mapping is used for checking if Category ID is already added
@@ -88,8 +83,12 @@ contract SolidWorldManager is
      */
     mapping(uint => uint[]) internal projectBatches;
 
-    uint public timeAppreciation;
     uint public collateralizationFee;
+
+    /**
+     * @notice Contract that operates forward contract batch tokens (ERC-1155). Allows this contract to mint tokens.
+     */
+    ForwardContractBatchToken public forwardContractBatch;
 
     event BatchCollateralized(
         uint indexed batchId,
@@ -104,16 +103,14 @@ contract SolidWorldManager is
         address indexed tokensOwner
     );
 
-    function initialize(
-        ForwardContractBatchToken _forwardContractBatch,
-        uint _collateralizationFee,
-        uint _timeAppreciation
-    ) public initializer {
+    function initialize(ForwardContractBatchToken _forwardContractBatch, uint _collateralizationFee)
+        public
+        initializer
+    {
         __Ownable_init();
 
         forwardContractBatch = _forwardContractBatch;
         collateralizationFee = _collateralizationFee;
-        timeAppreciation = _timeAppreciation;
     }
 
     // todo #121: add authorization
@@ -174,14 +171,14 @@ contract SolidWorldManager is
         (uint cbtUserCut, uint cbtDaoCut) = SolidMath.computeCollateralizationOutcome(
             batches[batchId].expectedDueDate,
             amountIn,
-            timeAppreciation,
+            batches[batchId].discountRate,
             collateralizationFee,
             collateralizedToken.decimals()
         );
         require(cbtUserCut >= amountOutMin, "Collateralize batch: amountOut < amountOutMin.");
 
         collateralizedToken.mint(msg.sender, cbtUserCut);
-        // todo: mint `cbtDaoCut` to DAO
+        // todo #112: mint `cbtDaoCut` to DAO
 
         forwardContractBatch.safeTransferFrom(msg.sender, address(this), batchId, amountIn, "");
 
@@ -223,11 +220,6 @@ contract SolidWorldManager is
     // todo #121: add authorization
     function setCollateralizationFee(uint _collateralizationFee) public {
         collateralizationFee = _collateralizationFee;
-    }
-
-    // todo #121: add authorization
-    function setTimeAppreciation(uint _timeAppreciation) public {
-        timeAppreciation = _timeAppreciation;
     }
 
     function getProjectIdsByCategory(uint categoryId) public view returns (uint[] memory) {

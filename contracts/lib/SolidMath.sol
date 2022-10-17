@@ -30,7 +30,7 @@ library SolidMath {
      * @param startDate start date expressed in seconds
      * @param endDate end date expressed in seconds
      */
-    function weeksBetween(uint startDate, uint endDate) public pure returns (uint) {
+    function weeksBetween(uint startDate, uint endDate) internal pure returns (uint) {
         if (startDate < 1 weeks || endDate < 1 weeks || endDate < startDate) {
             revert IncorrectDates(startDate, endDate);
         }
@@ -52,7 +52,7 @@ library SolidMath {
      * @param weeksUntilCertification number of weeks until project certification
      */
     function computeCollateralizationDiscount(uint timeAppreciation, uint weeksUntilCertification)
-        public
+        internal
         pure
         returns (uint)
     {
@@ -82,7 +82,7 @@ library SolidMath {
         uint timeAppreciation,
         uint collateralizationFee,
         uint cbtDecimals
-    ) public view returns (uint, uint) {
+    ) internal view returns (uint, uint) {
         uint weeksUntilCertification = weeksBetween(block.timestamp, expectedCertificationDate);
 
         uint collateralizationDiscount = computeCollateralizationDiscount(

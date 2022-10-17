@@ -31,7 +31,7 @@ library ABDKMath64x64 {
      * @param x unsigned 256-bit integer number
      * @return signed 64.64-bit fixed point number
      */
-    function fromUInt(uint256 x) public pure returns (int128) {
+    function fromUInt(uint256 x) internal pure returns (int128) {
         unchecked {
             require(x <= 0x7FFFFFFFFFFFFFFF);
             return int128(int256(x << 64));
@@ -45,7 +45,7 @@ library ABDKMath64x64 {
      * @param x signed 64.64-bit fixed point number
      * @return unsigned 64-bit integer number
      */
-    function toUInt(int128 x) public pure returns (uint64) {
+    function toUInt(int128 x) internal pure returns (uint64) {
         unchecked {
             require(x >= 0);
             return uint64(uint128(x >> 64));
@@ -60,7 +60,7 @@ library ABDKMath64x64 {
      * @param y unsigned 256-bit integer number
      * @return unsigned 256-bit integer number
      */
-    function mulu(int128 x, uint256 y) public pure returns (uint256) {
+    function mulu(int128 x, uint256 y) internal pure returns (uint256) {
         unchecked {
             if (y == 0) return 0;
 
@@ -85,7 +85,7 @@ library ABDKMath64x64 {
      * @param y uint256 value
      * @return signed 64.64-bit fixed point number
      */
-    function pow(int128 x, uint256 y) public pure returns (int128) {
+    function pow(int128 x, uint256 y) internal pure returns (int128) {
         unchecked {
             bool negative = x < 0 && y & 1 == 1;
 
@@ -203,7 +203,7 @@ library ABDKMath64x64 {
      * @param y unsigned 256-bit integer number
      * @return unsigned 64.64-bit fixed point number
      */
-    function divu(uint256 x, uint256 y) public pure returns (uint128) {
+    function divu(uint256 x, uint256 y) internal pure returns (uint128) {
         unchecked {
             require(y != 0);
 
