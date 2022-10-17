@@ -89,7 +89,7 @@ contract SolidWorldManager is
 
     event BatchCollateralized(
         uint indexed batchId,
-        uint amount,
+        uint amountIn,
         uint amountOut,
         address indexed batchOwner
     );
@@ -105,7 +105,7 @@ contract SolidWorldManager is
         __Ownable_init();
     }
 
-    // todo: add authorization
+    // todo #121: add authorization
     function addCategory(
         uint categoryId,
         string calldata tokenName,
@@ -117,7 +117,7 @@ contract SolidWorldManager is
         categoryToken[categoryId] = new CollateralizedBasketToken(tokenName, tokenSymbol);
     }
 
-    // todo: add authorization
+    // todo #121: add authorization
     function addProject(uint categoryId, uint projectId) external {
         require(categoryIds[categoryId], "Add project: unknown categoryId.");
         require(!projectIds[projectId], "Add project: projectId already exists.");
@@ -127,7 +127,7 @@ contract SolidWorldManager is
         projectIds[projectId] = true;
     }
 
-    // todo: add authorization
+    // todo #121: add authorization
     function addBatch(Batch calldata batch) external {
         require(projectIds[batch.projectId], "Add batch: This batch belongs to unknown project.");
         require(!batchIds[batch.id], "Add batch: This batch has already been created.");
@@ -158,7 +158,7 @@ contract SolidWorldManager is
     ) external nonReentrant {
         require(batchIds[batchId], "Collateralize batch: invalid batchId.");
 
-        uint amountOut = amountIn; //todo: implement function to compute ERC1155=>ERC20 output amount
+        uint amountOut = amountIn; // todo #111: implement function to compute ERC1155=>ERC20 output amount
         require(amountOut >= amountOutMin, "Collateralize batch: amountOut < amountOutMin.");
 
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
@@ -184,7 +184,7 @@ contract SolidWorldManager is
     ) external nonReentrant {
         require(batchIds[batchId], "Decollateralize batch: invalid batchId.");
 
-        uint amountOut = amountIn; //todo: implement function to compute ERC20=>ERC1155 output amount
+        uint amountOut = amountIn; // todo #122: implement function to compute ERC20=>ERC1155 output amount
         require(amountOut >= amountOutMin, "Decollateralize batch: amountOut < amountOutMin.");
 
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);

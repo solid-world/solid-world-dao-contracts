@@ -14,6 +14,19 @@ contract SolidWorldManagerTest is Test {
     uint constant PROJECT_ID = 3;
     uint constant BATCH_ID = 5;
 
+    event BatchCollateralized(
+        uint indexed batchId,
+        uint amountIn,
+        uint amountOut,
+        address indexed batchOwner
+    );
+    event TokensDecollateralized(
+        uint indexed batchId,
+        uint amountIn,
+        uint amountOut,
+        address indexed tokensOwner
+    );
+
     function setUp() public {
         manager = new SolidWorldManager();
 
@@ -233,7 +246,11 @@ contract SolidWorldManagerTest is Test {
 
         vm.startPrank(vm.addr(1));
         forwardContractBatch.setApprovalForAll(address(manager), true);
+
+        vm.expectEmit(true, true, false, true, address(manager));
+        emit BatchCollateralized(BATCH_ID, 100, 100, vm.addr(1));
         manager.collateralizeBatch(BATCH_ID, 100, 100);
+
         vm.stopPrank();
 
         assertEq(forwardContractBatch.balanceOf(vm.addr(1), BATCH_ID), 0);
@@ -314,7 +331,11 @@ contract SolidWorldManagerTest is Test {
         collateralizedToken.approve(address(manager), 75);
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 90, 90);
+
+        vm.expectEmit(true, true, false, true, address(manager));
+        emit TokensDecollateralized(BATCH_ID, 75, 75, vm.addr(1));
         manager.decollateralizeTokens(BATCH_ID, 75, 75);
+
         vm.stopPrank();
 
         assertEq(forwardContractBatch.balanceOf(vm.addr(1), BATCH_ID), 100 - 90 + 75);
