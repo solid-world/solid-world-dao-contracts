@@ -17,7 +17,7 @@ contract SolidWorldManagerTest is Test {
     uint constant CURRENT_DATE = 1666016743;
 
     uint constant COLLATERALIZATION_FEE = 1000; // 10%
-    uint constant TIME_APPRECIATION = 100_000; // 10%
+    uint24 constant TIME_APPRECIATION = 100_000; // 10%
 
     event BatchCollateralized(
         uint indexed batchId,
