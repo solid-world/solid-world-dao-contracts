@@ -8,7 +8,8 @@ import "../contracts/SolidWorldManager.sol";
 contract SolidWorldManagerTest is Test {
     SolidWorldManager manager;
     address root = address(this);
-    address ownerAddress = vm.addr(1);
+    address testAccount = vm.addr(1);
+    address daoAccount = vm.addr(2);
 
     uint constant CATEGORY_ID = 1;
     uint constant PROJECT_ID = 3;
@@ -40,9 +41,10 @@ contract SolidWorldManagerTest is Test {
         ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
         forwardContractBatch.transferOwnership(address(manager));
 
-        manager.initialize(forwardContractBatch, COLLATERALIZATION_FEE);
+        manager.initialize(forwardContractBatch, COLLATERALIZATION_FEE, daoAccount);
 
-        vm.label(vm.addr(1), "Dummy account 1");
+        vm.label(testAccount, "Test account");
+        vm.label(daoAccount, "DAO account");
     }
 
     function testAddCategory() public {
@@ -100,7 +102,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
 
@@ -122,7 +124,7 @@ contract SolidWorldManagerTest is Test {
         assertEq(totalAmount, 10);
         assertEq(expectedDueDate, uint32(CURRENT_DATE + 12));
         assertEq(discountRate, 1);
-        assertEq(owner, vm.addr(1));
+        assertEq(owner, testAccount);
     }
 
     function testAddMultipleBatches() public {
@@ -139,7 +141,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
 
@@ -151,7 +153,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 20,
                 expectedDueDate: uint32(CURRENT_DATE + 24),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
 
@@ -174,11 +176,11 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
 
-        assertEq(manager.forwardContractBatch().balanceOf(vm.addr(1), 7), 10);
+        assertEq(manager.forwardContractBatch().balanceOf(testAccount, 7), 10);
     }
 
     function testCollateralizeBatchWhenInvalidBatchId() public {
@@ -197,13 +199,13 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
 
-        vm.startPrank(vm.addr(1));
+        vm.startPrank(testAccount);
         forwardContractBatch.setApprovalForAll(address(manager), true);
         vm.expectRevert(abi.encodePacked("ERC1155: insufficient balance for transfer"));
         manager.collateralizeBatch(BATCH_ID, 1000, 1000);
@@ -212,7 +214,6 @@ contract SolidWorldManagerTest is Test {
 
     function testCollateralizeBatchWhenERC20OutputIsLessThanMinimum() public {
         uint cbtUserCut = 81e18;
-        uint cbtDaoCut = 9e8;
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
@@ -223,13 +224,13 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
                 discountRate: TIME_APPRECIATION,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
 
-        vm.startPrank(vm.addr(1));
+        vm.startPrank(testAccount);
         forwardContractBatch.setApprovalForAll(address(manager), true);
         vm.expectRevert(abi.encodePacked("Collateralize batch: amountOut < amountOutMin."));
         manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut + 1);
@@ -250,24 +251,62 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
                 discountRate: TIME_APPRECIATION,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
 
-        vm.startPrank(vm.addr(1));
+        vm.startPrank(testAccount);
         forwardContractBatch.setApprovalForAll(address(manager), true);
 
         vm.expectEmit(true, true, false, true, address(manager));
-        emit BatchCollateralized(BATCH_ID, 100, cbtUserCut, vm.addr(1));
+        emit BatchCollateralized(BATCH_ID, 100, cbtUserCut, testAccount);
         manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut);
 
         vm.stopPrank();
 
-        assertEq(forwardContractBatch.balanceOf(vm.addr(1), BATCH_ID), 0);
+        assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 0);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(vm.addr(1)), cbtUserCut);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(daoAccount), cbtDaoCut);
+    }
+
+    function testCollateralizeBatchWorksWhenCollateralizationFeeIs0() public {
+        manager.setCollateralizationFee(0);
+
+        uint cbtUserCut = 90e18;
+        uint cbtDaoCut = 0;
+
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 100,
+                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                discountRate: TIME_APPRECIATION,
+                owner: testAccount
+            })
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+
+        vm.startPrank(testAccount);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+
+        vm.expectEmit(true, true, false, true, address(manager));
+        emit BatchCollateralized(BATCH_ID, 100, cbtUserCut, testAccount);
+        manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut);
+
+        vm.stopPrank();
+
+        assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 0);
+        assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(daoAccount), cbtDaoCut);
     }
 
     function testDecollateralizeTokensWhenInvalidBatchId() public {
@@ -286,7 +325,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
 
@@ -296,7 +335,6 @@ contract SolidWorldManagerTest is Test {
 
     function testDecollateralizeTokensWhenERC1155OutputIsLessThanMinimum() public {
         uint cbtUserCut = 81e18;
-        uint cbtDaoCut = 9e18;
 
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
@@ -308,14 +346,14 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
                 discountRate: TIME_APPRECIATION,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
         CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
 
-        vm.startPrank(vm.addr(1));
+        vm.startPrank(testAccount);
         collateralizedToken.approve(address(manager), 75);
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut);
@@ -338,27 +376,28 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
                 discountRate: TIME_APPRECIATION,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
         CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
 
-        vm.startPrank(vm.addr(1));
+        vm.startPrank(testAccount);
         collateralizedToken.approve(address(manager), 75);
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut);
 
         vm.expectEmit(true, true, false, true, address(manager));
-        emit TokensDecollateralized(BATCH_ID, 75, 75, vm.addr(1));
+        emit TokensDecollateralized(BATCH_ID, 75, 75, testAccount);
         manager.decollateralizeTokens(BATCH_ID, 75, 75);
 
         vm.stopPrank();
 
-        assertEq(forwardContractBatch.balanceOf(vm.addr(1), BATCH_ID), 75);
+        assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 75);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100 - 75);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(vm.addr(1)), cbtUserCut - 75);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut - 75);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(daoAccount), cbtDaoCut);
     }
 
     function testFailAddBatchWhenProjectDoesntExist() public {
@@ -370,7 +409,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
     }
@@ -387,7 +426,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
 
@@ -399,7 +438,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
     }
@@ -433,7 +472,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
     }
@@ -450,7 +489,7 @@ contract SolidWorldManagerTest is Test {
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE - 1),
                 discountRate: 1,
-                owner: vm.addr(1)
+                owner: testAccount
             })
         );
     }

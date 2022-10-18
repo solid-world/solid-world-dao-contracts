@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.16;
+pragma solidity ^0.8.16;
 
 import "./ABDKMath64x64.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";

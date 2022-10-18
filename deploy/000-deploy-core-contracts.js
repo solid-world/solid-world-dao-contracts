@@ -41,7 +41,8 @@ const func = async ({ getNamedAccounts, deployments, getChainId }) => {
           methodName: 'initialize',
           args: [
             ForwardContractBatchToken.address,
-            INITIAL_COLLATERALIZATION_FEE
+            INITIAL_COLLATERALIZATION_FEE,
+            deployer
           ]
         }
       }
