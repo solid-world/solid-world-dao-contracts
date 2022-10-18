@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.16;
+pragma solidity ^0.8.16;
 
 import "./ABDKMath64x64.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -20,8 +20,6 @@ library SolidMath {
      * @dev 100% = 10_000; 0.01% = 1
      */
     uint constant FEE_BASIS_POINTS = 10_000;
-
-    uint constant HALF_A_WEEK = 3 days + 12 hours;
 
     error IncorrectDates(uint startDate, uint endDate);
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.16;
+pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -89,6 +89,11 @@ contract SolidWorldManager is
     ForwardContractBatchToken public forwardContractBatch;
 
     /**
+     * @notice The account where all protocol fees are captured.
+     */
+    address public feeReceiver;
+
+    /**
      * @notice Fee charged by DAO when collateralizing forward contract batch tokens.
      */
     uint16 public collateralizationFee;
@@ -108,12 +113,14 @@ contract SolidWorldManager is
 
     function initialize(
         ForwardContractBatchToken _forwardContractBatch,
-        uint16 _collateralizationFee
+        uint16 _collateralizationFee,
+        address _feeReceiver
     ) public initializer {
         __Ownable_init();
 
         forwardContractBatch = _forwardContractBatch;
         collateralizationFee = _collateralizationFee;
+        feeReceiver = _feeReceiver;
     }
 
     // todo #121: add authorization
@@ -181,7 +188,7 @@ contract SolidWorldManager is
         require(cbtUserCut >= amountOutMin, "Collateralize batch: amountOut < amountOutMin.");
 
         collateralizedToken.mint(msg.sender, cbtUserCut);
-        // todo #112: mint `cbtDaoCut` to DAO
+        collateralizedToken.mint(feeReceiver, cbtDaoCut);
 
         forwardContractBatch.safeTransferFrom(msg.sender, address(this), batchId, amountIn, "");
 
@@ -223,6 +230,11 @@ contract SolidWorldManager is
     // todo #121: add authorization
     function setCollateralizationFee(uint16 _collateralizationFee) public {
         collateralizationFee = _collateralizationFee;
+    }
+
+    // todo #121: add authorization
+    function setFeeReceiver(address _feeReceiver) public {
+        feeReceiver = _feeReceiver;
     }
 
     function getProjectIdsByCategory(uint categoryId) public view returns (uint[] memory) {
