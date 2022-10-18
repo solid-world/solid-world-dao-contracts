@@ -35,7 +35,7 @@ contract SolidMathTest is Test {
         uint endDate = CURRENT_DATE + 3 weeks + 3 days + 12 hours + 33 seconds;
 
         uint actual = SolidMath.weeksBetween(CURRENT_DATE, endDate);
-        uint expected = 4;
+        uint expected = 3;
 
         assertEq(actual, expected);
     }
@@ -62,6 +62,19 @@ contract SolidMathTest is Test {
             weeksUntilCertification
         );
         uint expected = 659_081; // 65.90815232%
+
+        assertEq(actual, expected);
+    }
+
+    function testComputeCollateralizationDiscountOneYear() public {
+        uint timeAppreciation = 80_000; // 8%
+        uint weeksUntilCertification = 52;
+
+        uint actual = SolidMath.computeCollateralizationDiscount(
+            timeAppreciation,
+            weeksUntilCertification
+        );
+        uint expected = 13_090; // 1.309082514%
 
         assertEq(actual, expected);
     }

@@ -35,15 +35,7 @@ library SolidMath {
             revert IncorrectDates(startDate, endDate);
         }
 
-        uint secondsBetweenDates = endDate - startDate;
-        uint weeksBetweenDates = secondsBetweenDates / 1 weeks;
-        uint remainder = secondsBetweenDates % 1 weeks;
-
-        if (remainder >= HALF_A_WEEK) {
-            weeksBetweenDates++;
-        }
-
-        return weeksBetweenDates;
+        return (endDate - startDate) / 1 weeks;
     }
 
     /**
