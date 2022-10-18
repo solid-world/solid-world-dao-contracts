@@ -48,6 +48,7 @@ library SolidMath {
 
     /**
      * @dev Computes discount with `timeAppreciation` after `weeksUntilCertification` weeks
+     * @dev (1 - timeAppreciation) ^ weeksUntilCertification
      * @param timeAppreciation 1% = 10000, 0.0984% = 984
      * @param weeksUntilCertification number of weeks until project certification
      */
