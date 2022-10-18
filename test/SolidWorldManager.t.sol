@@ -9,7 +9,7 @@ contract SolidWorldManagerTest is Test {
     SolidWorldManager manager;
     address root = address(this);
     address testAccount = vm.addr(1);
-    address daoAccount = vm.addr(2);
+    address feeReceiver = vm.addr(2);
 
     uint constant CATEGORY_ID = 1;
     uint constant PROJECT_ID = 3;
@@ -41,10 +41,10 @@ contract SolidWorldManagerTest is Test {
         ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
         forwardContractBatch.transferOwnership(address(manager));
 
-        manager.initialize(forwardContractBatch, COLLATERALIZATION_FEE, daoAccount);
+        manager.initialize(forwardContractBatch, COLLATERALIZATION_FEE, feeReceiver);
 
         vm.label(testAccount, "Test account");
-        vm.label(daoAccount, "DAO account");
+        vm.label(feeReceiver, "Protocol fee receiver account");
     }
 
     function testAddCategory() public {
@@ -269,7 +269,7 @@ contract SolidWorldManagerTest is Test {
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 0);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
         assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(daoAccount), cbtDaoCut);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
     }
 
     function testCollateralizeBatchWorksWhenCollateralizationFeeIs0() public {
@@ -306,7 +306,7 @@ contract SolidWorldManagerTest is Test {
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 0);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
         assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(daoAccount), cbtDaoCut);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
     }
 
     function testDecollateralizeTokensWhenInvalidBatchId() public {
@@ -397,7 +397,7 @@ contract SolidWorldManagerTest is Test {
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 75);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100 - 75);
         assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut - 75);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(daoAccount), cbtDaoCut);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
     }
 
     function testFailAddBatchWhenProjectDoesntExist() public {

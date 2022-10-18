@@ -21,8 +21,6 @@ library SolidMath {
      */
     uint constant FEE_BASIS_POINTS = 10_000;
 
-    uint constant HALF_A_WEEK = 3 days + 12 hours;
-
     error IncorrectDates(uint startDate, uint endDate);
 
     /**

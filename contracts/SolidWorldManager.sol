@@ -89,9 +89,9 @@ contract SolidWorldManager is
     ForwardContractBatchToken public forwardContractBatch;
 
     /**
-     * @notice The account where all DAO fees are captured.
+     * @notice The account where all protocol fees are captured.
      */
-    address public daoAccount;
+    address public feeReceiver;
 
     /**
      * @notice Fee charged by DAO when collateralizing forward contract batch tokens.
@@ -114,13 +114,13 @@ contract SolidWorldManager is
     function initialize(
         ForwardContractBatchToken _forwardContractBatch,
         uint16 _collateralizationFee,
-        address _daoAccount
+        address _feeReceiver
     ) public initializer {
         __Ownable_init();
 
         forwardContractBatch = _forwardContractBatch;
         collateralizationFee = _collateralizationFee;
-        daoAccount = _daoAccount;
+        feeReceiver = _feeReceiver;
     }
 
     // todo #121: add authorization
@@ -188,7 +188,7 @@ contract SolidWorldManager is
         require(cbtUserCut >= amountOutMin, "Collateralize batch: amountOut < amountOutMin.");
 
         collateralizedToken.mint(msg.sender, cbtUserCut);
-        collateralizedToken.mint(daoAccount, cbtDaoCut);
+        collateralizedToken.mint(feeReceiver, cbtDaoCut);
 
         forwardContractBatch.safeTransferFrom(msg.sender, address(this), batchId, amountIn, "");
 
@@ -233,8 +233,8 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
-    function setDaoAccount(address _daoAccount) public {
-        daoAccount = _daoAccount;
+    function setFeeReceiver(address _feeReceiver) public {
+        feeReceiver = _feeReceiver;
     }
 
     function getProjectIdsByCategory(uint categoryId) public view returns (uint[] memory) {
