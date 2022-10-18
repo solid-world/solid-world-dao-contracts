@@ -294,14 +294,8 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
             "CT Treasury: owner not approved this contract spend ERC1155"
         );
 
-        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksBetween(
-            block.timestamp,
-            carbonProjects[_token][_tokenId].contractExpectedDueDate
-        );
-        require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
-
-        (uint256 projectAmount, uint256 daoAmount) = SolidMath.payout(
-            weeksUntilDelivery,
+        (uint256 projectAmount, uint256 daoAmount) = SolidMath.computeCollateralizationOutcome(
+            carbonProjects[_token][_tokenId].contractExpectedDueDate,
             _amount,
             carbonProjects[_token][_tokenId].projectDiscountRate,
             daoLiquidityFee,
@@ -354,14 +348,8 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
             "CT Treasury: carbon project insuficient ERC1155 balance"
         );
 
-        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksBetween(
-            block.timestamp,
-            carbonProjects[_token][_tokenId].contractExpectedDueDate
-        );
-        require(mathOK, "CT Treasury: weeks from delivery dates are invalid");
-
-        (uint256 projectAmount, uint256 daoAmount) = SolidMath.payout(
-            weeksUntilDelivery,
+        (uint256 projectAmount, uint256 daoAmount) = SolidMath.computeCollateralizationOutcome(
+            carbonProjects[_token][_tokenId].contractExpectedDueDate,
             _amountToSell,
             carbonProjects[_token][_tokenId].projectDiscountRate,
             daoLiquidityFee,
@@ -414,17 +402,8 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
             uint256 userAmount
         )
     {
-        (bool mathOK, uint256 weeksUntilDelivery) = SolidMath.weeksBetween(
-            block.timestamp,
-            carbonProjects[_token][_tokenId].contractExpectedDueDate
-        );
-
-        if (!mathOK) {
-            return (0, 0, 0);
-        }
-
-        (uint256 projectAmount, uint256 daoAmount_) = SolidMath.payout(
-            weeksUntilDelivery,
+        (uint256 projectAmount, uint256 daoAmount_) = SolidMath.computeCollateralizationOutcome(
+            carbonProjects[_token][_tokenId].contractExpectedDueDate,
             _amountIn,
             carbonProjects[_token][_tokenId].projectDiscountRate,
             daoLiquidityFee,
@@ -432,18 +411,6 @@ contract CTTreasury is SolidDaoManaged, ERC1155Receiver {
         );
 
         return (projectAmount + daoAmount_, daoAmount_, projectAmount);
-    }
-
-    /**
-    @notice informs the investor a simulated return for deposit project's tokens
-     */
-    function simulateDepositWeekPeriod(
-        uint256 _numWeeks,
-        uint256 _rate,
-        uint256 _totalToken,
-        uint256 _daoFee
-    ) public view returns (uint256 toProjectOwner, uint256 toDAO) {
-        return SolidMath.payout(_numWeeks, _totalToken, _rate, _daoFee, CT.decimals());
     }
 
     /*

@@ -1,4 +1,5 @@
 const { ethers } = require('hardhat')
+const { BigNumber } = require('ethers')
 
 const LOCALHOST_ID = '31337'
 
@@ -28,6 +29,7 @@ const func = async ({ getNamedAccounts, deployments, getChainId }) => {
     }
   )
 
+  const INITIAL_COLLATERALIZATION_FEE = BigNumber.from(30) // 0.3%
   const SolidWorldManager = await deployments.deploy('SolidWorldManager', {
     from: deployer,
     args: [],
@@ -37,7 +39,10 @@ const func = async ({ getNamedAccounts, deployments, getChainId }) => {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [ForwardContractBatchToken.address]
+          args: [
+            ForwardContractBatchToken.address,
+            INITIAL_COLLATERALIZATION_FEE
+          ]
         }
       }
     }
