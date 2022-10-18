@@ -211,8 +211,8 @@ contract SolidWorldManagerTest is Test {
     }
 
     function testCollateralizeBatchWhenERC20OutputIsLessThanMinimum() public {
-        uint cbtUserCut = 81 * 10**18;
-        uint cbtDaoCut = 9 * 10**18;
+        uint cbtUserCut = 81e18;
+        uint cbtDaoCut = 9e8;
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
@@ -237,8 +237,8 @@ contract SolidWorldManagerTest is Test {
     }
 
     function testCollateralizeBatchMintsERC20AndTransfersERC1155ToManager() public {
-        uint cbtUserCut = 81 * 10**18;
-        uint cbtDaoCut = 9 * 10**18;
+        uint cbtUserCut = 81e18;
+        uint cbtDaoCut = 9e18;
 
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
@@ -295,8 +295,8 @@ contract SolidWorldManagerTest is Test {
     }
 
     function testDecollateralizeTokensWhenERC1155OutputIsLessThanMinimum() public {
-        uint cbtUserCut = 81 * 10**18;
-        uint cbtDaoCut = 9 * 10**18;
+        uint cbtUserCut = 81e18;
+        uint cbtDaoCut = 9e18;
 
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
@@ -325,8 +325,8 @@ contract SolidWorldManagerTest is Test {
     }
 
     function testDecollateralizeTokensBurnsERC20AndReceivesERC1155() public {
-        uint cbtUserCut = 81 * 10**18;
-        uint cbtDaoCut = 9 * 10**18;
+        uint cbtUserCut = 81e18;
+        uint cbtDaoCut = 9e18;
 
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);

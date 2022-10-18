@@ -32,7 +32,7 @@ contract SolidMathTest is Test {
     }
 
     function testWeeksBetweenRoughTimeDifference() public {
-        uint endDate = CURRENT_DATE + 3 weeks + 3 days + 12 hours + 33 seconds;
+        uint endDate = CURRENT_DATE + 4 weeks - 1 seconds;
 
         uint actual = SolidMath.weeksBetween(CURRENT_DATE, endDate);
         uint expected = 3;
