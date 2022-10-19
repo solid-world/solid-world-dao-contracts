@@ -80,7 +80,7 @@ contract SolidMathTest is Test {
     }
 
     function testCollateralizationOutcomeAgainstLinearAlgorithm_oneWeek() public {
-        uint deviation = 500000000000000000;
+        uint delta = 500000000000000000;
 
         (uint256 cbtUserCut, uint256 cbtDaoCut) = SolidMath.computeCollateralizationOutcome(
             block.timestamp + 1 weeks + 1 hours,
@@ -89,12 +89,12 @@ contract SolidMathTest is Test {
             COLLATERALIZATION_FEE,
             18
         );
-        assertApproxEqAbs(cbtUserCut, 9790_356800000_000000000, deviation);
-        assertApproxEqAbs(cbtDaoCut, 199_803200000_000000000, deviation);
+        assertApproxEqAbs(cbtUserCut, 9790_356800000_000000000, delta);
+        assertApproxEqAbs(cbtDaoCut, 199_803200000_000000000, delta);
     }
 
     function testCollateralizationOutcomeAgainstLinearAlgorithm_oneYear() public {
-        uint deviation = 500000000000000000;
+        uint delta = 500000000000000000;
 
         (uint256 userAmountOut2, uint256 daoAmountOut2) = SolidMath.computeCollateralizationOutcome(
             block.timestamp + ONE_YEAR + 1 hours,
@@ -103,12 +103,12 @@ contract SolidMathTest is Test {
             COLLATERALIZATION_FEE,
             18
         );
-        assertApproxEqAbs(userAmountOut2, 9310_666400000_000000000, deviation);
-        assertApproxEqAbs(daoAmountOut2, 190_013600000_000000000, deviation);
+        assertApproxEqAbs(userAmountOut2, 9310_666400000_000000000, delta);
+        assertApproxEqAbs(daoAmountOut2, 190_013600000_000000000, delta);
     }
 
     function testCollateralizationOutcomeAgainstLinearAlgorithm_tenYears() public {
-        uint deviation = 50000000000000000000;
+        uint delta = 50000000000000000000;
 
         (uint256 userAmountOut3, uint256 daoAmountOut3) = SolidMath.computeCollateralizationOutcome(
             block.timestamp + 10 * ONE_YEAR + 1 hours,
@@ -117,7 +117,7 @@ contract SolidMathTest is Test {
             COLLATERALIZATION_FEE,
             18
         );
-        assertApproxEqAbs(userAmountOut3, 58714_348000000_000000000, deviation);
-        assertApproxEqAbs(daoAmountOut3, 1198_252000000_000000000, deviation);
+        assertApproxEqAbs(userAmountOut3, 58714_348000000_000000000, delta);
+        assertApproxEqAbs(daoAmountOut3, 1198_252000000_000000000, delta);
     }
 }

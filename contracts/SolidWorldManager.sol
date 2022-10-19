@@ -110,6 +110,9 @@ contract SolidWorldManager is
         uint amountOut,
         address indexed tokensOwner
     );
+    event CategoryCreated(uint indexed categoryId);
+    event ProjectCreated(uint indexed projectId);
+    event BatchCreated(uint indexed batchId);
 
     function initialize(
         ForwardContractBatchToken _forwardContractBatch,
@@ -133,6 +136,8 @@ contract SolidWorldManager is
 
         categoryIds[categoryId] = true;
         categoryToken[categoryId] = new CollateralizedBasketToken(tokenName, tokenSymbol);
+
+        emit CategoryCreated(categoryId);
     }
 
     // todo #121: add authorization
@@ -143,6 +148,8 @@ contract SolidWorldManager is
         categoryProjects[categoryId].push(projectId);
         projectCategory[projectId] = categoryId;
         projectIds[projectId] = true;
+
+        emit ProjectCreated(projectId);
     }
 
     // todo #121: add authorization
@@ -159,6 +166,8 @@ contract SolidWorldManager is
         batches[batch.id] = batch;
         projectBatches[batch.projectId].push(batch.id);
         forwardContractBatch.mint(batch.owner, batch.id, batch.totalAmount, "");
+
+        emit BatchCreated(batch.id);
     }
 
     /**
