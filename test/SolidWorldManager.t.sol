@@ -32,6 +32,9 @@ contract SolidWorldManagerTest is Test {
         uint amountOut,
         address indexed tokensOwner
     );
+    event CategoryCreated(uint indexed categoryId);
+    event ProjectCreated(uint indexed projectId);
+    event BatchCreated(uint indexed batchId);
 
     function setUp() public {
         vm.warp(CURRENT_DATE);
@@ -48,22 +51,30 @@ contract SolidWorldManagerTest is Test {
     }
 
     function testAddCategory() public {
-        assertEq(address(manager.categoryToken(1)), address(0));
-        assertEq(manager.categoryIds(1), false);
+        assertEq(address(manager.categoryToken(CATEGORY_ID)), address(0));
+        assertEq(manager.categoryIds(CATEGORY_ID), false);
 
-        manager.addCategory(1, "Test token", "TT");
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit CategoryCreated(CATEGORY_ID);
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
 
-        assertNotEq(address(manager.categoryToken(1)), address(0));
-        assertEq(manager.categoryIds(1), true);
+        assertNotEq(address(manager.categoryToken(CATEGORY_ID)), address(0));
+        assertEq(manager.categoryIds(CATEGORY_ID), true);
     }
 
     function testAddProject() public {
-        assertEq(manager.projectIds(5), false);
+        uint projectId = 5;
+        uint categoryId = 3;
 
-        manager.addCategory(3, "Test token", "TT");
-        manager.addProject(3, 5);
+        assertEq(manager.projectIds(projectId), false);
 
-        assertEq(manager.projectIds(5), true);
+        manager.addCategory(categoryId, "Test token", "TT");
+
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit ProjectCreated(projectId);
+        manager.addProject(categoryId, projectId);
+
+        assertEq(manager.projectIds(projectId), true);
     }
 
     function testAddMultipleProjects() public {
@@ -89,14 +100,18 @@ contract SolidWorldManagerTest is Test {
     }
 
     function testAddBatch() public {
+        uint batchId = 7;
+
         manager.addCategory(3, "Test token", "TT");
         manager.addProject(3, 5);
 
-        assertEq(manager.batchIds(7), false);
+        assertEq(manager.batchIds(batchId), false);
 
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit BatchCreated(batchId);
         manager.addBatch(
             SolidWorldManager.Batch({
-                id: 7,
+                id: batchId,
                 status: 0,
                 projectId: 5,
                 totalAmount: 10,
@@ -106,7 +121,7 @@ contract SolidWorldManagerTest is Test {
             })
         );
 
-        assertEq(manager.batchIds(7), true);
+        assertEq(manager.batchIds(batchId), true);
 
         (
             uint id,
@@ -116,9 +131,9 @@ contract SolidWorldManagerTest is Test {
             uint32 expectedDueDate,
             uint8 status,
             uint24 discountRate
-        ) = manager.batches(7);
+        ) = manager.batches(batchId);
 
-        assertEq(id, 7);
+        assertEq(id, batchId);
         assertEq(status, 0);
         assertEq(projectId, 5);
         assertEq(totalAmount, 10);
