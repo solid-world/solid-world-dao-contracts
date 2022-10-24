@@ -2,6 +2,7 @@
 pragma solidity ^0.8.16;
 
 import "forge-std/Test.sol";
+import "forge-std/console.sol";
 
 import "../contracts/SolidWorldManager.sol";
 
@@ -362,7 +363,37 @@ contract SolidWorldManagerTest is Test {
         );
 
         vm.expectRevert(abi.encodePacked("ERC20: insufficient allowance"));
-        manager.decollateralizeTokens(BATCH_ID, 1000, 500);
+        manager.decollateralizeTokens(BATCH_ID, 1000e18, 500);
+    }
+
+    function testDecollateralizeTokensWhenERC20InputIsTooLow() public {
+        uint amountOutMin = 81e18;
+
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 10000,
+                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                discountRate: TIME_APPRECIATION,
+                owner: testAccount
+            })
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+
+        vm.startPrank(testAccount);
+        collateralizedToken.approve(address(manager), 10000);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        manager.collateralizeBatch(BATCH_ID, 10000, amountOutMin);
+        vm.expectRevert(abi.encodePacked("Decollateralize batch: input amount too low."));
+        manager.decollateralizeTokens(BATCH_ID, 1e18, 0);
+        vm.stopPrank();
     }
 
     function testDecollateralizeTokensWhenERC1155OutputIsLessThanMinimum() public {
@@ -375,7 +406,7 @@ contract SolidWorldManagerTest is Test {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 100,
+                totalAmount: 10000,
                 expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
                 discountRate: TIME_APPRECIATION,
@@ -387,17 +418,17 @@ contract SolidWorldManagerTest is Test {
         CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
 
         vm.startPrank(testAccount);
-        collateralizedToken.approve(address(manager), 75);
+        collateralizedToken.approve(address(manager), 10000);
         forwardContractBatch.setApprovalForAll(address(manager), true);
-        manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut);
+        manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
         vm.expectRevert(abi.encodePacked("Decollateralize batch: amountOut < amountOutMin."));
-        manager.decollateralizeTokens(BATCH_ID, 75, 100);
+        manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 10000);
         vm.stopPrank();
     }
 
     function testDecollateralizeTokensBurnsERC20AndReceivesERC1155() public {
-        uint cbtUserCut = 81e18;
-        uint cbtDaoCut = 9e18;
+        uint cbtUserCut = 8100e18;
+        uint cbtDaoCut = 900e18;
 
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
@@ -406,7 +437,7 @@ contract SolidWorldManagerTest is Test {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 100,
+                totalAmount: 10000,
                 expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
                 discountRate: TIME_APPRECIATION,
@@ -418,20 +449,20 @@ contract SolidWorldManagerTest is Test {
         CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
 
         vm.startPrank(testAccount);
-        collateralizedToken.approve(address(manager), 75);
+        collateralizedToken.approve(address(manager), cbtUserCut);
         forwardContractBatch.setApprovalForAll(address(manager), true);
-        manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut);
+        manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
 
         vm.expectEmit(true, true, false, true, address(manager));
-        emit TokensDecollateralized(BATCH_ID, 75, 75, testAccount);
-        manager.decollateralizeTokens(BATCH_ID, 75, 75);
+        emit TokensDecollateralized(BATCH_ID, cbtUserCut, 8100, testAccount);
+        manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 8100);
 
         vm.stopPrank();
 
-        assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 75);
-        assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100 - 75);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut - 75);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
+        assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 8100);
+        assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 10000 - 8100);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), 0);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut + 810e18);
     }
 
     function testFailAddBatchWhenProjectDoesntExist() public {

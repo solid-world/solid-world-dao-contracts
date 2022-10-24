@@ -228,19 +228,24 @@ contract SolidWorldManager is
     ) external nonReentrant {
         require(batchIds[batchId], "Decollateralize batch: invalid batchId.");
 
-        uint amountOut = amountIn; // todo #122: implement function to compute ERC20=>ERC1155 output amount
+        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
+
+        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
+            .computeDecollateralizationOutcome(
+                batches[batchId].expectedDueDate,
+                amountIn,
+                batches[batchId].discountRate,
+                decollateralizationFee,
+                collateralizedToken.decimals()
+            );
+
+        require(amountOut > 0, "Decollateralize batch: input amount too low.");
         require(amountOut >= amountOutMin, "Decollateralize batch: amountOut < amountOutMin.");
 
-        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
-        collateralizedToken.burnFrom(msg.sender, amountIn);
+        collateralizedToken.burnFrom(msg.sender, cbtToBurn);
+        collateralizedToken.transferFrom(msg.sender, feeReceiver, cbtDaoCut);
 
-        forwardContractBatch.safeTransferFrom(
-            address(this),
-            msg.sender,
-            batchId,
-            amountOut,
-            new bytes(0)
-        );
+        forwardContractBatch.safeTransferFrom(address(this), msg.sender, batchId, amountOut, "");
 
         emit TokensDecollateralized(batchId, amountIn, amountOut, msg.sender);
     }
