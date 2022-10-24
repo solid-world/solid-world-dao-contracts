@@ -42,7 +42,7 @@ library SolidMath {
      * @param timeAppreciation 1% = 10000, 0.0984% = 984
      * @param weeksUntilCertification number of weeks until project certification
      */
-    function computeCollateralizationDiscount(uint timeAppreciation, uint weeksUntilCertification)
+    function computeTimeAppreciationDiscount(uint timeAppreciation, uint weeksUntilCertification)
         internal
         pure
         returns (uint)
@@ -76,7 +76,7 @@ library SolidMath {
     ) internal view returns (uint, uint) {
         uint weeksUntilCertification = weeksBetween(block.timestamp, expectedCertificationDate);
 
-        uint collateralizationDiscount = computeCollateralizationDiscount(
+        uint collateralizationDiscount = computeTimeAppreciationDiscount(
             timeAppreciation,
             weeksUntilCertification
         );

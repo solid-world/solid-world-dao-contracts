@@ -44,7 +44,7 @@ contract SolidMathTest is Test {
         uint timeAppreciation = 80_000; // 8%
         uint weeksUntilCertification = 1;
 
-        uint actual = SolidMath.computeCollateralizationDiscount(
+        uint actual = SolidMath.computeTimeAppreciationDiscount(
             timeAppreciation,
             weeksUntilCertification
         );
@@ -57,7 +57,7 @@ contract SolidMathTest is Test {
         uint timeAppreciation = 80_000; // 8%
         uint weeksUntilCertification = 5;
 
-        uint actual = SolidMath.computeCollateralizationDiscount(
+        uint actual = SolidMath.computeTimeAppreciationDiscount(
             timeAppreciation,
             weeksUntilCertification
         );
@@ -70,7 +70,7 @@ contract SolidMathTest is Test {
         uint timeAppreciation = 80_000; // 8%
         uint weeksUntilCertification = 52;
 
-        uint actual = SolidMath.computeCollateralizationDiscount(
+        uint actual = SolidMath.computeTimeAppreciationDiscount(
             timeAppreciation,
             weeksUntilCertification
         );
