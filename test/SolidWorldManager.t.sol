@@ -116,6 +116,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: 5,
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
                 discountRate: 1,
                 owner: testAccount
             })
@@ -129,6 +130,7 @@ contract SolidWorldManagerTest is Test {
             uint totalAmount,
             address owner,
             uint32 expectedDueDate,
+            uint16 vintage,
             uint8 status,
             uint24 discountRate
         ) = manager.batches(batchId);
@@ -138,6 +140,7 @@ contract SolidWorldManagerTest is Test {
         assertEq(projectId, 5);
         assertEq(totalAmount, 10);
         assertEq(expectedDueDate, uint32(CURRENT_DATE + 12));
+        assertEq(vintage, 2022);
         assertEq(discountRate, 1);
         assertEq(owner, testAccount);
     }
@@ -155,6 +158,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: 5,
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
                 discountRate: 1,
                 owner: testAccount
             })
@@ -167,6 +171,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: 5,
                 totalAmount: 20,
                 expectedDueDate: uint32(CURRENT_DATE + 24),
+                vintage: 2022,
                 discountRate: 1,
                 owner: testAccount
             })
@@ -190,6 +195,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: 5,
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
                 discountRate: 1,
                 owner: testAccount
             })
@@ -213,6 +219,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: PROJECT_ID,
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
                 discountRate: 1,
                 owner: testAccount
             })
@@ -238,6 +245,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: PROJECT_ID,
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
                 discountRate: TIME_APPRECIATION,
                 owner: testAccount
             })
@@ -265,6 +273,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: PROJECT_ID,
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
                 discountRate: TIME_APPRECIATION,
                 owner: testAccount
             })
@@ -302,6 +311,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: PROJECT_ID,
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
                 discountRate: TIME_APPRECIATION,
                 owner: testAccount
             })
@@ -339,6 +349,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: PROJECT_ID,
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
                 discountRate: 1,
                 owner: testAccount
             })
@@ -360,6 +371,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: PROJECT_ID,
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
                 discountRate: TIME_APPRECIATION,
                 owner: testAccount
             })
@@ -390,6 +402,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: PROJECT_ID,
                 totalAmount: 100,
                 expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
                 discountRate: TIME_APPRECIATION,
                 owner: testAccount
             })
@@ -423,6 +436,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: 5,
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
                 discountRate: 1,
                 owner: testAccount
             })
@@ -440,6 +454,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: 5,
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
                 discountRate: 1,
                 owner: testAccount
             })
@@ -452,6 +467,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: 5,
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
                 discountRate: 1,
                 owner: testAccount
             })
@@ -469,6 +485,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: 5,
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
                 discountRate: 1,
                 owner: address(0)
             })
@@ -486,6 +503,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: 5,
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE),
+                vintage: 2022,
                 discountRate: 1,
                 owner: testAccount
             })
@@ -503,6 +521,7 @@ contract SolidWorldManagerTest is Test {
                 projectId: 5,
                 totalAmount: 10,
                 expectedDueDate: uint32(CURRENT_DATE - 1),
+                vintage: 2022,
                 discountRate: 1,
                 owner: testAccount
             })
