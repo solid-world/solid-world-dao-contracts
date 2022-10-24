@@ -18,6 +18,7 @@ contract SolidWorldManagerTest is Test {
     uint constant CURRENT_DATE = 1666016743;
 
     uint16 constant COLLATERALIZATION_FEE = 1000; // 10%
+    uint16 constant DECOLLATERALIZATION_FEE = 1000; // 10%
     uint24 constant TIME_APPRECIATION = 100_000; // 10%
 
     event BatchCollateralized(
@@ -44,7 +45,12 @@ contract SolidWorldManagerTest is Test {
         ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
         forwardContractBatch.transferOwnership(address(manager));
 
-        manager.initialize(forwardContractBatch, COLLATERALIZATION_FEE, feeReceiver);
+        manager.initialize(
+            forwardContractBatch,
+            COLLATERALIZATION_FEE,
+            DECOLLATERALIZATION_FEE,
+            feeReceiver
+        );
 
         vm.label(testAccount, "Test account");
         vm.label(feeReceiver, "Protocol fee receiver account");

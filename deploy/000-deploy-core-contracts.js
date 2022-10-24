@@ -30,6 +30,7 @@ const func = async ({ getNamedAccounts, deployments, getChainId }) => {
   )
 
   const INITIAL_COLLATERALIZATION_FEE = BigNumber.from(30) // 0.3%
+  const INITIAL_DECOLLATERALIZATION_FEE = BigNumber.from(500) // 5.0%
   const SolidWorldManager = await deployments.deploy('SolidWorldManager', {
     from: deployer,
     args: [],
@@ -42,6 +43,7 @@ const func = async ({ getNamedAccounts, deployments, getChainId }) => {
           args: [
             ForwardContractBatchToken.address,
             INITIAL_COLLATERALIZATION_FEE,
+            INITIAL_DECOLLATERALIZATION_FEE,
             deployer
           ]
         }

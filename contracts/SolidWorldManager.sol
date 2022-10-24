@@ -100,6 +100,11 @@ contract SolidWorldManager is
      */
     uint16 public collateralizationFee;
 
+    /**
+     * @notice Fee charged by DAO when decollateralizing collateralized basket tokens.
+     */
+    uint16 public decollateralizationFee;
+
     event BatchCollateralized(
         uint indexed batchId,
         uint amountIn,
@@ -119,12 +124,14 @@ contract SolidWorldManager is
     function initialize(
         ForwardContractBatchToken _forwardContractBatch,
         uint16 _collateralizationFee,
+        uint16 _decollateralizationFee,
         address _feeReceiver
     ) public initializer {
         __Ownable_init();
 
         forwardContractBatch = _forwardContractBatch;
         collateralizationFee = _collateralizationFee;
+        decollateralizationFee = _decollateralizationFee;
         feeReceiver = _feeReceiver;
     }
 
@@ -241,6 +248,11 @@ contract SolidWorldManager is
     // todo #121: add authorization
     function setCollateralizationFee(uint16 _collateralizationFee) public {
         collateralizationFee = _collateralizationFee;
+    }
+
+    // todo #121: add authorization
+    function setDecollateralizationFee(uint16 _decollateralizationFee) public {
+        decollateralizationFee = _decollateralizationFee;
     }
 
     // todo #121: add authorization
