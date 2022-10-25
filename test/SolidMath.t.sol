@@ -4,7 +4,8 @@ import "forge-std/Test.sol";
 import "../contracts/lib/SolidMath.sol";
 
 contract SolidMathTest is Test {
-    uint constant COLLATERALIZATION_FEE = 200;
+    uint constant COLLATERALIZATION_FEE = 200; // 2%
+    uint constant DECOLLATERALIZATION_FEE = 500; // 5%
     uint constant ONE_YEAR = 1 weeks * 52;
     uint constant CURRENT_DATE = 1666016743;
 
@@ -40,39 +41,39 @@ contract SolidMathTest is Test {
         assertEq(actual, expected);
     }
 
-    function testComputeCollateralizationDiscountSingleWeek() public {
+    function testComputeTimeAppreciationDiscountSingleWeek() public {
         uint timeAppreciation = 80_000; // 8%
-        uint weeksUntilCertification = 1;
+        uint expectedCertificationDate = block.timestamp + 1 weeks;
 
-        uint actual = SolidMath.computeCollateralizationDiscount(
+        uint actual = SolidMath.computeTimeAppreciationDiscount(
             timeAppreciation,
-            weeksUntilCertification
+            expectedCertificationDate
         );
         uint expected = 920_000; // 92%
 
         assertEq(actual, expected);
     }
 
-    function testComputeCollateralizationDiscountFewWeeks() public {
+    function testComputeTimeAppreciationDiscountFewWeeks() public {
         uint timeAppreciation = 80_000; // 8%
-        uint weeksUntilCertification = 5;
+        uint expectedCertificationDate = block.timestamp + 5 weeks;
 
-        uint actual = SolidMath.computeCollateralizationDiscount(
+        uint actual = SolidMath.computeTimeAppreciationDiscount(
             timeAppreciation,
-            weeksUntilCertification
+            expectedCertificationDate
         );
         uint expected = 659_081; // 65.90815232%
 
         assertEq(actual, expected);
     }
 
-    function testComputeCollateralizationDiscountOneYear() public {
+    function testComputeTimeAppreciationDiscountOneYear() public {
         uint timeAppreciation = 80_000; // 8%
-        uint weeksUntilCertification = 52;
+        uint expectedCertificationDate = block.timestamp + ONE_YEAR;
 
-        uint actual = SolidMath.computeCollateralizationDiscount(
+        uint actual = SolidMath.computeTimeAppreciationDiscount(
             timeAppreciation,
-            weeksUntilCertification
+            expectedCertificationDate
         );
         uint expected = 13_090; // 1.309082514%
 
@@ -119,5 +120,50 @@ contract SolidMathTest is Test {
         );
         assertApproxEqAbs(userAmountOut3, 58714_348000000_000000000, delta);
         assertApproxEqAbs(daoAmountOut3, 1198_252000000_000000000, delta);
+    }
+
+    function testDecollateralizationOutcome_oneWeek() public {
+        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
+            .computeDecollateralizationOutcome(
+                block.timestamp + 1 weeks,
+                10000e18,
+                10_0000,
+                DECOLLATERALIZATION_FEE,
+                18
+            );
+
+        assertEq(amountOut, 10555);
+        assertEq(cbtDaoCut, 500e18);
+        assertEq(cbtToBurn, 9500e18);
+    }
+
+    function testDecollateralizationOutcome_oneYear() public {
+        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
+            .computeDecollateralizationOutcome(
+                block.timestamp + ONE_YEAR + 1 hours,
+                10000e18,
+                1600, // 0.16% weekly discount
+                DECOLLATERALIZATION_FEE,
+                18
+            );
+
+        assertEq(amountOut, 10324);
+        assertEq(cbtDaoCut, 500e18);
+        assertEq(cbtToBurn, 9500e18);
+    }
+
+    function testDecollateralizationOutcome_tenYears() public {
+        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
+            .computeDecollateralizationOutcome(
+                block.timestamp + 10 * ONE_YEAR,
+                1000e18,
+                1600, // 0.16% weekly discount
+                DECOLLATERALIZATION_FEE,
+                18
+            );
+
+        assertEq(amountOut, 2184);
+        assertEq(cbtDaoCut, 50e18);
+        assertEq(cbtToBurn, 950e18);
     }
 }

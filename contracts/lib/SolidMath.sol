@@ -27,6 +27,7 @@ library SolidMath {
      * @dev Computes the number of weeks between two dates
      * @param startDate start date expressed in seconds
      * @param endDate end date expressed in seconds
+     * @return number of weeks between the two dates
      */
     function weeksBetween(uint startDate, uint endDate) internal pure returns (uint) {
         if (startDate < 1 weeks || endDate < 1 weeks || endDate < startDate) {
@@ -37,16 +38,19 @@ library SolidMath {
     }
 
     /**
-     * @dev Computes discount with `timeAppreciation` after `weeksUntilCertification` weeks
+     * @dev Computes discount for given `timeAppreciation` and project `expectedCertificationDate`
      * @dev (1 - timeAppreciation) ^ weeksUntilCertification
      * @param timeAppreciation 1% = 10000, 0.0984% = 984
-     * @param weeksUntilCertification number of weeks until project certification
+     * @param expectedCertificationDate expected date for project certification
+     * @return discount in basis points
      */
-    function computeCollateralizationDiscount(uint timeAppreciation, uint weeksUntilCertification)
+    function computeTimeAppreciationDiscount(uint timeAppreciation, uint expectedCertificationDate)
         internal
-        pure
+        view
         returns (uint)
     {
+        uint weeksUntilCertification = weeksBetween(block.timestamp, expectedCertificationDate);
+
         uint discountRatePoints = TIME_APPRECIATION_BASIS_POINTS - timeAppreciation;
 
         if (weeksUntilCertification <= 1) {
@@ -66,6 +70,8 @@ library SolidMath {
      * @param timeAppreciation 1% = 10000, 0.0984% = 984
      * @param collateralizationFee 0.01% = 1
      * @param cbtDecimals collateralized basket token number of decimals
+     * @return amount of ERC20 tokens to be minted to the stakeholder
+     * @return amount of ERC20 tokens to be minted to the DAO
      */
     function computeCollateralizationOutcome(
         uint expectedCertificationDate,
@@ -74,14 +80,12 @@ library SolidMath {
         uint collateralizationFee,
         uint cbtDecimals
     ) internal view returns (uint, uint) {
-        uint weeksUntilCertification = weeksBetween(block.timestamp, expectedCertificationDate);
-
-        uint collateralizationDiscount = computeCollateralizationDiscount(
+        uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
             timeAppreciation,
-            weeksUntilCertification
+            expectedCertificationDate
         );
         uint cbtAmount = Math.mulDiv(
-            fcbtAmount * collateralizationDiscount,
+            fcbtAmount * timeAppreciationDiscount,
             10**cbtDecimals,
             TIME_APPRECIATION_BASIS_POINTS
         );
@@ -90,5 +94,50 @@ library SolidMath {
         uint cbtUserCut = cbtAmount - cbtDaoCut;
 
         return (cbtUserCut, cbtDaoCut);
+    }
+
+    /**
+     * @dev Computes the amount of ERC1155 tokens redeemable by the stakeholder, amount of ERC20 tokens
+     * @dev charged by the DAO and to be burned when decollateralizing `cbtAmount` of ERC20 tokens
+     * @dev erc1155 = erc20 * (1 - fee) / (1 - timeAppreciation) ^ weeksUntilCertification
+     * @param expectedCertificationDate expected date for project certification
+     * @param cbtAmount amount of ERC20 tokens to be decollateralized
+     * @param timeAppreciation 1% = 10000, 0.0984% = 984
+     * @param decollateralizationFee 0.01% = 1
+     * @param cbtDecimals collateralized basket token number of decimals
+     * @return amount of ERC1155 tokens redeemable by the stakeholder
+     * @return amount of ERC20 tokens charged by the DAO
+     * @return amount of ERC20 tokens to be burned from the stakeholder
+     */
+    function computeDecollateralizationOutcome(
+        uint expectedCertificationDate,
+        uint cbtAmount,
+        uint timeAppreciation,
+        uint decollateralizationFee,
+        uint cbtDecimals
+    )
+        internal
+        view
+        returns (
+            uint,
+            uint,
+            uint
+        )
+    {
+        uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
+            timeAppreciation,
+            expectedCertificationDate
+        );
+
+        uint cbtDaoCut = Math.mulDiv(cbtAmount, decollateralizationFee, FEE_BASIS_POINTS);
+        uint cbtToBurn = cbtAmount - cbtDaoCut;
+
+        uint fcbtAmount = Math.mulDiv(
+            cbtToBurn / 10**cbtDecimals,
+            TIME_APPRECIATION_BASIS_POINTS,
+            timeAppreciationDiscount
+        );
+
+        return (fcbtAmount, cbtDaoCut, cbtToBurn);
     }
 }
