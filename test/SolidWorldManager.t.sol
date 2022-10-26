@@ -465,6 +465,39 @@ contract SolidWorldManagerTest is Test {
         assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut + 810e18);
     }
 
+    function testSimulateBatchCollateralizationWhenBatchIdIsInvalid() public {
+        vm.expectRevert(abi.encodePacked("Simulate batch collateralization: invalid batchId."));
+        manager.simulateBatchCollateralization(BATCH_ID, 10000);
+    }
+
+    function testSimulateBatchCollateralization() public {
+        uint expectedCbtUserCut = 8100e18;
+        uint expectedCbtDaoCut = 900e18;
+        uint expectedCbtForfeited = 1000e18;
+
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 10000,
+                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2025,
+                discountRate: TIME_APPRECIATION,
+                owner: testAccount
+            })
+        );
+
+        (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = manager
+            .simulateBatchCollateralization(BATCH_ID, 10000);
+
+        assertEq(cbtUserCut, expectedCbtUserCut);
+        assertEq(cbtDaoCut, expectedCbtDaoCut);
+        assertEq(cbtForfeited, expectedCbtForfeited);
+    }
+
     function testFailAddBatchWhenProjectDoesntExist() public {
         manager.addBatch(
             SolidWorldManager.Batch({

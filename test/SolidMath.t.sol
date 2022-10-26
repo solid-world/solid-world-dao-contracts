@@ -80,50 +80,86 @@ contract SolidMathTest is Test {
         assertEq(actual, expected);
     }
 
-    function testCollateralizationOutcomeAgainstLinearAlgorithm_oneWeek() public {
-        uint delta = 500000000000000000;
-
-        (uint256 cbtUserCut, uint256 cbtDaoCut) = SolidMath.computeCollateralizationOutcome(
-            block.timestamp + 1 weeks + 1 hours,
-            10000,
-            984,
-            COLLATERALIZATION_FEE,
-            18
-        );
-        assertApproxEqAbs(cbtUserCut, 9790_356800000_000000000, delta);
-        assertApproxEqAbs(cbtDaoCut, 199_803200000_000000000, delta);
+    function testCollateralizationOutcome_oneWeek() public {
+        (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = SolidMath
+            .computeCollateralizationOutcome(
+                block.timestamp + 1 weeks + 1 hours,
+                10000,
+                1647,
+                COLLATERALIZATION_FEE,
+                18
+            );
+        assertEq(cbtUserCut, 9783859400000000000000);
+        assertEq(cbtDaoCut, 199670600000000000000);
+        assertEq(cbtForfeited, 16470000000000000000);
     }
 
-    function testCollateralizationOutcomeAgainstLinearAlgorithm_oneYear() public {
-        uint delta = 500000000000000000;
+    function testCollateralizationOutcome_oneYear() public {
+        (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = SolidMath
+            .computeCollateralizationOutcome(
+                block.timestamp + ONE_YEAR + 1 hours,
+                10000,
+                1647,
+                COLLATERALIZATION_FEE,
+                18
+            );
 
-        (uint256 userAmountOut2, uint256 daoAmountOut2) = SolidMath.computeCollateralizationOutcome(
-            block.timestamp + ONE_YEAR + 1 hours,
-            10000,
-            984,
-            COLLATERALIZATION_FEE,
-            18
-        );
-        assertApproxEqAbs(userAmountOut2, 9310_666400000_000000000, delta);
-        assertApproxEqAbs(daoAmountOut2, 190_013600000_000000000, delta);
+        // js result:       8994990221582975000000
+        // macbook result:  8994990221600000000000
+        // desmos result:   8994990221600000000000
+        // solidity result: 8994988800000000000000
+        // delta = 8994990221600000000000 - 8994988800000000000000 = 1421599999800000 = ~1430000000000000
+        assertApproxEqAbs(cbtUserCut, 8994990221600000000000, 1430000000000000);
+
+        // js result:       183571229011897580000
+        // macbook result:  183571229010000000000
+        // desmos result:   183571229010000000000
+        // solidity result: 183571200000000000000
+        // delta = 183571229010000000000 - 183571200000000000000 = 29009999987000 = ~29100000000000
+        assertApproxEqAbs(cbtDaoCut, 183571229010000000000, 29100000000000);
+
+        // js result:       821438549405127900000
+        // macbook result:  821438549410000000000
+        // desmos result:   821438549410000000000
+        // solidity result: 821440000000000000000
+        // delta = 821440000000000000000 - 821438549410000000000 = 1450590000000000 = ~1460000000000000
+        assertApproxEqAbs(cbtForfeited, 821438549410000000000, 1460000000000000);
     }
 
-    function testCollateralizationOutcomeAgainstLinearAlgorithm_tenYears() public {
-        uint delta = 50000000000000000000;
+    function testCollateralizationOutcome_tenYears() public {
+        (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = SolidMath
+            .computeCollateralizationOutcome(
+                block.timestamp + 10 * ONE_YEAR + 1 hours,
+                10000,
+                1647,
+                COLLATERALIZATION_FEE,
+                18
+            );
 
-        (uint256 userAmountOut3, uint256 daoAmountOut3) = SolidMath.computeCollateralizationOutcome(
-            block.timestamp + 10 * ONE_YEAR + 1 hours,
-            100000,
-            984,
-            COLLATERALIZATION_FEE,
-            18
-        );
-        assertApproxEqAbs(userAmountOut3, 58714_348000000_000000000, delta);
-        assertApproxEqAbs(daoAmountOut3, 1198_252000000_000000000, delta);
+        // js result:       4158840593668590000000
+        // macbook result:  4158840593700000000000
+        // desmos result:   4158840593700000000000
+        // solidity result: 4158835800000000000000
+        // delta = 4158840593700000000000 - 4158835800000000000000 = 4793699999900000 = ~4800000000000000
+        assertApproxEqAbs(cbtUserCut, 4158840593700000000000, 4800000000000000);
+
+        // js result:       84874297829971300000
+        // macbook result:  84874297829969190000
+        // desmos result:   84874297830000000000
+        // solidity result: 84874200000000000000
+        // delta = 84874297830000000000 - 84874200000000000000 = 97830000000000 = ~97900000000000
+        assertApproxEqAbs(cbtDaoCut, 84874297830000000000, 97900000000000);
+
+        // js result:       5756285108501439000000
+        // macbook result:  5756285108500000000000
+        // desmos result:   5756285108500000000000
+        // solidity result: 5756290000000000000000
+        // delta = 5756290000000000000000 - 5756285108500000000000 = 4891500000000000 = ~4900000000000000
+        assertApproxEqAbs(cbtForfeited, 5756290000000000000000, 4900000000000000);
     }
 
     function testDecollateralizationOutcome_oneWeek() public {
-        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
+        (uint cbtUserCut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
             .computeDecollateralizationOutcome(
                 block.timestamp + 1 weeks,
                 10000e18,
@@ -132,7 +168,7 @@ contract SolidMathTest is Test {
                 18
             );
 
-        assertEq(amountOut, 10555);
+        assertEq(cbtUserCut, 10555);
         assertEq(cbtDaoCut, 500e18);
         assertEq(cbtToBurn, 9500e18);
     }

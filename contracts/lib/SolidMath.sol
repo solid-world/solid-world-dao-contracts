@@ -39,7 +39,7 @@ library SolidMath {
 
     /**
      * @dev Computes discount for given `timeAppreciation` and project `expectedCertificationDate`
-     * @dev (1 - timeAppreciation) ^ weeksUntilCertification
+     * @dev (1 - timeAppreciation) ** weeksUntilCertification
      * @param timeAppreciation 1% = 10000, 0.0984% = 984
      * @param expectedCertificationDate expected date for project certification
      * @return discount in basis points
@@ -64,7 +64,9 @@ library SolidMath {
     }
 
     /**
-     * @dev Computes the amount of ERC20 tokens to be minted to the stakeholder and DAO when collateralizing `fcbtAmount` of ERC1155 tokens
+     * @dev Computes the amount of ERC20 tokens to be minted to the stakeholder and DAO,
+     * @dev and the amount forfeited when collateralizing `fcbtAmount` of ERC1155 tokens
+     * @dev cbtUserCut = erc1155 * 10e18 * (1 - fee) * (1 - timeAppreciation) ** weeksUntilCertification
      * @param expectedCertificationDate expected date for project certification
      * @param fcbtAmount amount of ERC1155 tokens to be collateralized
      * @param timeAppreciation 1% = 10000, 0.0984% = 984
@@ -72,6 +74,7 @@ library SolidMath {
      * @param cbtDecimals collateralized basket token number of decimals
      * @return amount of ERC20 tokens to be minted to the stakeholder
      * @return amount of ERC20 tokens to be minted to the DAO
+     * @return amount of ERC20 tokens forfeited for collateralizing the ERC1155 tokens
      */
     function computeCollateralizationOutcome(
         uint expectedCertificationDate,
@@ -79,27 +82,36 @@ library SolidMath {
         uint timeAppreciation,
         uint collateralizationFee,
         uint cbtDecimals
-    ) internal view returns (uint, uint) {
+    )
+        internal
+        view
+        returns (
+            uint,
+            uint,
+            uint
+        )
+    {
         uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
             timeAppreciation,
             expectedCertificationDate
         );
-        uint cbtAmount = Math.mulDiv(
+        uint mintableCbtAmount = Math.mulDiv(
             fcbtAmount * timeAppreciationDiscount,
             10**cbtDecimals,
             TIME_APPRECIATION_BASIS_POINTS
         );
 
-        uint cbtDaoCut = Math.mulDiv(cbtAmount, collateralizationFee, FEE_BASIS_POINTS);
-        uint cbtUserCut = cbtAmount - cbtDaoCut;
+        uint cbtDaoCut = Math.mulDiv(mintableCbtAmount, collateralizationFee, FEE_BASIS_POINTS);
+        uint cbtUserCut = mintableCbtAmount - cbtDaoCut;
+        uint cbtForfeited = fcbtAmount * 10**cbtDecimals - mintableCbtAmount;
 
-        return (cbtUserCut, cbtDaoCut);
+        return (cbtUserCut, cbtDaoCut, cbtForfeited);
     }
 
     /**
      * @dev Computes the amount of ERC1155 tokens redeemable by the stakeholder, amount of ERC20 tokens
      * @dev charged by the DAO and to be burned when decollateralizing `cbtAmount` of ERC20 tokens
-     * @dev erc1155 = erc20 * (1 - fee) / (1 - timeAppreciation) ^ weeksUntilCertification
+     * @dev erc1155 = erc20 / 10e18 * (1 - fee) / (1 - timeAppreciation) ** weeksUntilCertification
      * @param expectedCertificationDate expected date for project certification
      * @param cbtAmount amount of ERC20 tokens to be decollateralized
      * @param timeAppreciation 1% = 10000, 0.0984% = 984
