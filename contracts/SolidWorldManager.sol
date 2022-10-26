@@ -196,7 +196,7 @@ contract SolidWorldManager is
 
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
 
-        (uint cbtUserCut, uint cbtDaoCut) = SolidMath.computeCollateralizationOutcome(
+        (uint cbtUserCut, uint cbtDaoCut, ) = SolidMath.computeCollateralizationOutcome(
             batches[batchId].expectedDueDate,
             amountIn,
             batches[batchId].discountRate,
@@ -248,6 +248,36 @@ contract SolidWorldManager is
         forwardContractBatch.safeTransferFrom(address(this), msg.sender, batchId, amountOut, "");
 
         emit TokensDecollateralized(batchId, amountIn, amountOut, msg.sender);
+    }
+
+    /**
+     * @dev Simulates collateralization of `amountIn` ERC1155 tokens with id `batchId` for msg.sender
+     * @param batchId id of the batch
+     * @param amountIn ERC1155 tokens to collateralize
+     * @return cbtUserCut ERC20 tokens to be received by msg.sender
+     * @return cbtDaoCut ERC20 tokens to be received by feeReceiver
+     * @return cbtForfeited ERC20 tokens forfeited for collateralizing the ERC1155 tokens
+     */
+    function simulateBatchCollateralization(uint batchId, uint amountIn)
+        external
+        view
+        returns (
+            uint cbtUserCut,
+            uint cbtDaoCut,
+            uint cbtForfeited
+        )
+    {
+        require(batchIds[batchId], "Simulate batch collateralization: invalid batchId.");
+
+        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
+
+        (cbtUserCut, cbtDaoCut, cbtForfeited) = SolidMath.computeCollateralizationOutcome(
+            batches[batchId].expectedDueDate,
+            amountIn,
+            batches[batchId].discountRate,
+            collateralizationFee,
+            collateralizedToken.decimals()
+        );
     }
 
     // todo #121: add authorization
