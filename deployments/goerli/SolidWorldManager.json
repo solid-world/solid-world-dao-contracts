@@ -1,5 +1,5 @@
 {
-  "address": "0xA2f2E9D654945460c37f4C97b95D5D1584Ec27D2",
+  "address": "0x3205E13369c9BDEA6647CE1d66fe5D1F26f5B44f",
   "abi": [
     {
       "anonymous": false,
@@ -125,6 +125,79 @@
       "type": "receive"
     },
     {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "startDate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "endDate",
+          "type": "uint256"
+        }
+      ],
+      "name": "IncorrectDates",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "batchId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountIn",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountOut",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "batchOwner",
+          "type": "address"
+        }
+      ],
+      "name": "BatchCollateralized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "batchId",
+          "type": "uint256"
+        }
+      ],
+      "name": "BatchCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "categoryId",
+          "type": "uint256"
+        }
+      ],
+      "name": "CategoryCreated",
+      "type": "event"
+    },
+    {
       "anonymous": false,
       "inputs": [
         {
@@ -157,6 +230,105 @@
       "type": "event"
     },
     {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ProjectCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "batchId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountIn",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountOut",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "tokensOwner",
+          "type": "address"
+        }
+      ],
+      "name": "TokensDecollateralized",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "projectId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "uint32",
+              "name": "expectedDueDate",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint16",
+              "name": "vintage",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint24",
+              "name": "discountRate",
+              "type": "uint24"
+            }
+          ],
+          "internalType": "struct SolidWorldManager.Batch",
+          "name": "batch",
+          "type": "tuple"
+        }
+      ],
+      "name": "addBatch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -183,11 +355,206 @@
       "inputs": [
         {
           "internalType": "uint256",
+          "name": "categoryId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        }
+      ],
+      "name": "addProject",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "batchIds",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "batches",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "expectedDueDate",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint16",
+          "name": "vintage",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint8",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint24",
+          "name": "discountRate",
+          "type": "uint24"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "categoryIds",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
           "name": "",
           "type": "uint256"
         }
       ],
       "name": "categoryToken",
+      "outputs": [
+        {
+          "internalType": "contract CollateralizedBasketToken",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "collateralizationFee",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "batchId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountIn",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountOutMin",
+          "type": "uint256"
+        }
+      ],
+      "name": "collateralizeBatch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "decollateralizationFee",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "batchId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountIn",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountOutMin",
+          "type": "uint256"
+        }
+      ],
+      "name": "decollateralizeTokens",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "feeReceiver",
       "outputs": [
         {
           "internalType": "address",
@@ -199,15 +566,159 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "forwardContractBatch",
+      "outputs": [
+        {
+          "internalType": "contract ForwardContractBatchToken",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
-          "internalType": "contract Erc20Deployer",
-          "name": "_erc20Deployer",
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getBatchIdsByProject",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "categoryId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getProjectIdsByCategory",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ForwardContractBatchToken",
+          "name": "_forwardContractBatch",
+          "type": "address"
+        },
+        {
+          "internalType": "uint16",
+          "name": "_collateralizationFee",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "_decollateralizationFee",
+          "type": "uint16"
+        },
+        {
+          "internalType": "address",
+          "name": "_feeReceiver",
           "type": "address"
         }
       ],
       "name": "initialize",
       "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC1155BatchReceived",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC1155Received",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -225,10 +736,121 @@
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "projectIds",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "renounceOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "_collateralizationFee",
+          "type": "uint16"
+        }
+      ],
+      "name": "setCollateralizationFee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "_decollateralizationFee",
+          "type": "uint16"
+        }
+      ],
+      "name": "setDecollateralizationFee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_feeReceiver",
+          "type": "address"
+        }
+      ],
+      "name": "setFeeReceiver",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "batchId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountIn",
+          "type": "uint256"
+        }
+      ],
+      "name": "simulateBatchCollateralization",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "cbtUserCut",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "cbtDaoCut",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "cbtForfeited",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
       "type": "function"
     },
     {
@@ -266,78 +888,78 @@
       "type": "constructor"
     }
   ],
-  "transactionHash": "0x21dabcc242b148cbad4c09cb481a971d7b24bf77282443ddd05f35b4cc2baec6",
+  "transactionHash": "0x53e2658684750aed39d7c7e87ef00f053a56b53e97a7b0d8ee043beddf85d797",
   "receipt": {
     "to": null,
     "from": "0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299",
-    "contractAddress": "0xA2f2E9D654945460c37f4C97b95D5D1584Ec27D2",
-    "transactionIndex": 10,
-    "gasUsed": "793727",
-    "logsBloom": "0x00000000000000000000000000000000400000000000000010800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000001000000000000000000000000000000001000020000000000000000000800000000800000000000000000000000400000000000000000000000080000000000000000000080000000000000800000000000000000000000000000020400000000000000000000000000000000000000000020000020000000002200040000000000000400000000000000000020000000000000000000000020000000000000000000000000000000000000000000",
-    "blockHash": "0x5b2262d23aa9947b08f97cd269651d9b27398eda7d602d17862127ff818f021b",
-    "transactionHash": "0x21dabcc242b148cbad4c09cb481a971d7b24bf77282443ddd05f35b4cc2baec6",
+    "contractAddress": "0x3205E13369c9BDEA6647CE1d66fe5D1F26f5B44f",
+    "transactionIndex": 119,
+    "gasUsed": "816093",
+    "logsBloom": "0x00000000000000000000000000000020400000000000000000800000000000000008000000000000000000000000000000000000000000000000000400000000000000000000000000000000000002000001000000000000000000000000000000001000020000000000000200000800000000800000000000000000000000400000000000000000000000000000000000000000000080000000000000800000000000000000000020000000000400000000000000000000000000000000000000000420000020000000000000040000000000000400000000000000000020000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x4684da2b3471d3300d21453a6e48f516fe9481320621ae87e00191cbc963af77",
+    "transactionHash": "0x53e2658684750aed39d7c7e87ef00f053a56b53e97a7b0d8ee043beddf85d797",
     "logs": [
       {
-        "transactionIndex": 10,
-        "blockNumber": 7629531,
-        "transactionHash": "0x21dabcc242b148cbad4c09cb481a971d7b24bf77282443ddd05f35b4cc2baec6",
-        "address": "0xA2f2E9D654945460c37f4C97b95D5D1584Ec27D2",
+        "transactionIndex": 119,
+        "blockNumber": 7838103,
+        "transactionHash": "0x53e2658684750aed39d7c7e87ef00f053a56b53e97a7b0d8ee043beddf85d797",
+        "address": "0x3205E13369c9BDEA6647CE1d66fe5D1F26f5B44f",
         "topics": [
           "0xbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b",
-          "0x000000000000000000000000ee11cadc80e8bb4e14dbc13c4616574538923949"
+          "0x000000000000000000000000f2e44b72fbc8004f9210e09330c2996739a01cf7"
         ],
         "data": "0x",
-        "logIndex": 39,
-        "blockHash": "0x5b2262d23aa9947b08f97cd269651d9b27398eda7d602d17862127ff818f021b"
+        "logIndex": 854,
+        "blockHash": "0x4684da2b3471d3300d21453a6e48f516fe9481320621ae87e00191cbc963af77"
       },
       {
-        "transactionIndex": 10,
-        "blockNumber": 7629531,
-        "transactionHash": "0x21dabcc242b148cbad4c09cb481a971d7b24bf77282443ddd05f35b4cc2baec6",
-        "address": "0xA2f2E9D654945460c37f4C97b95D5D1584Ec27D2",
+        "transactionIndex": 119,
+        "blockNumber": 7838103,
+        "transactionHash": "0x53e2658684750aed39d7c7e87ef00f053a56b53e97a7b0d8ee043beddf85d797",
+        "address": "0x3205E13369c9BDEA6647CE1d66fe5D1F26f5B44f",
         "topics": [
           "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
           "0x0000000000000000000000000000000000000000000000000000000000000000",
           "0x0000000000000000000000008b3a08b22d25c60e4b2bfd984e331568eca4c299"
         ],
         "data": "0x",
-        "logIndex": 40,
-        "blockHash": "0x5b2262d23aa9947b08f97cd269651d9b27398eda7d602d17862127ff818f021b"
+        "logIndex": 855,
+        "blockHash": "0x4684da2b3471d3300d21453a6e48f516fe9481320621ae87e00191cbc963af77"
       },
       {
-        "transactionIndex": 10,
-        "blockNumber": 7629531,
-        "transactionHash": "0x21dabcc242b148cbad4c09cb481a971d7b24bf77282443ddd05f35b4cc2baec6",
-        "address": "0xA2f2E9D654945460c37f4C97b95D5D1584Ec27D2",
+        "transactionIndex": 119,
+        "blockNumber": 7838103,
+        "transactionHash": "0x53e2658684750aed39d7c7e87ef00f053a56b53e97a7b0d8ee043beddf85d797",
+        "address": "0x3205E13369c9BDEA6647CE1d66fe5D1F26f5B44f",
         "topics": [
           "0x7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb3847402498"
         ],
         "data": "0x0000000000000000000000000000000000000000000000000000000000000001",
-        "logIndex": 41,
-        "blockHash": "0x5b2262d23aa9947b08f97cd269651d9b27398eda7d602d17862127ff818f021b"
+        "logIndex": 856,
+        "blockHash": "0x4684da2b3471d3300d21453a6e48f516fe9481320621ae87e00191cbc963af77"
       },
       {
-        "transactionIndex": 10,
-        "blockNumber": 7629531,
-        "transactionHash": "0x21dabcc242b148cbad4c09cb481a971d7b24bf77282443ddd05f35b4cc2baec6",
-        "address": "0xA2f2E9D654945460c37f4C97b95D5D1584Ec27D2",
+        "transactionIndex": 119,
+        "blockNumber": 7838103,
+        "transactionHash": "0x53e2658684750aed39d7c7e87ef00f053a56b53e97a7b0d8ee043beddf85d797",
+        "address": "0x3205E13369c9BDEA6647CE1d66fe5D1F26f5B44f",
         "topics": [
           "0x7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f"
         ],
-        "data": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f6299e2688ae17cec22f2eac6e647c719515c4d3",
-        "logIndex": 42,
-        "blockHash": "0x5b2262d23aa9947b08f97cd269651d9b27398eda7d602d17862127ff818f021b"
+        "data": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f64f235488039369f9f175df7b0c995963c816c9",
+        "logIndex": 857,
+        "blockHash": "0x4684da2b3471d3300d21453a6e48f516fe9481320621ae87e00191cbc963af77"
       }
     ],
-    "blockNumber": 7629531,
-    "cumulativeGasUsed": "2960681",
+    "blockNumber": 7838103,
+    "cumulativeGasUsed": "27325293",
     "status": 1,
     "byzantium": true
   },
   "args": [
-    "0xEE11cAdc80e8bb4e14dBC13C4616574538923949",
-    "0xf6299e2688AE17cec22F2eaC6e647C719515c4D3",
-    "0xc4d66de80000000000000000000000003e5615474b8e8bae76a05f9d494ec55376f8b211"
+    "0xf2e44b72fBC8004F9210E09330C2996739A01cf7",
+    "0xf64F235488039369F9f175dF7b0c995963C816C9",
+    "0xef5509bb000000000000000000000000aa68849d697c89c108c1e6bc543b25f23ce1cd82000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000000000000000000000000000000000000000001f40000000000000000000000008b3a08b22d25c60e4b2bfd984e331568eca4c299"
   ],
   "numDeployments": 1,
   "solcInputHash": "0e89febeebc7444140de8e67c9067d2c",
@@ -347,10 +969,19 @@
   "execute": {
     "methodName": "initialize",
     "args": [
-      "0x3E5615474B8E8bAE76A05F9d494ec55376f8B211"
+      "0xaa68849D697C89C108c1E6bC543B25f23ce1CD82",
+      {
+        "type": "BigNumber",
+        "hex": "0x1e"
+      },
+      {
+        "type": "BigNumber",
+        "hex": "0x01f4"
+      },
+      "0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299"
     ]
   },
-  "implementation": "0xEE11cAdc80e8bb4e14dBC13C4616574538923949",
+  "implementation": "0xf2e44b72fBC8004F9210E09330C2996739A01cf7",
   "devdoc": {
     "details": "This contract implements a proxy that is upgradeable by an admin. To avoid https://medium.com/nomic-labs-blog/malicious-backdoors-in-ethereum-proxies-62629adf3357[proxy selector clashing], which can potentially be used in an attack, this contract uses the https://blog.openzeppelin.com/the-transparent-proxy-pattern/[transparent proxy pattern]. This pattern implies two things that go hand in hand: 1. If any account other than the admin calls the proxy, the call will be forwarded to the implementation, even if that call matches one of the admin functions exposed by the proxy itself. 2. If the admin calls the proxy, it can access the admin functions, but its calls will never be forwarded to the implementation. If the admin tries to call a function on the implementation it will fail with an error that says \"admin cannot fallback to proxy target\". These properties mean that the admin account can only be used for admin actions like upgrading the proxy or changing the admin, so it's best if it's a dedicated account that is not used for anything else. This will avoid headaches due to sudden errors when trying to call a function from the proxy implementation. Our recommendation is for the dedicated account to be an instance of the {ProxyAdmin} contract. If set up this way, you should think of the `ProxyAdmin` instance as the real administrative interface of your proxy.",
     "kind": "dev",
