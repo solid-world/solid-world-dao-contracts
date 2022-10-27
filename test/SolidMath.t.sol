@@ -278,24 +278,32 @@ contract SolidMathTest is Test {
     }
 
     function testComputeDecollateralizationMinAmountInAndDaoCut_tenYears_fuzz(
-        uint expectedFcbtAmount
+        uint expectedFcbtAmount,
+        uint timeToCertificationDate,
+        uint timeAppreciation,
+        uint decollateralizationFee
     ) public {
         expectedFcbtAmount = bound(expectedFcbtAmount, 1, 1e15);
+        timeToCertificationDate = bound(timeToCertificationDate, 1, 20 * ONE_YEAR);
+        timeAppreciation = bound(timeAppreciation, 1, 4273); // max 20% annual
+        decollateralizationFee = bound(decollateralizationFee, 1, 5000); // max 50% fee
+
+        uint expectedCertificationDate = block.timestamp + timeToCertificationDate;
 
         (uint minAmountIn, uint minCbtDaoCut) = SolidMath
             .computeDecollateralizationMinAmountInAndDaoCut(
-                block.timestamp + 10 * ONE_YEAR + 1 hours,
+                expectedCertificationDate,
                 expectedFcbtAmount,
-                1600, // 0.16% weekly discount
-                DECOLLATERALIZATION_FEE,
+                timeAppreciation,
+                decollateralizationFee,
                 18
             );
 
         (uint amountOut, uint cbtDaoCut, ) = SolidMath.computeDecollateralizationOutcome(
-            block.timestamp + 10 * ONE_YEAR + 1 hours,
+            expectedCertificationDate,
             minAmountIn,
-            1600, // 0.16% weekly discount
-            DECOLLATERALIZATION_FEE,
+            timeAppreciation,
+            decollateralizationFee,
             18
         );
 
