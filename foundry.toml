@@ -5,3 +5,7 @@ libs = ['node_modules', 'lib']
 optimizer = true
 optimizer_runs = 200
 gas_reports = ["*"]
+
+[fuzz]
+runs = 1000
+max_test_rejects = 0

@@ -136,20 +136,58 @@ library SolidMath {
             uint
         )
     {
+        uint cbtDaoCut = Math.mulDiv(cbtAmount, decollateralizationFee, FEE_BASIS_POINTS);
+        uint cbtToBurn = cbtAmount - cbtDaoCut;
+
         uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
             timeAppreciation,
             expectedCertificationDate
         );
 
-        uint cbtDaoCut = Math.mulDiv(cbtAmount, decollateralizationFee, FEE_BASIS_POINTS);
-        uint cbtToBurn = cbtAmount - cbtDaoCut;
-
         uint fcbtAmount = Math.mulDiv(
-            cbtToBurn / 10**cbtDecimals,
+            cbtToBurn,
             TIME_APPRECIATION_BASIS_POINTS,
             timeAppreciationDiscount
         );
 
-        return (fcbtAmount, cbtDaoCut, cbtToBurn);
+        return (fcbtAmount / 10**cbtDecimals, cbtDaoCut, cbtToBurn);
+    }
+
+    /**
+     * @dev Computes the minimum amount of ERC20 tokens to decollateralize in order to redeem `fcbtAmount`
+     * @dev and the amount of ERC20 tokens charged by the DAO for decollateralizing the minimum amount of ERC20 tokens
+     * @param expectedCertificationDate expected date for project certification
+     * @param expectedFcbtAmount amount of ERC1155 tokens to be redeemed
+     * @param timeAppreciation 1% = 10000, 0.0984% = 984
+     * @param decollateralizationFee 0.01% = 1
+     * @param cbtDecimals collateralized basket token number of decimals
+     * @return minAmountIn minimum amount of ERC20 tokens to decollateralize in order to redeem `fcbtAmount`
+     * @return minCbtDaoCut amount of ERC20 tokens charged by the DAO for decollateralizing minAmountIn ERC20 tokens
+     */
+    function computeDecollateralizationMinAmountInAndDaoCut(
+        uint expectedCertificationDate,
+        uint expectedFcbtAmount,
+        uint timeAppreciation,
+        uint decollateralizationFee,
+        uint cbtDecimals
+    ) internal view returns (uint minAmountIn, uint minCbtDaoCut) {
+        uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
+            timeAppreciation,
+            expectedCertificationDate
+        );
+
+        uint minAmountInAfterFee = Math.mulDiv(
+            expectedFcbtAmount * timeAppreciationDiscount,
+            10**cbtDecimals,
+            TIME_APPRECIATION_BASIS_POINTS
+        );
+
+        minAmountIn = Math.mulDiv(
+            minAmountInAfterFee,
+            FEE_BASIS_POINTS,
+            FEE_BASIS_POINTS - decollateralizationFee
+        );
+
+        minCbtDaoCut = Math.mulDiv(minAmountIn, decollateralizationFee, FEE_BASIS_POINTS);
     }
 }
