@@ -202,4 +202,104 @@ contract SolidMathTest is Test {
         assertEq(cbtDaoCut, 50e18);
         assertEq(cbtToBurn, 950e18);
     }
+
+    function testComputeDecollateralizationMinAmountInAndDaoCut_oneYear() public {
+        uint expectedFcbtAmount = 10324;
+        (uint minAmountIn, uint minCbtDaoCut) = SolidMath
+            .computeDecollateralizationMinAmountInAndDaoCut(
+                block.timestamp + ONE_YEAR + 1 hours,
+                expectedFcbtAmount,
+                1600, // 0.16% weekly discount
+                DECOLLATERALIZATION_FEE,
+                18
+            );
+
+        // js result:       9999128559644928000000
+        // macbook result:  9999128559600000000000
+        // keisan result:   9999128559644950203259
+        // solidity result: 9999120021052631578947
+        // delta = 9999128559644950203259 - 9999120021052631578947 = 8538592318624312 = ~8540000000000000
+        assertApproxEqAbs(minAmountIn, 9999128559644950203259, 8540000000000000);
+
+        // js result:       499956427982246450000
+        // macbook result:  499956427980000000000
+        // keisan result:   499956427982247510163
+        // solidity result: 499956001052631578947
+        // delta = 499956427982247510163 - 499956001052631578947 = 426929615931216 = ~427000000000000
+        assertApproxEqAbs(minCbtDaoCut, 499956427982247510163, 427000000000000);
+
+        (uint amountOut, uint cbtDaoCut, ) = SolidMath.computeDecollateralizationOutcome(
+            block.timestamp + ONE_YEAR + 1 hours,
+            minAmountIn,
+            1600, // 0.16% weekly discount
+            DECOLLATERALIZATION_FEE,
+            18
+        );
+
+        assertEq(amountOut, expectedFcbtAmount);
+        assertEq(minCbtDaoCut, cbtDaoCut);
+    }
+
+    function testComputeDecollateralizationMinAmountInAndDaoCut_tenYears() public {
+        uint expectedFcbtAmount = 10324;
+        (uint minAmountIn, uint minCbtDaoCut) = SolidMath
+            .computeDecollateralizationMinAmountInAndDaoCut(
+                block.timestamp + 10 * ONE_YEAR + 1 hours,
+                expectedFcbtAmount,
+                1600, // 0.16% weekly discount
+                DECOLLATERALIZATION_FEE,
+                18
+            );
+
+        // macbook result:   4726090204400000000000
+        // js result:        4726090204381908000000
+        // keisan result:    4726090204382020388684
+        // sol result:       4726088117894736842105
+        // delta = 4726090204400000000000 - 4726088117894736842105 = 2086505263157895 = ~2087000000000000
+        assertApproxEqAbs(minAmountIn, 4726090204400000000000, 2087000000000000);
+
+        // macbook result:   236304510220000000000
+        // js result:        236304510220000030000
+        // keisan result:    236304510220000000000
+        // sol result:       236304405894736842105
+        // delta = 236304510220000030000 - 236304405894736842105 = 104325263187895 = ~104400000000000
+        assertApproxEqAbs(minCbtDaoCut, 236304510220000030000, 104400000000000);
+
+        (uint amountOut, uint cbtDaoCut, ) = SolidMath.computeDecollateralizationOutcome(
+            block.timestamp + 10 * ONE_YEAR + 1 hours,
+            minAmountIn,
+            1600, // 0.16% weekly discount
+            DECOLLATERALIZATION_FEE,
+            18
+        );
+
+        assertEq(amountOut, expectedFcbtAmount);
+        assertEq(minCbtDaoCut, cbtDaoCut);
+    }
+
+    function testComputeDecollateralizationMinAmountInAndDaoCut_tenYears_fuzz(
+        uint expectedFcbtAmount
+    ) public {
+        expectedFcbtAmount = bound(expectedFcbtAmount, 1, 1e15);
+
+        (uint minAmountIn, uint minCbtDaoCut) = SolidMath
+            .computeDecollateralizationMinAmountInAndDaoCut(
+                block.timestamp + 10 * ONE_YEAR + 1 hours,
+                expectedFcbtAmount,
+                1600, // 0.16% weekly discount
+                DECOLLATERALIZATION_FEE,
+                18
+            );
+
+        (uint amountOut, uint cbtDaoCut, ) = SolidMath.computeDecollateralizationOutcome(
+            block.timestamp + 10 * ONE_YEAR + 1 hours,
+            minAmountIn,
+            1600, // 0.16% weekly discount
+            DECOLLATERALIZATION_FEE,
+            18
+        );
+
+        assertEq(amountOut, expectedFcbtAmount);
+        assertEq(minCbtDaoCut, cbtDaoCut);
+    }
 }

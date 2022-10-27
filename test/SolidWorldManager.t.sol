@@ -392,7 +392,7 @@ contract SolidWorldManagerTest is Test {
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 10000, amountOutMin);
         vm.expectRevert(abi.encodePacked("Decollateralize batch: input amount too low."));
-        manager.decollateralizeTokens(BATCH_ID, 1e18, 0);
+        manager.decollateralizeTokens(BATCH_ID, 1e17, 0);
         vm.stopPrank();
     }
 

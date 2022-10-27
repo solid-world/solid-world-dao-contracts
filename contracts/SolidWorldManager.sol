@@ -214,7 +214,7 @@ contract SolidWorldManager is
     }
 
     /**
-     * @dev Decollateralizes `amountIn` of ERC20 tokens and sends `amountOut` ERC1155 tokens with id `batchId` for msg.sender
+     * @dev Decollateralizes `amountIn` of ERC20 tokens and sends `amountOut` ERC1155 tokens with id `batchId` to msg.sender
      * @dev prior to calling, msg.sender must approve SolidWorldManager to spend `amountIn` ERC20 tokens
      * @dev nonReentrant, to avoid possible reentrancy after calling safeTransferFrom
      * @param batchId id of the batch
@@ -276,6 +276,44 @@ contract SolidWorldManager is
             amountIn,
             batches[batchId].discountRate,
             collateralizationFee,
+            collateralizedToken.decimals()
+        );
+    }
+
+    /**
+     * @dev Simulates decollateralization of `amountIn` ERC20 tokens for ERC1155 tokens with id `batchId`
+     * @param batchId id of the batch
+     * @param amountIn ERC20 tokens to decollateralize
+     * @return amountOut ERC1155 tokens to be received by msg.sender
+     * @return minAmountIn minimum amount of ERC20 tokens to decollateralize `amountOut` ERC1155 tokens with id `batchId`
+     * @return minCbtDaoCut ERC20 tokens to be received by feeReceiver for decollateralizing minAmountIn ERC20 tokens
+     */
+    function simulateDecollateralization(uint batchId, uint amountIn)
+        external
+        view
+        returns (
+            uint amountOut,
+            uint minAmountIn,
+            uint minCbtDaoCut
+        )
+    {
+        require(batchIds[batchId], "Simulate batch decollateralization: invalid batchId.");
+
+        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
+
+        (amountOut, , ) = SolidMath.computeDecollateralizationOutcome(
+            batches[batchId].expectedDueDate,
+            amountIn,
+            batches[batchId].discountRate,
+            decollateralizationFee,
+            collateralizedToken.decimals()
+        );
+
+        (minAmountIn, minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
+            batches[batchId].expectedDueDate,
+            amountOut,
+            batches[batchId].discountRate,
+            decollateralizationFee,
             collateralizedToken.decimals()
         );
     }
