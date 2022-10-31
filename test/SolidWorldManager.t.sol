@@ -499,24 +499,24 @@ contract SolidWorldManagerTest is Test {
         assertEq(cbtForfeited, expectedCbtForfeited);
     }
 
-    function testDecollateralizeTokensBulkWhenInvalidInput() public {
+    function testBulkDecollateralizeTokensWhenInvalidInput() public {
         uint[] memory arrayLength1 = new uint[](1);
         uint[] memory arrayLength2 = new uint[](2);
 
         vm.expectRevert(abi.encodePacked("Decollateralize batch: invalid input."));
-        manager.decollateralizeTokensBulk(arrayLength1, arrayLength2, arrayLength1);
+        manager.bulkDecollateralizeTokens(arrayLength1, arrayLength2, arrayLength1);
 
         vm.expectRevert(abi.encodePacked("Decollateralize batch: invalid input."));
-        manager.decollateralizeTokensBulk(arrayLength1, arrayLength1, arrayLength2);
+        manager.bulkDecollateralizeTokens(arrayLength1, arrayLength1, arrayLength2);
 
         vm.expectRevert(abi.encodePacked("Decollateralize batch: invalid input."));
-        manager.decollateralizeTokensBulk(arrayLength2, arrayLength1, arrayLength2);
+        manager.bulkDecollateralizeTokens(arrayLength2, arrayLength1, arrayLength2);
 
         vm.expectRevert(abi.encodePacked("Decollateralize batch: invalid input."));
-        manager.decollateralizeTokensBulk(arrayLength2, arrayLength1, arrayLength1);
+        manager.bulkDecollateralizeTokens(arrayLength2, arrayLength1, arrayLength1);
     }
 
-    function testDecollateralizeTokensBulk() public {
+    function testBulkDecollateralizeTokens() public {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
@@ -564,7 +564,7 @@ contract SolidWorldManagerTest is Test {
         amountsOutMin[0] = 4000;
         amountsOutMin[1] = 3789;
 
-        manager.decollateralizeTokensBulk(batchIds, amountsIn, amountsOutMin);
+        manager.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
         vm.stopPrank();
 
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 4000);
@@ -667,18 +667,18 @@ contract SolidWorldManagerTest is Test {
 
         assertEq(info.length, 5);
         assertEq(info[0].batchId, BATCH_ID);
-        assertEq(info[0].availableCredits, 5000);
+        assertEq(info[0].availableBatchTokens, 5000);
         assertEq(info[0].amountOut, 1000);
 
         assertEq(info[1].batchId, BATCH_ID + 1);
-        assertEq(info[1].availableCredits, 5100);
+        assertEq(info[1].availableBatchTokens, 5100);
         assertEq(info[1].amountOut, 1000);
 
         assertEq(info[2].batchId, 0); // empty
         assertEq(info[3].batchId, 0); // empty
 
         assertEq(info[4].batchId, BATCH_ID + 4);
-        assertEq(info[4].availableCredits, 5400);
+        assertEq(info[4].availableBatchTokens, 5400);
         assertEq(info[4].amountOut, 947);
     }
 

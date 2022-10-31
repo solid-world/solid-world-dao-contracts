@@ -40,14 +40,14 @@ contract SolidWorldManager is
     /**
      * @notice Structure that holds necessary information for decollateralizing ERC20 tokens to ERC1155 tokens with id `batchId`
      * @param batchId id of the batch
-     * @param availableCredits Amount of ERC1155 tokens with id `batchId` that are available to be redeemed
+     * @param availableBatchTokens Amount of ERC1155 tokens with id `batchId` that are available to be redeemed
      * @param amountOut ERC1155 tokens with id `batchId` to be received by msg.sender
      * @param minAmountIn minimum amount of ERC20 tokens to decollateralize `amountOut` ERC1155 tokens with id `batchId`
      * @param minCbtDaoCut ERC20 tokens to be received by feeReceiver for decollateralizing minAmountIn ERC20 tokens
      */
     struct TokenDecollateralizationInfo {
         uint batchId;
-        uint availableCredits;
+        uint availableBatchTokens;
         uint amountOut;
         uint minAmountIn;
         uint minCbtDaoCut;
@@ -285,7 +285,7 @@ contract SolidWorldManager is
      * @param amountsIn ERC20 tokens to decollateralize
      * @param amountsOutMin minimum output amounts of ERC1155 tokens for transaction to succeed
      */
-    function decollateralizeTokensBulk(
+    function bulkDecollateralizeTokens(
         uint[] calldata _batchIds,
         uint[] calldata amountsIn,
         uint[] calldata amountsOutMin
