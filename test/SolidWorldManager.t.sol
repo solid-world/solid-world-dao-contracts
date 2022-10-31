@@ -580,6 +580,108 @@ contract SolidWorldManagerTest is Test {
         assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), 2650e18);
     }
 
+    function testGetBatchesDecollateralizationInfo() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 10000,
+                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                discountRate: TIME_APPRECIATION,
+                owner: testAccount
+            })
+        );
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID + 1,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 10000,
+                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                discountRate: TIME_APPRECIATION,
+                owner: testAccount
+            })
+        );
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID + 2,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 10000,
+                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2023,
+                discountRate: TIME_APPRECIATION,
+                owner: testAccount
+            })
+        );
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID + 3,
+                status: 0,
+                projectId: PROJECT_ID + 1,
+                totalAmount: 10000,
+                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                discountRate: TIME_APPRECIATION,
+                owner: testAccount
+            })
+        );
+
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID + 4,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 10000,
+                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                discountRate: 5_0000, // 5%
+                owner: testAccount
+            })
+        );
+
+        vm.startPrank(testAccount);
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+
+        manager.collateralizeBatch(BATCH_ID, 5000, 0);
+        manager.collateralizeBatch(BATCH_ID + 1, 5100, 0);
+        manager.collateralizeBatch(BATCH_ID + 2, 5200, 0);
+        manager.collateralizeBatch(BATCH_ID + 3, 5300, 0);
+        manager.collateralizeBatch(BATCH_ID + 4, 5400, 0);
+
+        vm.stopPrank();
+
+        SolidWorldManager.TokenDecollateralizationInfo[] memory info = manager
+            .getBatchesDecollateralizationInfo(CATEGORY_ID, 2022);
+
+        assertEq(info.length, 5);
+        assertEq(info[0].batchId, BATCH_ID);
+        assertEq(info[0].availableCredits, 5000);
+        assertEq(info[0].amountOut, 1000);
+
+        assertEq(info[1].batchId, BATCH_ID + 1);
+        assertEq(info[1].availableCredits, 5100);
+        assertEq(info[1].amountOut, 1000);
+
+        assertEq(info[2].batchId, 0); // empty
+        assertEq(info[3].batchId, 0); // empty
+
+        assertEq(info[4].batchId, BATCH_ID + 4);
+        assertEq(info[4].availableCredits, 5400);
+        assertEq(info[4].amountOut, 947);
+    }
+
     function testFailAddBatchWhenProjectDoesntExist() public {
         manager.addBatch(
             SolidWorldManager.Batch({

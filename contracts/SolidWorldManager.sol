@@ -43,12 +43,14 @@ contract SolidWorldManager is
      * @param availableCredits Amount of ERC1155 tokens with id `batchId` that are available to be redeemed
      * @param amountOut ERC1155 tokens with id `batchId` to be received by msg.sender
      * @param minAmountIn minimum amount of ERC20 tokens to decollateralize `amountOut` ERC1155 tokens with id `batchId`
+     * @param minCbtDaoCut ERC20 tokens to be received by feeReceiver for decollateralizing minAmountIn ERC20 tokens
      */
     struct TokenDecollateralizationInfo {
         uint batchId;
         uint availableCredits;
         uint amountOut;
         uint minAmountIn;
+        uint minCbtDaoCut;
     }
 
     /**
@@ -363,7 +365,8 @@ contract SolidWorldManager is
     }
 
     /**
-     * @dev Computes relevant info for the decollateralization process involving batches that match the specified `categoryId` and `vintage`
+     * @dev Computes relevant info for the decollateralization process involving batches
+     *      that match the specified `categoryId` and `vintage`
      * @param categoryId id of the category the batch belongs to
      * @param vintage vintage of the batch
      * @return result array of relevant info about matching batches
@@ -373,6 +376,8 @@ contract SolidWorldManager is
         view
         returns (TokenDecollateralizationInfo[] memory result)
     {
+        result = new TokenDecollateralizationInfo[](batchIds.length);
+
         for (uint i = 0; i < batchIds.length; i++) {
             uint batchId = batchIds[i];
             if (
@@ -383,7 +388,8 @@ contract SolidWorldManager is
             }
 
             uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
-            (uint amountOut, uint minAmountIn, ) = simulateDecollateralization(
+
+            (uint amountOut, uint minAmountIn, uint minCbtDaoCut) = simulateDecollateralization(
                 batchId,
                 DECOLLATERALIZATION_SIMULATION_INPUT
             );
@@ -392,11 +398,10 @@ contract SolidWorldManager is
                 batchId,
                 availableCredits,
                 amountOut,
-                minAmountIn
+                minAmountIn,
+                minCbtDaoCut
             );
         }
-
-        return result;
     }
 
     // todo #121: add authorization
