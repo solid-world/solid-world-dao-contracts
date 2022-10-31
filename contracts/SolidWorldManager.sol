@@ -52,6 +52,11 @@ contract SolidWorldManager is
     }
 
     /**
+     * @notice Constant used as input for decollateralization simulation for ordering batches with the same category and vintage
+     */
+    uint public constant DECOLLATERALIZATION_SIMULATION_INPUT = 1000e18;
+
+    /**
      * @notice Mapping is used for checking if Category ID is already added
      * @dev CategoryId => isAdded
      */
@@ -274,20 +279,20 @@ contract SolidWorldManager is
     /**
      * @dev Bulk-decollateralizes ERC20 tokens into multiple ERC1155 tokens with specified amounts
      * @dev prior to calling, msg.sender must approve SolidWorldManager to spend `sum(amountsIn)` ERC20 tokens
-     * @param batchIds ids of the batches
+     * @param _batchIds ids of the batches
      * @param amountsIn ERC20 tokens to decollateralize
      * @param amountsOutMin minimum output amounts of ERC1155 tokens for transaction to succeed
      */
     function decollateralizeTokensBulk(
-        uint[] calldata batchIds,
+        uint[] calldata _batchIds,
         uint[] calldata amountsIn,
         uint[] calldata amountsOutMin
     ) external {
-        require(batchIds.length == amountsIn.length, "Decollateralize batch: invalid input.");
-        require(batchIds.length == amountsOutMin.length, "Decollateralize batch: invalid input.");
+        require(_batchIds.length == amountsIn.length, "Decollateralize batch: invalid input.");
+        require(_batchIds.length == amountsOutMin.length, "Decollateralize batch: invalid input.");
 
-        for (uint i = 0; i < batchIds.length; i++) {
-            decollateralizeTokens(batchIds[i], amountsIn[i], amountsOutMin[i]);
+        for (uint i = 0; i < _batchIds.length; i++) {
+            decollateralizeTokens(_batchIds[i], amountsIn[i], amountsOutMin[i]);
         }
     }
 
@@ -378,7 +383,10 @@ contract SolidWorldManager is
             }
 
             uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
-            (uint amountOut, uint minAmountIn, ) = simulateDecollateralization(batchId, 1000);
+            (uint amountOut, uint minAmountIn, ) = simulateDecollateralization(
+                batchId,
+                DECOLLATERALIZATION_SIMULATION_INPUT
+            );
 
             result[i] = TokenDecollateralizationInfo(
                 batchId,
