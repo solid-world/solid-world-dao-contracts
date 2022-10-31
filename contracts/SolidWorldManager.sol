@@ -38,6 +38,20 @@ contract SolidWorldManager is
     }
 
     /**
+     * @notice Structure that holds necessary information for decollateralizing ERC20 tokens to ERC1155 tokens with id `batchId`
+     * @param batchId id of the batch
+     * @param availableCredits Amount of ERC1155 tokens with id `batchId` that are available to be redeemed
+     * @param amountOut ERC1155 tokens with id `batchId` to be received by msg.sender
+     * @param minAmountIn minimum amount of ERC20 tokens to decollateralize `amountOut` ERC1155 tokens with id `batchId`
+     */
+    struct TokenDecollateralizationInfo {
+        uint batchId;
+        uint availableCredits;
+        uint amountOut;
+        uint minAmountIn;
+    }
+
+    /**
      * @notice Mapping is used for checking if Category ID is already added
      * @dev CategoryId => isAdded
      */
@@ -53,7 +67,12 @@ contract SolidWorldManager is
      * @notice Property is used for checking if Batch ID is already added
      * @dev BatchId => isAdded
      */
-    mapping(uint => bool) public batchIds;
+    mapping(uint => bool) public batchCreated;
+
+    /**
+     * @notice Stores all batch ids ever created
+     */
+    uint[] public batchIds;
 
     /**
      * @notice Property stores info about a batch
@@ -71,19 +90,19 @@ contract SolidWorldManager is
      * @notice Mapping determines what projects a category has
      * @dev CategoryId => ProjectId[]
      */
-    mapping(uint => uint[]) internal categoryProjects;
+    mapping(uint => uint[]) public categoryProjects;
 
     /**
      * @notice Mapping determines what category a project belongs to
      * @dev ProjectId => CategoryId
      */
-    mapping(uint => uint) internal projectCategory;
+    mapping(uint => uint) public projectCategory;
 
     /**
      * @notice Mapping determines what batches a project has
      * @dev ProjectId => BatchId[]
      */
-    mapping(uint => uint[]) internal projectBatches;
+    mapping(uint => uint[]) public projectBatches;
 
     /**
      * @notice Contract that operates forward contract batch tokens (ERC-1155). Allows this contract to mint tokens.
@@ -120,6 +139,11 @@ contract SolidWorldManager is
     event CategoryCreated(uint indexed categoryId);
     event ProjectCreated(uint indexed projectId);
     event BatchCreated(uint indexed batchId);
+
+    modifier validBatch(uint batchId) {
+        require(batchCreated[batchId], "Invalid batchId.");
+        _;
+    }
 
     function initialize(
         ForwardContractBatchToken _forwardContractBatch,
@@ -164,15 +188,16 @@ contract SolidWorldManager is
     // todo #121: add authorization
     function addBatch(Batch calldata batch) external {
         require(projectIds[batch.projectId], "Add batch: This batch belongs to unknown project.");
-        require(!batchIds[batch.id], "Add batch: This batch has already been created.");
+        require(!batchCreated[batch.id], "Add batch: This batch has already been created.");
         require(batch.owner != address(0), "Add batch: Batch owner not defined.");
         require(
             batch.expectedDueDate > block.timestamp,
             "Add batch: Batch expected due date must be in the future."
         );
 
-        batchIds[batch.id] = true;
+        batchCreated[batch.id] = true;
         batches[batch.id] = batch;
+        batchIds.push(batch.id);
         projectBatches[batch.projectId].push(batch.id);
         forwardContractBatch.mint(batch.owner, batch.id, batch.totalAmount, "");
 
@@ -191,9 +216,7 @@ contract SolidWorldManager is
         uint batchId,
         uint amountIn,
         uint amountOutMin
-    ) external nonReentrant {
-        require(batchIds[batchId], "Collateralize batch: invalid batchId.");
-
+    ) external nonReentrant validBatch(batchId) {
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
 
         (uint cbtUserCut, uint cbtDaoCut, ) = SolidMath.computeCollateralizationOutcome(
@@ -225,9 +248,7 @@ contract SolidWorldManager is
         uint batchId,
         uint amountIn,
         uint amountOutMin
-    ) external nonReentrant {
-        require(batchIds[batchId], "Decollateralize batch: invalid batchId.");
-
+    ) public nonReentrant validBatch(batchId) {
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
 
         (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
@@ -251,6 +272,26 @@ contract SolidWorldManager is
     }
 
     /**
+     * @dev Bulk-decollateralizes ERC20 tokens into multiple ERC1155 tokens with specified amounts
+     * @dev prior to calling, msg.sender must approve SolidWorldManager to spend `sum(amountsIn)` ERC20 tokens
+     * @param batchIds ids of the batches
+     * @param amountsIn ERC20 tokens to decollateralize
+     * @param amountsOutMin minimum output amounts of ERC1155 tokens for transaction to succeed
+     */
+    function decollateralizeTokensBulk(
+        uint[] calldata batchIds,
+        uint[] calldata amountsIn,
+        uint[] calldata amountsOutMin
+    ) external {
+        require(batchIds.length == amountsIn.length, "Decollateralize batch: invalid input.");
+        require(batchIds.length == amountsOutMin.length, "Decollateralize batch: invalid input.");
+
+        for (uint i = 0; i < batchIds.length; i++) {
+            decollateralizeTokens(batchIds[i], amountsIn[i], amountsOutMin[i]);
+        }
+    }
+
+    /**
      * @dev Simulates collateralization of `amountIn` ERC1155 tokens with id `batchId` for msg.sender
      * @param batchId id of the batch
      * @param amountIn ERC1155 tokens to collateralize
@@ -261,14 +302,13 @@ contract SolidWorldManager is
     function simulateBatchCollateralization(uint batchId, uint amountIn)
         external
         view
+        validBatch(batchId)
         returns (
             uint cbtUserCut,
             uint cbtDaoCut,
             uint cbtForfeited
         )
     {
-        require(batchIds[batchId], "Simulate batch collateralization: invalid batchId.");
-
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
 
         (cbtUserCut, cbtDaoCut, cbtForfeited) = SolidMath.computeCollateralizationOutcome(
@@ -289,16 +329,15 @@ contract SolidWorldManager is
      * @return minCbtDaoCut ERC20 tokens to be received by feeReceiver for decollateralizing minAmountIn ERC20 tokens
      */
     function simulateDecollateralization(uint batchId, uint amountIn)
-        external
+        public
         view
+        validBatch(batchId)
         returns (
             uint amountOut,
             uint minAmountIn,
             uint minCbtDaoCut
         )
     {
-        require(batchIds[batchId], "Simulate batch decollateralization: invalid batchId.");
-
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
 
         (amountOut, , ) = SolidMath.computeDecollateralizationOutcome(
@@ -316,6 +355,40 @@ contract SolidWorldManager is
             decollateralizationFee,
             collateralizedToken.decimals()
         );
+    }
+
+    /**
+     * @dev Computes relevant info for the decollateralization process involving batches that match the specified `categoryId` and `vintage`
+     * @param categoryId id of the category the batch belongs to
+     * @param vintage vintage of the batch
+     * @return result array of relevant info about matching batches
+     */
+    function getBatchesDecollateralizationInfo(uint categoryId, uint vintage)
+        external
+        view
+        returns (TokenDecollateralizationInfo[] memory result)
+    {
+        for (uint i = 0; i < batchIds.length; i++) {
+            uint batchId = batchIds[i];
+            if (
+                batches[batchId].vintage != vintage ||
+                projectCategory[batches[batchId].projectId] != categoryId
+            ) {
+                continue;
+            }
+
+            uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
+            (uint amountOut, uint minAmountIn, ) = simulateDecollateralization(batchId, 1000);
+
+            result[i] = TokenDecollateralizationInfo(
+                batchId,
+                availableCredits,
+                amountOut,
+                minAmountIn
+            );
+        }
+
+        return result;
     }
 
     // todo #121: add authorization

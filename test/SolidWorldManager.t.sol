@@ -112,7 +112,7 @@ contract SolidWorldManagerTest is Test {
         manager.addCategory(3, "Test token", "TT");
         manager.addProject(3, 5);
 
-        assertEq(manager.batchIds(batchId), false);
+        assertEq(manager.batchCreated(batchId), false);
 
         vm.expectEmit(true, false, false, false, address(manager));
         emit BatchCreated(batchId);
@@ -129,7 +129,7 @@ contract SolidWorldManagerTest is Test {
             })
         );
 
-        assertEq(manager.batchIds(batchId), true);
+        assertEq(manager.batchCreated(batchId), true);
 
         (
             uint id,
@@ -212,7 +212,7 @@ contract SolidWorldManagerTest is Test {
     }
 
     function testCollateralizeBatchWhenInvalidBatchId() public {
-        vm.expectRevert(abi.encodePacked("Collateralize batch: invalid batchId."));
+        vm.expectRevert(abi.encodePacked("Invalid batchId."));
         manager.collateralizeBatch(CATEGORY_ID, 0, 0);
     }
 
@@ -342,7 +342,7 @@ contract SolidWorldManagerTest is Test {
     }
 
     function testDecollateralizeTokensWhenInvalidBatchId() public {
-        vm.expectRevert(abi.encodePacked("Decollateralize batch: invalid batchId."));
+        vm.expectRevert(abi.encodePacked("Invalid batchId."));
         manager.decollateralizeTokens(BATCH_ID, 10, 5);
     }
 
@@ -466,7 +466,7 @@ contract SolidWorldManagerTest is Test {
     }
 
     function testSimulateBatchCollateralizationWhenBatchIdIsInvalid() public {
-        vm.expectRevert(abi.encodePacked("Simulate batch collateralization: invalid batchId."));
+        vm.expectRevert(abi.encodePacked("Invalid batchId."));
         manager.simulateBatchCollateralization(BATCH_ID, 10000);
     }
 
