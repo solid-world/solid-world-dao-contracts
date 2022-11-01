@@ -281,7 +281,7 @@ contract SolidWorldManager is
         require(_batchIds.length == amountsIn.length, "Decollateralize batch: invalid input.");
         require(_batchIds.length == amountsOutMin.length, "Decollateralize batch: invalid input.");
 
-        for (uint i = 0; i < _batchIds.length; i++) {
+        for (uint i; i < _batchIds.length; i++) {
             decollateralizeTokens(_batchIds[i], amountsIn[i], amountsOutMin[i]);
         }
     }
@@ -366,7 +366,7 @@ contract SolidWorldManager is
     {
         result = new TokenDecollateralizationInfo[](batchIds.length);
 
-        for (uint i = 0; i < batchIds.length; i++) {
+        for (uint i; i < batchIds.length; i++) {
             uint batchId = batchIds[i];
             if (
                 batches[batchId].vintage != vintage ||
