@@ -2,6 +2,8 @@ const { ethers } = require('hardhat')
 const { BigNumber } = require('ethers')
 
 const LOCALHOST_ID = '31337'
+const INITIAL_COLLATERALIZATION_FEE = BigNumber.from(30) // 0.3%
+const INITIAL_DECOLLATERALIZATION_FEE = BigNumber.from(500) // 5.0%
 
 const ensureDeployerHasFunds = async (deployerAddress, chainId) => {
   if (chainId !== LOCALHOST_ID) {
@@ -11,7 +13,7 @@ const ensureDeployerHasFunds = async (deployerAddress, chainId) => {
 
   await owner.sendTransaction({
     to: deployerAddress,
-    value: ethers.utils.parseEther('1')
+    value: ethers.utils.parseEther('100')
   })
 }
 
@@ -29,8 +31,6 @@ const func = async ({ getNamedAccounts, deployments, getChainId }) => {
     }
   )
 
-  const INITIAL_COLLATERALIZATION_FEE = BigNumber.from(30) // 0.3%
-  const INITIAL_DECOLLATERALIZATION_FEE = BigNumber.from(500) // 5.0%
   const SolidWorldManager = await deployments.deploy('SolidWorldManager', {
     from: deployer,
     args: [],
@@ -60,5 +60,7 @@ const func = async ({ getNamedAccounts, deployments, getChainId }) => {
     )
   }
 }
+
+func.tags = ['core']
 
 module.exports = func
