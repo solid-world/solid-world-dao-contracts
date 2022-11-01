@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
-import "./lib/SolidMath.sol";
+import "./libraries/SolidMath.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -53,9 +53,7 @@ contract SolidWorldManager is
         uint minCbtDaoCut;
     }
 
-    /**
-     * @notice Constant used as input for decollateralization simulation for ordering batches with the same category and vintage
-     */
+    /// @notice Constant used as input for decollateralization simulation for ordering batches with the same category and vintage
     uint public constant DECOLLATERALIZATION_SIMULATION_INPUT = 1000e18;
 
     /**
@@ -76,9 +74,7 @@ contract SolidWorldManager is
      */
     mapping(uint => bool) public batchCreated;
 
-    /**
-     * @notice Stores all batch ids ever created
-     */
+    /// @notice Stores all batch ids ever created
     uint[] public batchIds;
 
     /**
@@ -111,24 +107,16 @@ contract SolidWorldManager is
      */
     mapping(uint => uint[]) public projectBatches;
 
-    /**
-     * @notice Contract that operates forward contract batch tokens (ERC-1155). Allows this contract to mint tokens.
-     */
+    /// @notice Contract that operates forward contract batch tokens (ERC-1155). Allows this contract to mint tokens.
     ForwardContractBatchToken public forwardContractBatch;
 
-    /**
-     * @notice The account where all protocol fees are captured.
-     */
+    /// @notice The account where all protocol fees are captured.
     address public feeReceiver;
 
-    /**
-     * @notice Fee charged by DAO when collateralizing forward contract batch tokens.
-     */
+    /// @notice Fee charged by DAO when collateralizing forward contract batch tokens.
     uint16 public collateralizationFee;
 
-    /**
-     * @notice Fee charged by DAO when decollateralizing collateralized basket tokens.
-     */
+    /// @notice Fee charged by DAO when decollateralizing collateralized basket tokens.
     uint16 public decollateralizationFee;
 
     event BatchCollateralized(
@@ -293,7 +281,7 @@ contract SolidWorldManager is
         require(_batchIds.length == amountsIn.length, "Decollateralize batch: invalid input.");
         require(_batchIds.length == amountsOutMin.length, "Decollateralize batch: invalid input.");
 
-        for (uint i = 0; i < _batchIds.length; i++) {
+        for (uint i; i < _batchIds.length; i++) {
             decollateralizeTokens(_batchIds[i], amountsIn[i], amountsOutMin[i]);
         }
     }
@@ -378,7 +366,7 @@ contract SolidWorldManager is
     {
         result = new TokenDecollateralizationInfo[](batchIds.length);
 
-        for (uint i = 0; i < batchIds.length; i++) {
+        for (uint i; i < batchIds.length; i++) {
             uint batchId = batchIds[i];
             if (
                 batches[batchId].vintage != vintage ||
