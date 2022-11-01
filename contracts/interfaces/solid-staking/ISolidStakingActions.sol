@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /**
  * @title Permissionless staking actions
  * @notice Contains staking methods that can be called by anyone
+ * @author Solid World DAO
  */
 interface ISolidStakingActions {
     /**

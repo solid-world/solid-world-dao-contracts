@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import "./rewards/IRewardsDistributor.sol";
+import "./interfaces/rewards/IRewardsDistributor.sol";
 
 contract RewardsDistributor is IRewardsDistributor {
     /// @inheritdoc IRewardsDistributor

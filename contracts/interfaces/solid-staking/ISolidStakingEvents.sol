@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /**
  * @title Events emitted by the staking contract
  * @notice Contains all events emitted by the staking contract
+ * @author Solid World DAO
  */
 interface ISolidStakingEvents {
     /**

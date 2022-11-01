@@ -59,7 +59,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
         uint oldTotalStake = token.balanceOf(address(this));
 
         userStake[token][msg.sender] = oldUserStake - amount;
-        token.transferFrom(address(this), msg.sender, amount);
+        token.transfer(msg.sender, amount);
 
         rewardsController.handleAction(msg.sender, oldUserStake, oldTotalStake);
 

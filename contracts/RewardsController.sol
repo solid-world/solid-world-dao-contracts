@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
-import "./rewards/IRewardsController.sol";
 import "./RewardsDistributor.sol";
+import "./interfaces/rewards/IRewardsController.sol";
 
 contract RewardsController is IRewardsController, RewardsDistributor {
     /// @inheritdoc IRewardsController
@@ -42,9 +42,7 @@ contract RewardsController is IRewardsController, RewardsDistributor {
         address user,
         uint256 totalSupply,
         uint256 userBalance
-    ) external override {
-        revert("Not implemented");
-    }
+    ) external override {}
 
     /// @inheritdoc IRewardsController
     function claimRewards(
