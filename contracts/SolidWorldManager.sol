@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
-import "./lib/SolidMath.sol";
+import "./libraries/SolidMath.sol";
 
 contract SolidWorldManager is
     Initializable,

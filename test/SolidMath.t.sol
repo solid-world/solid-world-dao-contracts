@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../contracts/lib/SolidMath.sol";
+import "../contracts/libraries/SolidMath.sol";
 
 contract SolidMathTest is Test {
     uint constant COLLATERALIZATION_FEE = 200; // 2%
