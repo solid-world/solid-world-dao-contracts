@@ -3,25 +3,26 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./interfaces/ISolidStaking.sol";
 import "./interfaces/rewards/IRewardsController.sol";
 
 contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
     /// @dev All stakable lp tokens.
-    IERC20[] public tokens;
+    address[] public tokens;
 
     /// @dev Mapping with added tokens.
-    mapping(IERC20 => bool) public tokensAdded;
+    mapping(address => bool) public tokensAdded;
 
     /// @dev Mapping with the staked amount of each account for each token.
     /// @dev token => user => amount
-    mapping(IERC20 => mapping(address => uint)) public userStake;
+    mapping(address => mapping(address => uint)) public userStake;
 
     /// @dev Main contract used for interacting with rewards mechanism.
     IRewardsController public immutable rewardsController;
 
-    modifier validToken(IERC20 token) {
+    modifier validToken(address token) {
         require(tokensAdded[token], "SolidStaking: Invalid token address");
         _;
     }
@@ -31,7 +32,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
     }
 
     /// @inheritdoc ISolidStakingOwnerActions
-    function addToken(IERC20 token) external override onlyOwner {
+    function addToken(address token) external override onlyOwner {
         require(!tokensAdded[token], "SolidStaking: Token already added");
 
         tokens.push(token);
@@ -41,12 +42,12 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
     }
 
     /// @inheritdoc ISolidStakingActions
-    function stake(IERC20 token, uint amount) external override nonReentrant validToken(token) {
+    function stake(address token, uint amount) external override nonReentrant validToken(token) {
         uint oldUserStake = userStake[token][msg.sender];
-        uint oldTotalStake = token.balanceOf(address(this));
+        uint oldTotalStake = IERC20(token).balanceOf(address(this));
 
         userStake[token][msg.sender] = oldUserStake + amount;
-        token.transferFrom(msg.sender, address(this), amount);
+        IERC20(token).transferFrom(msg.sender, address(this), amount);
 
         rewardsController.handleAction(msg.sender, oldUserStake, oldTotalStake);
 
@@ -54,12 +55,12 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
     }
 
     /// @inheritdoc ISolidStakingActions
-    function withdraw(IERC20 token, uint amount) external override nonReentrant validToken(token) {
+    function withdraw(address token, uint amount) external override nonReentrant validToken(token) {
         uint oldUserStake = userStake[token][msg.sender];
-        uint oldTotalStake = token.balanceOf(address(this));
+        uint oldTotalStake = IERC20(token).balanceOf(address(this));
 
         userStake[token][msg.sender] = oldUserStake - amount;
-        token.transfer(msg.sender, amount);
+        IERC20(token).transfer(msg.sender, amount);
 
         rewardsController.handleAction(msg.sender, oldUserStake, oldTotalStake);
 
@@ -67,7 +68,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
     }
 
     /// @inheritdoc ISolidStakingActions
-    function balanceOf(IERC20 token, address account)
+    function balanceOf(address token, address account)
         external
         view
         override
@@ -78,7 +79,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
     }
 
     /// @inheritdoc ISolidStakingActions
-    function getTokens() external view override returns (IERC20[] memory _tokens) {
+    function getTokens() external view override returns (address[] memory _tokens) {
         _tokens = tokens;
     }
 }

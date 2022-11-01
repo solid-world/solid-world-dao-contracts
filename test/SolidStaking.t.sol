@@ -12,9 +12,9 @@ contract SolidStakingTest is Test {
     address root = address(this);
     address testAccount = vm.addr(1);
 
-    event Stake(address indexed account, IERC20 indexed token, uint indexed amount);
-    event Withdraw(address indexed account, IERC20 indexed token, uint indexed amount);
-    event TokenAdded(IERC20 indexed token);
+    event Stake(address indexed account, address indexed token, uint indexed amount);
+    event Withdraw(address indexed account, address indexed token, uint indexed amount);
+    event TokenAdded(address indexed token);
 
     function setUp() public {
         rewardsController = new RewardsController();
@@ -26,47 +26,51 @@ contract SolidStakingTest is Test {
 
     function testAddToken() public {
         IERC20 token = new CollateralizedBasketToken("Test Token", "TT");
-        vm.label(address(token), "Test token");
+        address tokenAddress = address(token);
+        vm.label(tokenAddress, "Test token");
 
-        assertFalse(solidStaking.tokensAdded(token), "Token should not be added yet");
+        assertFalse(solidStaking.tokensAdded(tokenAddress), "Token should not be added yet");
 
         vm.expectEmit(true, false, false, false, address(solidStaking));
-        emit TokenAdded(token);
-        solidStaking.addToken(token);
+        emit TokenAdded(tokenAddress);
+        solidStaking.addToken(tokenAddress);
 
-        assertTrue(solidStaking.tokensAdded(token), "Token should be added");
+        assertTrue(solidStaking.tokensAdded(tokenAddress), "Token should be added");
         assertEq(
             address(solidStaking.tokens(0)),
-            address(token),
+            address(tokenAddress),
             "Tokens array should have the added token"
         );
     }
 
     function testAddTokenFailsWhenAddingSameTokenTwice() public {
         IERC20 token = new CollateralizedBasketToken("Test Token", "TT");
-        vm.label(address(token), "Test token");
+        address tokenAddress = address(token);
+        vm.label(tokenAddress, "Test token");
 
-        assertFalse(solidStaking.tokensAdded(token), "Token should not be added yet");
+        assertFalse(solidStaking.tokensAdded(tokenAddress), "Token should not be added yet");
 
-        solidStaking.addToken(token);
+        solidStaking.addToken(tokenAddress);
 
         vm.expectRevert(abi.encodePacked("SolidStaking: Token already added"));
-        solidStaking.addToken(token);
+        solidStaking.addToken(tokenAddress);
     }
 
     function testValidTokenModifier() public {
         IERC20 token = new CollateralizedBasketToken("Test Token", "TT");
-        vm.label(address(token), "Test token");
+        address tokenAddress = address(token);
+        vm.label(tokenAddress, "Test token");
 
         vm.expectRevert(abi.encodePacked("SolidStaking: Invalid token address"));
-        solidStaking.stake(token, 100);
+        solidStaking.stake(tokenAddress, 100);
     }
 
     function testStake() public {
         CollateralizedBasketToken token = new CollateralizedBasketToken("Test Token", "TT");
-        vm.label(address(token), "Test token");
+        address tokenAddress = address(token);
+        vm.label(tokenAddress, "Test token");
 
-        solidStaking.addToken(token);
+        solidStaking.addToken(tokenAddress);
 
         uint amount = 100;
         token.mint(testAccount, amount);
@@ -79,12 +83,12 @@ contract SolidStakingTest is Test {
             abi.encodeCall(rewardsController.handleAction, (testAccount, 0, 0))
         );
         vm.expectEmit(true, true, true, false, address(solidStaking));
-        emit Stake(testAccount, token, amount);
-        solidStaking.stake(token, amount);
+        emit Stake(testAccount, tokenAddress, amount);
+        solidStaking.stake(tokenAddress, amount);
         vm.stopPrank();
 
         assertEq(
-            solidStaking.userStake(token, testAccount),
+            solidStaking.userStake(tokenAddress, testAccount),
             amount,
             "User stake should be updated"
         );
@@ -98,9 +102,10 @@ contract SolidStakingTest is Test {
 
     function testWithdraw() public {
         CollateralizedBasketToken token = new CollateralizedBasketToken("Test Token", "TT");
-        vm.label(address(token), "Test token");
+        address tokenAddress = address(token);
+        vm.label(tokenAddress, "Test token");
 
-        solidStaking.addToken(token);
+        solidStaking.addToken(tokenAddress);
 
         uint amountToStake = 100;
         uint amountToWithdraw = 50;
@@ -108,7 +113,7 @@ contract SolidStakingTest is Test {
 
         vm.startPrank(testAccount);
         token.approve(address(solidStaking), amountToStake);
-        solidStaking.stake(token, amountToStake);
+        solidStaking.stake(tokenAddress, amountToStake);
 
         vm.expectCall(
             address(rewardsController),
@@ -118,12 +123,12 @@ contract SolidStakingTest is Test {
             )
         );
         vm.expectEmit(true, true, true, false, address(solidStaking));
-        emit Withdraw(testAccount, token, amountToWithdraw);
-        solidStaking.withdraw(token, amountToWithdraw);
+        emit Withdraw(testAccount, tokenAddress, amountToWithdraw);
+        solidStaking.withdraw(tokenAddress, amountToWithdraw);
         vm.stopPrank();
 
         assertEq(
-            solidStaking.userStake(token, testAccount),
+            solidStaking.userStake(tokenAddress, testAccount),
             amountToStake - amountToWithdraw,
             "User stake should be updated"
         );
@@ -137,9 +142,10 @@ contract SolidStakingTest is Test {
 
     function testWithdrawFailsWhenNotEnoughStaked() public {
         CollateralizedBasketToken token = new CollateralizedBasketToken("Test Token", "TT");
-        vm.label(address(token), "Test token");
+        address tokenAddress = address(token);
+        vm.label(tokenAddress, "Test token");
 
-        solidStaking.addToken(token);
+        solidStaking.addToken(tokenAddress);
 
         uint amountToStake = 100;
         uint amountToWithdraw = 150;
@@ -147,29 +153,30 @@ contract SolidStakingTest is Test {
 
         vm.startPrank(testAccount);
         token.approve(address(solidStaking), amountToStake);
-        solidStaking.stake(token, amountToStake);
+        solidStaking.stake(tokenAddress, amountToStake);
 
         vm.expectRevert(stdError.arithmeticError);
-        solidStaking.withdraw(token, amountToWithdraw);
+        solidStaking.withdraw(tokenAddress, amountToWithdraw);
         vm.stopPrank();
     }
 
     function testBalanceOf() public {
         CollateralizedBasketToken token = new CollateralizedBasketToken("Test Token", "TT");
-        vm.label(address(token), "Test token");
+        address tokenAddress = address(token);
+        vm.label(tokenAddress, "Test token");
 
-        solidStaking.addToken(token);
+        solidStaking.addToken(tokenAddress);
 
         uint amountToStake = 100;
         token.mint(testAccount, amountToStake);
 
         vm.startPrank(testAccount);
         token.approve(address(solidStaking), amountToStake);
-        solidStaking.stake(token, amountToStake);
+        solidStaking.stake(tokenAddress, amountToStake);
         vm.stopPrank();
 
         assertEq(
-            solidStaking.balanceOf(token, testAccount),
+            solidStaking.balanceOf(tokenAddress, testAccount),
             amountToStake,
             "Balance should be equal to the staked amount"
         );
@@ -183,15 +190,15 @@ contract SolidStakingTest is Test {
         vm.label(address(token2), "Test token 2");
         vm.label(address(token3), "Test token 3");
 
-        solidStaking.addToken(token1);
-        solidStaking.addToken(token2);
-        solidStaking.addToken(token3);
+        solidStaking.addToken(address(token1));
+        solidStaking.addToken(address(token2));
+        solidStaking.addToken(address(token3));
 
-        IERC20[] memory tokens = solidStaking.getTokens();
+        address[] memory tokens = solidStaking.getTokens();
 
         assertEq(tokens.length, 3, "Tokens array should have 3 elements");
-        assertEq(address(tokens[0]), address(token1), "Tokens array should have token 1");
-        assertEq(address(tokens[1]), address(token2), "Tokens array should have token 2");
-        assertEq(address(tokens[2]), address(token3), "Tokens array should have token 3");
+        assertEq(tokens[0], address(token1), "Tokens array should have token 1");
+        assertEq(tokens[1], address(token2), "Tokens array should have token 2");
+        assertEq(tokens[2], address(token3), "Tokens array should have token 3");
     }
 }

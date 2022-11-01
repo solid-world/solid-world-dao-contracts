@@ -1,7 +1,5 @@
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 /**
  * @title Events emitted by the staking contract
  * @notice Contains all events emitted by the staking contract
@@ -14,7 +12,7 @@ interface ISolidStakingEvents {
      * @param token the token that was staked
      * @param amount the amount of tokens that were staked
      */
-    event Stake(address indexed account, IERC20 indexed token, uint indexed amount);
+    event Stake(address indexed account, address indexed token, uint indexed amount);
 
     /**
      * @dev Emitted when an account un-stakes tokens
@@ -22,11 +20,11 @@ interface ISolidStakingEvents {
      * @param token the token that was withdrawn
      * @param amount the amount of tokens that were withdrawn
      */
-    event Withdraw(address indexed account, IERC20 indexed token, uint indexed amount);
+    event Withdraw(address indexed account, address indexed token, uint indexed amount);
 
     /**
      * @dev Emitted when a new token is added to the staking contract
      * @param token the token that was added
      */
-    event TokenAdded(IERC20 indexed token);
+    event TokenAdded(address indexed token);
 }
