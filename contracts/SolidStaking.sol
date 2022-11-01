@@ -2,10 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 import "./interfaces/ISolidStaking.sol";
 import "./interfaces/rewards/IRewardsController.sol";
 
-contract SolidStaking is ISolidStaking, ReentrancyGuard {
+contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
     /// @dev All stakable lp tokens.
     IERC20[] public tokens;
 
@@ -16,7 +18,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard {
     /// @dev token => user => amount
     mapping(IERC20 => mapping(address => uint)) public userStake;
 
-    /// @dev Rewards controller used for interacting with rewards mechanism.
+    /// @dev Main contract used for interacting with rewards mechanism.
     IRewardsController public immutable rewardsController;
 
     modifier validToken(IERC20 token) {
@@ -26,6 +28,16 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard {
 
     constructor(IRewardsController _rewardsController) {
         rewardsController = _rewardsController;
+    }
+
+    /// @inheritdoc ISolidStakingOwnerActions
+    function addToken(IERC20 token) external override onlyOwner {
+        require(!tokensAdded[token], "SolidStaking: Token already added");
+
+        tokens.push(token);
+        tokensAdded[token] = true;
+
+        emit TokenAdded(token);
     }
 
     /// @inheritdoc ISolidStakingActions
@@ -68,15 +80,5 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard {
     /// @inheritdoc ISolidStakingActions
     function getTokens() external view override returns (IERC20[] memory _tokens) {
         _tokens = tokens;
-    }
-
-    /// @inheritdoc ISolidStakingOwnerActions
-    function addToken(IERC20 token) external override {
-        require(!tokensAdded[token], "SolidStaking: Token already added");
-
-        tokens.push(token);
-        tokensAdded[token] = true;
-
-        emit TokenAdded(token);
     }
 }
