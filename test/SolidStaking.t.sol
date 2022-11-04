@@ -29,13 +29,13 @@ contract SolidStakingTest is Test {
         address tokenAddress = address(token);
         vm.label(tokenAddress, "Test token");
 
-        assertFalse(solidStaking.tokensAdded(tokenAddress), "Token should not be added yet");
+        assertFalse(solidStaking.tokenAdded(tokenAddress), "Token should not be added yet");
 
         vm.expectEmit(true, false, false, false, address(solidStaking));
         emit TokenAdded(tokenAddress);
         solidStaking.addToken(tokenAddress);
 
-        assertTrue(solidStaking.tokensAdded(tokenAddress), "Token should be added");
+        assertTrue(solidStaking.tokenAdded(tokenAddress), "Token should be added");
         assertEq(
             address(solidStaking.tokens(0)),
             address(tokenAddress),
@@ -48,7 +48,7 @@ contract SolidStakingTest is Test {
         address tokenAddress = address(token);
         vm.label(tokenAddress, "Test token");
 
-        assertFalse(solidStaking.tokensAdded(tokenAddress), "Token should not be added yet");
+        assertFalse(solidStaking.tokenAdded(tokenAddress), "Token should not be added yet");
 
         solidStaking.addToken(tokenAddress);
 

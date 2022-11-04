@@ -13,7 +13,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
     address[] public tokens;
 
     /// @dev Mapping with added tokens.
-    mapping(address => bool) public tokensAdded;
+    mapping(address => bool) public tokenAdded;
 
     /// @dev Mapping with the staked amount of each account for each token.
     /// @dev token => user => amount
@@ -23,7 +23,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
     IRewardsController public immutable rewardsController;
 
     modifier validToken(address token) {
-        require(tokensAdded[token], "SolidStaking: Invalid token address");
+        require(tokenAdded[token], "SolidStaking: Invalid token address");
         _;
     }
 
@@ -33,10 +33,10 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
 
     /// @inheritdoc ISolidStakingOwnerActions
     function addToken(address token) external override onlyOwner {
-        require(!tokensAdded[token], "SolidStaking: Token already added");
+        require(!tokenAdded[token], "SolidStaking: Token already added");
 
         tokens.push(token);
-        tokensAdded[token] = true;
+        tokenAdded[token] = true;
 
         emit TokenAdded(token);
     }
