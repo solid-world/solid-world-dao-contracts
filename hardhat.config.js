@@ -9,7 +9,8 @@ const { ethers } = require('ethers')
 const {
   POLYGONSCAN_API_KEY = '',
   ETHERSCAN_API_KEY = '',
-  INFURA_KEY = ''
+  INFURA_KEY = '',
+  OWNER_ADDRESS
 } = process.env
 
 /**
@@ -64,12 +65,20 @@ module.exports = {
     deployer: decodePrivateKey(
       process.env.DEPLOYER_JSON,
       process.env.DEPLOYER_PASSWORD
-    )
+    ),
+    contractsOwner: {
+      default: OWNER_ADDRESS
+    }
   }
 }
 
 function decodePrivateKey(jsonFile, password) {
   const json = fs.readFileSync(jsonFile, 'utf8')
   const wallet = ethers.Wallet.fromEncryptedJsonSync(json, password)
-  return 'privatekey://' + wallet.privateKey
+
+  return buildPrivateKey(wallet.privateKey)
+}
+
+function buildPrivateKey(privateKey) {
+  return `privatekey://${privateKey}`
 }
