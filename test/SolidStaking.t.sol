@@ -18,7 +18,7 @@ contract SolidStakingTest is Test {
 
     function setUp() public {
         rewardsController = new RewardsController();
-        solidStaking = new SolidStaking(rewardsController);
+        solidStaking = new SolidStaking(rewardsController, root);
 
         vm.label(root, "Root account");
         vm.label(testAccount, "Test account");

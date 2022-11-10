@@ -27,8 +27,9 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
         _;
     }
 
-    constructor(IRewardsController _rewardsController) {
+    constructor(IRewardsController _rewardsController, address owner) {
         rewardsController = _rewardsController;
+        transferOwnership(owner);
     }
 
     /// @inheritdoc ISolidStakingOwnerActions
