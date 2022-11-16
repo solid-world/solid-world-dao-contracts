@@ -23,8 +23,8 @@ interface ISolidStakingActions {
 
     /**
      * @dev Computes the amount of tokens that the `account` has staked
-     * @param account the account to check
      * @param token the token to check
+     * @param account the account to check
      * @return the amount of `token` tokens that the `account` has staked
      */
     function balanceOf(address token, address account) external view returns (uint);

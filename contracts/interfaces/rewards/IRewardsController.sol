@@ -3,8 +3,8 @@ pragma solidity ^0.8.0;
 
 import "./IRewardsDistributor.sol";
 import "./IRewardsDistributor.sol";
-import "./RewardsDataTypes.sol";
 import "./ITransferStrategyBase.sol";
+import "../../libraries/RewardsDataTypes.sol";
 
 /**
  * @title IRewardsController
@@ -111,14 +111,16 @@ interface IRewardsController is IRewardsDistributor {
 
     /**
      * @dev Called by the corresponding asset on transfer hook in order to update the rewards distribution.
+     * @param asset The incentivized asset address
      * @param user The address of the user whose asset balance has changed
-     * @param userBalance The previous user balance prior to balance change
-     * @param totalSupply The total supply of the asset prior to user balance change
+     * @param userStake The amount of assets staked by the user
+     * @param totalStaked The total amount staked of the asset
      **/
     function handleAction(
+        address asset,
         address user,
-        uint256 userBalance,
-        uint256 totalSupply
+        uint256 userStake,
+        uint256 totalStaked
     ) external;
 
     /**
