@@ -11,6 +11,7 @@ contract SolidStakingTest is Test {
 
     address root = address(this);
     address testAccount = vm.addr(1);
+    address testAccount2 = vm.addr(2);
 
     event Stake(address indexed account, address indexed token, uint indexed amount);
     event Withdraw(address indexed account, address indexed token, uint indexed amount);
@@ -22,6 +23,7 @@ contract SolidStakingTest is Test {
 
         vm.label(root, "Root account");
         vm.label(testAccount, "Test account");
+        vm.label(testAccount2, "Test account 2");
     }
 
     function testAddToken() public {
@@ -80,7 +82,7 @@ contract SolidStakingTest is Test {
 
         vm.expectCall(
             address(rewardsController),
-            abi.encodeCall(rewardsController.handleAction, (testAccount, 0, 0))
+            abi.encodeCall(rewardsController.handleAction, (tokenAddress, testAccount, 0, 0))
         );
         vm.expectEmit(true, true, true, false, address(solidStaking));
         emit Stake(testAccount, tokenAddress, amount);
@@ -119,7 +121,7 @@ contract SolidStakingTest is Test {
             address(rewardsController),
             abi.encodeCall(
                 rewardsController.handleAction,
-                (testAccount, amountToStake, amountToStake)
+                (tokenAddress, testAccount, amountToStake, amountToStake)
             )
         );
         vm.expectEmit(true, true, true, false, address(solidStaking));
@@ -179,6 +181,54 @@ contract SolidStakingTest is Test {
             solidStaking.balanceOf(tokenAddress, testAccount),
             amountToStake,
             "Balance should be equal to the staked amount"
+        );
+    }
+
+    function testTotalStaked() public {
+        CollateralizedBasketToken token = new CollateralizedBasketToken("Test Token", "TT");
+        CollateralizedBasketToken token2 = new CollateralizedBasketToken("Test Token 2", "TT2");
+
+        address tokenAddress = address(token);
+        address tokenAddress2 = address(token2);
+
+        vm.label(tokenAddress, "Test token");
+        vm.label(tokenAddress2, "Test token 2");
+
+        solidStaking.addToken(tokenAddress);
+        solidStaking.addToken(tokenAddress2);
+
+        uint amountToStake = 100;
+        token.mint(testAccount, amountToStake);
+        token.mint(testAccount2, amountToStake);
+
+        uint amountToStake2 = 55;
+        token2.mint(testAccount, amountToStake2);
+        token2.mint(testAccount2, amountToStake2);
+
+        vm.startPrank(testAccount);
+        token.approve(address(solidStaking), amountToStake);
+        token2.approve(address(solidStaking), amountToStake2);
+        solidStaking.stake(tokenAddress, amountToStake);
+        solidStaking.stake(tokenAddress2, amountToStake2);
+        vm.stopPrank();
+
+        vm.startPrank(testAccount2);
+        token.approve(address(solidStaking), amountToStake);
+        token2.approve(address(solidStaking), amountToStake2);
+        solidStaking.stake(tokenAddress, amountToStake);
+        solidStaking.stake(tokenAddress2, amountToStake2);
+        vm.stopPrank();
+
+        assertEq(
+            solidStaking.totalStaked(tokenAddress),
+            amountToStake * 2,
+            "Total staked should be equal to the staked amount"
+        );
+
+        assertEq(
+            solidStaking.totalStaked(tokenAddress2),
+            amountToStake2 * 2,
+            "Total staked should be equal to the staked amount"
         );
     }
 

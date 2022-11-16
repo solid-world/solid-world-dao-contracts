@@ -80,6 +80,11 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
     }
 
     /// @inheritdoc ISolidStakingViewActions
+    function totalStaked(address token) external view override validToken(token) returns (uint) {
+        return IERC20(token).balanceOf(address(this));
+    }
+
+    /// @inheritdoc ISolidStakingViewActions
     function getTokens() external view override returns (address[] memory _tokens) {
         _tokens = tokens;
     }

@@ -16,6 +16,13 @@ interface ISolidStakingViewActions {
     function balanceOf(address token, address account) external view returns (uint);
 
     /**
+     * @dev Computes the total amount of tokens that have been staked
+     * @param token the token to check
+     * @return the total amount of `token` tokens that have been staked
+     */
+    function totalStaked(address token) external view returns (uint);
+
+    /**
      * @dev Returns the list of tokens that can be staked
      * @return the list of tokens that can be staked
      */
