@@ -45,8 +45,8 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
 
     /// @inheritdoc ISolidStakingActions
     function stake(address token, uint amount) external override nonReentrant validToken(token) {
-        uint oldUserStake = userStake[token][msg.sender];
-        uint oldTotalStake = IERC20(token).balanceOf(address(this));
+        uint oldUserStake = _balanceOf(token, msg.sender);
+        uint oldTotalStake = _totalStaked(token);
 
         userStake[token][msg.sender] = oldUserStake + amount;
         IERC20(token).transferFrom(msg.sender, address(this), amount);
@@ -58,8 +58,8 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
 
     /// @inheritdoc ISolidStakingActions
     function withdraw(address token, uint amount) external override nonReentrant validToken(token) {
-        uint oldUserStake = userStake[token][msg.sender];
-        uint oldTotalStake = IERC20(token).balanceOf(address(this));
+        uint oldUserStake = _balanceOf(token, msg.sender);
+        uint oldTotalStake = _totalStaked(token);
 
         userStake[token][msg.sender] = oldUserStake - amount;
         IERC20(token).transfer(msg.sender, amount);
@@ -77,16 +77,24 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
         validToken(token)
         returns (uint)
     {
-        return userStake[token][account];
+        return _balanceOf(token, account);
     }
 
     /// @inheritdoc ISolidStakingViewActions
     function totalStaked(address token) external view override validToken(token) returns (uint) {
-        return IERC20(token).balanceOf(address(this));
+        return _totalStaked(token);
     }
 
     /// @inheritdoc ISolidStakingViewActions
     function getTokens() external view override returns (address[] memory _tokens) {
         _tokens = tokens;
+    }
+
+    function _balanceOf(address token, address account) internal view returns (uint) {
+        return userStake[token][account];
+    }
+
+    function _totalStaked(address token) internal view returns (uint) {
+        return IERC20(token).balanceOf(address(this));
     }
 }
