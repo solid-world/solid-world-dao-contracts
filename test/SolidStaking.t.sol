@@ -19,11 +19,19 @@ contract SolidStakingTest is Test {
 
     function setUp() public {
         rewardsController = new RewardsController();
-        solidStaking = new SolidStaking(rewardsController, root);
+        solidStaking = new SolidStaking();
+
+        rewardsController.setup(solidStaking);
+        solidStaking.setup(rewardsController, root);
 
         vm.label(root, "Root account");
         vm.label(testAccount, "Test account");
         vm.label(testAccount2, "Test account 2");
+    }
+
+    function testSetupFailsWhenAlreadyInitialized() public {
+        vm.expectRevert(abi.encodePacked("PostConstruct: Already initialized"));
+        solidStaking.setup(rewardsController, root);
     }
 
     function testAddToken() public {

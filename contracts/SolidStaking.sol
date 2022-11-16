@@ -7,8 +7,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./interfaces/ISolidStaking.sol";
 import "./interfaces/rewards/IRewardsController.sol";
+import "./PostConstruct.sol";
 
-contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
+contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct {
     /// @dev All stakable lp tokens.
     address[] public tokens;
 
@@ -20,14 +21,14 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
     mapping(address => mapping(address => uint)) public userStake;
 
     /// @dev Main contract used for interacting with rewards mechanism.
-    IRewardsController public immutable rewardsController;
+    IRewardsController public rewardsController;
 
     modifier validToken(address token) {
         require(tokenAdded[token], "SolidStaking: Invalid token address");
         _;
     }
 
-    constructor(IRewardsController _rewardsController, address owner) {
+    function setup(IRewardsController _rewardsController, address owner) external postConstruct {
         rewardsController = _rewardsController;
         transferOwnership(owner);
     }

@@ -2,11 +2,13 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 import "./RewardsDistributor.sol";
 import "./interfaces/rewards/IRewardsController.sol";
+import "./interfaces/solid-staking/ISolidStakingViewActions.sol";
+import "./PostConstruct.sol";
 
-contract RewardsController is IRewardsController, RewardsDistributor {
+contract RewardsController is IRewardsController, RewardsDistributor, PostConstruct {
     // This mapping allows whitelisted addresses to claim on behalf of others
     // useful for contracts that hold tokens to be rewarded but don't have any native logic to claim Liquidity Mining rewards
     mapping(address => address) internal _authorizedClaimers;
@@ -23,9 +25,15 @@ contract RewardsController is IRewardsController, RewardsDistributor {
     // a check to see if the provided reward oracle contains `latestAnswer`.
     mapping(address => IEACAggregatorProxy) internal _rewardOracle;
 
+    ISolidStakingViewActions public solidStakingViewActions;
+
     modifier onlyAuthorizedClaimers(address claimer, address user) {
         require(_authorizedClaimers[user] == claimer, "CLAIMER_UNAUTHORIZED");
         _;
+    }
+
+    function setup(ISolidStakingViewActions _solidStakingViewActions) external postConstruct {
+        solidStakingViewActions = _solidStakingViewActions;
     }
 
     /// @inheritdoc IRewardsController
@@ -51,7 +59,7 @@ contract RewardsController is IRewardsController, RewardsDistributor {
     {
         for (uint i; i < config.length; i++) {
             // Get the current total staked amount for the asset
-            config[i].totalSupply = IERC20(config[i].asset).totalSupply();
+            config[i].totalSupply = solidStakingViewActions.totalStaked(config[i].asset);
 
             // Install TransferStrategy logic at IncentivesController
             _installTransferStrategy(config[i].reward, config[i].transferStrategy);
@@ -177,8 +185,8 @@ contract RewardsController is IRewardsController, RewardsDistributor {
         userAssetBalances = new RewardsDataTypes.UserAssetBalance[](assets.length);
         for (uint i; i < assets.length; i++) {
             userAssetBalances[i].asset = assets[i];
-            userAssetBalances[i].userBalance = IERC20(assets[i]).balanceOf(user);
-            userAssetBalances[i].totalSupply = IERC20(assets[i]).totalSupply();
+            userAssetBalances[i].userBalance = solidStakingViewActions.balanceOf(assets[i], user);
+            userAssetBalances[i].totalSupply = solidStakingViewActions.totalStaked(assets[i]);
         }
         return userAssetBalances;
     }
