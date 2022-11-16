@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./solid-staking/ISolidStakingOwnerActions.sol";
 import "./solid-staking/ISolidStakingEvents.sol";
 import "./solid-staking/ISolidStakingActions.sol";
+import "./solid-staking/ISolidStakingViewActions.sol";
 
 /**
  * @title The interface for the Solid World staking contract
@@ -11,6 +12,11 @@ import "./solid-staking/ISolidStakingActions.sol";
  * @author Solid World DAO
  * @dev The interface is broken up into smaller pieces
  */
-interface ISolidStaking is ISolidStakingActions, ISolidStakingEvents, ISolidStakingOwnerActions {
+interface ISolidStaking is
+    ISolidStakingActions,
+    ISolidStakingEvents,
+    ISolidStakingOwnerActions,
+    ISolidStakingViewActions
+{
 
 }

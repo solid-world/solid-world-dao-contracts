@@ -68,7 +68,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
         emit Withdraw(msg.sender, token, amount);
     }
 
-    /// @inheritdoc ISolidStakingActions
+    /// @inheritdoc ISolidStakingViewActions
     function balanceOf(address token, address account)
         external
         view
@@ -79,7 +79,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable {
         return userStake[token][account];
     }
 
-    /// @inheritdoc ISolidStakingActions
+    /// @inheritdoc ISolidStakingViewActions
     function getTokens() external view override returns (address[] memory _tokens) {
         _tokens = tokens;
     }
