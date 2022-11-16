@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import "./RewardsDistributor.sol";
 import "./interfaces/rewards/IRewardsController.sol";
-import "./interfaces/solid-staking/ISolidStakingViewActions.sol";
 import "./PostConstruct.sol";
 
 contract RewardsController is IRewardsController, RewardsDistributor, PostConstruct {
@@ -24,8 +23,6 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     // At the moment of reward configuration, the Incentives Controller performs
     // a check to see if the provided reward oracle contains `latestAnswer`.
     mapping(address => IEACAggregatorProxy) internal _rewardOracle;
-
-    ISolidStakingViewActions public solidStakingViewActions;
 
     modifier onlyAuthorizedClaimers(address claimer, address user) {
         require(_authorizedClaimers[user] == claimer, "CLAIMER_UNAUTHORIZED");
@@ -59,7 +56,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     {
         for (uint i; i < config.length; i++) {
             // Get the current total staked amount for the asset
-            config[i].totalSupply = solidStakingViewActions.totalStaked(config[i].asset);
+            config[i].totalStaked = solidStakingViewActions.totalStaked(config[i].asset);
 
             // Install TransferStrategy logic at IncentivesController
             _installTransferStrategy(config[i].reward, config[i].transferStrategy);
@@ -185,8 +182,8 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         userAssetBalances = new RewardsDataTypes.UserAssetBalance[](assets.length);
         for (uint i; i < assets.length; i++) {
             userAssetBalances[i].asset = assets[i];
-            userAssetBalances[i].userBalance = solidStakingViewActions.balanceOf(assets[i], user);
-            userAssetBalances[i].totalSupply = solidStakingViewActions.totalStaked(assets[i]);
+            userAssetBalances[i].userStake = solidStakingViewActions.balanceOf(assets[i], user);
+            userAssetBalances[i].totalStaked = solidStakingViewActions.totalStaked(assets[i]);
         }
         return userAssetBalances;
     }

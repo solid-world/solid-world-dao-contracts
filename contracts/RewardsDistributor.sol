@@ -3,8 +3,10 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
 import "./interfaces/rewards/IRewardsDistributor.sol";
 import "./libraries/RewardsDataTypes.sol";
+import "./interfaces/solid-staking/ISolidStakingViewActions.sol";
 
 abstract contract RewardsDistributor is IRewardsDistributor {
     using SafeCast for uint;
@@ -23,6 +25,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
     //global assets list
     address[] internal _assetsList;
+
+    /// @dev Used to fetch the total amount staked and the stake of an user for a given asset
+    ISolidStakingViewActions public solidStakingViewActions;
 
     modifier onlyEmissionManager() {
         require(msg.sender == _emissionManager, "ONLY_EMISSION_MANAGER");
@@ -131,7 +136,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
                     .usersData[user]
                     .accrued;
 
-                if (userAssetBalances[i].userBalance == 0) {
+                if (userAssetBalances[i].userStake == 0) {
                     continue;
                 }
                 unclaimedAmounts[r] += _getPendingRewards(
@@ -182,7 +187,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
             (uint newIndex, ) = _updateRewardData(
                 rewardConfig,
-                IERC20Metadata(asset).totalSupply(),
+                solidStakingViewActions.totalStaked(asset),
                 10**decimals
             );
 
@@ -251,7 +256,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             // Due emissions is still zero, updates only latestUpdateTimestamp
             (uint newIndex, ) = _updateRewardData(
                 rewardConfig,
-                rewardsInput[i].totalSupply,
+                rewardsInput[i].totalStaked,
                 10**decimals
             );
 
@@ -286,8 +291,8 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             _updateData(
                 userAssetBalances[i].asset,
                 user,
-                userAssetBalances[i].userBalance,
-                userAssetBalances[i].totalSupply
+                userAssetBalances[i].userStake,
+                userAssetBalances[i].totalStaked
             );
         }
     }
@@ -414,7 +419,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     ) internal view returns (uint unclaimedRewards) {
         // Add unrealized rewards
         for (uint i; i < userAssetBalances.length; i++) {
-            if (userAssetBalances[i].userBalance == 0) {
+            if (userAssetBalances[i].userStake == 0) {
                 unclaimedRewards += _assets[userAssetBalances[i].asset]
                     .rewards[reward]
                     .usersData[user]
@@ -445,11 +450,11 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             reward
         ];
         uint assetUnit = 10**_assets[userAssetBalance.asset].decimals;
-        (, uint nextIndex) = _getAssetIndex(rewardData, userAssetBalance.totalSupply, assetUnit);
+        (, uint nextIndex) = _getAssetIndex(rewardData, userAssetBalance.totalStaked, assetUnit);
 
         return
             _getRewards(
-                userAssetBalance.userBalance,
+                userAssetBalance.userStake,
                 nextIndex,
                 rewardData.usersData[user].index,
                 assetUnit

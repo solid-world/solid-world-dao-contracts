@@ -7,8 +7,8 @@ import "../interfaces/rewards/ITransferStrategyBase.sol";
 library RewardsDataTypes {
     struct RewardsConfigInput {
         uint88 emissionPerSecond;
-        uint256 totalSupply;
-        uint32 distributionEnd; // 0
+        uint256 totalStaked;
+        uint32 distributionEnd;
         address asset; // hypervisor token
         address reward; // cbt, usdc, gov
         ITransferStrategyBase transferStrategy;
@@ -17,8 +17,8 @@ library RewardsDataTypes {
 
     struct UserAssetBalance {
         address asset;
-        uint256 userBalance;
-        uint256 totalSupply;
+        uint256 userStake;
+        uint256 totalStaked;
     }
 
     struct UserData {

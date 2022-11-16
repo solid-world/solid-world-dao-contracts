@@ -99,7 +99,7 @@ interface IRewardsController is IRewardsDistributor {
      * @dev Configure assets to incentivize with an emission of rewards per second until the end of distribution.
      * @param config The assets configuration input, the list of structs contains the following fields:
      *   uint104 emissionPerSecond: The emission per second following rewards unit decimals.
-     *   uint256 totalSupply: The total supply of the asset to incentivize
+     *   uint256 totalStaked: The total amount staked of the asset
      *   uint40 distributionEnd: The end of the distribution of the incentives for an asset
      *   address asset: The asset address to incentivize
      *   address reward: The reward token address
