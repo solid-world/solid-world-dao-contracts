@@ -96,40 +96,8 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         uint userStake,
         uint totalStaked
     ) external override {
+        require(msg.sender == address(solidStakingViewActions), "CALLER_NOT_SOLID_STAKING");
         _updateData(asset, user, userStake, totalStaked);
-    }
-
-    /// @inheritdoc IRewardsController
-    function claimRewards(
-        address[] calldata assets,
-        uint amount,
-        address to,
-        address reward
-    ) external override returns (uint) {
-        require(to != address(0), "INVALID_TO_ADDRESS");
-        return _claimRewards(assets, amount, msg.sender, msg.sender, to, reward);
-    }
-
-    /// @inheritdoc IRewardsController
-    function claimRewardsOnBehalf(
-        address[] calldata assets,
-        uint amount,
-        address user,
-        address to,
-        address reward
-    ) external override onlyAuthorizedClaimers(msg.sender, user) returns (uint) {
-        require(user != address(0), "INVALID_USER_ADDRESS");
-        require(to != address(0), "INVALID_TO_ADDRESS");
-        return _claimRewards(assets, amount, msg.sender, user, to, reward);
-    }
-
-    /// @inheritdoc IRewardsController
-    function claimRewardsToSelf(
-        address[] calldata assets,
-        uint amount,
-        address reward
-    ) external override returns (uint) {
-        return _claimRewards(assets, amount, msg.sender, msg.sender, msg.sender, reward);
     }
 
     /// @inheritdoc IRewardsController
@@ -186,56 +154,6 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
             userAssetBalances[i].totalStaked = solidStakingViewActions.totalStaked(assets[i]);
         }
         return userAssetBalances;
-    }
-
-    /**
-     * @dev Claims one type of reward for a user on behalf, on all the assets of the pool, accumulating the pending rewards.
-     * @param assets List of assets to check eligible distributions before claiming rewards
-     * @param amount Amount of rewards to claim
-     * @param claimer Address of the claimer who claims rewards on behalf of user
-     * @param user Address to check and claim rewards
-     * @param to Address that will be receiving the rewards
-     * @param reward Address of the reward token
-     * @return Rewards claimed
-     **/
-    function _claimRewards(
-        address[] calldata assets,
-        uint amount,
-        address claimer,
-        address user,
-        address to,
-        address reward
-    ) internal returns (uint) {
-        if (amount == 0) {
-            return 0;
-        }
-        uint totalRewards;
-
-        _updateDataMultiple(user, _getUserAssetBalances(assets, user));
-        for (uint i; i < assets.length; i++) {
-            address asset = assets[i];
-            totalRewards += _assets[asset].rewards[reward].usersData[user].accrued;
-
-            if (totalRewards <= amount) {
-                _assets[asset].rewards[reward].usersData[user].accrued = 0;
-            } else {
-                uint difference = totalRewards - amount;
-                totalRewards -= difference;
-                _assets[asset].rewards[reward].usersData[user].accrued = SafeCast.toUint128(
-                    difference
-                );
-                break;
-            }
-        }
-
-        if (totalRewards == 0) {
-            return 0;
-        }
-
-        _transferRewards(to, reward, totalRewards);
-        emit RewardsClaimed(user, reward, to, claimer, totalRewards);
-
-        return totalRewards;
     }
 
     /**
