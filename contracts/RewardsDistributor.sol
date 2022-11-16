@@ -299,6 +299,8 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
     /**
      * @dev Iterates and accrues all the rewards for asset of the specific user
+     * @dev When call origin is (un)staking, `userStake` and `totalStaked` are prior to the (un)stake action
+     * @dev When call origin is rewards claiming, `userStake` and `totalStaked` are current values
      * @param asset The address of the reference asset of the distribution
      * @param user The user address
      * @param userStake The amount of assets staked by the user

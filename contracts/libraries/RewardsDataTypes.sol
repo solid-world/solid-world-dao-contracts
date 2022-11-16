@@ -9,8 +9,8 @@ library RewardsDataTypes {
         uint88 emissionPerSecond;
         uint256 totalStaked;
         uint32 distributionEnd;
-        address asset; // hypervisor token
-        address reward; // cbt, usdc, gov
+        address asset; // hypervisor
+        address reward; // CBT, USDC, Governance token
         ITransferStrategyBase transferStrategy;
         IEACAggregatorProxy rewardOracle;
     }
@@ -22,7 +22,7 @@ library RewardsDataTypes {
     }
 
     struct UserData {
-        uint104 index; // matches reward index
+        uint104 index;
         uint128 accrued;
     }
 
