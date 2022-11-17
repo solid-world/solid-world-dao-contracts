@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./IRewardsDistributor.sol";
-import "./ITransferStrategyBase.sol";
 import "../../libraries/RewardsDataTypes.sol";
 
 /**
@@ -35,13 +34,6 @@ interface IRewardsController is IRewardsDistributor {
     );
 
     /**
-     * @dev Emitted when a transfer strategy is installed for the reward distribution
-     * @param reward The address of the token reward
-     * @param transferStrategy The address of TransferStrategy contract
-     */
-    event TransferStrategyInstalled(address indexed reward, address indexed transferStrategy);
-
-    /**
      * @dev Emitted when the reward oracle is updated
      * @param reward The address of the token reward
      * @param rewardOracle The address of oracle
@@ -54,13 +46,6 @@ interface IRewardsController is IRewardsDistributor {
      * @param claimer The address of the claimer
      */
     function setClaimer(address user, address claimer) external;
-
-    /**
-     * @dev Sets a TransferStrategy logic contract that determines the logic of the rewards transfer
-     * @param reward The address of the reward token
-     * @param transferStrategy The address of the TransferStrategy logic contract
-     */
-    function setTransferStrategy(address reward, ITransferStrategyBase transferStrategy) external;
 
     /**
      * @dev Sets an Aave Oracle contract to enforce rewards with a source of value.
@@ -88,13 +73,6 @@ interface IRewardsController is IRewardsDistributor {
     function getClaimer(address user) external view returns (address);
 
     /**
-     * @dev Returns the Transfer Strategy implementation contract address being used for a reward address
-     * @param reward The address of the reward
-     * @return The address of the TransferStrategy contract
-     */
-    function getTransferStrategy(address reward) external view returns (address);
-
-    /**
      * @dev Configure assets to incentivize with an emission of rewards per second until the end of distribution.
      * @param config The assets configuration input, the list of structs contains the following fields:
      *   uint104 emissionPerSecond: The emission per second following rewards unit decimals.
@@ -102,7 +80,6 @@ interface IRewardsController is IRewardsDistributor {
      *   uint40 distributionEnd: The end of the distribution of the incentives for an asset
      *   address asset: The asset address to incentivize
      *   address reward: The reward token address
-     *   ITransferStrategy transferStrategy: The TransferStrategy address with the install hook and claim logic.
      *   IEACAggregatorProxy rewardOracle: The Price Oracle of a reward to visualize the incentives at the UI Frontend.
      *                                     Must follow Chainlink Aggregator IEACAggregatorProxy interface to be compatible.
      */

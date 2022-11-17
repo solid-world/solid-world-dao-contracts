@@ -6,16 +6,12 @@ import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "./RewardsDistributor.sol";
 import "../interfaces/rewards/IRewardsController.sol";
 import "../PostConstruct.sol";
+import "../libraries/GPv2SafeERC20.sol";
 
 contract RewardsController is IRewardsController, RewardsDistributor, PostConstruct {
     // This mapping allows whitelisted addresses to claim on behalf of others
     // useful for contracts that hold tokens to be rewarded but don't have any native logic to claim Liquidity Mining rewards
     mapping(address => address) internal _authorizedClaimers;
-
-    // reward => transfer strategy implementation contract
-    // The TransferStrategy contract abstracts the logic regarding
-    // the source of the reward and how to transfer it to the user.
-    mapping(address => ITransferStrategyBase) internal _transferStrategy;
 
     // This mapping contains the price oracle per reward.
     // A price oracle is enforced for integrators to be able to show incentives at
@@ -24,13 +20,21 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     // a check to see if the provided reward oracle contains `latestAnswer`.
     mapping(address => IEACAggregatorProxy) internal _rewardOracle;
 
+    /// @dev Account that holds ERC20 rewards.
+    /// @dev It must approve `RewardsController` to spend the rewards it holds.
+    address public REWARDS_VAULT;
+
     modifier onlyAuthorizedClaimers(address claimer, address user) {
         require(_authorizedClaimers[user] == claimer, "CLAIMER_UNAUTHORIZED");
         _;
     }
 
-    function setup(ISolidStakingViewActions _solidStakingViewActions) external postConstruct {
+    function setup(ISolidStakingViewActions _solidStakingViewActions, address rewardsVault)
+        external
+        postConstruct
+    {
         solidStakingViewActions = _solidStakingViewActions;
+        REWARDS_VAULT = rewardsVault;
     }
 
     /// @inheritdoc IRewardsController
@@ -44,11 +48,6 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     }
 
     /// @inheritdoc IRewardsController
-    function getTransferStrategy(address reward) external view override returns (address) {
-        return address(_transferStrategy[reward]);
-    }
-
-    /// @inheritdoc IRewardsController
     function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config)
         external
         override
@@ -58,21 +57,10 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
             // Get the current total staked amount for the asset
             config[i].totalStaked = solidStakingViewActions.totalStaked(config[i].asset);
 
-            // Install TransferStrategy logic at IncentivesController
-            _installTransferStrategy(config[i].reward, config[i].transferStrategy);
-
             // Set reward oracle, enforces input oracle to have latestPrice function
             _setRewardOracle(config[i].reward, config[i].rewardOracle);
         }
         _configureAssets(config);
-    }
-
-    /// @inheritdoc IRewardsController
-    function setTransferStrategy(address reward, ITransferStrategyBase transferStrategy)
-        external
-        onlyEmissionManager
-    {
-        _installTransferStrategy(reward, transferStrategy);
     }
 
     /// @inheritdoc IRewardsController
@@ -199,7 +187,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     }
 
     /**
-     * @dev Function to transfer rewards to the desired account using delegatecall and
+     * @dev Function to transfer rewards to the desired account
      * @param to Account address to send the rewards
      * @param reward Address of the reward token
      * @param amount Amount of rewards to transfer
@@ -209,41 +197,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         address reward,
         uint amount
     ) internal {
-        ITransferStrategyBase transferStrategy = _transferStrategy[reward];
-
-        bool success = transferStrategy.performTransfer(to, reward, amount);
-
-        require(success == true, "TRANSFER_ERROR");
-    }
-
-    /**
-     * @dev Returns true if `account` is a contract.
-     * @param account The address of the account
-     * @return bool, true if contract, false otherwise
-     */
-    function _isContract(address account) internal view returns (bool) {
-        uint size;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            size := extcodesize(account)
-        }
-        return size > 0;
-    }
-
-    /**
-     * @dev Internal function to call the optional install hook at the TransferStrategy
-     * @param reward The address of the reward token
-     * @param transferStrategy The address of the reward TransferStrategy
-     */
-    function _installTransferStrategy(address reward, ITransferStrategyBase transferStrategy)
-        internal
-    {
-        require(address(transferStrategy) != address(0), "STRATEGY_CAN_NOT_BE_ZERO");
-        require(_isContract(address(transferStrategy)) == true, "STRATEGY_MUST_BE_CONTRACT");
-
-        _transferStrategy[reward] = transferStrategy;
-
-        emit TransferStrategyInstalled(reward, address(transferStrategy));
+        GPv2SafeERC20.safeTransferFrom(IERC20(reward), REWARDS_VAULT, to, amount);
     }
 
     /**

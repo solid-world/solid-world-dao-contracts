@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "../interfaces/rewards/IEACAggregatorProxy.sol";
-import "../interfaces/rewards/ITransferStrategyBase.sol";
 
 library RewardsDataTypes {
     struct RewardsConfigInput {
@@ -11,7 +10,6 @@ library RewardsDataTypes {
         uint32 distributionEnd;
         address asset; // hypervisor
         address reward; // CBT, USDC, Governance token
-        ITransferStrategyBase transferStrategy;
         IEACAggregatorProxy rewardOracle;
     }
 
