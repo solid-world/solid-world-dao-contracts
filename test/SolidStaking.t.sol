@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 import "../contracts/SolidStaking.sol";
 import "../contracts/CollateralizedBasketToken.sol";
-import "../contracts/RewardsController.sol";
+import "../contracts/rewards/RewardsController.sol";
 
 contract SolidStakingTest is Test {
     RewardsController rewardsController;

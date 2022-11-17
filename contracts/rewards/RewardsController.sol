@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import "./RewardsDistributor.sol";
-import "./interfaces/rewards/IRewardsController.sol";
-import "./PostConstruct.sol";
+import "../interfaces/rewards/IRewardsController.sol";
+import "../PostConstruct.sol";
 
 contract RewardsController is IRewardsController, RewardsDistributor, PostConstruct {
     // This mapping allows whitelisted addresses to claim on behalf of others
@@ -222,10 +222,6 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
      * @return bool, true if contract, false otherwise
      */
     function _isContract(address account) internal view returns (bool) {
-        // This method relies on extcodesize, which returns 0 for contracts in
-        // construction, since the code is only stored at the end of the
-        // constructor execution.
-
         uint size;
         // solhint-disable-next-line no-inline-assembly
         assembly {
