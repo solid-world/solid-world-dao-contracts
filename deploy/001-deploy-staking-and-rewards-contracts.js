@@ -11,6 +11,12 @@ const func = async ({ getNamedAccounts, deployments }) => {
     log: true
   })
 
+  const EmissionManager = await deployments.deploy('EmissionManager', {
+    from: deployer,
+    args: [RewardsController.address, contractsOwner],
+    log: true
+  })
+
   if (RewardsController.newlyDeployed) {
     await deployments.execute(
       'RewardsController',
@@ -20,7 +26,8 @@ const func = async ({ getNamedAccounts, deployments }) => {
       },
       'setup',
       SolidStaking.address,
-      contractsOwner
+      contractsOwner,
+      EmissionManager.address
     )
   }
 

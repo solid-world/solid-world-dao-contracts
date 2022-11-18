@@ -4,8 +4,10 @@ import "forge-std/Test.sol";
 import "../contracts/SolidStaking.sol";
 import "../contracts/CollateralizedBasketToken.sol";
 import "../contracts/rewards/RewardsController.sol";
+import "../contracts/rewards/EmissionManager.sol";
 
 contract SolidStakingTest is Test {
+    EmissionManager emissionManager;
     RewardsController rewardsController;
     SolidStaking solidStaking;
 
@@ -20,8 +22,8 @@ contract SolidStakingTest is Test {
     function setUp() public {
         rewardsController = new RewardsController();
         solidStaking = new SolidStaking();
-
-        rewardsController.setup(solidStaking, root);
+        emissionManager = new EmissionManager(rewardsController, root);
+        rewardsController.setup(solidStaking, root, address(emissionManager));
         solidStaking.setup(rewardsController, root);
 
         vm.label(root, "Root account");

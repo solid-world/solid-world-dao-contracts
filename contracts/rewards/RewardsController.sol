@@ -29,12 +29,14 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         _;
     }
 
-    function setup(ISolidStakingViewActions _solidStakingViewActions, address rewardsVault)
-        external
-        postConstruct
-    {
+    function setup(
+        ISolidStakingViewActions _solidStakingViewActions,
+        address rewardsVault,
+        address emissionManager
+    ) external postConstruct {
         solidStakingViewActions = _solidStakingViewActions;
         REWARDS_VAULT = rewardsVault;
+        _setEmissionManager(emissionManager);
     }
 
     /// @inheritdoc IRewardsController
