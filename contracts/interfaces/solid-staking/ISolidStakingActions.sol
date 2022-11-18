@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 
 /**
- * @title Permissionless staking actions
- * @notice Contains staking methods that can be called by anyone
+ * @title Permissionless state-mutating actions
+ * @notice Contains state-mutating functions that can be called by anyone
  * @author Solid World DAO
  */
 interface ISolidStakingActions {
@@ -20,18 +20,4 @@ interface ISolidStakingActions {
      * @param amount the amount to withdraw
      */
     function withdraw(address token, uint amount) external;
-
-    /**
-     * @dev Computes the amount of tokens that the `account` has staked
-     * @param account the account to check
-     * @param token the token to check
-     * @return the amount of `token` tokens that the `account` has staked
-     */
-    function balanceOf(address token, address account) external view returns (uint);
-
-    /**
-     * @dev Returns the list of tokens that can be staked
-     * @return the list of tokens that can be staked
-     */
-    function getTokens() external view returns (address[] memory);
 }

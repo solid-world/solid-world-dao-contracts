@@ -357,7 +357,7 @@ contract SolidWorldManager is
      *      that match the specified `categoryId` and `vintage`
      * @param categoryId id of the category the batch belongs to
      * @param vintage vintage of the batch
-     * @return result array of relevant info about matching batches
+     * @return result array of relevant info about matching batches. Elements having batchId == 0 should be ignored.
      */
     function getBatchesDecollateralizationInfo(uint categoryId, uint vintage)
         external

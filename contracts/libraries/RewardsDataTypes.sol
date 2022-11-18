@@ -1,28 +1,26 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./ITransferStrategyBase.sol";
-import "./IEACAggregatorProxy.sol";
+import "../interfaces/rewards/IEACAggregatorProxy.sol";
 
 library RewardsDataTypes {
     struct RewardsConfigInput {
         uint88 emissionPerSecond;
-        uint256 totalSupply;
+        uint256 totalStaked;
         uint32 distributionEnd;
-        address asset;
-        address reward;
-        ITransferStrategyBase transferStrategy;
+        address asset; // hypervisor
+        address reward; // CBT, USDC, Governance token
         IEACAggregatorProxy rewardOracle;
     }
 
     struct UserAssetBalance {
         address asset;
-        uint256 userBalance;
-        uint256 totalSupply;
+        uint256 userStake;
+        uint256 totalStaked;
     }
 
     struct UserData {
-        uint104 index; // matches reward index
+        uint104 index;
         uint128 accrued;
     }
 
