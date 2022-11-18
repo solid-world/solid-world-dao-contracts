@@ -227,14 +227,16 @@ abstract contract RewardsDistributor is IRewardsDistributor {
      **/
     function _configureAssets(RewardsDataTypes.RewardsConfigInput[] memory rewardsInput) internal {
         for (uint i; i < rewardsInput.length; i++) {
+            uint8 decimals = IERC20Metadata(rewardsInput[i].asset).decimals();
+
+            require(decimals != 0, "INVALID_DECIMALS");
+
             if (_assets[rewardsInput[i].asset].decimals == 0) {
                 //never initialized before, adding to the list of assets
                 _assetsList.push(rewardsInput[i].asset);
             }
 
-            uint decimals = _assets[rewardsInput[i].asset].decimals = IERC20Metadata(
-                rewardsInput[i].asset
-            ).decimals();
+            _assets[rewardsInput[i].asset].decimals = decimals;
 
             RewardsDataTypes.RewardData storage rewardConfig = _assets[rewardsInput[i].asset]
                 .rewards[rewardsInput[i].reward];
