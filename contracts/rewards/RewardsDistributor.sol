@@ -4,9 +4,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import "./interfaces/rewards/IRewardsDistributor.sol";
-import "./libraries/RewardsDataTypes.sol";
-import "./interfaces/solid-staking/ISolidStakingViewActions.sol";
+import "../interfaces/rewards/IRewardsDistributor.sol";
+import "../libraries/RewardsDataTypes.sol";
+import "../interfaces/solid-staking/ISolidStakingViewActions.sol";
 
 abstract contract RewardsDistributor is IRewardsDistributor {
     using SafeCast for uint;

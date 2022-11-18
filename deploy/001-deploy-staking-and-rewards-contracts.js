@@ -19,7 +19,8 @@ const func = async ({ getNamedAccounts, deployments }) => {
         log: true
       },
       'setup',
-      SolidStaking.address
+      SolidStaking.address,
+      contractsOwner
     )
   }
 
