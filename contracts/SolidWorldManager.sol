@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgrad
 import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
 import "./libraries/SolidMath.sol";
+import "./libraries/GPv2SafeERC20.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -259,7 +260,7 @@ contract SolidWorldManager is
         require(amountOut >= amountOutMin, "Decollateralize batch: amountOut < amountOutMin.");
 
         collateralizedToken.burnFrom(msg.sender, cbtToBurn);
-        collateralizedToken.transferFrom(msg.sender, feeReceiver, cbtDaoCut);
+        GPv2SafeERC20.safeTransferFrom(collateralizedToken, msg.sender, feeReceiver, cbtDaoCut);
 
         forwardContractBatch.safeTransferFrom(address(this), msg.sender, batchId, amountOut, "");
 
