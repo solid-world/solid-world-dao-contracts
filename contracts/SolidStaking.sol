@@ -8,8 +8,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ISolidStaking.sol";
 import "./interfaces/rewards/IRewardsController.sol";
 import "./PostConstruct.sol";
+import "./libraries/GPv2SafeERC20.sol";
 
 contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct {
+    using GPv2SafeERC20 for IERC20;
+
     /// @dev All stakable lp tokens.
     address[] public tokens;
 
@@ -49,7 +52,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
         uint oldTotalStake = _totalStaked(token);
 
         userStake[token][msg.sender] = oldUserStake + amount;
-        IERC20(token).transferFrom(msg.sender, address(this), amount);
+        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
 
         rewardsController.handleAction(token, msg.sender, oldUserStake, oldTotalStake);
 
@@ -62,7 +65,8 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
         uint oldTotalStake = _totalStaked(token);
 
         userStake[token][msg.sender] = oldUserStake - amount;
-        IERC20(token).transfer(msg.sender, amount);
+
+        IERC20(token).safeTransfer(msg.sender, amount);
 
         rewardsController.handleAction(token, msg.sender, oldUserStake, oldTotalStake);
 
