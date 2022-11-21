@@ -665,7 +665,7 @@ contract SolidWorldManagerTest is Test {
         SolidWorldManager.TokenDecollateralizationInfo[] memory info = manager
             .getBatchesDecollateralizationInfo(PROJECT_ID, 2022);
 
-        assertEq(info.length, 5);
+        assertEq(info.length, 3);
         assertEq(info[0].batchId, BATCH_ID);
         assertEq(info[0].availableBatchTokens, 5000);
         assertEq(info[0].amountOut, 1000);
@@ -674,12 +674,9 @@ contract SolidWorldManagerTest is Test {
         assertEq(info[1].availableBatchTokens, 5100);
         assertEq(info[1].amountOut, 1000);
 
-        assertEq(info[2].batchId, 0); // empty
-        assertEq(info[3].batchId, 0); // empty
-
-        assertEq(info[4].batchId, BATCH_ID + 4);
-        assertEq(info[4].availableBatchTokens, 5400);
-        assertEq(info[4].amountOut, 947);
+        assertEq(info[2].batchId, BATCH_ID + 4);
+        assertEq(info[2].availableBatchTokens, 5400);
+        assertEq(info[2].amountOut, 947);
     }
 
     function testFailAddBatchWhenProjectDoesntExist() public {

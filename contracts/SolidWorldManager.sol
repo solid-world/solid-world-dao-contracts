@@ -358,21 +358,21 @@ contract SolidWorldManager is
      *      that match the specified `projectId` and `vintage`
      * @param projectId id of the project the batch belongs to
      * @param vintage vintage of the batch
-     * @return result array of relevant info about matching batches. Elements having batchId == 0 should be ignored.
+     * @return result array of relevant info about matching batches
      */
     function getBatchesDecollateralizationInfo(uint projectId, uint vintage)
         external
         view
         returns (TokenDecollateralizationInfo[] memory result)
     {
-        result = new TokenDecollateralizationInfo[](batchIds.length);
+        TokenDecollateralizationInfo[] memory allInfos = new TokenDecollateralizationInfo[](
+            batchIds.length
+        );
+        uint infoCount = 0;
 
         for (uint i; i < batchIds.length; i++) {
             uint batchId = batchIds[i];
-            if (
-                batches[batchId].vintage != vintage ||
-                batches[batchId].projectId != projectId
-            ) {
+            if (batches[batchId].vintage != vintage || batches[batchId].projectId != projectId) {
                 continue;
             }
 
@@ -383,13 +383,19 @@ contract SolidWorldManager is
                 DECOLLATERALIZATION_SIMULATION_INPUT
             );
 
-            result[i] = TokenDecollateralizationInfo(
+            allInfos[infoCount] = TokenDecollateralizationInfo(
                 batchId,
                 availableCredits,
                 amountOut,
                 minAmountIn,
                 minCbtDaoCut
             );
+            infoCount = infoCount + 1;
+        }
+
+        result = new TokenDecollateralizationInfo[](infoCount);
+        for (uint i; i < infoCount; i++) {
+            result[i] = allInfos[i];
         }
     }
 
