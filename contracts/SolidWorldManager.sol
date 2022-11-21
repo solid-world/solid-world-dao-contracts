@@ -368,7 +368,7 @@ contract SolidWorldManager is
         TokenDecollateralizationInfo[] memory allInfos = new TokenDecollateralizationInfo[](
             batchIds.length
         );
-        uint infoCount = 0;
+        uint infoCount;
 
         for (uint i; i < batchIds.length; i++) {
             uint batchId = batchIds[i];
