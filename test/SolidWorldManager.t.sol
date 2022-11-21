@@ -663,7 +663,7 @@ contract SolidWorldManagerTest is Test {
         vm.stopPrank();
 
         SolidWorldManager.TokenDecollateralizationInfo[] memory info = manager
-            .getBatchesDecollateralizationInfo(CATEGORY_ID, 2022);
+            .getBatchesDecollateralizationInfo(PROJECT_ID, 2022);
 
         assertEq(info.length, 5);
         assertEq(info[0].batchId, BATCH_ID);
