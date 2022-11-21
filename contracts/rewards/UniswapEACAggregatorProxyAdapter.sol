@@ -38,7 +38,7 @@ abstract contract Ownable {
  * and converting it to a format that is compatible with the Chainlink EACAggregatorProxy interface.
  * @author Solid World DAO
  */
-contract UniswapEACAggregatorProxyAdaptor is IEACAggregatorProxy, Ownable {
+contract UniswapEACAggregatorProxyAdapter is IEACAggregatorProxy, Ownable {
     address public immutable baseToken;
     address public immutable quoteToken;
     address public immutable pool;
