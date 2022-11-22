@@ -8,16 +8,30 @@ For more information about DAO visit our site: https://solid.world
 
 ## Deployment
 
-Copy and populate environment variables:
+▶ Copy and populate environment variables:
 ```shell
 cp .env.example .env
 ```
 
-In order to deploy to localhost run:
+▶ In order to deploy to localhost run:
 ```shell
 yarn hardhat deploy --network localhost
 ```
 Supported networks: localhost, goerli, polygon.
+
+▶ To deploy a new reward price oracle run:
+```shell
+yarn hardhat --network localhost deploy-reward-oracle [OPTIONS] 
+```
+
+OPTIONS:
+
+- `--owner`       The owner of the contract. Defaults to `OWNER_ADDRESS`
+- `--factory`     UniswapV3Factory address. If not provided, a mock factory will be deployed
+- `--base-token`  The base token address. If not provided, a mock token will be deployed
+- `--quote-token` The quote token address. If not provided, a mock token will be deployed
+- `--fee`         Pool fee (default: 500)
+- `--seconds-ago` Seconds ago to calculate the time-weighted means (default: 300)
 
 ## How to export addresses and ABI?
 
