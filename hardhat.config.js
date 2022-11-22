@@ -11,6 +11,9 @@ const {
   POLYGONSCAN_API_KEY = '',
   ETHERSCAN_API_KEY = '',
   INFURA_KEY = '',
+  DEPLOYER_PRIVATE_KEY,
+  DEPLOYER_JSON,
+  DEPLOYER_PASSWORD,
   OWNER_ADDRESS
 } = process.env
 
@@ -64,6 +67,10 @@ module.exports = {
     localhost: {
       url: 'http://127.0.0.1:8545',
       timeout: 10000
+    },
+    foundry: {
+      url: 'http://127.0.0.1:8545',
+      timeout: 10000
     }
   },
   etherscan: {
@@ -76,10 +83,9 @@ module.exports = {
     }
   },
   namedAccounts: {
-    deployer: decodePrivateKey(
-      process.env.DEPLOYER_JSON,
-      process.env.DEPLOYER_PASSWORD
-    ),
+    deployer: DEPLOYER_PRIVATE_KEY
+      ? buildPrivateKey(DEPLOYER_PRIVATE_KEY)
+      : decodePrivateKey(DEPLOYER_JSON, DEPLOYER_PASSWORD),
     contractsOwner: {
       default: OWNER_ADDRESS
     }
