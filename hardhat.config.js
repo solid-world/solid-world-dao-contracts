@@ -10,6 +10,9 @@ const {
   POLYGONSCAN_API_KEY = '',
   ETHERSCAN_API_KEY = '',
   INFURA_KEY = '',
+  DEPLOYER_PRIVATE_KEY,
+  DEPLOYER_JSON,
+  DEPLOYER_PASSWORD,
   OWNER_ADDRESS
 } = process.env
 
@@ -62,10 +65,9 @@ module.exports = {
     }
   },
   namedAccounts: {
-    deployer: decodePrivateKey(
-      process.env.DEPLOYER_JSON,
-      process.env.DEPLOYER_PASSWORD
-    ),
+    deployer: DEPLOYER_PRIVATE_KEY
+      ? buildPrivateKey(DEPLOYER_PRIVATE_KEY)
+      : decodePrivateKey(DEPLOYER_JSON, DEPLOYER_PASSWORD),
     contractsOwner: {
       default: OWNER_ADDRESS
     }
