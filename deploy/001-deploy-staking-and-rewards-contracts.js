@@ -1,5 +1,5 @@
 const func = async ({ getNamedAccounts, deployments }) => {
-  const { deployer, contractsOwner } = await getNamedAccounts()
+  const { deployer, contractsOwner, rewardsVault } = await getNamedAccounts()
 
   const RewardsController = await deployments.deploy('RewardsController', {
     from: deployer,
@@ -26,7 +26,7 @@ const func = async ({ getNamedAccounts, deployments }) => {
       },
       'setup',
       SolidStaking.address,
-      contractsOwner,
+      rewardsVault,
       EmissionManager.address
     )
   }
