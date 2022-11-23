@@ -79,6 +79,18 @@ interface IRewardsDistributor {
         uint88[] calldata newEmissionsPerSecond
     ) external;
 
+    /// @dev Updates weekly reward distributions
+    /// @param assets List of incentivized assets getting updated
+    /// @param rewards List of reward tokens getting updated
+    /// @param newEmissionsPerSecond List of new reward emissions per second
+    /// @param newDistributionEnd New end date of the reward distributions
+    function updateRewardDistribution(
+        address[] calldata assets,
+        address[] calldata rewards,
+        uint88[] calldata newEmissionsPerSecond,
+        uint32 newDistributionEnd
+    ) external;
+
     /**
      * @dev Gets the end date for the distribution
      * @param asset The incentivized asset

@@ -65,6 +65,9 @@ interface IRewardsController is IRewardsDistributor {
      */
     function getRewardOracle(address reward) external view returns (address);
 
+    /// @return Account that secures ERC20 rewards.
+    function getRewardsVault() external view returns (address);
+
     /**
      * @dev Returns the whitelisted claimer for a certain address (0x0 if not set)
      * @param user The address of the user

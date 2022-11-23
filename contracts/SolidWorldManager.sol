@@ -9,6 +9,7 @@ import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
 import "./libraries/SolidMath.sol";
 import "./libraries/GPv2SafeERC20.sol";
+import "./interfaces/rewards/IRewardsController.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -114,6 +115,8 @@ contract SolidWorldManager is
     /// @notice The account where all protocol fees are captured.
     address public feeReceiver;
 
+    IRewardsController public rewardsController;
+
     /// @notice Fee charged by DAO when collateralizing forward contract batch tokens.
     uint16 public collateralizationFee;
 
@@ -135,6 +138,7 @@ contract SolidWorldManager is
     event CategoryCreated(uint indexed categoryId);
     event ProjectCreated(uint indexed projectId);
     event BatchCreated(uint indexed batchId);
+    event RewardMinted(address rewardToken, uint rewardAmount);
 
     modifier validBatch(uint batchId) {
         require(batchCreated[batchId], "Invalid batchId.");
@@ -198,6 +202,73 @@ contract SolidWorldManager is
         forwardContractBatch.mint(batch.owner, batch.id, batch.totalAmount, "");
 
         emit BatchCreated(batch.id);
+    }
+
+    /// @dev Computes and mints weekly carbon rewards, and instructs RewardsController how to distribute them
+    /// @param assets The incentivized assets (hypervisors)
+    /// @param _categoryIds The categories to which the incentivized assets belong
+    /// todo #121: add authorization
+    function updateRewardDistribution(address[] calldata assets, uint[] calldata _categoryIds)
+        external
+    {
+        require(assets.length == _categoryIds.length, "INVALID_INPUT");
+
+        address[] memory carbonRewards = new address[](assets.length);
+        uint88[] memory newEmissionsPerSecond = new uint88[](assets.length);
+
+        for (uint i; i < assets.length; i++) {
+            uint categoryId = _categoryIds[i];
+            require(categoryIds[categoryId], "UNKNOWN_CATEGORY");
+            (uint rewardAmount, CollateralizedBasketToken rewardToken) = _computeCategoryReward(
+                categoryId
+            );
+
+            rewardToken.mint(rewardsController.getRewardsVault(), rewardAmount);
+            emit RewardMinted(address(rewardToken), rewardAmount);
+
+            carbonRewards[i] = address(rewardToken);
+            newEmissionsPerSecond[i] = uint88(rewardAmount / 1 weeks);
+        }
+
+        rewardsController.updateRewardDistribution(
+            assets,
+            carbonRewards,
+            newEmissionsPerSecond,
+            uint32(block.timestamp + 1 weeks)
+        );
+    }
+
+    /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
+    /// @param categoryId The source category for the ERC20 rewards
+    function _computeCategoryReward(uint categoryId)
+        internal
+        view
+        returns (uint, CollateralizedBasketToken)
+    {
+        uint rewardAmount;
+        CollateralizedBasketToken rewardToken = categoryToken[categoryId];
+        uint[] storage projects = categoryProjects[categoryId];
+
+        for (uint i; i < projects.length; i++) {
+            uint projectId = projects[i];
+            uint[] storage _batches = projectBatches[projectId];
+            for (uint j; j < _batches.length; j++) {
+                uint batchId = _batches[j];
+                Batch storage batch = batches[batchId];
+                uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
+                if (availableCredits == 0) {
+                    continue;
+                }
+                rewardAmount += SolidMath.computeWeeklyBatchReward(
+                    batch.expectedDueDate,
+                    availableCredits,
+                    batch.discountRate,
+                    rewardToken.decimals()
+                );
+            }
+        }
+
+        return (rewardAmount, rewardToken);
     }
 
     /**
@@ -285,20 +356,6 @@ contract SolidWorldManager is
         for (uint i; i < _batchIds.length; i++) {
             decollateralizeTokens(_batchIds[i], amountsIn[i], amountsOutMin[i]);
         }
-    }
-
-    /// assets = hypervisors
-    function updateCarbonRewardDistribution(address[] assets, uint[] categoryIds) {
-        // assets.length == categoryIds.length
-        // categoryId[i] => projectIds => batchIds => batchWeeklyRewardAmount
-        // categoryId[i] => CollateralizedBasketToken.
-        // carbonRewards[i] = CollateralizedBasketToken
-        // newEmissionsPerSecond[i] += batchWeeklyRewardAmount
-        // newEmissionsPerSecond[i] = newEmissionsPerSecond[i] / 7 days
-        // newDistributionsEnd[i] = block.timestamp + 7 days
-        //
-        // implement RewardController.updateCarbonRewardDistribution
-        // rewardController.updateCarbonRewardDistribution(assets, carbonRewards, newEmissionsPerSecond, newDistributionsEnd);
     }
 
     /**

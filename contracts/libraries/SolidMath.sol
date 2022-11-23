@@ -190,4 +190,36 @@ library SolidMath {
 
         minCbtDaoCut = Math.mulDiv(minAmountIn, decollateralizationFee, FEE_BASIS_POINTS);
     }
+
+    /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
+    /// @dev erc1155 * 10e18 * ((1 - timeApn) ** weeks - (1 - timeApn) ** (weeks + 1))
+    /// @param expectedCertificationDate expected date for project certification
+    /// @param availableCredits amount of ERC1155 tokens backing the reward
+    /// @param timeAppreciation 1% = 10000, 0.0984% = 984
+    /// @param decimals reward token number of decimals
+    /// @return rewardAmount ERC20 reward amount
+    function computeWeeklyBatchReward(
+        uint expectedCertificationDate,
+        uint availableCredits,
+        uint timeAppreciation,
+        uint decimals
+    ) internal view returns (uint rewardAmount) {
+        rewardAmount = 0;
+
+        uint currentTimeAppreciationDiscount = computeTimeAppreciationDiscount(
+            timeAppreciation,
+            expectedCertificationDate
+        );
+
+        uint previousTimeAppreciationDiscount = computeTimeAppreciationDiscount(
+            timeAppreciation,
+            expectedCertificationDate + 1 weeks
+        );
+
+        rewardAmount = Math.mulDiv(
+            availableCredits * (currentTimeAppreciationDiscount - previousTimeAppreciationDiscount),
+            10**decimals,
+            TIME_APPRECIATION_BASIS_POINTS
+        );
+    }
 }
