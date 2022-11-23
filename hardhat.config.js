@@ -14,7 +14,8 @@ const {
   DEPLOYER_PRIVATE_KEY,
   DEPLOYER_JSON,
   DEPLOYER_PASSWORD,
-  OWNER_ADDRESS
+  OWNER_ADDRESS,
+  REWARDS_VAULT_ADDRESS
 } = process.env
 
 /**
@@ -88,6 +89,9 @@ module.exports = {
       : decodePrivateKey(DEPLOYER_JSON, DEPLOYER_PASSWORD),
     contractsOwner: {
       default: OWNER_ADDRESS
+    },
+    rewardsVault: {
+      default: REWARDS_VAULT_ADDRESS
     }
   }
 }
