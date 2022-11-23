@@ -287,6 +287,20 @@ contract SolidWorldManager is
         }
     }
 
+    /// assets = hypervisors
+    function updateCarbonRewardDistribution(address[] assets, uint[] categoryIds) {
+        // assets.length == categoryIds.length
+        // categoryId[i] => projectIds => batchIds => batchWeeklyRewardAmount
+        // categoryId[i] => CollateralizedBasketToken.
+        // carbonRewards[i] = CollateralizedBasketToken
+        // newEmissionsPerSecond[i] += batchWeeklyRewardAmount
+        // newEmissionsPerSecond[i] = newEmissionsPerSecond[i] / 7 days
+        // newDistributionsEnd[i] = block.timestamp + 7 days
+        //
+        // implement RewardController.updateCarbonRewardDistribution
+        // rewardController.updateCarbonRewardDistribution(assets, carbonRewards, newEmissionsPerSecond, newDistributionsEnd);
+    }
+
     /**
      * @dev Simulates collateralization of `amountIn` ERC1155 tokens with id `batchId` for msg.sender
      * @param batchId id of the batch
