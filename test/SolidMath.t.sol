@@ -310,4 +310,40 @@ contract SolidMathTest is Test {
         assertEq(amountOut, expectedFcbtAmount);
         assertEq(minCbtDaoCut, cbtDaoCut);
     }
+
+    function testComputeWeeklyBatchReward_lessThanOneWeek() public {
+        uint rewardAmount = SolidMath.computeWeeklyBatchReward(
+            block.timestamp + 1 minutes,
+            10000,
+            1647,
+            18
+        );
+
+        assertEq(rewardAmount, 16.47e18);
+    }
+
+    function testComputeWeeklyBatchReward_oneWeek() public {
+        uint rewardAmount = SolidMath.computeWeeklyBatchReward(
+            block.timestamp + 1 weeks + 1 minutes,
+            10000,
+            1647,
+            18
+        );
+
+        assertEq(rewardAmount, 16.44287391e18);
+    }
+
+    function testComputeWeeklyBatchReward_fiveYears() public {
+        uint rewardAmount = SolidMath.computeWeeklyBatchReward(
+            block.timestamp + 5 * ONE_YEAR + 1 minutes,
+            10000,
+            1647,
+            18
+        );
+
+        // FixedNumber math:    10729184129332830000
+        // sol result:          10729183860000000000
+        // delta = 10729184129332830000 - 10729183860000000000 = 269332830000 = ~270000000000
+        assertApproxEqAbs(rewardAmount, 10.72918412933283e18, 270000000000);
+    }
 }
