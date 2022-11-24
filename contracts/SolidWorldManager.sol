@@ -9,7 +9,7 @@ import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
 import "./libraries/SolidMath.sol";
 import "./libraries/GPv2SafeERC20.sol";
-import "./interfaces/rewards/IRewardsController.sol";
+import "./interfaces/rewards/IRewardsDistributor.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -115,7 +115,7 @@ contract SolidWorldManager is
     /// @notice The account where all protocol fees are captured.
     address public feeReceiver;
 
-    IRewardsController public rewardsController;
+    IRewardsDistributor public rewardsDistributor;
 
     /// @notice Fee charged by DAO when collateralizing forward contract batch tokens.
     uint16 public collateralizationFee;
@@ -149,7 +149,8 @@ contract SolidWorldManager is
         ForwardContractBatchToken _forwardContractBatch,
         uint16 _collateralizationFee,
         uint16 _decollateralizationFee,
-        address _feeReceiver
+        address _feeReceiver,
+        IRewardsDistributor _rewardsDistributor
     ) public initializer {
         __Ownable_init();
 
@@ -157,6 +158,7 @@ contract SolidWorldManager is
         collateralizationFee = _collateralizationFee;
         decollateralizationFee = _decollateralizationFee;
         feeReceiver = _feeReceiver;
+        rewardsDistributor = _rewardsDistributor;
     }
 
     // todo #121: add authorization
@@ -204,17 +206,26 @@ contract SolidWorldManager is
         emit BatchCreated(batch.id);
     }
 
-    /// @dev Computes and mints weekly carbon rewards, and instructs RewardsController how to distribute them
-    /// @param assets The incentivized assets (hypervisors)
+    /// @dev Computes and mints weekly carbon rewards
+    /// @param assets The incentivized assets (LP tokens)
     /// @param _categoryIds The categories to which the incentivized assets belong
-    /// todo #121: add authorization
-    function updateRewardDistribution(address[] calldata assets, uint[] calldata _categoryIds)
+    // todo #121: add authorization
+    function computeAndMintCarbonRewardDistribution(
+        address[] calldata assets,
+        uint[] calldata _categoryIds,
+        address rewardsVault
+    )
         external
+        returns (
+            address[] memory carbonRewards,
+            uint88[] memory newEmissionsPerSecond,
+            uint32 newDistributionEnd
+        )
     {
         require(assets.length == _categoryIds.length, "INVALID_INPUT");
 
-        address[] memory carbonRewards = new address[](assets.length);
-        uint88[] memory newEmissionsPerSecond = new uint88[](assets.length);
+        carbonRewards = new address[](assets.length);
+        newEmissionsPerSecond = new uint88[](assets.length);
 
         for (uint i; i < assets.length; i++) {
             uint categoryId = _categoryIds[i];
@@ -222,60 +233,22 @@ contract SolidWorldManager is
 
             CollateralizedBasketToken rewardToken = categoryToken[categoryId];
             if (
-                rewardsController.getDistributionEnd(assets[i], address(rewardToken)) >
+                rewardsDistributor.getDistributionEnd(assets[i], address(rewardToken)) >
                 block.timestamp
             ) {
-                // carbonRewards[i] is 0x0, must be checked and skipped by RewardsController
+                // carbonRewards[i] is 0x0, must be checked and skipped by RewardsDistributor
                 continue;
             }
 
             uint rewardAmount = _computeCategoryReward(categoryId, rewardToken.decimals());
-            rewardToken.mint(rewardsController.getRewardsVault(), rewardAmount);
-
+            rewardToken.mint(rewardsVault, rewardAmount);
             emit RewardMinted(address(rewardToken), rewardAmount);
 
             carbonRewards[i] = address(rewardToken);
             newEmissionsPerSecond[i] = uint88(rewardAmount / 1 weeks);
         }
 
-        rewardsController.updateRewardDistribution(
-            assets,
-            carbonRewards,
-            newEmissionsPerSecond,
-            uint32(block.timestamp + 1 weeks)
-        );
-    }
-
-    /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
-    /// @param categoryId The source category for the ERC20 rewards
-    function _computeCategoryReward(uint categoryId, uint rewardDecimals)
-        internal
-        view
-        returns (uint)
-    {
-        uint rewardAmount;
-
-        uint[] storage projects = categoryProjects[categoryId];
-        for (uint i; i < projects.length; i++) {
-            uint projectId = projects[i];
-            uint[] storage _batches = projectBatches[projectId];
-            for (uint j; j < _batches.length; j++) {
-                uint batchId = _batches[j];
-                Batch storage batch = batches[batchId];
-                uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
-                if (availableCredits == 0) {
-                    continue;
-                }
-                rewardAmount += SolidMath.computeWeeklyBatchReward(
-                    batch.expectedDueDate,
-                    availableCredits,
-                    batch.discountRate,
-                    rewardDecimals
-                );
-            }
-        }
-
-        return rewardAmount;
+        newDistributionEnd = uint32(block.timestamp + 1 weeks);
     }
 
     /**
@@ -522,6 +495,38 @@ contract SolidWorldManager is
 
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return interfaceId == 0xd9b67a26;
+    }
+
+    /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
+    /// @param categoryId The source category for the ERC20 rewards
+    function _computeCategoryReward(uint categoryId, uint rewardDecimals)
+        internal
+        view
+        returns (uint)
+    {
+        uint rewardAmount;
+
+        uint[] storage projects = categoryProjects[categoryId];
+        for (uint i; i < projects.length; i++) {
+            uint projectId = projects[i];
+            uint[] storage _batches = projectBatches[projectId];
+            for (uint j; j < _batches.length; j++) {
+                uint batchId = _batches[j];
+                Batch storage batch = batches[batchId];
+                uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
+                if (availableCredits == 0) {
+                    continue;
+                }
+                rewardAmount += SolidMath.computeWeeklyBatchReward(
+                    batch.expectedDueDate,
+                    availableCredits,
+                    batch.discountRate,
+                    rewardDecimals
+                );
+            }
+        }
+
+        return rewardAmount;
     }
 
     function _getCollateralizedTokenForBatchId(uint batchId)

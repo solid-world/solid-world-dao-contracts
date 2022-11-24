@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "../interfaces/rewards/IEmissionManager.sol";
+import "../SolidWorldManager.sol";
 
 /**
  * @title EmissionManager
@@ -14,7 +15,9 @@ contract EmissionManager is Ownable, IEmissionManager {
     // reward => emissionAdmin
     mapping(address => address) internal _emissionAdmins;
 
+    SolidWorldManager internal _solidWorldManager;
     IRewardsController internal _rewardsController;
+    address internal carbonRewardAdmin;
 
     /// @dev Only emission admin of the given reward can call functions marked by this modifier.
     modifier onlyEmissionAdmin(address reward) {
@@ -22,7 +25,12 @@ contract EmissionManager is Ownable, IEmissionManager {
         _;
     }
 
-    constructor(IRewardsController controller, address owner) {
+    constructor(
+        SolidWorldManager solidWorldManager,
+        IRewardsController controller,
+        address owner
+    ) {
+        _solidWorldManager = solidWorldManager;
         _rewardsController = controller;
         transferOwnership(owner);
     }
@@ -66,6 +74,31 @@ contract EmissionManager is Ownable, IEmissionManager {
             require(_emissionAdmins[rewards[i]] == msg.sender, "ONLY_EMISSION_ADMIN");
         }
         _rewardsController.setEmissionPerSecond(asset, rewards, newEmissionsPerSecond);
+    }
+
+    /// @inheritdoc IEmissionManager
+    function updateCarbonRewardDistribution(address[] calldata assets, uint[] calldata categoryIds)
+        external
+        override
+    {
+        require(msg.sender == owner() || msg.sender == carbonRewardAdmin, "UNAUTHORIZED");
+
+        (
+            address[] memory carbonRewards,
+            uint88[] memory newEmissionsPerSecond,
+            uint32 newDistributionEnd
+        ) = _solidWorldManager.computeAndMintCarbonRewardDistribution(
+                assets,
+                categoryIds,
+                _rewardsController.getRewardsVault()
+            );
+
+        _rewardsController.updateRewardDistribution(
+            assets,
+            carbonRewards,
+            newEmissionsPerSecond,
+            newDistributionEnd
+        );
     }
 
     /// @inheritdoc IEmissionManager
