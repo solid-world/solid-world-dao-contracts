@@ -207,6 +207,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         );
 
         for (uint i; i < assets.length; i++) {
+            if (rewards[i] == address(0)) {
+                continue;
+            }
+
             (uint oldEmissionPerSecond, uint newIndex, ) = _setEmissionPerSecond(
                 assets[i],
                 rewards[i],

@@ -219,11 +219,19 @@ contract SolidWorldManager is
         for (uint i; i < assets.length; i++) {
             uint categoryId = _categoryIds[i];
             require(categoryIds[categoryId], "UNKNOWN_CATEGORY");
-            (uint rewardAmount, CollateralizedBasketToken rewardToken) = _computeCategoryReward(
-                categoryId
-            );
 
+            CollateralizedBasketToken rewardToken = categoryToken[categoryId];
+            if (
+                rewardsController.getDistributionEnd(assets[i], address(rewardToken)) >
+                block.timestamp
+            ) {
+                // carbonRewards[i] is 0x0, must be checked and skipped by RewardsController
+                continue;
+            }
+
+            uint rewardAmount = _computeCategoryReward(categoryId, rewardToken.decimals());
             rewardToken.mint(rewardsController.getRewardsVault(), rewardAmount);
+
             emit RewardMinted(address(rewardToken), rewardAmount);
 
             carbonRewards[i] = address(rewardToken);
@@ -240,15 +248,14 @@ contract SolidWorldManager is
 
     /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
     /// @param categoryId The source category for the ERC20 rewards
-    function _computeCategoryReward(uint categoryId)
+    function _computeCategoryReward(uint categoryId, uint rewardDecimals)
         internal
         view
-        returns (uint, CollateralizedBasketToken)
+        returns (uint)
     {
         uint rewardAmount;
-        CollateralizedBasketToken rewardToken = categoryToken[categoryId];
-        uint[] storage projects = categoryProjects[categoryId];
 
+        uint[] storage projects = categoryProjects[categoryId];
         for (uint i; i < projects.length; i++) {
             uint projectId = projects[i];
             uint[] storage _batches = projectBatches[projectId];
@@ -263,12 +270,12 @@ contract SolidWorldManager is
                     batch.expectedDueDate,
                     availableCredits,
                     batch.discountRate,
-                    rewardToken.decimals()
+                    rewardDecimals
                 );
             }
         }
 
-        return (rewardAmount, rewardToken);
+        return rewardAmount;
     }
 
     /**
