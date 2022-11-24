@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "../interfaces/rewards/IEmissionManager.sol";
-import "../SolidWorldManager.sol";
+import "../interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 
 /**
  * @title EmissionManager
@@ -15,7 +15,7 @@ contract EmissionManager is Ownable, IEmissionManager {
     // reward => emissionAdmin
     mapping(address => address) internal _emissionAdmins;
 
-    SolidWorldManager internal _solidWorldManager;
+    IWeeklyCarbonRewardsManager internal _carbonRewardsManager;
     IRewardsController internal _rewardsController;
     address internal carbonRewardAdmin;
 
@@ -26,11 +26,11 @@ contract EmissionManager is Ownable, IEmissionManager {
     }
 
     constructor(
-        SolidWorldManager solidWorldManager,
+        IWeeklyCarbonRewardsManager carbonRewardsManager,
         IRewardsController controller,
         address owner
     ) {
-        _solidWorldManager = solidWorldManager;
+        _carbonRewardsManager = carbonRewardsManager;
         _rewardsController = controller;
         transferOwnership(owner);
     }
@@ -81,7 +81,7 @@ contract EmissionManager is Ownable, IEmissionManager {
         external
         override
     {
-        (address[] memory carbonRewards, uint[] memory rewardAmounts) = _solidWorldManager
+        (address[] memory carbonRewards, uint[] memory rewardAmounts) = _carbonRewardsManager
             .computeAndMintWeeklyCarbonRewards(
                 assets,
                 categoryIds,

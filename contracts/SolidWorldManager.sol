@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
@@ -10,12 +10,14 @@ import "./CollateralizedBasketToken.sol";
 import "./libraries/SolidMath.sol";
 import "./libraries/GPv2SafeERC20.sol";
 import "./interfaces/rewards/IRewardsDistributor.sol";
+import "./interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 
 contract SolidWorldManager is
     Initializable,
     OwnableUpgradeable,
     IERC1155ReceiverUpgradeable,
-    ReentrancyGuard
+    ReentrancyGuardUpgradeable,
+    IWeeklyCarbonRewardsManager
 {
     /**
      * @notice Structure that holds necessary information for minting collateralized basket tokens (ERC-20).
@@ -138,7 +140,6 @@ contract SolidWorldManager is
     event CategoryCreated(uint indexed categoryId);
     event ProjectCreated(uint indexed projectId);
     event BatchCreated(uint indexed batchId);
-    event RewardMinted(address rewardToken, uint rewardAmount);
 
     modifier validBatch(uint batchId) {
         require(batchCreated[batchId], "Invalid batchId.");
@@ -153,6 +154,7 @@ contract SolidWorldManager is
         IRewardsDistributor _rewardsDistributor
     ) public initializer {
         __Ownable_init();
+        __ReentrancyGuard_init();
 
         forwardContractBatch = _forwardContractBatch;
         collateralizationFee = _collateralizationFee;
@@ -206,11 +208,7 @@ contract SolidWorldManager is
         emit BatchCreated(batch.id);
     }
 
-    /// @param assets The incentivized assets (LP tokens)
-    /// @param _categoryIds The categories to which the incentivized assets belong
-    /// @param rewardsVault Account that secures ERC20 rewards
-    /// @return carbonRewards List of carbon rewards getting distributed. 0x0 values where no new rewards are distributed
-    /// @return rewardAmounts List of carbon reward amounts getting distributed
+    /// @inheritdoc IWeeklyCarbonRewardsManager
     // todo #121: add authorization
     function computeAndMintWeeklyCarbonRewards(
         address[] calldata assets,

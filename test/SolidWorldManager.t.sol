@@ -681,41 +681,6 @@ contract SolidWorldManagerTest is Test {
         assertEq(info[2].amountOut, 947);
     }
 
-    function testUpdateRewardDistribution() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
-        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT");
-        manager.addProject(CATEGORY_ID, PROJECT_ID);
-        manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
-        for (uint i = 1; i < 500; i++) {
-            manager.addBatch(
-                SolidWorldManager.Batch({
-                    id: BATCH_ID + i,
-                    status: 0,
-                    projectId: PROJECT_ID + (i % 2),
-                    totalAmount: 10000,
-                    expectedDueDate: uint32(CURRENT_DATE + i * 1 weeks),
-                    vintage: 2022,
-                    discountRate: 1647,
-                    owner: testAccount
-                })
-            );
-        }
-
-        vm.mockCall(
-            rewardsDistributor,
-            abi.encodeWithSignature("getDistributionEnd(address,address)"),
-            abi.encode(CURRENT_DATE - 1 weeks)
-        );
-
-        address[] memory assets = new address[](2);
-        uint[] memory categoryIds = new uint[](2);
-        assets[0] = vm.addr(4);
-        assets[1] = vm.addr(5);
-        categoryIds[0] = CATEGORY_ID;
-        categoryIds[1] = CATEGORY_ID + 1;
-        manager.computeAndMintWeeklyCarbonRewards(assets, categoryIds, vm.addr(6));
-    }
-
     function testFailAddBatchWhenProjectDoesntExist() public {
         manager.addBatch(
             SolidWorldManager.Batch({

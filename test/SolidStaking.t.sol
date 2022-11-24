@@ -5,12 +5,13 @@ import "../contracts/SolidStaking.sol";
 import "../contracts/CollateralizedBasketToken.sol";
 import "../contracts/rewards/RewardsController.sol";
 import "../contracts/rewards/EmissionManager.sol";
+import "../contracts/SolidWorldManager.sol";
 
 contract SolidStakingTest is Test {
     EmissionManager emissionManager;
     RewardsController rewardsController;
     SolidStaking solidStaking;
-    SolidWorldManager solidWorldManager;
+    IWeeklyCarbonRewardsManager carbonRewardsManager;
 
     address root = address(this);
     address testAccount = vm.addr(1);
@@ -23,8 +24,8 @@ contract SolidStakingTest is Test {
     function setUp() public {
         rewardsController = new RewardsController();
         solidStaking = new SolidStaking();
-        solidWorldManager = new SolidWorldManager();
-        emissionManager = new EmissionManager(solidWorldManager, rewardsController, root);
+        carbonRewardsManager = new SolidWorldManager();
+        emissionManager = new EmissionManager(carbonRewardsManager, rewardsController, root);
         rewardsController.setup(solidStaking, root, address(emissionManager));
         solidStaking.setup(rewardsController, root);
 
