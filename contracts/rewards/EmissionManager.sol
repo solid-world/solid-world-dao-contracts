@@ -81,8 +81,6 @@ contract EmissionManager is Ownable, IEmissionManager {
         external
         override
     {
-        require(msg.sender == owner() || msg.sender == carbonRewardAdmin, "UNAUTHORIZED");
-
         (
             address[] memory carbonRewards,
             uint88[] memory newEmissionsPerSecond,
