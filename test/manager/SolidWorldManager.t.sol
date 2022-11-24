@@ -1,26 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-import "forge-std/Test.sol";
-import "forge-std/console.sol";
+import "./BaseSolidWorldManager.t.sol";
 
-import "../contracts/SolidWorldManager.sol";
-
-contract SolidWorldManagerTest is Test {
-    SolidWorldManager manager;
-    address root = address(this);
-    address testAccount = vm.addr(1);
-    address feeReceiver = vm.addr(2);
-    address rewardsDistributor = vm.addr(3);
-
-    uint constant CATEGORY_ID = 1;
-    uint constant PROJECT_ID = 3;
-    uint constant BATCH_ID = 5;
-
-    uint constant CURRENT_DATE = 1666016743;
-
-    uint16 constant COLLATERALIZATION_FEE = 1000; // 10%
-    uint16 constant DECOLLATERALIZATION_FEE = 1000; // 10%
+contract SolidWorldManagerTest is BaseSolidWorldManager {
     uint24 constant TIME_APPRECIATION = 100_000; // 10%
 
     event BatchCollateralized(
@@ -38,26 +21,6 @@ contract SolidWorldManagerTest is Test {
     event CategoryCreated(uint indexed categoryId);
     event ProjectCreated(uint indexed projectId);
     event BatchCreated(uint indexed batchId);
-
-    function setUp() public {
-        vm.warp(CURRENT_DATE);
-
-        manager = new SolidWorldManager();
-
-        ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
-        forwardContractBatch.transferOwnership(address(manager));
-
-        manager.initialize(
-            forwardContractBatch,
-            COLLATERALIZATION_FEE,
-            DECOLLATERALIZATION_FEE,
-            feeReceiver,
-            IRewardsDistributor(rewardsDistributor)
-        );
-
-        vm.label(testAccount, "Test account");
-        vm.label(feeReceiver, "Protocol fee receiver account");
-    }
 
     function testAddCategory() public {
         assertEq(address(manager.categoryToken(CATEGORY_ID)), address(0));
