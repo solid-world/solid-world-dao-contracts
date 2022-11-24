@@ -713,7 +713,7 @@ contract SolidWorldManagerTest is Test {
         assets[1] = vm.addr(5);
         categoryIds[0] = CATEGORY_ID;
         categoryIds[1] = CATEGORY_ID + 1;
-        manager.computeAndMintCarbonRewardDistribution(assets, categoryIds, vm.addr(6));
+        manager.computeAndMintWeeklyCarbonRewards(assets, categoryIds, vm.addr(6));
     }
 
     function testFailAddBatchWhenProjectDoesntExist() public {

@@ -82,13 +82,11 @@ interface IRewardsDistributor {
     /// @dev Updates weekly reward distributions
     /// @param assets List of incentivized assets getting updated
     /// @param rewards List of reward tokens getting updated
-    /// @param newEmissionsPerSecond List of new reward emissions per second
-    /// @param newDistributionEnd New end date of the reward distributions
+    /// @param rewardAmounts List of carbon reward amounts getting distributed
     function updateRewardDistribution(
         address[] calldata assets,
         address[] calldata rewards,
-        uint88[] calldata newEmissionsPerSecond,
-        uint32 newDistributionEnd
+        uint[] calldata rewardAmounts
     ) external;
 
     /**

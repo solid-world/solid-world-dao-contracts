@@ -81,22 +81,14 @@ contract EmissionManager is Ownable, IEmissionManager {
         external
         override
     {
-        (
-            address[] memory carbonRewards,
-            uint88[] memory newEmissionsPerSecond,
-            uint32 newDistributionEnd
-        ) = _solidWorldManager.computeAndMintCarbonRewardDistribution(
+        (address[] memory carbonRewards, uint[] memory rewardAmounts) = _solidWorldManager
+            .computeAndMintWeeklyCarbonRewards(
                 assets,
                 categoryIds,
                 _rewardsController.getRewardsVault()
             );
 
-        _rewardsController.updateRewardDistribution(
-            assets,
-            carbonRewards,
-            newEmissionsPerSecond,
-            newDistributionEnd
-        );
+        _rewardsController.updateRewardDistribution(assets, carbonRewards, rewardAmounts);
     }
 
     /// @inheritdoc IEmissionManager

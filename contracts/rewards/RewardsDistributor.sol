@@ -198,23 +198,24 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     function updateRewardDistribution(
         address[] calldata assets,
         address[] calldata rewards,
-        uint88[] calldata newEmissionsPerSecond,
-        uint32 newDistributionEnd
+        uint[] calldata rewardAmounts
     ) external override onlyEmissionManager {
         require(
-            assets.length == rewards.length && rewards.length == newEmissionsPerSecond.length,
+            assets.length == rewards.length && rewards.length == rewardAmounts.length,
             "INVALID_INPUT"
         );
 
+        uint32 newDistributionEnd = uint32(block.timestamp + 1 weeks);
         for (uint i; i < assets.length; i++) {
             if (rewards[i] == address(0)) {
                 continue;
             }
 
+            uint88 newEmissionsPerSecond = uint88(rewardAmounts[i] / 1 weeks);
             (uint oldEmissionPerSecond, uint newIndex, ) = _setEmissionPerSecond(
                 assets[i],
                 rewards[i],
-                newEmissionsPerSecond[i]
+                newEmissionsPerSecond
             );
             uint oldDistributionEnd = _setDistributionEnd(
                 assets[i],
@@ -225,7 +226,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
                 assets[i],
                 rewards[i],
                 oldEmissionPerSecond,
-                newEmissionsPerSecond[i],
+                newEmissionsPerSecond,
                 oldDistributionEnd,
                 newDistributionEnd,
                 newIndex

@@ -206,26 +206,21 @@ contract SolidWorldManager is
         emit BatchCreated(batch.id);
     }
 
-    /// @dev Computes and mints weekly carbon rewards
     /// @param assets The incentivized assets (LP tokens)
     /// @param _categoryIds The categories to which the incentivized assets belong
+    /// @param rewardsVault Account that secures ERC20 rewards
+    /// @return carbonRewards List of carbon rewards getting distributed. 0x0 values where no new rewards are distributed
+    /// @return rewardAmounts List of carbon reward amounts getting distributed
     // todo #121: add authorization
-    function computeAndMintCarbonRewardDistribution(
+    function computeAndMintWeeklyCarbonRewards(
         address[] calldata assets,
         uint[] calldata _categoryIds,
         address rewardsVault
-    )
-        external
-        returns (
-            address[] memory carbonRewards,
-            uint88[] memory newEmissionsPerSecond,
-            uint32 newDistributionEnd
-        )
-    {
+    ) external returns (address[] memory carbonRewards, uint[] memory rewardAmounts) {
         require(assets.length == _categoryIds.length, "INVALID_INPUT");
 
         carbonRewards = new address[](assets.length);
-        newEmissionsPerSecond = new uint88[](assets.length);
+        rewardAmounts = new uint[](assets.length);
 
         for (uint i; i < assets.length; i++) {
             uint categoryId = _categoryIds[i];
@@ -236,7 +231,6 @@ contract SolidWorldManager is
                 rewardsDistributor.getDistributionEnd(assets[i], address(rewardToken)) >
                 block.timestamp
             ) {
-                // carbonRewards[i] is 0x0, must be checked and skipped by RewardsDistributor
                 continue;
             }
 
@@ -245,10 +239,8 @@ contract SolidWorldManager is
             emit RewardMinted(address(rewardToken), rewardAmount);
 
             carbonRewards[i] = address(rewardToken);
-            newEmissionsPerSecond[i] = uint88(rewardAmount / 1 weeks);
+            rewardAmounts[i] = rewardAmount;
         }
-
-        newDistributionEnd = uint32(block.timestamp + 1 weeks);
     }
 
     /**
