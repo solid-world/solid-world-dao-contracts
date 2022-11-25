@@ -55,6 +55,10 @@ interface IRewardsDistributor {
         address indexed newEmissionManager
     );
 
+    /// @param asset The address of the incentivized asset
+    /// @param reward The address of the reward token
+    error UpdateOngoingRewardDistribution(address asset, address reward);
+
     /**
      * @dev Sets the end date for the distribution
      * @param asset The asset to incentivize
@@ -96,11 +100,6 @@ interface IRewardsDistributor {
      * @return The timestamp with the end of the distribution, in unix time format
      **/
     function getDistributionEnd(address asset, address reward) external view returns (uint256);
-
-    /// @param asset The incentivized asset
-    /// @param reward The reward token of the incentivized asset
-    /// @return true, if rewards are still being distributed for the asset - reward pair
-    function isOngoingDistribution(address asset, address reward) external view returns (bool);
 
     /**
      * @dev Returns the index of a user on a reward distribution

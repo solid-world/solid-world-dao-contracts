@@ -65,16 +65,6 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     }
 
     /// @inheritdoc IRewardsDistributor
-    function isOngoingDistribution(address asset, address reward)
-        external
-        view
-        override
-        returns (bool)
-    {
-        return _assets[asset].rewards[reward].distributionEnd > block.timestamp;
-    }
-
-    /// @inheritdoc IRewardsDistributor
     function getRewardsByAsset(address asset) external view override returns (address[] memory) {
         uint128 rewardsCount = _assets[asset].availableRewardsCount;
         address[] memory availableRewards = new address[](rewardsCount);
@@ -217,8 +207,8 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
         uint32 newDistributionEnd = uint32(block.timestamp + 1 weeks);
         for (uint i; i < assets.length; i++) {
-            if (rewards[i] == address(0)) {
-                continue;
+            if (_isOngoingDistribution(assets[i], rewards[i])) {
+                revert UpdateOngoingRewardDistribution(assets[i], rewards[i]);
             }
 
             uint88 newEmissionsPerSecond = uint88(rewardAmounts[i] / 1 weeks);
@@ -257,6 +247,13 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     /// @inheritdoc IRewardsDistributor
     function setEmissionManager(address emissionManager) external onlyEmissionManager {
         _setEmissionManager(emissionManager);
+    }
+
+    /// @param asset The incentivized asset
+    /// @param reward The reward token of the incentivized asset
+    /// @return true, if rewards are still being distributed for the asset - reward pair
+    function _isOngoingDistribution(address asset, address reward) internal view returns (bool) {
+        return _assets[asset].rewards[reward].distributionEnd > block.timestamp;
     }
 
     /**

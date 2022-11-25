@@ -10,7 +10,6 @@ abstract contract BaseSolidWorldManager is Test {
     address root = address(this);
     address testAccount = vm.addr(1);
     address feeReceiver = vm.addr(2);
-    address rewardsDistributor = vm.addr(3);
 
     uint constant CATEGORY_ID = 1;
     uint constant PROJECT_ID = 3;
@@ -33,8 +32,7 @@ abstract contract BaseSolidWorldManager is Test {
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,
-            feeReceiver,
-            IRewardsDistributor(rewardsDistributor)
+            feeReceiver
         );
 
         vm.label(testAccount, "Test account");

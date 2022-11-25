@@ -82,13 +82,15 @@ contract EmissionManager is Ownable, IEmissionManager {
         override
     {
         (address[] memory carbonRewards, uint[] memory rewardAmounts) = _carbonRewardsManager
-            .computeAndMintWeeklyCarbonRewards(
-                assets,
-                categoryIds,
-                _rewardsController.getRewardsVault()
-            );
+            .computeWeeklyCarbonRewards(assets, categoryIds);
 
         _rewardsController.updateRewardDistribution(assets, carbonRewards, rewardAmounts);
+
+        _carbonRewardsManager.mintWeeklyCarbonRewards(
+            carbonRewards,
+            rewardAmounts,
+            _rewardsController.getRewardsVault()
+        );
     }
 
     /// @inheritdoc IEmissionManager
@@ -121,5 +123,10 @@ contract EmissionManager is Ownable, IEmissionManager {
     /// @inheritdoc IEmissionManager
     function getEmissionAdmin(address reward) external view override returns (address) {
         return _emissionAdmins[reward];
+    }
+
+    /// @inheritdoc IEmissionManager
+    function getCarbonRewardsManager() external view override returns (address) {
+        return address(_carbonRewardsManager);
     }
 }

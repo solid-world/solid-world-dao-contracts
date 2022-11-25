@@ -121,4 +121,7 @@ interface IEmissionManager {
      * @return The address of the emission admin
      */
     function getEmissionAdmin(address reward) external view returns (address);
+
+    /// @return The address of the IWeeklyCarbonRewardsManager implementation contract
+    function getCarbonRewardsManager() external view returns (address);
 }

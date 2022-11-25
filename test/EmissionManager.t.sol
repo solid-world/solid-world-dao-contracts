@@ -51,9 +51,7 @@ contract EmissionManagerTest is Test {
         );
         vm.mockCall(
             carbonRewardsManager,
-            abi.encodeWithSelector(
-                IWeeklyCarbonRewardsManager.computeAndMintWeeklyCarbonRewards.selector
-            ),
+            abi.encodeWithSelector(IWeeklyCarbonRewardsManager.computeWeeklyCarbonRewards.selector),
             abi.encode(carbonRewards, rewardAmounts)
         );
         vm.expectCall(
@@ -61,6 +59,13 @@ contract EmissionManagerTest is Test {
             abi.encodeCall(
                 IRewardsDistributor.updateRewardDistribution,
                 (assets, carbonRewards, rewardAmounts)
+            )
+        );
+        vm.expectCall(
+            carbonRewardsManager,
+            abi.encodeCall(
+                IWeeklyCarbonRewardsManager.mintWeeklyCarbonRewards,
+                (carbonRewards, rewardAmounts, rewardsVault)
             )
         );
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);

@@ -9,7 +9,6 @@ import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
 import "./libraries/SolidMath.sol";
 import "./libraries/GPv2SafeERC20.sol";
-import "./interfaces/rewards/IRewardsDistributor.sol";
 import "./interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 
 contract SolidWorldManager is
@@ -117,8 +116,6 @@ contract SolidWorldManager is
     /// @notice The account where all protocol fees are captured.
     address public feeReceiver;
 
-    IRewardsDistributor public rewardsDistributor;
-
     /// @notice Fee charged by DAO when collateralizing forward contract batch tokens.
     uint16 public collateralizationFee;
 
@@ -150,8 +147,7 @@ contract SolidWorldManager is
         ForwardContractBatchToken _forwardContractBatch,
         uint16 _collateralizationFee,
         uint16 _decollateralizationFee,
-        address _feeReceiver,
-        IRewardsDistributor _rewardsDistributor
+        address _feeReceiver
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -160,7 +156,6 @@ contract SolidWorldManager is
         collateralizationFee = _collateralizationFee;
         decollateralizationFee = _decollateralizationFee;
         feeReceiver = _feeReceiver;
-        rewardsDistributor = _rewardsDistributor;
     }
 
     // todo #121: add authorization
@@ -209,12 +204,12 @@ contract SolidWorldManager is
     }
 
     /// @inheritdoc IWeeklyCarbonRewardsManager
-    // todo #121: add authorization
-    function computeAndMintWeeklyCarbonRewards(
-        address[] calldata assets,
-        uint[] calldata _categoryIds,
-        address rewardsVault
-    ) external returns (address[] memory carbonRewards, uint[] memory rewardAmounts) {
+    function computeWeeklyCarbonRewards(address[] calldata assets, uint[] calldata _categoryIds)
+        external
+        view
+        override
+        returns (address[] memory carbonRewards, uint[] memory rewardAmounts)
+    {
         require(assets.length == _categoryIds.length, "INVALID_INPUT");
 
         carbonRewards = new address[](assets.length);
@@ -225,17 +220,29 @@ contract SolidWorldManager is
             require(categoryIds[categoryId], "UNKNOWN_CATEGORY");
 
             CollateralizedBasketToken rewardToken = categoryToken[categoryId];
-            if (rewardsDistributor.isOngoingDistribution(assets[i], address(rewardToken))) {
-                emit WeeklyRewardRecalculationSkipped(address(rewardToken));
-                continue;
-            }
-
             uint rewardAmount = _computeCategoryReward(categoryId, rewardToken.decimals());
-            rewardToken.mint(rewardsVault, rewardAmount);
-            emit WeeklyRewardMinted(address(rewardToken), rewardAmount);
 
             carbonRewards[i] = address(rewardToken);
             rewardAmounts[i] = rewardAmount;
+        }
+    }
+
+    /// @inheritdoc IWeeklyCarbonRewardsManager
+    // todo #162: Restrict access => only from EmissionManager
+    function mintWeeklyCarbonRewards(
+        address[] calldata carbonRewards,
+        uint[] calldata rewardAmounts,
+        address rewardsVault
+    ) external override {
+        require(carbonRewards.length == rewardAmounts.length, "INVALID_INPUT");
+
+        for (uint i; i < carbonRewards.length; i++) {
+            address carbonReward = carbonRewards[i];
+            CollateralizedBasketToken rewardToken = CollateralizedBasketToken(carbonReward);
+            uint rewardAmount = rewardAmounts[i];
+
+            rewardToken.mint(rewardsVault, rewardAmount);
+            emit WeeklyRewardMinted(carbonReward, rewardAmount);
         }
     }
 

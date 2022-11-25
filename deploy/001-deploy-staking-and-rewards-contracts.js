@@ -1,6 +1,8 @@
 const func = async ({ getNamedAccounts, deployments }) => {
   const { deployer, contractsOwner, rewardsVault } = await getNamedAccounts()
 
+  const SolidWorldManager = await deployments.get('SolidWorldManager')
+
   const RewardsController = await deployments.deploy('RewardsController', {
     from: deployer,
     log: true
@@ -13,7 +15,11 @@ const func = async ({ getNamedAccounts, deployments }) => {
 
   const EmissionManager = await deployments.deploy('EmissionManager', {
     from: deployer,
-    args: [RewardsController.address, contractsOwner],
+    args: [
+      SolidWorldManager.address,
+      RewardsController.address,
+      contractsOwner
+    ],
     log: true
   })
 
