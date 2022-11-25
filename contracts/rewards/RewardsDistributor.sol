@@ -65,6 +65,16 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     }
 
     /// @inheritdoc IRewardsDistributor
+    function isOngoingDistribution(address asset, address reward)
+        external
+        view
+        override
+        returns (bool)
+    {
+        return _assets[asset].rewards[reward].distributionEnd > block.timestamp;
+    }
+
+    /// @inheritdoc IRewardsDistributor
     function getRewardsByAsset(address asset) external view override returns (address[] memory) {
         uint128 rewardsCount = _assets[asset].availableRewardsCount;
         address[] memory availableRewards = new address[](rewardsCount);

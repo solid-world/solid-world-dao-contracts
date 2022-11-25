@@ -97,6 +97,11 @@ interface IRewardsDistributor {
      **/
     function getDistributionEnd(address asset, address reward) external view returns (uint256);
 
+    /// @param asset The incentivized asset
+    /// @param reward The reward token of the incentivized asset
+    /// @return true, if rewards are still being distributed for the asset - reward pair
+    function isOngoingDistribution(address asset, address reward) external view returns (bool);
+
     /**
      * @dev Returns the index of a user on a reward distribution
      * @param user Address of the user

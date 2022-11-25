@@ -225,10 +225,7 @@ contract SolidWorldManager is
             require(categoryIds[categoryId], "UNKNOWN_CATEGORY");
 
             CollateralizedBasketToken rewardToken = categoryToken[categoryId];
-            if (
-                rewardsDistributor.getDistributionEnd(assets[i], address(rewardToken)) >
-                block.timestamp
-            ) {
+            if (rewardsDistributor.isOngoingDistribution(assets[i], address(rewardToken))) {
                 continue;
             }
 
