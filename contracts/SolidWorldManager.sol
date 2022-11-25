@@ -226,12 +226,13 @@ contract SolidWorldManager is
 
             CollateralizedBasketToken rewardToken = categoryToken[categoryId];
             if (rewardsDistributor.isOngoingDistribution(assets[i], address(rewardToken))) {
+                emit WeeklyRewardRecalculationSkipped(address(rewardToken));
                 continue;
             }
 
             uint rewardAmount = _computeCategoryReward(categoryId, rewardToken.decimals());
             rewardToken.mint(rewardsVault, rewardAmount);
-            emit RewardMinted(address(rewardToken), rewardAmount);
+            emit WeeklyRewardMinted(address(rewardToken), rewardAmount);
 
             carbonRewards[i] = address(rewardToken);
             rewardAmounts[i] = rewardAmount;

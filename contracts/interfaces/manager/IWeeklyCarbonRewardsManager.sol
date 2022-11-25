@@ -5,7 +5,8 @@ pragma solidity ^0.8.0;
 /// @notice Computes and mints weekly carbon rewards
 /// @author Solid World DAO
 interface IWeeklyCarbonRewardsManager {
-    event RewardMinted(address rewardToken, uint rewardAmount);
+    event WeeklyRewardMinted(address rewardToken, uint rewardAmount);
+    event WeeklyRewardRecalculationSkipped(address rewardToken);
 
     /// @param assets The incentivized assets (LP tokens)
     /// @param _categoryIds The categories to which the incentivized assets belong
