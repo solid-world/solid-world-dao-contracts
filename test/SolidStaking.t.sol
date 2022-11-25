@@ -3,15 +3,12 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 import "../contracts/SolidStaking.sol";
 import "../contracts/CollateralizedBasketToken.sol";
-import "../contracts/rewards/RewardsController.sol";
-import "../contracts/rewards/EmissionManager.sol";
-import "../contracts/SolidWorldManager.sol";
 
 contract SolidStakingTest is Test {
-    EmissionManager emissionManager;
-    RewardsController rewardsController;
+    address emissionManager;
+    address rewardsController;
+    address carbonRewardsManager;
     SolidStaking solidStaking;
-    IWeeklyCarbonRewardsManager carbonRewardsManager;
 
     address root = address(this);
     address testAccount = vm.addr(1);
@@ -22,12 +19,18 @@ contract SolidStakingTest is Test {
     event TokenAdded(address indexed token);
 
     function setUp() public {
-        rewardsController = new RewardsController();
+        rewardsController = vm.addr(3);
+        carbonRewardsManager = vm.addr(4);
+        emissionManager = vm.addr(5);
+
         solidStaking = new SolidStaking();
-        carbonRewardsManager = new SolidWorldManager();
-        emissionManager = new EmissionManager(carbonRewardsManager, rewardsController, root);
-        rewardsController.setup(solidStaking, root, address(emissionManager));
-        solidStaking.setup(rewardsController, root);
+        solidStaking.setup(IRewardsController(rewardsController), root);
+
+        vm.mockCall(
+            rewardsController,
+            abi.encodeWithSelector(IRewardsController.handleAction.selector),
+            abi.encode()
+        );
 
         vm.label(root, "Root account");
         vm.label(testAccount, "Test account");
@@ -36,7 +39,7 @@ contract SolidStakingTest is Test {
 
     function testSetupFailsWhenAlreadyInitialized() public {
         vm.expectRevert(abi.encodePacked("PostConstruct: Already initialized"));
-        solidStaking.setup(rewardsController, root);
+        solidStaking.setup(IRewardsController(rewardsController), root);
     }
 
     function testAddToken() public {
@@ -94,8 +97,8 @@ contract SolidStakingTest is Test {
         token.approve(address(solidStaking), amount);
 
         vm.expectCall(
-            address(rewardsController),
-            abi.encodeCall(rewardsController.handleAction, (tokenAddress, testAccount, 0, 0))
+            rewardsController,
+            abi.encodeCall(IRewardsController.handleAction, (tokenAddress, testAccount, 0, 0))
         );
         vm.expectEmit(true, true, true, false, address(solidStaking));
         emit Stake(testAccount, tokenAddress, amount);
@@ -131,9 +134,9 @@ contract SolidStakingTest is Test {
         solidStaking.stake(tokenAddress, amountToStake);
 
         vm.expectCall(
-            address(rewardsController),
+            rewardsController,
             abi.encodeCall(
-                rewardsController.handleAction,
+                IRewardsController.handleAction,
                 (tokenAddress, testAccount, amountToStake, amountToStake)
             )
         );
