@@ -63,7 +63,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         emit WeeklyRewardMinted(address(rewardToken1), expectedBatchWeeklyRewardAmount * 3);
         vm.mockCall(
             rewardsDistributor,
-            abi.encodeWithSignature("isOngoingDistribution(address,address)"),
+            abi.encodeWithSelector(IRewardsDistributor.isOngoingDistribution.selector),
             abi.encode(false)
         );
         (address[] memory carbonRewards, uint[] memory rewardAmounts) = manager

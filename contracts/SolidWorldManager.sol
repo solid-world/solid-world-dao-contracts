@@ -482,7 +482,7 @@ contract SolidWorldManager is
     }
 
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
-        return interfaceId == 0xd9b67a26;
+        return interfaceId == 0xd9b67a26; // The ERC-165 identifier for ERC-1155
     }
 
     /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
