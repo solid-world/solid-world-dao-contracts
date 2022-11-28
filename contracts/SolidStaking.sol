@@ -27,7 +27,9 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
     IRewardsController public rewardsController;
 
     modifier validToken(address token) {
-        require(tokenAdded[token], "SolidStaking: Invalid token address");
+        if (!tokenAdded[token]) {
+            revert InvalidTokenAddress(token);
+        }
         _;
     }
 
@@ -38,7 +40,9 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
 
     /// @inheritdoc ISolidStakingOwnerActions
     function addToken(address token) external override onlyOwner {
-        require(!tokenAdded[token], "SolidStaking: Token already added");
+        if (tokenAdded[token]) {
+            revert TokenAlreadyAdded(token);
+        }
 
         tokens.push(token);
         tokenAdded[token] = true;

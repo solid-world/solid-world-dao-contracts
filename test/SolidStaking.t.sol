@@ -70,7 +70,9 @@ contract SolidStakingTest is Test {
 
         solidStaking.addToken(tokenAddress);
 
-        vm.expectRevert(abi.encodePacked("SolidStaking: Token already added"));
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolidStakingErrors.TokenAlreadyAdded.selector, tokenAddress)
+        );
         solidStaking.addToken(tokenAddress);
     }
 
@@ -79,7 +81,9 @@ contract SolidStakingTest is Test {
         address tokenAddress = address(token);
         vm.label(tokenAddress, "Test token");
 
-        vm.expectRevert(abi.encodePacked("SolidStaking: Invalid token address"));
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolidStakingErrors.InvalidTokenAddress.selector, tokenAddress)
+        );
         solidStaking.stake(tokenAddress, 100);
     }
 

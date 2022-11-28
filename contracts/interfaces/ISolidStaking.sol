@@ -5,6 +5,7 @@ import "./solid-staking/ISolidStakingOwnerActions.sol";
 import "./solid-staking/ISolidStakingEvents.sol";
 import "./solid-staking/ISolidStakingActions.sol";
 import "./solid-staking/ISolidStakingViewActions.sol";
+import "./solid-staking/ISolidStakingErrors.sol";
 
 /// @title The interface for the Solid World staking contract
 /// @notice The staking contract facilitates (un)staking of ERC20 tokens
@@ -14,7 +15,8 @@ interface ISolidStaking is
     ISolidStakingActions,
     ISolidStakingEvents,
     ISolidStakingOwnerActions,
-    ISolidStakingViewActions
+    ISolidStakingViewActions,
+    ISolidStakingErrors
 {
 
 }
