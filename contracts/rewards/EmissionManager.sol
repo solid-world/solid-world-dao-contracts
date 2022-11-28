@@ -6,11 +6,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/rewards/IEmissionManager.sol";
 import "../interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 
-/**
- * @title EmissionManager
- * @author Aave
- * @notice It manages the list of admins of reward emissions and provides functions to control reward emissions.
- */
+/// @title EmissionManager
+/// @author Aave
+/// @notice It manages the list of admins of reward emissions and provides functions to control reward emissions.
 contract EmissionManager is Ownable, IEmissionManager {
     // reward => emissionAdmin
     mapping(address => address) internal _emissionAdmins;

@@ -1,36 +1,26 @@
 // SPDX-License-Identifier: BSD-4-Clause
-/*
- * ABDK Math 64.64 Smart Contract Library.  Copyright © 2019 by ABDK Consulting.
- * Author: Mikhail Vladimirov <mikhail.vladimirov@gmail.com>
- */
+
+/// ABDK Math 64.64 Smart Contract Library.  Copyright © 2019 by ABDK Consulting.
+/// Author: Mikhail Vladimirov <mikhail.vladimirov@gmail.com>
 pragma solidity ^0.8.0;
 
-/**
- * Smart contract library of mathematical functions operating with signed
- * 64.64-bit fixed point numbers.  Signed 64.64-bit fixed point number is
- * basically a simple fraction whose numerator is signed 128-bit integer and
- * denominator is 2^64.  As long as denominator is always the same, there is no
- * need to store it, thus in Solidity signed 64.64-bit fixed point numbers are
- * represented by int128 type holding only the numerator.
- */
+/// Smart contract library of mathematical functions operating with signed
+/// 64.64-bit fixed point numbers.  Signed 64.64-bit fixed point number is
+/// basically a simple fraction whose numerator is signed 128-bit integer and
+/// denominator is 2^64.  As long as denominator is always the same, there is no
+/// need to store it, thus in Solidity signed 64.64-bit fixed point numbers are
+/// represented by int128 type holding only the numerator.
 library ABDKMath64x64 {
-    /*
-     * Minimum value signed 64.64-bit fixed point number may have.
-     */
+    /// Minimum value signed 64.64-bit fixed point number may have.
     int128 private constant MIN_64x64 = -0x80000000000000000000000000000000;
 
-    /*
-     * Maximum value signed 64.64-bit fixed point number may have.
-     */
+    /// Maximum value signed 64.64-bit fixed point number may have.
     int128 private constant MAX_64x64 = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 
-    /**
-     * Convert unsigned 256-bit integer number into signed 64.64-bit fixed point
-     * number.  Revert on overflow.
-     *
-     * @param x unsigned 256-bit integer number
-     * @return signed 64.64-bit fixed point number
-     */
+    /// Convert unsigned 256-bit integer number into signed 64.64-bit fixed point
+    /// number.  Revert on overflow.
+    /// @param x unsigned 256-bit integer number
+    /// @return signed 64.64-bit fixed point number
     function fromUInt(uint256 x) internal pure returns (int128) {
         unchecked {
             require(x <= 0x7FFFFFFFFFFFFFFF);
@@ -38,13 +28,10 @@ library ABDKMath64x64 {
         }
     }
 
-    /**
-     * Convert signed 64.64 fixed point number into unsigned 64-bit integer
-     * number rounding down.  Revert on underflow.
-     *
-     * @param x signed 64.64-bit fixed point number
-     * @return unsigned 64-bit integer number
-     */
+    /// Convert signed 64.64 fixed point number into unsigned 64-bit integer
+    /// number rounding down.  Revert on underflow.
+    /// @param x signed 64.64-bit fixed point number
+    /// @return unsigned 64-bit integer number
     function toUInt(int128 x) internal pure returns (uint64) {
         unchecked {
             require(x >= 0);
@@ -52,14 +39,11 @@ library ABDKMath64x64 {
         }
     }
 
-    /**
-     * Calculate x * y rounding down, where x is signed 64.64 fixed point number
-     * and y is unsigned 256-bit integer number.  Revert on overflow.
-     *
-     * @param x signed 64.64 fixed point number
-     * @param y unsigned 256-bit integer number
-     * @return unsigned 256-bit integer number
-     */
+    /// Calculate x * y rounding down, where x is signed 64.64 fixed point number
+    /// and y is unsigned 256-bit integer number.  Revert on overflow.
+    /// @param x signed 64.64 fixed point number
+    /// @param y unsigned 256-bit integer number
+    /// @return unsigned 256-bit integer number
     function mulu(int128 x, uint256 y) internal pure returns (uint256) {
         unchecked {
             if (y == 0) return 0;
@@ -77,14 +61,11 @@ library ABDKMath64x64 {
         }
     }
 
-    /**
-     * Calculate x^y assuming 0^0 is 1, where x is signed 64.64 fixed point number
-     * and y is unsigned 256-bit integer number.  Revert on overflow.
-     *
-     * @param x signed 64.64-bit fixed point number
-     * @param y uint256 value
-     * @return signed 64.64-bit fixed point number
-     */
+    /// Calculate x^y assuming 0^0 is 1, where x is signed 64.64 fixed point number
+    /// and y is unsigned 256-bit integer number.  Revert on overflow.
+    /// @param x signed 64.64-bit fixed point number
+    /// @param y uint256 value
+    /// @return signed 64.64-bit fixed point number
     function pow(int128 x, uint256 y) internal pure returns (int128) {
         unchecked {
             bool negative = x < 0 && y & 1 == 1;
@@ -178,14 +159,11 @@ library ABDKMath64x64 {
         }
     }
 
-    /**
-     * Calculate x / y rounding towards zero, where x and y are unsigned 256-bit
-     * integer numbers.  Revert on overflow or when y is zero.
-     *
-     * @param x unsigned 256-bit integer number
-     * @param y unsigned 256-bit integer number
-     * @return signed 64.64-bit fixed point number
-     */
+    /// Calculate x / y rounding towards zero, where x and y are unsigned 256-bit
+    /// integer numbers.  Revert on overflow or when y is zero.
+    /// @param x unsigned 256-bit integer number
+    /// @param y unsigned 256-bit integer number
+    /// @return signed 64.64-bit fixed point number
     function div(uint256 x, uint256 y) internal pure returns (int128) {
         unchecked {
             require(y != 0);
@@ -195,14 +173,11 @@ library ABDKMath64x64 {
         }
     }
 
-    /**
-     * Calculate x / y rounding towards zero, where x and y are unsigned 256-bit
-     * integer numbers.  Revert on overflow or when y is zero.
-     *
-     * @param x unsigned 256-bit integer number
-     * @param y unsigned 256-bit integer number
-     * @return unsigned 64.64-bit fixed point number
-     */
+    /// Calculate x / y rounding towards zero, where x and y are unsigned 256-bit
+    /// integer numbers.  Revert on overflow or when y is zero.
+    /// @param x unsigned 256-bit integer number
+    /// @param y unsigned 256-bit integer number
+    /// @return unsigned 64.64-bit fixed point number
     function divu(uint256 x, uint256 y) internal pure returns (uint128) {
         unchecked {
             require(y != 0);

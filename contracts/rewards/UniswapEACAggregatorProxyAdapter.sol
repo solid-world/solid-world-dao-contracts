@@ -32,12 +32,10 @@ abstract contract Ownable {
     }
 }
 
-/**
- * @title Adapter from Uniswap V3 Oracle to Chainlink EACAggregatorProxy
- * @notice This contract exposes a method for getting the price of a token from the Uniswap V3 Pool
- * and converting it to a format that is compatible with the Chainlink EACAggregatorProxy interface.
- * @author Solid World DAO
- */
+/// @title Adapter from Uniswap V3 Oracle to Chainlink EACAggregatorProxy
+/// @notice This contract exposes a method for getting the price of a token from the Uniswap V3 Pool
+/// and converting it to a format that is compatible with the Chainlink EACAggregatorProxy interface.
+/// @author Solid World DAO
 contract UniswapEACAggregatorProxyAdapter is IEACAggregatorProxy, Ownable {
     address public immutable baseToken;
     address public immutable quoteToken;
