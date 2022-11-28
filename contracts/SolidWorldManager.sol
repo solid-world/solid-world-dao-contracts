@@ -220,7 +220,7 @@ contract SolidWorldManager is
             require(categoryIds[categoryId], "UNKNOWN_CATEGORY");
 
             CollateralizedBasketToken rewardToken = categoryToken[categoryId];
-            uint rewardAmount = _computeCategoryReward(categoryId, rewardToken.decimals());
+            uint rewardAmount = _computeWeeklyCategoryReward(categoryId, rewardToken.decimals());
 
             carbonRewards[i] = address(rewardToken);
             rewardAmounts[i] = rewardAmount;
@@ -494,7 +494,7 @@ contract SolidWorldManager is
 
     /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
     /// @param categoryId The source category for the ERC20 rewards
-    function _computeCategoryReward(uint categoryId, uint rewardDecimals)
+    function _computeWeeklyCategoryReward(uint categoryId, uint rewardDecimals)
         internal
         view
         returns (uint)
