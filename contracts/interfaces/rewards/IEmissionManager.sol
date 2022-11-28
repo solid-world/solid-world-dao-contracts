@@ -8,6 +8,8 @@ import "./IRewardsController.sol";
 /// @author Aave
 /// @notice Defines the basic interface for the Emission Manager
 interface IEmissionManager {
+    error NotEmissionAdmin(address sender, address reward);
+
     /// @dev Emitted when the admin of a reward emission is updated.
     /// @param reward The address of the rewarding token
     /// @param oldAdmin The address of the old emission admin

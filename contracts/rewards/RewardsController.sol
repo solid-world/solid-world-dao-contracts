@@ -25,7 +25,9 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     address internal REWARDS_VAULT;
 
     modifier onlyAuthorizedClaimers(address claimer, address user) {
-        require(_authorizedClaimers[user] == claimer, "CLAIMER_UNAUTHORIZED");
+        if (_authorizedClaimers[user] != claimer) {
+            revert UnauthorizedClaimer(claimer, user);
+        }
         _;
     }
 
@@ -91,7 +93,10 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         uint userStake,
         uint totalStaked
     ) external override {
-        require(msg.sender == address(solidStakingViewActions), "CALLER_NOT_SOLID_STAKING");
+        if (msg.sender != address(solidStakingViewActions)) {
+            revert NotSolidStaking(msg.sender);
+        }
+
         _updateData(asset, user, userStake, totalStaked);
     }
 
@@ -101,7 +106,10 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         override
         returns (address[] memory rewardsList, uint[] memory claimedAmounts)
     {
-        require(to != address(0), "INVALID_TO_ADDRESS");
+        if (to == address(0)) {
+            revert InvalidInput();
+        }
+
         return _claimAllRewards(assets, msg.sender, msg.sender, to);
     }
 
@@ -116,8 +124,10 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         onlyAuthorizedClaimers(msg.sender, user)
         returns (address[] memory rewardsList, uint[] memory claimedAmounts)
     {
-        require(user != address(0), "INVALID_USER_ADDRESS");
-        require(to != address(0), "INVALID_TO_ADDRESS");
+        if (to == address(0) || user == address(0)) {
+            revert InvalidInput();
+        }
+
         return _claimAllRewards(assets, msg.sender, user, to);
     }
 
@@ -206,7 +216,10 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     /// @param reward The address of the reward token
     /// @param rewardOracle The address of the price oracle
     function _setRewardOracle(address reward, IEACAggregatorProxy rewardOracle) internal {
-        require(rewardOracle.latestAnswer() > 0, "ORACLE_MUST_RETURN_PRICE");
+        if (rewardOracle.latestAnswer() <= 0) {
+            revert InvalidRewardOracle(reward, address(rewardOracle));
+        }
+
         _rewardOracle[reward] = rewardOracle;
         emit RewardOracleUpdated(reward, address(rewardOracle));
     }

@@ -8,6 +8,10 @@ import "../../libraries/RewardsDataTypes.sol";
 /// @author Aave
 /// @notice Defines the basic interface for a Rewards Controller.
 interface IRewardsController is IRewardsDistributor {
+    error UnauthorizedClaimer(address claimer, address user);
+    error NotSolidStaking(address sender);
+    error InvalidRewardOracle(address reward, address rewardOracle);
+
     /// @dev Emitted when a new address is whitelisted as claimer of rewards on behalf of a user
     /// @param user The address of the user
     /// @param claimer The address of the claimer

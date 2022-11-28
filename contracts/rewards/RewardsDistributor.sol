@@ -30,7 +30,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     ISolidStakingViewActions public solidStakingViewActions;
 
     modifier onlyEmissionManager() {
-        require(msg.sender == _emissionManager, "ONLY_EMISSION_MANAGER");
+        if (msg.sender != _emissionManager) {
+            revert NotEmissionManager(msg.sender);
+        }
         _;
     }
 
@@ -174,7 +176,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address[] calldata rewards,
         uint88[] calldata newEmissionsPerSecond
     ) external override onlyEmissionManager {
-        require(rewards.length == newEmissionsPerSecond.length, "INVALID_INPUT");
+        if (rewards.length != newEmissionsPerSecond.length) {
+            revert InvalidInput();
+        }
+
         for (uint i; i < rewards.length; i++) {
             (
                 uint oldEmissionPerSecond,
@@ -200,10 +205,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address[] calldata rewards,
         uint[] calldata rewardAmounts
     ) external override onlyEmissionManager {
-        require(
-            assets.length == rewards.length && rewards.length == rewardAmounts.length,
-            "INVALID_INPUT"
-        );
+        if (assets.length != rewards.length || rewards.length != rewardAmounts.length) {
+            revert InvalidInput();
+        }
 
         uint32 newDistributionEnd = uint32(block.timestamp + 1 weeks);
         for (uint i; i < assets.length; i++) {
@@ -264,7 +268,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         for (uint i; i < rewardsInput.length; i++) {
             uint8 decimals = IERC20Metadata(rewardsInput[i].asset).decimals();
 
-            require(decimals != 0, "INVALID_DECIMALS");
+            if (decimals == 0) {
+                revert InvalidAssetDecimals(rewardsInput[i].asset);
+            }
 
             if (_assets[rewardsInput[i].asset].decimals == 0) {
                 //never initialized before, adding to the list of assets
@@ -394,7 +400,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         (uint oldIndex, uint newIndex) = _getAssetIndex(rewardData, totalStaked, assetUnit);
         bool indexUpdated;
         if (newIndex != oldIndex) {
-            require(newIndex <= type(uint104).max, "INDEX_OVERFLOW");
+            if (newIndex > type(uint104).max) {
+                revert IndexOverflow(newIndex);
+            }
+
             indexUpdated = true;
 
             //optimization: storing one after another saves one SSTORE
@@ -574,10 +583,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         RewardsDataTypes.AssetData storage assetConfig = _assets[asset];
         RewardsDataTypes.RewardData storage rewardConfig = _assets[asset].rewards[reward];
         uint decimals = assetConfig.decimals;
-        require(
-            decimals != 0 && rewardConfig.lastUpdateTimestamp != 0,
-            "DISTRIBUTION_DOES_NOT_EXIST"
-        );
+        if (decimals == 0 || rewardConfig.lastUpdateTimestamp == 0) {
+            revert DistributionNonExistent(asset, reward);
+        }
+
         distributionEnd = rewardConfig.distributionEnd;
 
         (newIndex, ) = _updateRewardData(
