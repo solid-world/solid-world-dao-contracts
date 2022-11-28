@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.16;
 
 /// @title Permissioned staking actions
 /// @notice Contains staking methods may only be called by the owner

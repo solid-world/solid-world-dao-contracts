@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.16;
 
 /// @notice Simple contract exposing a modifier used on setup functions
 /// to prevent them from being called more than once
