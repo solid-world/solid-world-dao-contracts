@@ -20,7 +20,8 @@ contract EmissionManagerTest is Test {
         controller = vm.addr(10);
         rewardsVault = vm.addr(1);
 
-        emissionManager = new EmissionManager(
+        emissionManager = new EmissionManager();
+        emissionManager.setup(
             IWeeklyCarbonRewardsManager(carbonRewardsManager),
             IRewardsController(controller),
             owner
