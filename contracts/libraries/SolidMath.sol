@@ -50,13 +50,15 @@ library SolidMath {
         returns (uint)
     {
         uint weeksUntilCertification = weeksBetween(block.timestamp, expectedCertificationDate);
-
-        uint discountRatePoints = TIME_APPRECIATION_BASIS_POINTS - timeAppreciation;
-
-        if (weeksUntilCertification <= 1) {
-            return discountRatePoints;
+        if (weeksUntilCertification == 0) {
+            return TIME_APPRECIATION_BASIS_POINTS;
         }
 
+        if (weeksUntilCertification == 1) {
+            return TIME_APPRECIATION_BASIS_POINTS - timeAppreciation;
+        }
+
+        uint discountRatePoints = TIME_APPRECIATION_BASIS_POINTS - timeAppreciation;
         int128 discountRate = ABDKMath64x64.div(discountRatePoints, TIME_APPRECIATION_BASIS_POINTS);
         int128 totalDiscount = ABDKMath64x64.pow(discountRate, (weeksUntilCertification - 1));
 
@@ -189,5 +191,30 @@ library SolidMath {
         );
 
         minCbtDaoCut = Math.mulDiv(minAmountIn, decollateralizationFee, FEE_BASIS_POINTS);
+    }
+
+    /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
+    /// @dev erc1155 * 10e18 * timeApn * (1 - timeApn) ** weeks
+    /// @param expectedCertificationDate expected date for project certification
+    /// @param availableCredits amount of ERC1155 tokens backing the reward
+    /// @param timeAppreciation 1% = 10000, 0.0984% = 984
+    /// @param decimals reward token number of decimals
+    /// @return rewardAmount ERC20 reward amount
+    function computeWeeklyBatchReward(
+        uint expectedCertificationDate,
+        uint availableCredits,
+        uint timeAppreciation,
+        uint decimals
+    ) internal view returns (uint rewardAmount) {
+        uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
+            timeAppreciation,
+            expectedCertificationDate
+        );
+
+        rewardAmount = Math.mulDiv(
+            availableCredits * timeAppreciation * timeAppreciationDiscount,
+            10**decimals,
+            TIME_APPRECIATION_BASIS_POINTS**2
+        );
     }
 }

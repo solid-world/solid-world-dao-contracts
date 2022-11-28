@@ -20,9 +20,9 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     // a check to see if the provided reward oracle contains `latestAnswer`.
     mapping(address => IEACAggregatorProxy) internal _rewardOracle;
 
-    /// @dev Account that holds ERC20 rewards.
+    /// @dev Account that secures ERC20 rewards.
     /// @dev It must approve `RewardsController` to spend the rewards it holds.
-    address public REWARDS_VAULT;
+    address internal REWARDS_VAULT;
 
     modifier onlyAuthorizedClaimers(address claimer, address user) {
         require(_authorizedClaimers[user] == claimer, "CLAIMER_UNAUTHORIZED");
@@ -37,6 +37,11 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         solidStakingViewActions = _solidStakingViewActions;
         REWARDS_VAULT = rewardsVault;
         _setEmissionManager(emissionManager);
+    }
+
+    /// @inheritdoc IRewardsController
+    function getRewardsVault() external view override returns (address) {
+        return REWARDS_VAULT;
     }
 
     /// @inheritdoc IRewardsController

@@ -73,6 +73,12 @@ interface IEmissionManager {
         uint88[] calldata newEmissionsPerSecond
     ) external;
 
+    /// @dev Computes and mints weekly carbon rewards, and instructs RewardsController how to distribute them
+    /// @param assets The incentivized assets (hypervisors)
+    /// @param _categoryIds The categories to which the incentivized assets belong
+    function updateCarbonRewardDistribution(address[] calldata assets, uint[] calldata _categoryIds)
+        external;
+
     /**
      * @dev Whitelists an address to claim the rewards on behalf of another address
      * @dev Only callable by the owner of the EmissionManager
@@ -115,4 +121,7 @@ interface IEmissionManager {
      * @return The address of the emission admin
      */
     function getEmissionAdmin(address reward) external view returns (address);
+
+    /// @return The address of the IWeeklyCarbonRewardsManager implementation contract
+    function getCarbonRewardsManager() external view returns (address);
 }

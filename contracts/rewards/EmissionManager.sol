@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "../interfaces/rewards/IEmissionManager.sol";
+import "../interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 
 /**
  * @title EmissionManager
@@ -14,7 +15,9 @@ contract EmissionManager is Ownable, IEmissionManager {
     // reward => emissionAdmin
     mapping(address => address) internal _emissionAdmins;
 
+    IWeeklyCarbonRewardsManager internal _carbonRewardsManager;
     IRewardsController internal _rewardsController;
+    address internal carbonRewardAdmin;
 
     /// @dev Only emission admin of the given reward can call functions marked by this modifier.
     modifier onlyEmissionAdmin(address reward) {
@@ -22,7 +25,12 @@ contract EmissionManager is Ownable, IEmissionManager {
         _;
     }
 
-    constructor(IRewardsController controller, address owner) {
+    constructor(
+        IWeeklyCarbonRewardsManager carbonRewardsManager,
+        IRewardsController controller,
+        address owner
+    ) {
+        _carbonRewardsManager = carbonRewardsManager;
         _rewardsController = controller;
         transferOwnership(owner);
     }
@@ -69,6 +77,23 @@ contract EmissionManager is Ownable, IEmissionManager {
     }
 
     /// @inheritdoc IEmissionManager
+    function updateCarbonRewardDistribution(address[] calldata assets, uint[] calldata categoryIds)
+        external
+        override
+    {
+        (address[] memory carbonRewards, uint[] memory rewardAmounts) = _carbonRewardsManager
+            .computeWeeklyCarbonRewards(assets, categoryIds);
+
+        _rewardsController.updateRewardDistribution(assets, carbonRewards, rewardAmounts);
+
+        _carbonRewardsManager.mintWeeklyCarbonRewards(
+            carbonRewards,
+            rewardAmounts,
+            _rewardsController.getRewardsVault()
+        );
+    }
+
+    /// @inheritdoc IEmissionManager
     function setClaimer(address user, address claimer) external override onlyOwner {
         _rewardsController.setClaimer(user, claimer);
     }
@@ -98,5 +123,10 @@ contract EmissionManager is Ownable, IEmissionManager {
     /// @inheritdoc IEmissionManager
     function getEmissionAdmin(address reward) external view override returns (address) {
         return _emissionAdmins[reward];
+    }
+
+    /// @inheritdoc IEmissionManager
+    function getCarbonRewardsManager() external view override returns (address) {
+        return address(_carbonRewardsManager);
     }
 }

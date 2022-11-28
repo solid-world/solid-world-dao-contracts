@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
@@ -9,12 +9,14 @@ import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
 import "./libraries/SolidMath.sol";
 import "./libraries/GPv2SafeERC20.sol";
+import "./interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 
 contract SolidWorldManager is
     Initializable,
     OwnableUpgradeable,
     IERC1155ReceiverUpgradeable,
-    ReentrancyGuard
+    ReentrancyGuardUpgradeable,
+    IWeeklyCarbonRewardsManager
 {
     /**
      * @notice Structure that holds necessary information for minting collateralized basket tokens (ERC-20).
@@ -148,6 +150,7 @@ contract SolidWorldManager is
         address _feeReceiver
     ) public initializer {
         __Ownable_init();
+        __ReentrancyGuard_init();
 
         forwardContractBatch = _forwardContractBatch;
         collateralizationFee = _collateralizationFee;
@@ -198,6 +201,49 @@ contract SolidWorldManager is
         forwardContractBatch.mint(batch.owner, batch.id, batch.totalAmount, "");
 
         emit BatchCreated(batch.id);
+    }
+
+    /// @inheritdoc IWeeklyCarbonRewardsManager
+    function computeWeeklyCarbonRewards(address[] calldata assets, uint[] calldata _categoryIds)
+        external
+        view
+        override
+        returns (address[] memory carbonRewards, uint[] memory rewardAmounts)
+    {
+        require(assets.length == _categoryIds.length, "INVALID_INPUT");
+
+        carbonRewards = new address[](assets.length);
+        rewardAmounts = new uint[](assets.length);
+
+        for (uint i; i < assets.length; i++) {
+            uint categoryId = _categoryIds[i];
+            require(categoryIds[categoryId], "UNKNOWN_CATEGORY");
+
+            CollateralizedBasketToken rewardToken = categoryToken[categoryId];
+            uint rewardAmount = _computeWeeklyCategoryReward(categoryId, rewardToken.decimals());
+
+            carbonRewards[i] = address(rewardToken);
+            rewardAmounts[i] = rewardAmount;
+        }
+    }
+
+    /// @inheritdoc IWeeklyCarbonRewardsManager
+    // todo #162: Restrict access => only from EmissionManager
+    function mintWeeklyCarbonRewards(
+        address[] calldata carbonRewards,
+        uint[] calldata rewardAmounts,
+        address rewardsVault
+    ) external override {
+        require(carbonRewards.length == rewardAmounts.length, "INVALID_INPUT");
+
+        for (uint i; i < carbonRewards.length; i++) {
+            address carbonReward = carbonRewards[i];
+            CollateralizedBasketToken rewardToken = CollateralizedBasketToken(carbonReward);
+            uint rewardAmount = rewardAmounts[i];
+
+            rewardToken.mint(rewardsVault, rewardAmount);
+            emit WeeklyRewardMinted(carbonReward, rewardAmount);
+        }
     }
 
     /**
@@ -443,7 +489,39 @@ contract SolidWorldManager is
     }
 
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
-        return interfaceId == 0xd9b67a26;
+        return interfaceId == 0xd9b67a26; // The ERC-165 identifier for ERC-1155
+    }
+
+    /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
+    /// @param categoryId The source category for the ERC20 rewards
+    function _computeWeeklyCategoryReward(uint categoryId, uint rewardDecimals)
+        internal
+        view
+        returns (uint)
+    {
+        uint rewardAmount;
+
+        uint[] storage projects = categoryProjects[categoryId];
+        for (uint i; i < projects.length; i++) {
+            uint projectId = projects[i];
+            uint[] storage _batches = projectBatches[projectId];
+            for (uint j; j < _batches.length; j++) {
+                uint batchId = _batches[j];
+                Batch storage batch = batches[batchId];
+                uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
+                if (availableCredits == 0) {
+                    continue;
+                }
+                rewardAmount += SolidMath.computeWeeklyBatchReward(
+                    batch.expectedDueDate,
+                    availableCredits,
+                    batch.discountRate,
+                    rewardDecimals
+                );
+            }
+        }
+
+        return rewardAmount;
     }
 
     function _getCollateralizedTokenForBatchId(uint batchId)

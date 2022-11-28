@@ -155,8 +155,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address reward,
         uint32 newDistributionEnd
     ) external override onlyEmissionManager {
-        uint oldDistributionEnd = _assets[asset].rewards[reward].distributionEnd;
-        _assets[asset].rewards[reward].distributionEnd = newDistributionEnd;
+        uint oldDistributionEnd = _setDistributionEnd(asset, reward, newDistributionEnd);
 
         emit AssetConfigUpdated(
             asset,
@@ -177,30 +176,59 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     ) external override onlyEmissionManager {
         require(rewards.length == newEmissionsPerSecond.length, "INVALID_INPUT");
         for (uint i; i < rewards.length; i++) {
-            RewardsDataTypes.AssetData storage assetConfig = _assets[asset];
-            RewardsDataTypes.RewardData storage rewardConfig = _assets[asset].rewards[rewards[i]];
-            uint decimals = assetConfig.decimals;
-            require(
-                decimals != 0 && rewardConfig.lastUpdateTimestamp != 0,
-                "DISTRIBUTION_DOES_NOT_EXIST"
-            );
-
-            (uint newIndex, ) = _updateRewardData(
-                rewardConfig,
-                solidStakingViewActions.totalStaked(asset),
-                10**decimals
-            );
-
-            uint oldEmissionPerSecond = rewardConfig.emissionPerSecond;
-            rewardConfig.emissionPerSecond = newEmissionsPerSecond[i];
+            (
+                uint oldEmissionPerSecond,
+                uint newIndex,
+                uint distributionEnd
+            ) = _setEmissionPerSecond(asset, rewards[i], newEmissionsPerSecond[i]);
 
             emit AssetConfigUpdated(
                 asset,
                 rewards[i],
                 oldEmissionPerSecond,
                 newEmissionsPerSecond[i],
-                rewardConfig.distributionEnd,
-                rewardConfig.distributionEnd,
+                distributionEnd,
+                distributionEnd,
+                newIndex
+            );
+        }
+    }
+
+    /// @inheritdoc IRewardsDistributor
+    function updateRewardDistribution(
+        address[] calldata assets,
+        address[] calldata rewards,
+        uint[] calldata rewardAmounts
+    ) external override onlyEmissionManager {
+        require(
+            assets.length == rewards.length && rewards.length == rewardAmounts.length,
+            "INVALID_INPUT"
+        );
+
+        uint32 newDistributionEnd = uint32(block.timestamp + 1 weeks);
+        for (uint i; i < assets.length; i++) {
+            if (_isOngoingDistribution(assets[i], rewards[i])) {
+                revert UpdateOngoingRewardDistribution(assets[i], rewards[i]);
+            }
+
+            uint88 newEmissionsPerSecond = uint88(rewardAmounts[i] / 1 weeks);
+            (uint oldEmissionPerSecond, uint newIndex, ) = _setEmissionPerSecond(
+                assets[i],
+                rewards[i],
+                newEmissionsPerSecond
+            );
+            uint oldDistributionEnd = _setDistributionEnd(
+                assets[i],
+                rewards[i],
+                newDistributionEnd
+            );
+            emit AssetConfigUpdated(
+                assets[i],
+                rewards[i],
+                oldEmissionPerSecond,
+                newEmissionsPerSecond,
+                oldDistributionEnd,
+                newDistributionEnd,
                 newIndex
             );
         }
@@ -219,6 +247,15 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     /// @inheritdoc IRewardsDistributor
     function setEmissionManager(address emissionManager) external onlyEmissionManager {
         _setEmissionManager(emissionManager);
+    }
+
+    /// @inheritdoc IRewardsDistributor
+    function isOngoingDistribution(address asset, address reward) external view returns (bool) {
+        return _isOngoingDistribution(asset, reward);
+    }
+
+    function _isOngoingDistribution(address asset, address reward) internal view returns (bool) {
+        return _assets[asset].rewards[reward].distributionEnd > block.timestamp;
     }
 
     /**
@@ -542,5 +579,45 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address previousEmissionManager = _emissionManager;
         _emissionManager = emissionManager;
         emit EmissionManagerUpdated(previousEmissionManager, emissionManager);
+    }
+
+    function _setEmissionPerSecond(
+        address asset,
+        address reward,
+        uint88 newEmissionsPerSecond
+    )
+        internal
+        returns (
+            uint oldEmissionPerSecond,
+            uint newIndex,
+            uint distributionEnd
+        )
+    {
+        RewardsDataTypes.AssetData storage assetConfig = _assets[asset];
+        RewardsDataTypes.RewardData storage rewardConfig = _assets[asset].rewards[reward];
+        uint decimals = assetConfig.decimals;
+        require(
+            decimals != 0 && rewardConfig.lastUpdateTimestamp != 0,
+            "DISTRIBUTION_DOES_NOT_EXIST"
+        );
+        distributionEnd = rewardConfig.distributionEnd;
+
+        (newIndex, ) = _updateRewardData(
+            rewardConfig,
+            solidStakingViewActions.totalStaked(asset),
+            10**decimals
+        );
+
+        oldEmissionPerSecond = rewardConfig.emissionPerSecond;
+        rewardConfig.emissionPerSecond = newEmissionsPerSecond;
+    }
+
+    function _setDistributionEnd(
+        address asset,
+        address reward,
+        uint32 newDistributionEnd
+    ) internal returns (uint oldDistributionEnd) {
+        oldDistributionEnd = _assets[asset].rewards[reward].distributionEnd;
+        _assets[asset].rewards[reward].distributionEnd = newDistributionEnd;
     }
 }
