@@ -258,10 +258,8 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         return _assets[asset].rewards[reward].distributionEnd > block.timestamp;
     }
 
-    /**
-     * @dev Configure the _assets for a specific emission
-     * @param rewardsInput The array of each asset configuration
-     **/
+    /// @dev Configure the _assets for a specific emission
+    /// @param rewardsInput The array of each asset configuration
     function _configureAssets(RewardsDataTypes.RewardsConfigInput[] memory rewardsInput) internal {
         for (uint i; i < rewardsInput.length; i++) {
             uint8 decimals = IERC20Metadata(rewardsInput[i].asset).decimals();
@@ -317,11 +315,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         }
     }
 
-    /**
-     * @dev Accrues all the rewards of the assets specified in the userAssetBalances list
-     * @param user The address of the user
-     * @param userAssetBalances List of structs with the user balance and total supply of a set of assets
-     **/
+    /// @dev Accrues all the rewards of the assets specified in the userAssetBalances list
+    /// @param user The address of the user
+    /// @param userAssetBalances List of structs with the user balance and total supply of a set of assets
     function _updateDataMultiple(
         address user,
         RewardsDataTypes.UserAssetBalance[] memory userAssetBalances
@@ -336,15 +332,13 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         }
     }
 
-    /**
-     * @dev Iterates and accrues all the rewards for asset of the specific user
-     * @dev When call origin is (un)staking, `userStake` and `totalStaked` are prior to the (un)stake action
-     * @dev When call origin is rewards claiming, `userStake` and `totalStaked` are current values
-     * @param asset The address of the reference asset of the distribution
-     * @param user The user address
-     * @param userStake The amount of assets staked by the user
-     * @param totalStaked The total amount staked of the asset
-     **/
+    /// @dev Iterates and accrues all the rewards for asset of the specific user
+    /// @dev When call origin is (un)staking, `userStake` and `totalStaked` are prior to the (un)stake action
+    /// @dev When call origin is rewards claiming, `userStake` and `totalStaked` are current values
+    /// @param asset The address of the reference asset of the distribution
+    /// @param user The user address
+    /// @param userStake The amount of assets staked by the user
+    /// @param totalStaked The total amount staked of the asset
     function _updateData(
         address asset,
         address user,
@@ -386,14 +380,12 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         }
     }
 
-    /**
-     * @dev Updates the state of the distribution for the specified reward
-     * @param rewardData Storage pointer to the distribution reward config
-     * @param totalStaked The total amount staked of the asset
-     * @param assetUnit One unit of asset (10**decimals)
-     * @return The new distribution index
-     * @return True if the index was updated, false otherwise
-     **/
+    /// @dev Updates the state of the distribution for the specified reward
+    /// @param rewardData Storage pointer to the distribution reward config
+    /// @param totalStaked The total amount staked of the asset
+    /// @param assetUnit One unit of asset (10**decimals)
+    /// @return The new distribution index
+    /// @return True if the index was updated, false otherwise
     function _updateRewardData(
         RewardsDataTypes.RewardData storage rewardData,
         uint totalStaked,
@@ -415,15 +407,13 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         return (newIndex, indexUpdated);
     }
 
-    /**
-     * @dev Updates the state of the distribution for the specific user
-     * @param rewardData Storage pointer to the distribution reward config
-     * @param user The address of the user
-     * @param userStake The amount of assets staked by the user
-     * @param newAssetIndex The new index of the asset distribution
-     * @param assetUnit One unit of asset (10**decimals)
-     * @return The rewards accrued since the last update
-     **/
+    /// @dev Updates the state of the distribution for the specific user
+    /// @param rewardData Storage pointer to the distribution reward config
+    /// @param user The address of the user
+    /// @param userStake The amount of assets staked by the user
+    /// @param newAssetIndex The new index of the asset distribution
+    /// @param assetUnit One unit of asset (10**decimals)
+    /// @return The rewards accrued since the last update
     function _updateUserData(
         RewardsDataTypes.RewardData storage rewardData,
         address user,
@@ -446,13 +436,11 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         return (rewardsAccrued, dataUpdated);
     }
 
-    /**
-     * @dev Return the accrued unclaimed amount of a reward from a user over a list of distribution
-     * @param user The address of the user
-     * @param reward The address of the reward token
-     * @param userAssetBalances List of structs with the user balance and total supply of a set of assets
-     * @return unclaimedRewards The accrued rewards for the user until the moment
-     **/
+    /// @dev Return the accrued unclaimed amount of a reward from a user over a list of distribution
+    /// @param user The address of the user
+    /// @param reward The address of the reward token
+    /// @param userAssetBalances List of structs with the user balance and total supply of a set of assets
+    /// @return unclaimedRewards The accrued rewards for the user until the moment
     function _getUserReward(
         address user,
         address reward,
@@ -475,13 +463,11 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         return unclaimedRewards;
     }
 
-    /**
-     * @dev Calculates the pending (not yet accrued) rewards since the last user action
-     * @param user The address of the user
-     * @param reward The address of the reward token
-     * @param userAssetBalance struct with the user balance and total supply of the incentivized asset
-     * @return The pending rewards for the user since the last user action
-     **/
+    /// @dev Calculates the pending (not yet accrued) rewards since the last user action
+    /// @param user The address of the user
+    /// @param reward The address of the reward token
+    /// @param userAssetBalance struct with the user balance and total supply of the incentivized asset
+    /// @return The pending rewards for the user since the last user action
     function _getPendingRewards(
         address user,
         address reward,
@@ -502,14 +488,12 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             );
     }
 
-    /**
-     * @dev Internal function for the calculation of user's rewards on a distribution
-     * @param userStake The amount of assets staked by the user on a distribution
-     * @param reserveIndex Current index of the distribution
-     * @param userIndex Index stored for the user, representation his staking moment
-     * @param assetUnit One unit of asset (10**decimals)
-     * @return The rewards
-     **/
+    /// @dev Internal function for the calculation of user's rewards on a distribution
+    /// @param userStake The amount of assets staked by the user on a distribution
+    /// @param reserveIndex Current index of the distribution
+    /// @param userIndex Index stored for the user, representation his staking moment
+    /// @param assetUnit One unit of asset (10**decimals)
+    /// @return The rewards
     function _getRewards(
         uint userStake,
         uint reserveIndex,
@@ -523,12 +507,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         return result;
     }
 
-    /**
-     * @dev Calculates the next value of an specific distribution index, with validations
-     * @param totalStaked The total amount staked of the asset
-     * @param assetUnit One unit of asset (10**decimals)
-     * @return The new index.
-     **/
+    /// @dev Calculates the next value of an specific distribution index, with validations
+    /// @param totalStaked The total amount staked of the asset
+    /// @param assetUnit One unit of asset (10**decimals)
+    /// @return The new index.
     function _getAssetIndex(
         RewardsDataTypes.RewardData storage rewardData,
         uint totalStaked,
@@ -559,22 +541,18 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         return (oldIndex, (firstTerm + oldIndex));
     }
 
-    /**
-     * @dev Get user balances and total supply of all the assets specified by the assets parameter
-     * @param assets List of assets to retrieve user balance and total supply
-     * @param user Address of the user
-     * @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
-     */
+    /// @dev Get user balances and total supply of all the assets specified by the assets parameter
+    /// @param assets List of assets to retrieve user balance and total supply
+    /// @param user Address of the user
+    /// @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
     function _getUserAssetBalances(address[] calldata assets, address user)
         internal
         view
         virtual
         returns (RewardsDataTypes.UserAssetBalance[] memory userAssetBalances);
 
-    /**
-     * @dev Updates the address of the emission manager
-     * @param emissionManager The address of the new EmissionManager
-     */
+    /// @dev Updates the address of the emission manager
+    /// @param emissionManager The address of the new EmissionManager
     function _setEmissionManager(address emissionManager) internal {
         address previousEmissionManager = _emissionManager;
         _emissionManager = emissionManager;

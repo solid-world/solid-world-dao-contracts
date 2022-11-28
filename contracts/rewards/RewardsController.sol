@@ -130,12 +130,10 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         return _claimAllRewards(assets, msg.sender, msg.sender, msg.sender);
     }
 
-    /**
-     * @dev Get user balances and total supply of all the assets specified by the assets parameter
-     * @param assets List of assets to retrieve user balance and total supply
-     * @param user Address of the user
-     * @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
-     */
+    /// @dev Get user balances and total supply of all the assets specified by the assets parameter
+    /// @param assets List of assets to retrieve user balance and total supply
+    /// @param user Address of the user
+    /// @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
     function _getUserAssetBalances(address[] calldata assets, address user)
         internal
         view
@@ -151,16 +149,14 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         return userAssetBalances;
     }
 
-    /**
-     * @dev Claims one type of reward for a user on behalf, on all the assets of the pool, accumulating the pending rewards.
-     * @param assets List of assets to check eligible distributions before claiming rewards
-     * @param claimer Address of the claimer on behalf of user
-     * @param user Address to check and claim rewards
-     * @param to Address that will be receiving the rewards
-     * @return
-     *   rewardsList List of reward addresses
-     *   claimedAmount List of claimed amounts, follows "rewardsList" items order
-     **/
+    /// @dev Claims one type of reward for a user on behalf, on all the assets of the pool, accumulating the pending rewards.
+    /// @param assets List of assets to check eligible distributions before claiming rewards
+    /// @param claimer Address of the claimer on behalf of user
+    /// @param user Address to check and claim rewards
+    /// @param to Address that will be receiving the rewards
+    /// @return
+    ///   rewardsList List of reward addresses
+    ///   claimedAmount List of claimed amounts, follows "rewardsList" items order
     function _claimAllRewards(
         address[] calldata assets,
         address claimer,
@@ -193,12 +189,10 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         return (rewardsList, claimedAmounts);
     }
 
-    /**
-     * @dev Function to transfer rewards to the desired account
-     * @param to Account address to send the rewards
-     * @param reward Address of the reward token
-     * @param amount Amount of rewards to transfer
-     */
+    /// @dev Function to transfer rewards to the desired account
+    /// @param to Account address to send the rewards
+    /// @param reward Address of the reward token
+    /// @param amount Amount of rewards to transfer
     function _transferRewards(
         address to,
         address reward,
@@ -207,13 +201,10 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         GPv2SafeERC20.safeTransferFrom(IERC20(reward), REWARDS_VAULT, to, amount);
     }
 
-    /**
-     * @dev Update the Price Oracle of a reward token. The Price Oracle must follow Chainlink IEACAggregatorProxy interface.
-     * @notice The Price Oracle of a reward is used for displaying correct data about the incentives at the UI frontend.
-     * @param reward The address of the reward token
-     * @param rewardOracle The address of the price oracle
-     */
-
+    /// @dev Update the Price Oracle of a reward token. The Price Oracle must follow Chainlink IEACAggregatorProxy interface.
+    /// @notice The Price Oracle of a reward is used for displaying correct data about the incentives at the UI frontend.
+    /// @param reward The address of the reward token
+    /// @param rewardOracle The address of the price oracle
     function _setRewardOracle(address reward, IEACAggregatorProxy rewardOracle) internal {
         require(rewardOracle.latestAnswer() > 0, "ORACLE_MUST_RETURN_PRICE");
         _rewardOracle[reward] = rewardOracle;
