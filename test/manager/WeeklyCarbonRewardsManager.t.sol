@@ -6,12 +6,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     event WeeklyRewardMinted(address indexed rewardToken, uint indexed rewardAmount);
 
     function testComputeWeeklyCarbonRewards_failsInputsOfDifferentLengths() public {
-        vm.expectRevert(abi.encodePacked("INVALID_INPUT"));
+        vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
         manager.computeWeeklyCarbonRewards(new address[](2), new uint[](1));
     }
 
     function testMintWeeklyCarbonRewards_failsInputsOfDifferentLengths() public {
-        vm.expectRevert(abi.encodePacked("INVALID_INPUT"));
+        vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
         manager.mintWeeklyCarbonRewards(new address[](2), new uint[](1), testAccount);
     }
 
@@ -23,7 +23,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         categoryIds[0] = CATEGORY_ID + 777;
         categoryIds[1] = CATEGORY_ID;
 
-        vm.expectRevert(abi.encodePacked("UNKNOWN_CATEGORY"));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ISolidWorldManagerErrors.InvalidCategoryId.selector,
+                categoryIds[0]
+            )
+        );
         manager.computeWeeklyCarbonRewards(assets, categoryIds);
     }
 
