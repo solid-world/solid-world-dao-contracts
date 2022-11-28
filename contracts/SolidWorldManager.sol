@@ -96,6 +96,9 @@ contract SolidWorldManager is
     /// @notice The account where all protocol fees are captured.
     address public feeReceiver;
 
+    /// @notice The only account that is allowed to mint weekly carbon rewards
+    address public rewardsEmissionManager;
+
     /// @notice Fee charged by DAO when collateralizing forward contract batch tokens.
     uint16 public collateralizationFee;
 
@@ -127,7 +130,8 @@ contract SolidWorldManager is
         ForwardContractBatchToken _forwardContractBatch,
         uint16 _collateralizationFee,
         uint16 _decollateralizationFee,
-        address _feeReceiver
+        address _feeReceiver,
+        address _rewardsEmissionManager
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -136,6 +140,7 @@ contract SolidWorldManager is
         collateralizationFee = _collateralizationFee;
         decollateralizationFee = _decollateralizationFee;
         feeReceiver = _feeReceiver;
+        rewardsEmissionManager = _rewardsEmissionManager;
     }
 
     // todo #121: add authorization
@@ -183,6 +188,12 @@ contract SolidWorldManager is
         emit BatchCreated(batch.id);
     }
 
+    // todo #121: add authorization
+    /// @inheritdoc IWeeklyCarbonRewardsManager
+    function setRewardsEmissionManager(address _rewardsEmissionManager) external {
+        rewardsEmissionManager = _rewardsEmissionManager;
+    }
+
     /// @inheritdoc IWeeklyCarbonRewardsManager
     function computeWeeklyCarbonRewards(address[] calldata assets, uint[] calldata _categoryIds)
         external
@@ -208,13 +219,15 @@ contract SolidWorldManager is
     }
 
     /// @inheritdoc IWeeklyCarbonRewardsManager
-    // todo #162: Restrict access => only from EmissionManager
     function mintWeeklyCarbonRewards(
         address[] calldata carbonRewards,
         uint[] calldata rewardAmounts,
         address rewardsVault
     ) external override {
         require(carbonRewards.length == rewardAmounts.length, "INVALID_INPUT");
+        if (msg.sender != rewardsEmissionManager) {
+            revert UnauthorizedRewardMinting(msg.sender);
+        }
 
         for (uint i; i < carbonRewards.length; i++) {
             address carbonReward = carbonRewards[i];

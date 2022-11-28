@@ -96,9 +96,20 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         vm.expectEmit(true, true, false, true, address(manager));
         emit WeeklyRewardMinted(address(rewardToken1), mintAmount1);
 
+        vm.prank(rewardsEmissionManager);
         manager.mintWeeklyCarbonRewards(carbonRewards, rewardAmounts, rewardsVault);
 
         assertEq(rewardToken0.balanceOf(rewardsVault), mintAmount0);
         assertEq(rewardToken1.balanceOf(rewardsVault), mintAmount1);
+    }
+
+    function testMintWeeklyCarbonRewards_failsIfNotCalledByRewardsEmissionManager() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IWeeklyCarbonRewardsManager.UnauthorizedRewardMinting.selector,
+                address(this)
+            )
+        );
+        manager.mintWeeklyCarbonRewards(new address[](0), new uint[](0), testAccount);
     }
 }
