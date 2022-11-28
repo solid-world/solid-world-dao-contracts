@@ -5,10 +5,14 @@ pragma solidity ^0.8.16;
 /// to prevent them from being called more than once
 /// @author Solid World DAO
 abstract contract PostConstruct {
+    error AlreadyInitialized();
+
     bool private _initialized;
 
     modifier postConstruct() {
-        require(!_initialized, "PostConstruct: Already initialized");
+        if (_initialized) {
+            revert AlreadyInitialized();
+        }
         _initialized = true;
         _;
     }

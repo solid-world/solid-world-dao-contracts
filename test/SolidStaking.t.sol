@@ -38,7 +38,7 @@ contract SolidStakingTest is Test {
     }
 
     function testSetupFailsWhenAlreadyInitialized() public {
-        vm.expectRevert(abi.encodePacked("PostConstruct: Already initialized"));
+        vm.expectRevert(abi.encodeWithSelector(PostConstruct.AlreadyInitialized.selector));
         solidStaking.setup(IRewardsController(rewardsController), root);
     }
 
