@@ -97,7 +97,7 @@ contract SolidWorldManager is
     address public feeReceiver;
 
     /// @notice The only account that is allowed to mint weekly carbon rewards
-    address public rewardsEmissionManager;
+    address public weeklyRewardsMinter;
 
     /// @notice Fee charged by DAO when collateralizing forward contract batch tokens.
     uint16 public collateralizationFee;
@@ -131,7 +131,7 @@ contract SolidWorldManager is
         uint16 _collateralizationFee,
         uint16 _decollateralizationFee,
         address _feeReceiver,
-        address _rewardsEmissionManager
+        address _weeklyRewardsMinter
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -140,7 +140,7 @@ contract SolidWorldManager is
         collateralizationFee = _collateralizationFee;
         decollateralizationFee = _decollateralizationFee;
         feeReceiver = _feeReceiver;
-        rewardsEmissionManager = _rewardsEmissionManager;
+        weeklyRewardsMinter = _weeklyRewardsMinter;
     }
 
     // todo #121: add authorization
@@ -190,8 +190,8 @@ contract SolidWorldManager is
 
     // todo #121: add authorization
     /// @inheritdoc IWeeklyCarbonRewardsManager
-    function setRewardsEmissionManager(address _rewardsEmissionManager) external {
-        rewardsEmissionManager = _rewardsEmissionManager;
+    function setWeeklyRewardsMinter(address _weeklyRewardsMinter) external {
+        weeklyRewardsMinter = _weeklyRewardsMinter;
     }
 
     /// @inheritdoc IWeeklyCarbonRewardsManager
@@ -225,7 +225,7 @@ contract SolidWorldManager is
         address rewardsVault
     ) external override {
         require(carbonRewards.length == rewardAmounts.length, "INVALID_INPUT");
-        if (msg.sender != rewardsEmissionManager) {
+        if (msg.sender != weeklyRewardsMinter) {
             revert UnauthorizedRewardMinting(msg.sender);
         }
 

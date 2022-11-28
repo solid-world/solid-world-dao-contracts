@@ -103,7 +103,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         assertEq(rewardToken1.balanceOf(rewardsVault), mintAmount1);
     }
 
-    function testMintWeeklyCarbonRewards_failsIfNotCalledByRewardsEmissionManager() public {
+    function testMintWeeklyCarbonRewards_failsIfNotCalledByWeeklyRewardsMinter() public {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IWeeklyCarbonRewardsManager.UnauthorizedRewardMinting.selector,

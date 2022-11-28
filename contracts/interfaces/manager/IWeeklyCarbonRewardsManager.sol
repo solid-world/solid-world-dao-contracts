@@ -10,8 +10,8 @@ interface IWeeklyCarbonRewardsManager {
     /// @dev Thrown if minting weekly rewards is called by an unauthorized account
     error UnauthorizedRewardMinting(address account);
 
-    /// @param _rewardsEmissionManager The only account allowed to mint weekly carbon rewards
-    function setRewardsEmissionManager(address _rewardsEmissionManager) external;
+    /// @param _weeklyRewardsMinter The only account allowed to mint weekly carbon rewards
+    function setWeeklyRewardsMinter(address _weeklyRewardsMinter) external;
 
     /// @param assets The incentivized assets (LP tokens)
     /// @param _categoryIds The categories to which the incentivized assets belong
