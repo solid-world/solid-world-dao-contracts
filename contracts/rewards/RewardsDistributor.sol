@@ -249,9 +249,11 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         _setEmissionManager(emissionManager);
     }
 
-    /// @param asset The incentivized asset
-    /// @param reward The reward token of the incentivized asset
-    /// @return true, if rewards are still being distributed for the asset - reward pair
+    /// @inheritdoc IRewardsDistributor
+    function isOngoingDistribution(address asset, address reward) external view returns (bool) {
+        return _isOngoingDistribution(asset, reward);
+    }
+
     function _isOngoingDistribution(address asset, address reward) internal view returns (bool) {
         return _assets[asset].rewards[reward].distributionEnd > block.timestamp;
     }

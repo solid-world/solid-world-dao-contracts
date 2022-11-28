@@ -93,6 +93,11 @@ interface IRewardsDistributor {
         uint[] calldata rewardAmounts
     ) external;
 
+    /// @param asset The incentivized asset
+    /// @param reward The reward token of the incentivized asset
+    /// @return true, if rewards are still being distributed for the asset - reward pair
+    function isOngoingDistribution(address asset, address reward) external view returns (bool);
+
     /**
      * @dev Gets the end date for the distribution
      * @param asset The incentivized asset
