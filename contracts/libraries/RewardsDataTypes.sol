@@ -8,8 +8,8 @@ library RewardsDataTypes {
         uint88 emissionPerSecond;
         uint256 totalStaked;
         uint32 distributionEnd;
-        address asset; // hypervisor
-        address reward; // CBT, USDC, Governance token
+        address asset;
+        address reward;
         IEACAggregatorProxy rewardOracle;
     }
 
