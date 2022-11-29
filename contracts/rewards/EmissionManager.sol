@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -20,7 +20,9 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct {
 
     /// @dev Only emission admin of the given reward can call functions marked by this modifier.
     modifier onlyEmissionAdmin(address reward) {
-        require(msg.sender == _emissionAdmins[reward], "ONLY_EMISSION_ADMIN");
+        if (_emissionAdmins[reward] != msg.sender) {
+            revert NotEmissionAdmin(msg.sender, reward);
+        }
         _;
     }
 
@@ -39,8 +41,10 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct {
         external
         override
     {
-        for (uint256 i = 0; i < config.length; i++) {
-            require(_emissionAdmins[config[i].reward] == msg.sender, "ONLY_EMISSION_ADMIN");
+        for (uint i; i < config.length; i++) {
+            if (_emissionAdmins[config[i].reward] != msg.sender) {
+                revert NotEmissionAdmin(msg.sender, config[i].reward);
+            }
         }
         _rewardsController.configureAssets(config);
     }
@@ -69,8 +73,10 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct {
         address[] calldata rewards,
         uint88[] calldata newEmissionsPerSecond
     ) external override {
-        for (uint256 i = 0; i < rewards.length; i++) {
-            require(_emissionAdmins[rewards[i]] == msg.sender, "ONLY_EMISSION_ADMIN");
+        for (uint i; i < rewards.length; i++) {
+            if (_emissionAdmins[rewards[i]] != msg.sender) {
+                revert NotEmissionAdmin(msg.sender, rewards[i]);
+            }
         }
         _rewardsController.setEmissionPerSecond(asset, rewards, newEmissionsPerSecond);
     }

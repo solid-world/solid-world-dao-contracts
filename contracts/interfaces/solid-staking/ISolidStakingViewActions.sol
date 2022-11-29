@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.16;
 
 /// @title Permissionless view actions
 /// @notice Contains view functions that can be called by anyone

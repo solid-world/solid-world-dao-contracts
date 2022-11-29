@@ -178,7 +178,9 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatchWhenInvalidBatchId() public {
-        vm.expectRevert(abi.encodePacked("Invalid batchId."));
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidBatchId.selector, 1)
+        );
         manager.collateralizeBatch(CATEGORY_ID, 0, 0);
     }
 
@@ -228,7 +230,13 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
         vm.startPrank(testAccount);
         forwardContractBatch.setApprovalForAll(address(manager), true);
-        vm.expectRevert(abi.encodePacked("Collateralize batch: amountOut < amountOutMin."));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ISolidWorldManagerErrors.AmountOutLessThanMinimum.selector,
+                cbtUserCut,
+                cbtUserCut + 1
+            )
+        );
         manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut + 1);
         vm.stopPrank();
     }
@@ -308,7 +316,9 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testDecollateralizeTokensWhenInvalidBatchId() public {
-        vm.expectRevert(abi.encodePacked("Invalid batchId."));
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidBatchId.selector, 5)
+        );
         manager.decollateralizeTokens(BATCH_ID, 10, 5);
     }
 
@@ -357,7 +367,9 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         collateralizedToken.approve(address(manager), 10000);
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 10000, amountOutMin);
-        vm.expectRevert(abi.encodePacked("Decollateralize batch: input amount too low."));
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolidWorldManagerErrors.AmountOutTooLow.selector, 0)
+        );
         manager.decollateralizeTokens(BATCH_ID, 1e17, 0);
         vm.stopPrank();
     }
@@ -387,7 +399,13 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         collateralizedToken.approve(address(manager), 10000);
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
-        vm.expectRevert(abi.encodePacked("Decollateralize batch: amountOut < amountOutMin."));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ISolidWorldManagerErrors.AmountOutLessThanMinimum.selector,
+                81,
+                10000
+            )
+        );
         manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 10000);
         vm.stopPrank();
     }
@@ -432,7 +450,9 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testSimulateBatchCollateralizationWhenBatchIdIsInvalid() public {
-        vm.expectRevert(abi.encodePacked("Invalid batchId."));
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidBatchId.selector, 5)
+        );
         manager.simulateBatchCollateralization(BATCH_ID, 10000);
     }
 
@@ -468,16 +488,16 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         uint[] memory arrayLength1 = new uint[](1);
         uint[] memory arrayLength2 = new uint[](2);
 
-        vm.expectRevert(abi.encodePacked("Decollateralize batch: invalid input."));
+        vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
         manager.bulkDecollateralizeTokens(arrayLength1, arrayLength2, arrayLength1);
 
-        vm.expectRevert(abi.encodePacked("Decollateralize batch: invalid input."));
+        vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
         manager.bulkDecollateralizeTokens(arrayLength1, arrayLength1, arrayLength2);
 
-        vm.expectRevert(abi.encodePacked("Decollateralize batch: invalid input."));
+        vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
         manager.bulkDecollateralizeTokens(arrayLength2, arrayLength1, arrayLength2);
 
-        vm.expectRevert(abi.encodePacked("Decollateralize batch: invalid input."));
+        vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
         manager.bulkDecollateralizeTokens(arrayLength2, arrayLength1, arrayLength1);
     }
 

@@ -10,13 +10,15 @@ import "./CollateralizedBasketToken.sol";
 import "./libraries/SolidMath.sol";
 import "./libraries/GPv2SafeERC20.sol";
 import "./interfaces/manager/IWeeklyCarbonRewardsManager.sol";
+import "./interfaces/manager/ISolidWorldManagerErrors.sol";
 
 contract SolidWorldManager is
     Initializable,
     OwnableUpgradeable,
     IERC1155ReceiverUpgradeable,
     ReentrancyGuardUpgradeable,
-    IWeeklyCarbonRewardsManager
+    IWeeklyCarbonRewardsManager,
+    ISolidWorldManagerErrors
 {
     /// @notice Structure that holds necessary information for minting collateralized basket tokens (ERC-20).
     /// @param id ID of the batch in the database
@@ -122,7 +124,9 @@ contract SolidWorldManager is
     event BatchCreated(uint indexed batchId);
 
     modifier validBatch(uint batchId) {
-        require(batchCreated[batchId], "Invalid batchId.");
+        if (!batchCreated[batchId]) {
+            revert InvalidBatchId(batchId);
+        }
         _;
     }
 
@@ -149,7 +153,9 @@ contract SolidWorldManager is
         string calldata tokenName,
         string calldata tokenSymbol
     ) external {
-        require(!categoryIds[categoryId], "Add category: categoryId already exists.");
+        if (categoryIds[categoryId]) {
+            revert CategoryAlreadyExists(categoryId);
+        }
 
         categoryIds[categoryId] = true;
         categoryToken[categoryId] = new CollateralizedBasketToken(tokenName, tokenSymbol);
@@ -159,8 +165,13 @@ contract SolidWorldManager is
 
     // todo #121: add authorization
     function addProject(uint categoryId, uint projectId) external {
-        require(categoryIds[categoryId], "Add project: unknown categoryId.");
-        require(!projectIds[projectId], "Add project: projectId already exists.");
+        if (!categoryIds[categoryId]) {
+            revert InvalidCategoryId(categoryId);
+        }
+
+        if (projectIds[projectId]) {
+            revert ProjectAlreadyExists(projectId);
+        }
 
         categoryProjects[categoryId].push(projectId);
         projectCategory[projectId] = categoryId;
@@ -171,13 +182,21 @@ contract SolidWorldManager is
 
     // todo #121: add authorization
     function addBatch(Batch calldata batch) external {
-        require(projectIds[batch.projectId], "Add batch: This batch belongs to unknown project.");
-        require(!batchCreated[batch.id], "Add batch: This batch has already been created.");
-        require(batch.owner != address(0), "Add batch: Batch owner not defined.");
-        require(
-            batch.expectedDueDate > block.timestamp,
-            "Add batch: Batch expected due date must be in the future."
-        );
+        if (!projectIds[batch.projectId]) {
+            revert InvalidProjectId(batch.projectId);
+        }
+
+        if (batchCreated[batch.id]) {
+            revert BatchAlreadyExists(batch.id);
+        }
+
+        if (batch.owner == address(0)) {
+            revert InvalidBatchOwner();
+        }
+
+        if (batch.expectedDueDate <= block.timestamp) {
+            revert BatchDueDateInThePast(batch.expectedDueDate);
+        }
 
         batchCreated[batch.id] = true;
         batches[batch.id] = batch;
@@ -201,14 +220,18 @@ contract SolidWorldManager is
         override
         returns (address[] memory carbonRewards, uint[] memory rewardAmounts)
     {
-        require(assets.length == _categoryIds.length, "INVALID_INPUT");
+        if (assets.length != _categoryIds.length) {
+            revert InvalidInput();
+        }
 
         carbonRewards = new address[](assets.length);
         rewardAmounts = new uint[](assets.length);
 
         for (uint i; i < assets.length; i++) {
             uint categoryId = _categoryIds[i];
-            require(categoryIds[categoryId], "UNKNOWN_CATEGORY");
+            if (!categoryIds[categoryId]) {
+                revert InvalidCategoryId(categoryId);
+            }
 
             CollateralizedBasketToken rewardToken = categoryToken[categoryId];
             uint rewardAmount = _computeWeeklyCategoryReward(categoryId, rewardToken.decimals());
@@ -224,7 +247,10 @@ contract SolidWorldManager is
         uint[] calldata rewardAmounts,
         address rewardsVault
     ) external override {
-        require(carbonRewards.length == rewardAmounts.length, "INVALID_INPUT");
+        if (carbonRewards.length != rewardAmounts.length) {
+            revert InvalidInput();
+        }
+
         if (msg.sender != weeklyRewardsMinter) {
             revert UnauthorizedRewardMinting(msg.sender);
         }
@@ -259,7 +285,10 @@ contract SolidWorldManager is
             collateralizationFee,
             collateralizedToken.decimals()
         );
-        require(cbtUserCut >= amountOutMin, "Collateralize batch: amountOut < amountOutMin.");
+
+        if (cbtUserCut < amountOutMin) {
+            revert AmountOutLessThanMinimum(cbtUserCut, amountOutMin);
+        }
 
         collateralizedToken.mint(msg.sender, cbtUserCut);
         collateralizedToken.mint(feeReceiver, cbtDaoCut);
@@ -291,8 +320,13 @@ contract SolidWorldManager is
                 collateralizedToken.decimals()
             );
 
-        require(amountOut > 0, "Decollateralize batch: input amount too low.");
-        require(amountOut >= amountOutMin, "Decollateralize batch: amountOut < amountOutMin.");
+        if (amountOut <= 0) {
+            revert AmountOutTooLow(amountOut);
+        }
+
+        if (amountOut < amountOutMin) {
+            revert AmountOutLessThanMinimum(amountOut, amountOutMin);
+        }
 
         collateralizedToken.burnFrom(msg.sender, cbtToBurn);
         GPv2SafeERC20.safeTransferFrom(collateralizedToken, msg.sender, feeReceiver, cbtDaoCut);
@@ -312,8 +346,9 @@ contract SolidWorldManager is
         uint[] calldata amountsIn,
         uint[] calldata amountsOutMin
     ) external {
-        require(_batchIds.length == amountsIn.length, "Decollateralize batch: invalid input.");
-        require(_batchIds.length == amountsOutMin.length, "Decollateralize batch: invalid input.");
+        if (_batchIds.length != amountsIn.length || _batchIds.length != amountsOutMin.length) {
+            revert InvalidInput();
+        }
 
         for (uint i; i < _batchIds.length; i++) {
             decollateralizeTokens(_batchIds[i], amountsIn[i], amountsOutMin[i]);

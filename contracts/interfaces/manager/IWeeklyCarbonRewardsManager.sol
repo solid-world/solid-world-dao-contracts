@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.16;
 
 /// @title The interface weekly carbon rewards processing
 /// @notice Computes and mints weekly carbon rewards

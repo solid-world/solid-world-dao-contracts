@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.16;
 
 /// @title IRewardsDistributor
 /// @author Aave
 /// @notice Defines the basic interface for a Rewards Distributor.
 interface IRewardsDistributor {
+    error NotEmissionManager(address sender);
+    error InvalidInput();
+    error InvalidAssetDecimals(address asset);
+    error IndexOverflow(uint newIndex);
+    error DistributionNonExistent(address asset, address reward);
+
     /// @dev Emitted when the configuration of the rewards of an asset is updated.
     /// @param asset The address of the incentivized asset
     /// @param reward The address of the reward token
