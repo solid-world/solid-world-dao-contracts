@@ -6,7 +6,7 @@ import "../interfaces/rewards/IEACAggregatorProxy.sol";
 library RewardsDataTypes {
     struct RewardsConfigInput {
         uint88 emissionPerSecond;
-        uint256 totalStaked;
+        uint totalStaked;
         uint32 distributionEnd;
         address asset;
         address reward;
@@ -15,8 +15,8 @@ library RewardsDataTypes {
 
     struct UserAssetBalance {
         address asset;
-        uint256 userStake;
-        uint256 totalStaked;
+        uint userStake;
+        uint totalStaked;
     }
 
     struct UserData {

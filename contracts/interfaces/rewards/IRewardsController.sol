@@ -28,7 +28,7 @@ interface IRewardsController is IRewardsDistributor {
         address indexed reward,
         address indexed to,
         address claimer,
-        uint256 amount
+        uint amount
     );
 
     /// @dev Emitted when the reward oracle is updated
@@ -82,8 +82,8 @@ interface IRewardsController is IRewardsDistributor {
     function handleAction(
         address asset,
         address user,
-        uint256 userStake,
-        uint256 totalStaked
+        uint userStake,
+        uint totalStaked
     ) external;
 
     /// @dev Claims all rewards for a user to the desired address, on all the assets of the pool, accumulating the pending rewards
@@ -93,7 +93,7 @@ interface IRewardsController is IRewardsDistributor {
     /// @return claimedAmounts List that contains the claimed amount per reward, following same order as "rewardList"
     function claimAllRewards(address[] calldata assets, address to)
         external
-        returns (address[] memory rewardsList, uint256[] memory claimedAmounts);
+        returns (address[] memory rewardsList, uint[] memory claimedAmounts);
 
     /// @dev Claims all rewards for a user on behalf, on all the assets of the pool, accumulating the pending rewards. The caller must
     /// be whitelisted via "allowClaimOnBehalf" function by the RewardsAdmin role manager
@@ -106,7 +106,7 @@ interface IRewardsController is IRewardsDistributor {
         address[] calldata assets,
         address user,
         address to
-    ) external returns (address[] memory rewardsList, uint256[] memory claimedAmounts);
+    ) external returns (address[] memory rewardsList, uint[] memory claimedAmounts);
 
     /// @dev Claims all reward for msg.sender, on all the assets of the pool, accumulating the pending rewards
     /// @param assets The list of assets to check eligible distributions before claiming rewards
@@ -114,5 +114,5 @@ interface IRewardsController is IRewardsDistributor {
     /// @return claimedAmounts List that contains the claimed amount per reward, following same order as "rewardsList"
     function claimAllRewardsToSelf(address[] calldata assets)
         external
-        returns (address[] memory rewardsList, uint256[] memory claimedAmounts);
+        returns (address[] memory rewardsList, uint[] memory claimedAmounts);
 }

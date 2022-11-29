@@ -487,8 +487,8 @@ contract SolidWorldManager is
     function onERC1155Received(
         address,
         address,
-        uint256,
-        uint256,
+        uint,
+        uint,
         bytes memory
     ) public virtual returns (bytes4) {
         return this.onERC1155Received.selector;
@@ -497,8 +497,8 @@ contract SolidWorldManager is
     function onERC1155BatchReceived(
         address,
         address,
-        uint256[] memory,
-        uint256[] memory,
+        uint[] memory,
+        uint[] memory,
         bytes memory
     ) public virtual returns (bytes4) {
         return this.onERC1155BatchReceived.selector;
