@@ -25,7 +25,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     address internal REWARDS_VAULT;
 
     modifier onlyAuthorizedClaimers(address claimer, address user) {
-        if (_authorizedClaimers[user] != claimer) {
+        if (_authorizedClaimers[user] != claimer && address(solidStakingViewActions) != claimer) {
             revert UnauthorizedClaimer(claimer, user);
         }
         _;

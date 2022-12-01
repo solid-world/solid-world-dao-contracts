@@ -225,4 +225,28 @@ contract RewardsControllerTest is Test {
         vm.expectRevert(abi.encodeWithSelector(IRewardsDistributor.InvalidInput.selector));
         rewardsController.claimAllRewardsOnBehalf(assets, invalidOnBehalfOf, okTo);
     }
+
+    function testClaimAllRewardsOnBehalf_failsForUnauthorizedClaimer() public {
+        address[] memory assets = new address[](0);
+        address onBehalfOf = vm.addr(4);
+        address to = vm.addr(5);
+        address unauthorizedClaimer = vm.addr(6);
+
+        vm.prank(emissionManager);
+        rewardsController.setClaimer(onBehalfOf, address(this));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IRewardsController.UnauthorizedClaimer.selector,
+                unauthorizedClaimer,
+                onBehalfOf
+            )
+        );
+        vm.prank(unauthorizedClaimer);
+        rewardsController.claimAllRewardsOnBehalf(assets, onBehalfOf, to);
+
+        rewardsController.claimAllRewardsOnBehalf(assets, onBehalfOf, to); //should not revert
+        vm.prank(solidStakingViewActions);
+        rewardsController.claimAllRewardsOnBehalf(assets, onBehalfOf, to); //should not revert
+    }
 }

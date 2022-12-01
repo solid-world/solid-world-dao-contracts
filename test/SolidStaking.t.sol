@@ -32,6 +32,12 @@ contract SolidStakingTest is Test {
             abi.encode()
         );
 
+        vm.mockCall(
+            rewardsController,
+            abi.encodeWithSelector(IRewardsController.claimAllRewardsOnBehalf.selector),
+            abi.encode(new address[](0), new uint[](0))
+        );
+
         vm.label(root, "Root account");
         vm.label(testAccount, "Test account");
         vm.label(testAccount2, "Test account 2");
@@ -76,17 +82,6 @@ contract SolidStakingTest is Test {
         solidStaking.addToken(tokenAddress);
     }
 
-    function testValidTokenModifier() public {
-        IERC20 token = new CollateralizedBasketToken("Test Token", "TT");
-        address tokenAddress = address(token);
-        vm.label(tokenAddress, "Test token");
-
-        vm.expectRevert(
-            abi.encodeWithSelector(ISolidStakingErrors.InvalidTokenAddress.selector, tokenAddress)
-        );
-        solidStaking.stake(tokenAddress, 100);
-    }
-
     function testStake() public {
         CollateralizedBasketToken token = new CollateralizedBasketToken("Test Token", "TT");
         address tokenAddress = address(token);
@@ -120,6 +115,17 @@ contract SolidStakingTest is Test {
             amount,
             "SolidStaking contract balance should be updated"
         );
+    }
+
+    function testStake_failsForInvalidTokenAddress() public {
+        address invalidTokenAddress = vm.addr(777);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ISolidStakingErrors.InvalidTokenAddress.selector,
+                invalidTokenAddress
+            )
+        );
+        solidStaking.stake(invalidTokenAddress, 100);
     }
 
     function testWithdraw() public {
@@ -180,6 +186,72 @@ contract SolidStakingTest is Test {
         vm.expectRevert(stdError.arithmeticError);
         solidStaking.withdraw(tokenAddress, amountToWithdraw);
         vm.stopPrank();
+    }
+
+    function testWithdraw_failsForInvalidTokenAddress() public {
+        address invalidTokenAddress = vm.addr(777);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ISolidStakingErrors.InvalidTokenAddress.selector,
+                invalidTokenAddress
+            )
+        );
+        solidStaking.withdraw(invalidTokenAddress, 100);
+    }
+
+    function testWithdrawStakeAndClaimRewards() public {
+        CollateralizedBasketToken token = new CollateralizedBasketToken("Test Token", "TT");
+        address tokenAddress = address(token);
+        vm.label(tokenAddress, "Test token");
+
+        address[] memory assets = new address[](1);
+        assets[0] = tokenAddress;
+
+        solidStaking.addToken(tokenAddress);
+
+        uint amountToStake = 100;
+        uint amountToWithdraw = 50;
+        token.mint(testAccount, amountToStake);
+
+        vm.startPrank(testAccount);
+        token.approve(address(solidStaking), amountToStake);
+        solidStaking.stake(tokenAddress, amountToStake);
+
+        vm.expectCall(
+            rewardsController,
+            abi.encodeCall(
+                IRewardsController.handleAction,
+                (tokenAddress, testAccount, amountToStake, amountToStake)
+            )
+        );
+        vm.expectCall(
+            rewardsController,
+            abi.encodeCall(
+                IRewardsController.claimAllRewardsOnBehalf,
+                (assets, testAccount, testAccount)
+            )
+        );
+        vm.expectEmit(true, true, true, false, address(solidStaking));
+        emit Withdraw(testAccount, tokenAddress, amountToWithdraw);
+        solidStaking.withdrawStakeAndClaimRewards(tokenAddress, amountToWithdraw);
+        vm.stopPrank();
+
+        assertEq(
+            solidStaking.userStake(tokenAddress, testAccount),
+            amountToStake - amountToWithdraw,
+            "User stake should be updated"
+        );
+    }
+
+    function testWithdrawStakeAndClaimRewards_failsForInvalidTokenAddress() public {
+        address invalidTokenAddress = vm.addr(777);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ISolidStakingErrors.InvalidTokenAddress.selector,
+                invalidTokenAddress
+            )
+        );
+        solidStaking.withdrawStakeAndClaimRewards(invalidTokenAddress, 100);
     }
 
     function testBalanceOf() public {

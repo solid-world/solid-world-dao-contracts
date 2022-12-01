@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-import "./solid-staking/ISolidStakingOwnerActions.sol";
-import "./solid-staking/ISolidStakingEvents.sol";
-import "./solid-staking/ISolidStakingActions.sol";
-import "./solid-staking/ISolidStakingViewActions.sol";
-import "./solid-staking/ISolidStakingErrors.sol";
+import "./staking/ISolidStakingOwnerActions.sol";
+import "./staking/ISolidStakingEvents.sol";
+import "./staking/ISolidStakingActions.sol";
+import "./staking/ISolidStakingViewActions.sol";
+import "./staking/ISolidStakingErrors.sol";
 
 /// @title The interface for the Solid World staking contract
 /// @notice The staking contract facilitates (un)staking of ERC20 tokens

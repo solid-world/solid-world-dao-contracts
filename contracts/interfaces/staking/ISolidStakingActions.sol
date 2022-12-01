@@ -14,4 +14,10 @@ interface ISolidStakingActions {
     /// @param token the token to withdraw
     /// @param amount the amount to withdraw
     function withdraw(address token, uint amount) external;
+
+    /// @dev Withdraws tokens for the caller from the staking contract
+    /// @dev Claims all rewards of the incentivized `token` for the caller
+    /// @param token the token to withdraw
+    /// @param amount the amount to withdraw
+    function withdrawStakeAndClaimRewards(address token, uint amount) external;
 }
