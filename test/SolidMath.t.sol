@@ -9,18 +9,21 @@ contract SolidMathTest is Test {
     uint constant ONE_YEAR = 1 weeks * 52;
     uint constant CURRENT_DATE = 1666016743;
 
-    error IncorrectDates(uint startDate, uint endDate);
-
     function setUp() public {
         vm.warp(CURRENT_DATE);
         vm.label(vm.addr(1), "Dummy account 1");
     }
 
-    function testWeeksBetweenWhenEndDateIsBeforeStartDate() public {
+    function testWeeksBetween_endDateIsBeforeStartDate() public {
         uint endDate = CURRENT_DATE - 3 weeks;
 
-        vm.expectRevert(abi.encodeWithSelector(IncorrectDates.selector, CURRENT_DATE, endDate));
-        SolidMath.weeksBetween(CURRENT_DATE, endDate);
+        uint weeksBetween = SolidMath.weeksBetween(CURRENT_DATE, endDate);
+        assertEq(weeksBetween, 0);
+    }
+
+    function testWeeksBetween_invalidDates() public {
+        vm.expectRevert(abi.encodeWithSelector(SolidMath.IncorrectDates.selector, 0, CURRENT_DATE));
+        SolidMath.weeksBetween(0, CURRENT_DATE);
     }
 
     function testWeeksBetweenExactTimeDifference() public {
@@ -311,6 +314,17 @@ contract SolidMathTest is Test {
         assertEq(minCbtDaoCut, cbtDaoCut);
     }
 
+    function testComputeWeeklyBatchReward_batchIsCertified() public {
+        uint rewardAmount = SolidMath.computeWeeklyBatchReward(
+            block.timestamp - 1 minutes,
+            10000,
+            1647,
+            18
+        );
+
+        assertEq(rewardAmount, 0);
+    }
+
     function testComputeWeeklyBatchReward_lessThanOneWeek() public {
         uint rewardAmount = SolidMath.computeWeeklyBatchReward(
             block.timestamp + 1 minutes,
@@ -345,5 +359,15 @@ contract SolidMathTest is Test {
         // sol result:          10729183860000000000
         // delta = 10729184129332830000 - 10729183860000000000 = 269332830000 = ~270000000000
         assertApproxEqAbs(rewardAmount, 10.72918412933283e18, 270000000000);
+    }
+
+    function testFailComputeCollateralizationOutcome_ifCertificationDateIsInThePast() public view {
+        SolidMath.computeCollateralizationOutcome(
+            block.timestamp - 1 hours,
+            10000,
+            1647,
+            COLLATERALIZATION_FEE,
+            18
+        );
     }
 }
