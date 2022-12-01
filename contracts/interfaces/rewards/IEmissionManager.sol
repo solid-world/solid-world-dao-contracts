@@ -10,12 +10,6 @@ import "./IRewardsController.sol";
 interface IEmissionManager {
     error NotEmissionAdmin(address sender, address reward);
 
-    error CarbonRewardDistributionOutOfSync(
-        uint lastCarbonRewardDistributionTimestamp,
-        uint redistributionTimestamp
-    );
-    error CarbonRewardDistributionNotStarted();
-
     /// @dev Emitted when the admin of a reward emission is updated.
     /// @param reward The address of the rewarding token
     /// @param oldAdmin The address of the old emission admin
@@ -96,11 +90,6 @@ interface IEmissionManager {
     /// @dev Only callable by the owner of the EmissionManager
     /// @param controller the address of the RewardsController contract
     function setRewardsController(address controller) external;
-
-    /// @dev Only callable by the owner of the EmissionManager
-    /// @param carbonRewardDistributionTimestamp The timestamp of the carbon reward distribution
-    function setCarbonRewardDistributionTimestamp(uint32 carbonRewardDistributionTimestamp)
-        external;
 
     /// @dev Returns the rewards controller address
     /// @return The address of the RewardsController contract

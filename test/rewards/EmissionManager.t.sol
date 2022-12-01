@@ -247,41 +247,6 @@ contract EmissionManagerTest is Test {
         emissionManager.setEmissionPerSecond(asset, rewards, emissionsPerSecond);
     }
 
-    function testUpdateCarbonRewardDistribution_failsIfDistributionNotStarted() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(IEmissionManager.CarbonRewardDistributionNotStarted.selector)
-        );
-        emissionManager.updateCarbonRewardDistribution(new address[](0), new uint[](0));
-    }
-
-    function testUpdateCarbonRewardDistribution_failsIfDistributionIsOutOfSync() public {
-        uint32 lastDistributionTimestamp = CURRENT_DATE;
-        vm.prank(owner);
-        emissionManager.setCarbonRewardDistributionTimestamp(lastDistributionTimestamp);
-
-        uint32 currentTimeBeforeDistributionInterval = lastDistributionTimestamp - 1 seconds;
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IEmissionManager.CarbonRewardDistributionOutOfSync.selector,
-                CURRENT_DATE,
-                currentTimeBeforeDistributionInterval
-            )
-        );
-        vm.warp(currentTimeBeforeDistributionInterval);
-        emissionManager.updateCarbonRewardDistribution(new address[](0), new uint[](0));
-
-        uint32 currentTimeAfterDistributionInterval = lastDistributionTimestamp + 1 weeks;
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IEmissionManager.CarbonRewardDistributionOutOfSync.selector,
-                CURRENT_DATE,
-                currentTimeAfterDistributionInterval
-            )
-        );
-        vm.warp(currentTimeAfterDistributionInterval);
-        emissionManager.updateCarbonRewardDistribution(new address[](0), new uint[](0));
-    }
-
     function testUpdateCarbonRewardDistribution() public {
         address[] memory assets = new address[](1);
         assets[0] = vm.addr(2);
@@ -292,9 +257,6 @@ contract EmissionManagerTest is Test {
         carbonRewards[0] = vm.addr(3);
         uint[] memory rewardAmounts = new uint[](1);
         rewardAmounts[0] = 100;
-
-        vm.prank(owner);
-        emissionManager.setCarbonRewardDistributionTimestamp(CURRENT_DATE);
 
         vm.mockCall(
             controller,
@@ -309,8 +271,8 @@ contract EmissionManagerTest is Test {
         vm.expectCall(
             controller,
             abi.encodeCall(
-                IRewardsDistributor.updateRewardDistribution,
-                (assets, carbonRewards, rewardAmounts, CURRENT_DATE + 1 weeks)
+                IRewardsDistributor.updateCarbonRewardDistribution,
+                (assets, carbonRewards, rewardAmounts)
             )
         );
         vm.expectCall(
@@ -321,12 +283,6 @@ contract EmissionManagerTest is Test {
             )
         );
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);
-
-        assertEq(
-            emissionManager.previousCarbonRewardDistributionEnd(),
-            CURRENT_DATE + 1 weeks,
-            "Carbon reward distribution timestamp should be updated"
-        );
     }
 
     function testSetClaimer_failsIfNotCalledByOwner() public {
@@ -416,14 +372,5 @@ contract EmissionManagerTest is Test {
         emissionManager.setRewardsController(newController);
 
         assertEq(address(emissionManager.getRewardsController()), newController);
-    }
-
-    function testSetCarbonRewardDistributionTimestamp_failsIfNotCalledByOwner() public {
-        address notOwner = vm.addr(119);
-        uint32 timestamp = 100;
-
-        vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
-        vm.prank(notOwner);
-        emissionManager.setCarbonRewardDistributionTimestamp(timestamp);
     }
 }
