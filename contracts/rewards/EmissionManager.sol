@@ -2,6 +2,7 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "../interfaces/rewards/IEmissionManager.sol";
 import "../interfaces/manager/IWeeklyCarbonRewardsManager.sol";
@@ -10,7 +11,7 @@ import "../PostConstruct.sol";
 /// @title EmissionManager
 /// @author Aave
 /// @notice It manages the list of admins of reward emissions and provides functions to control reward emissions.
-contract EmissionManager is Ownable, IEmissionManager, PostConstruct {
+contract EmissionManager is Ownable, IEmissionManager, PostConstruct, ReentrancyGuard {
     // reward => emissionAdmin
     mapping(address => address) internal _emissionAdmins;
 
@@ -18,11 +19,31 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct {
     IRewardsController internal _rewardsController;
     address internal carbonRewardAdmin;
 
+    uint32 public previousCarbonRewardDistributionEnd;
+
     /// @dev Only emission admin of the given reward can call functions marked by this modifier.
     modifier onlyEmissionAdmin(address reward) {
         if (_emissionAdmins[reward] != msg.sender) {
             revert NotEmissionAdmin(msg.sender, reward);
         }
+        _;
+    }
+
+    modifier carbonRewardDistributionInSync() {
+        if (previousCarbonRewardDistributionEnd == 0) {
+            revert CarbonRewardDistributionNotStarted();
+        }
+
+        if (
+            block.timestamp < previousCarbonRewardDistributionEnd ||
+            block.timestamp >= previousCarbonRewardDistributionEnd + 1 weeks
+        ) {
+            revert CarbonRewardDistributionOutOfSync(
+                previousCarbonRewardDistributionEnd,
+                block.timestamp
+            );
+        }
+
         _;
     }
 
@@ -85,17 +106,28 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct {
     function updateCarbonRewardDistribution(address[] calldata assets, uint[] calldata categoryIds)
         external
         override
+        nonReentrant
+        carbonRewardDistributionInSync
     {
+        uint32 newDistributionEnd = previousCarbonRewardDistributionEnd + 1 weeks;
+
         (address[] memory carbonRewards, uint[] memory rewardAmounts) = _carbonRewardsManager
             .computeWeeklyCarbonRewards(assets, categoryIds);
 
-        _rewardsController.updateRewardDistribution(assets, carbonRewards, rewardAmounts);
+        _rewardsController.updateRewardDistribution(
+            assets,
+            carbonRewards,
+            rewardAmounts,
+            newDistributionEnd
+        );
 
         _carbonRewardsManager.mintWeeklyCarbonRewards(
             carbonRewards,
             rewardAmounts,
             _rewardsController.getRewardsVault()
         );
+
+        previousCarbonRewardDistributionEnd = newDistributionEnd;
     }
 
     /// @inheritdoc IEmissionManager
@@ -118,6 +150,15 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct {
     /// @inheritdoc IEmissionManager
     function setRewardsController(address controller) external override onlyOwner {
         _rewardsController = IRewardsController(controller);
+    }
+
+    /// @inheritdoc IEmissionManager
+    function setCarbonRewardDistributionTimestamp(uint32 carbonRewardDistributionTimestamp)
+        external
+        override
+        onlyOwner
+    {
+        previousCarbonRewardDistributionEnd = carbonRewardDistributionTimestamp;
     }
 
     /// @inheritdoc IEmissionManager

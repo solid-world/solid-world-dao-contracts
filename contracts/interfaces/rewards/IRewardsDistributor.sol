@@ -81,10 +81,12 @@ interface IRewardsDistributor {
     /// @param assets List of incentivized assets getting updated
     /// @param rewards List of reward tokens getting updated
     /// @param rewardAmounts List of carbon reward amounts getting distributed
+    /// @param newDistributionEnd The end date of the incentivization, in unix time format
     function updateRewardDistribution(
         address[] calldata assets,
         address[] calldata rewards,
-        uint[] calldata rewardAmounts
+        uint[] calldata rewardAmounts,
+        uint32 newDistributionEnd
     ) external;
 
     /// @param asset The incentivized asset

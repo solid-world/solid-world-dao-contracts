@@ -203,19 +203,23 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     function updateRewardDistribution(
         address[] calldata assets,
         address[] calldata rewards,
-        uint[] calldata rewardAmounts
+        uint[] calldata rewardAmounts,
+        uint32 newDistributionEnd
     ) external override onlyEmissionManager {
         if (assets.length != rewards.length || rewards.length != rewardAmounts.length) {
             revert InvalidInput();
         }
 
-        uint32 newDistributionEnd = uint32(block.timestamp + 1 weeks);
+        assert(newDistributionEnd > block.timestamp);
+
         for (uint i; i < assets.length; i++) {
             if (_isOngoingDistribution(assets[i], rewards[i])) {
                 revert UpdateOngoingRewardDistribution(assets[i], rewards[i]);
             }
 
-            uint88 newEmissionsPerSecond = uint88(rewardAmounts[i] / 1 weeks);
+            uint88 newEmissionsPerSecond = uint88(
+                rewardAmounts[i] / (newDistributionEnd - block.timestamp)
+            );
             (uint oldEmissionPerSecond, uint newIndex, ) = _setEmissionPerSecond(
                 assets[i],
                 rewards[i],
