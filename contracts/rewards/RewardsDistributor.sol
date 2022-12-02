@@ -200,7 +200,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     }
 
     /// @inheritdoc IRewardsDistributor
-    function updateRewardDistribution(
+    function updateCarbonRewardDistribution(
         address[] calldata assets,
         address[] calldata rewards,
         uint[] calldata rewardAmounts
@@ -209,13 +209,19 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             revert InvalidInput();
         }
 
-        uint32 newDistributionEnd = uint32(block.timestamp + 1 weeks);
         for (uint i; i < assets.length; i++) {
-            if (_isOngoingDistribution(assets[i], rewards[i])) {
-                revert UpdateOngoingRewardDistribution(assets[i], rewards[i]);
+            if (!_canUpdateCarbonRewardDistribution(assets[i], rewards[i])) {
+                revert UpdateDistributionNotApplicable(assets[i], rewards[i]);
             }
 
-            uint88 newEmissionsPerSecond = uint88(rewardAmounts[i] / 1 weeks);
+            uint32 newDistributionEnd = _computeNewCarbonRewardDistributionEnd(
+                assets[i],
+                rewards[i]
+            );
+            uint88 newEmissionsPerSecond = uint88(
+                rewardAmounts[i] / (newDistributionEnd - block.timestamp)
+            );
+
             (uint oldEmissionPerSecond, uint newIndex, ) = _setEmissionPerSecond(
                 assets[i],
                 rewards[i],
@@ -254,12 +260,37 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     }
 
     /// @inheritdoc IRewardsDistributor
-    function isOngoingDistribution(address asset, address reward) external view returns (bool) {
-        return _isOngoingDistribution(asset, reward);
+    function canUpdateCarbonRewardDistribution(address asset, address reward)
+        external
+        view
+        returns (bool)
+    {
+        return _canUpdateCarbonRewardDistribution(asset, reward);
     }
 
-    function _isOngoingDistribution(address asset, address reward) internal view returns (bool) {
-        return _assets[asset].rewards[reward].distributionEnd > block.timestamp;
+    function _canUpdateCarbonRewardDistribution(address asset, address reward)
+        internal
+        view
+        returns (bool)
+    {
+        uint32 currentDistributionEnd = _assets[asset].rewards[reward].distributionEnd;
+        uint32 nextDistributionEnd = _computeNewCarbonRewardDistributionEnd(asset, reward);
+
+        bool isInitializedDistribution = currentDistributionEnd != 0;
+        bool isBetweenDistributions = block.timestamp >= currentDistributionEnd &&
+            block.timestamp < nextDistributionEnd;
+
+        return isInitializedDistribution && isBetweenDistributions;
+    }
+
+    function _computeNewCarbonRewardDistributionEnd(address asset, address reward)
+        internal
+        view
+        returns (uint32 newDistributionEnd)
+    {
+        uint32 currentDistributionEnd = _assets[asset].rewards[reward].distributionEnd;
+
+        newDistributionEnd = currentDistributionEnd + 1 weeks;
     }
 
     /// @dev Configure the _assets for a specific emission

@@ -8,6 +8,8 @@ import "../../contracts/SolidWorldManager.sol";
 import "../../contracts/rewards/RewardsController.sol";
 
 contract EmissionManagerTest is Test {
+    uint32 constant CURRENT_DATE = 1666016743;
+
     event EmissionAdminUpdated(
         address indexed reward,
         address indexed oldAdmin,
@@ -21,6 +23,8 @@ contract EmissionManagerTest is Test {
     address rewardsVault;
 
     function setUp() public {
+        vm.warp(CURRENT_DATE);
+
         owner = vm.addr(7);
         carbonRewardsManager = vm.addr(11);
         controller = vm.addr(10);
@@ -267,7 +271,7 @@ contract EmissionManagerTest is Test {
         vm.expectCall(
             controller,
             abi.encodeCall(
-                IRewardsDistributor.updateRewardDistribution,
+                IRewardsDistributor.updateCarbonRewardDistribution,
                 (assets, carbonRewards, rewardAmounts)
             )
         );

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "../interfaces/rewards/IEmissionManager.sol";
 import "../interfaces/manager/IWeeklyCarbonRewardsManager.sol";
@@ -10,7 +11,7 @@ import "../PostConstruct.sol";
 /// @title EmissionManager
 /// @author Aave
 /// @notice It manages the list of admins of reward emissions and provides functions to control reward emissions.
-contract EmissionManager is Ownable, IEmissionManager, PostConstruct {
+contract EmissionManager is Ownable, IEmissionManager, PostConstruct, ReentrancyGuard {
     // reward => emissionAdmin
     mapping(address => address) internal _emissionAdmins;
 
@@ -85,11 +86,12 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct {
     function updateCarbonRewardDistribution(address[] calldata assets, uint[] calldata categoryIds)
         external
         override
+        nonReentrant
     {
         (address[] memory carbonRewards, uint[] memory rewardAmounts) = _carbonRewardsManager
             .computeWeeklyCarbonRewards(assets, categoryIds);
 
-        _rewardsController.updateRewardDistribution(assets, carbonRewards, rewardAmounts);
+        _rewardsController.updateCarbonRewardDistribution(assets, carbonRewards, rewardAmounts);
 
         _carbonRewardsManager.mintWeeklyCarbonRewards(
             carbonRewards,
