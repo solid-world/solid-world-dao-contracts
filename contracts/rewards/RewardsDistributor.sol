@@ -111,8 +111,26 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address[] calldata assets,
         address user,
         address reward
-    ) external view override returns (uint) {
-        return _getUserReward(user, reward, _getUserAssetBalances(assets, user));
+    ) external view override returns (uint unclaimedRewards) {
+        RewardsDataTypes.UserAssetBalance[] memory userAssetBalances = _getUserAssetBalances(
+            assets,
+            user
+        );
+
+        for (uint i; i < userAssetBalances.length; i++) {
+            if (userAssetBalances[i].userStake == 0) {
+                unclaimedRewards += _assets[userAssetBalances[i].asset]
+                    .rewards[reward]
+                    .usersData[user]
+                    .accrued;
+            } else {
+                unclaimedRewards +=
+                    _getPendingRewards(user, reward, userAssetBalances[i]) +
+                    _assets[userAssetBalances[i].asset].rewards[reward].usersData[user].accrued;
+            }
+        }
+
+        return unclaimedRewards;
     }
 
     /// @inheritdoc IRewardsDistributor
@@ -428,7 +446,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         uint totalStaked,
         uint assetUnit
     ) internal returns (uint, bool) {
-        (uint oldIndex, uint newIndex) = _getAssetIndex(rewardData, totalStaked, assetUnit);
+        (uint oldIndex, uint newIndex) = _computeNewAssetIndex(rewardData, totalStaked, assetUnit);
         bool indexUpdated;
         if (newIndex != oldIndex) {
             if (newIndex > type(uint104).max) {
@@ -476,33 +494,6 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         return (rewardsAccrued, dataUpdated);
     }
 
-    /// @dev Return the accrued unclaimed amount of a reward from a user over a list of distribution
-    /// @param user The address of the user
-    /// @param reward The address of the reward token
-    /// @param userAssetBalances List of structs with the user balance and total supply of a set of assets
-    /// @return unclaimedRewards The accrued rewards for the user until the moment
-    function _getUserReward(
-        address user,
-        address reward,
-        RewardsDataTypes.UserAssetBalance[] memory userAssetBalances
-    ) internal view returns (uint unclaimedRewards) {
-        // Add unrealized rewards
-        for (uint i; i < userAssetBalances.length; i++) {
-            if (userAssetBalances[i].userStake == 0) {
-                unclaimedRewards += _assets[userAssetBalances[i].asset]
-                    .rewards[reward]
-                    .usersData[user]
-                    .accrued;
-            } else {
-                unclaimedRewards +=
-                    _getPendingRewards(user, reward, userAssetBalances[i]) +
-                    _assets[userAssetBalances[i].asset].rewards[reward].usersData[user].accrued;
-            }
-        }
-
-        return unclaimedRewards;
-    }
-
     /// @dev Calculates the pending (not yet accrued) rewards since the last user action
     /// @param user The address of the user
     /// @param reward The address of the reward token
@@ -517,7 +508,11 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             reward
         ];
         uint assetUnit = 10**_assets[userAssetBalance.asset].decimals;
-        (, uint nextIndex) = _getAssetIndex(rewardData, userAssetBalance.totalStaked, assetUnit);
+        (, uint nextIndex) = _computeNewAssetIndex(
+            rewardData,
+            userAssetBalance.totalStaked,
+            assetUnit
+        );
 
         return
             _getRewards(
@@ -551,7 +546,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     /// @param totalStaked The total amount staked of the asset
     /// @param assetUnit One unit of asset (10**decimals)
     /// @return The new index.
-    function _getAssetIndex(
+    function _computeNewAssetIndex(
         RewardsDataTypes.RewardData storage rewardData,
         uint totalStaked,
         uint assetUnit

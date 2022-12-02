@@ -198,11 +198,11 @@ contract CarbonRewardDistributionGasTest is GasTest {
         string memory label = string(
             abi.encodePacked(
                 "updateCarbonRewardDistribution_",
-                uintToString(batches),
+                vm.toString(batches),
                 "Batches_",
-                uintToString(yearsFromCertification),
+                vm.toString(yearsFromCertification),
                 "yearsFromCertification_",
-                uintToString(rewards),
+                vm.toString(rewards),
                 "rewards"
             )
         );
