@@ -9,9 +9,9 @@ contract MockUniswapV3Factory {
     }
 
     function getPool(
-        address tokenA,
-        address tokenB,
-        uint24 fee
+        address,
+        address,
+        uint24
     ) external view returns (address) {
         return pool;
     }

@@ -1,14 +1,14 @@
 pragma solidity ^0.8.0;
 
-import "../utils/GasTest.sol";
-import "../../contracts/SolidWorldManager.sol";
-import "../../contracts/interfaces/ISolidStaking.sol";
-import "../../contracts/rewards/EmissionManager.sol";
-import "../../contracts/SolidStaking.sol";
-import "../../contracts/rewards/RewardsController.sol";
+import "./utils/GasTest.sol";
+import "../contracts/SolidWorldManager.sol";
+import "../contracts/interfaces/ISolidStaking.sol";
+import "../contracts/rewards/EmissionManager.sol";
+import "../contracts/SolidStaking.sol";
+import "../contracts/rewards/RewardsController.sol";
 
 contract CarbonRewardDistributionGasTest is GasTest {
-    uint constant CURRENT_DATE = 1666016743;
+    uint32 constant CURRENT_DATE = 1666016743;
     uint constant CATEGORY_ID = 1;
     uint constant PROJECT_ID = 3;
     uint constant BATCH_ID = 5;
@@ -190,6 +190,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
             config[i].asset = assets[i];
             config[i].reward = address(manager.categoryToken(CATEGORY_ID + i));
             config[i].rewardOracle = IEACAggregatorProxy(rewardOracle);
+            config[i].distributionEnd = CURRENT_DATE;
         }
 
         emissionManager.configureAssets(config);
