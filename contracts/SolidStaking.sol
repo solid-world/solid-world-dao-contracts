@@ -65,16 +65,18 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
 
     /// @inheritdoc ISolidStakingActions
     function withdraw(address token, uint amount) external override nonReentrant validToken(token) {
-        uint oldUserStake = _balanceOf(token, msg.sender);
-        uint oldTotalStake = _totalStaked(token);
+        _withdraw(token, amount);
+    }
 
-        userStake[token][msg.sender] = oldUserStake - amount;
-
-        IERC20(token).safeTransfer(msg.sender, amount);
-
-        rewardsController.handleAction(token, msg.sender, oldUserStake, oldTotalStake);
-
-        emit Withdraw(msg.sender, token, amount);
+    /// @inheritdoc ISolidStakingActions
+    function withdrawStakeAndClaimRewards(address token, uint amount)
+        external
+        override
+        nonReentrant
+        validToken(token)
+    {
+        _withdraw(token, amount);
+        _claimRewards(token);
     }
 
     /// @inheritdoc ISolidStakingViewActions
@@ -104,5 +106,24 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
 
     function _totalStaked(address token) internal view returns (uint) {
         return IERC20(token).balanceOf(address(this));
+    }
+
+    function _withdraw(address token, uint amount) internal {
+        uint oldUserStake = _balanceOf(token, msg.sender);
+        uint oldTotalStake = _totalStaked(token);
+
+        userStake[token][msg.sender] = oldUserStake - amount;
+
+        IERC20(token).safeTransfer(msg.sender, amount);
+
+        rewardsController.handleAction(token, msg.sender, oldUserStake, oldTotalStake);
+
+        emit Withdraw(msg.sender, token, amount);
+    }
+
+    function _claimRewards(address token) internal {
+        address[] memory assets = new address[](1);
+        assets[0] = token;
+        rewardsController.claimAllRewardsOnBehalf(assets, msg.sender, msg.sender);
     }
 }

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 import "../interfaces/rewards/IRewardsDistributor.sol";
 import "../libraries/RewardsDataTypes.sol";
-import "../interfaces/solid-staking/ISolidStakingViewActions.sol";
+import "../interfaces/staking/ISolidStakingViewActions.sol";
 
 abstract contract RewardsDistributor is IRewardsDistributor {
     using SafeCast for uint;
