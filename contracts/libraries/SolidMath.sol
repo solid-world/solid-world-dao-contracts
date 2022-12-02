@@ -20,10 +20,14 @@ library SolidMath {
     /// @dev Computes the number of weeks between two dates
     /// @param startDate start date expressed in seconds
     /// @param endDate end date expressed in seconds
-    /// @return number of weeks between the two dates
+    /// @return number of weeks between the two dates. Returns 0 if result is negative
     function weeksBetween(uint startDate, uint endDate) internal pure returns (uint) {
-        if (startDate < 1 weeks || endDate < 1 weeks || endDate < startDate) {
+        if (startDate == 0 || endDate == 0) {
             revert IncorrectDates(startDate, endDate);
+        }
+
+        if (endDate <= startDate) {
+            return 0;
         }
 
         return (endDate - startDate) / 1 weeks;
@@ -58,7 +62,7 @@ library SolidMath {
     /// @dev Computes the amount of ERC20 tokens to be minted to the stakeholder and DAO,
     /// @dev and the amount forfeited when collateralizing `fcbtAmount` of ERC1155 tokens
     /// @dev cbtUserCut = erc1155 * 10e18 * (1 - fee) * (1 - timeAppreciation) ** weeksUntilCertification
-    /// @param expectedCertificationDate expected date for project certification
+    /// @param expectedCertificationDate expected date for project certification. Must not be in the past.
     /// @param fcbtAmount amount of ERC1155 tokens to be collateralized
     /// @param timeAppreciation 1% = 10000, 0.0984% = 984
     /// @param collateralizationFee 0.01% = 1
@@ -81,6 +85,8 @@ library SolidMath {
             uint
         )
     {
+        assert(expectedCertificationDate > block.timestamp);
+
         uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
             timeAppreciation,
             expectedCertificationDate
@@ -141,14 +147,14 @@ library SolidMath {
         return (fcbtAmount / 10**cbtDecimals, cbtDaoCut, cbtToBurn);
     }
 
-    /// @dev Computes the minimum amount of ERC20 tokens to decollateralize in order to redeem `fcbtAmount`
+    /// @dev Computes the minimum amount of ERC20 tokens to decollateralize in order to redeem `expectedFcbtAmount`
     /// @dev and the amount of ERC20 tokens charged by the DAO for decollateralizing the minimum amount of ERC20 tokens
     /// @param expectedCertificationDate expected date for project certification
     /// @param expectedFcbtAmount amount of ERC1155 tokens to be redeemed
     /// @param timeAppreciation 1% = 10000, 0.0984% = 984
     /// @param decollateralizationFee 0.01% = 1
     /// @param cbtDecimals collateralized basket token number of decimals
-    /// @return minAmountIn minimum amount of ERC20 tokens to decollateralize in order to redeem `fcbtAmount`
+    /// @return minAmountIn minimum amount of ERC20 tokens to decollateralize in order to redeem `expectedFcbtAmount`
     /// @return minCbtDaoCut amount of ERC20 tokens charged by the DAO for decollateralizing minAmountIn ERC20 tokens
     function computeDecollateralizationMinAmountInAndDaoCut(
         uint expectedCertificationDate,
@@ -183,13 +189,17 @@ library SolidMath {
     /// @param availableCredits amount of ERC1155 tokens backing the reward
     /// @param timeAppreciation 1% = 10000, 0.0984% = 984
     /// @param decimals reward token number of decimals
-    /// @return rewardAmount ERC20 reward amount
+    /// @return rewardAmount ERC20 reward amount. Returns 0 if `expectedCertificationDate` is in the past
     function computeWeeklyBatchReward(
         uint expectedCertificationDate,
         uint availableCredits,
         uint timeAppreciation,
         uint decimals
     ) internal view returns (uint rewardAmount) {
+        if (expectedCertificationDate <= block.timestamp) {
+            return 0;
+        }
+
         uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
             timeAppreciation,
             expectedCertificationDate

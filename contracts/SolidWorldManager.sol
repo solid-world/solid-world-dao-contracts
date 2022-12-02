@@ -130,6 +130,13 @@ contract SolidWorldManager is
         _;
     }
 
+    modifier batchUnderway(uint batchId) {
+        if (_isBatchCertified(batchId)) {
+            revert BatchCertified(batchId);
+        }
+        _;
+    }
+
     function initialize(
         ForwardContractBatchToken _forwardContractBatch,
         uint16 _collateralizationFee,
@@ -275,7 +282,7 @@ contract SolidWorldManager is
         uint batchId,
         uint amountIn,
         uint amountOutMin
-    ) external nonReentrant validBatch(batchId) {
+    ) external nonReentrant validBatch(batchId) batchUnderway(batchId) {
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
 
         (uint cbtUserCut, uint cbtDaoCut, ) = SolidMath.computeCollateralizationOutcome(
@@ -365,6 +372,7 @@ contract SolidWorldManager is
         external
         view
         validBatch(batchId)
+        batchUnderway(batchId)
         returns (
             uint cbtUserCut,
             uint cbtDaoCut,
@@ -523,11 +531,12 @@ contract SolidWorldManager is
             uint[] storage _batches = projectBatches[projectId];
             for (uint j; j < _batches.length; j++) {
                 uint batchId = _batches[j];
-                Batch storage batch = batches[batchId];
                 uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
-                if (availableCredits == 0) {
+                if (availableCredits == 0 || _isBatchCertified(batchId)) {
                     continue;
                 }
+
+                Batch storage batch = batches[batchId];
                 rewardAmount += SolidMath.computeWeeklyBatchReward(
                     batch.expectedDueDate,
                     availableCredits,
@@ -549,5 +558,9 @@ contract SolidWorldManager is
         uint categoryId = projectCategory[projectId];
 
         return categoryToken[categoryId];
+    }
+
+    function _isBatchCertified(uint batchId) internal view returns (bool) {
+        return batches[batchId].expectedDueDate <= block.timestamp;
     }
 }

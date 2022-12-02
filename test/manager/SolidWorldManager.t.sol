@@ -241,6 +241,30 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         vm.stopPrank();
     }
 
+    function testCollateralizeBatch_failsIfBatchIsCertified() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 100,
+                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                discountRate: TIME_APPRECIATION,
+                owner: testAccount
+            })
+        );
+
+        vm.warp(CURRENT_DATE + 1 weeks);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolidWorldManagerErrors.BatchCertified.selector, 5)
+        );
+        manager.collateralizeBatch(BATCH_ID, 100, 81e18);
+    }
+
     function testCollateralizeBatchMintsERC20AndTransfersERC1155ToManager() public {
         uint cbtUserCut = 81e18;
         uint cbtDaoCut = 9e18;
@@ -410,6 +434,59 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         vm.stopPrank();
     }
 
+    function testDecollateralizeTokens_whenBatchIsCertified() public {
+        uint cbtUserCut = 8100e18;
+        uint cbtDaoCut = 900e18;
+
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 10000,
+                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                discountRate: TIME_APPRECIATION,
+                owner: testAccount
+            })
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+
+        vm.startPrank(testAccount);
+        collateralizedToken.approve(address(manager), cbtUserCut);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
+
+        vm.warp(CURRENT_DATE + 1 weeks);
+
+        uint expectedAmountDecollateralized = (8100 / 10) * 9; // 90%
+        vm.expectEmit(true, true, true, true, address(manager));
+        emit TokensDecollateralized(
+            BATCH_ID,
+            cbtUserCut,
+            expectedAmountDecollateralized,
+            testAccount
+        );
+        manager.decollateralizeTokens(BATCH_ID, cbtUserCut, expectedAmountDecollateralized);
+
+        vm.stopPrank();
+
+        assertEq(
+            forwardContractBatch.balanceOf(testAccount, BATCH_ID),
+            expectedAmountDecollateralized
+        );
+        assertEq(
+            forwardContractBatch.balanceOf(address(manager), BATCH_ID),
+            10000 - expectedAmountDecollateralized
+        );
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), 0);
+        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut + 810e18);
+    }
+
     function testDecollateralizeTokensBurnsERC20AndReceivesERC1155() public {
         uint cbtUserCut = 8100e18;
         uint cbtDaoCut = 900e18;
@@ -437,7 +514,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
 
-        vm.expectEmit(true, true, false, true, address(manager));
+        vm.expectEmit(true, true, true, true, address(manager));
         emit TokensDecollateralized(BATCH_ID, cbtUserCut, 8100, testAccount);
         manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 8100);
 
@@ -452,6 +529,30 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     function testSimulateBatchCollateralizationWhenBatchIdIsInvalid() public {
         vm.expectRevert(
             abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidBatchId.selector, 5)
+        );
+        manager.simulateBatchCollateralization(BATCH_ID, 10000);
+    }
+
+    function testSimulateBatchCollateralization_failsIfBatchIsCertified() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            SolidWorldManager.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 10000,
+                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2025,
+                discountRate: TIME_APPRECIATION,
+                owner: testAccount
+            })
+        );
+
+        vm.warp(CURRENT_DATE + 1 weeks);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolidWorldManagerErrors.BatchCertified.selector, 5)
         );
         manager.simulateBatchCollateralization(BATCH_ID, 10000);
     }
