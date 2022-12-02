@@ -2,9 +2,9 @@
 pragma solidity ^0.8.16;
 
 contract MockUniswapV3Pool {
-    function observe(uint32[] calldata secondsAgos)
+    function observe(uint32[] calldata)
         external
-        view
+        pure
         returns (
             int56[] memory tickCumulatives,
             uint160[] memory secondsPerLiquidityCumulativeX128s

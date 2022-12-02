@@ -4,7 +4,8 @@
   "description": "Solid World DAO Smart Contracts",
   "scripts": {
     "test": "forge test -vvv",
-    "test:gas": "forge test -vvv --gas-report",
+    "test:gas": "FOUNDRY_PROFILE=gas forge test -vvv",
+    "test:gasReport": "forge test -vvv --gas-report",
     "test:coverage": "forge coverage",
     "deploy:local": "hardhat deploy --network localhost",
     "export:local": "hardhat export --export - --network localhost"
