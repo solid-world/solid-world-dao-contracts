@@ -20,20 +20,4 @@ abstract contract GasTest is Test {
 
         emit log_named_uint(string(abi.encodePacked(checkpointLabel, " Gas")), gasDelta);
     }
-
-    function uintToString(uint v) internal pure returns (string memory str) {
-        uint maxlength = 100;
-        bytes memory reversed = new bytes(maxlength);
-        uint i = 0;
-        while (v != 0) {
-            uint remainder = v % 10;
-            v = v / 10;
-            reversed[i++] = bytes1(uint8(48 + remainder));
-        }
-        bytes memory s = new bytes(i);
-        for (uint j = 0; j < i; j++) {
-            s[j] = reversed[i - 1 - j];
-        }
-        str = string(s);
-    }
 }
