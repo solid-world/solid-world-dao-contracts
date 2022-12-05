@@ -55,6 +55,61 @@ contract RewardsControllerTest is Test {
         rewardsController.configureAssets(new RewardsDataTypes.RewardsConfigInput[](0));
     }
 
+    function testConfigureAssets_failsForInvalidDecimals() public {
+        RewardsDataTypes.RewardsConfigInput[]
+            memory config = new RewardsDataTypes.RewardsConfigInput[](2);
+        config[0].reward = vm.addr(4);
+        config[0].asset = vm.addr(5);
+        config[0].emissionPerSecond = 100;
+        config[0].distributionEnd = CURRENT_DATE;
+        config[0].rewardOracle = IEACAggregatorProxy(vm.addr(6));
+
+        config[1].reward = vm.addr(7);
+        config[1].asset = vm.addr(8);
+        config[1].emissionPerSecond = 200;
+        config[1].distributionEnd = CURRENT_DATE;
+        config[1].rewardOracle = IEACAggregatorProxy(vm.addr(9));
+
+        vm.mockCall(
+            solidStakingViewActions,
+            abi.encodeWithSelector(ISolidStakingViewActions.totalStaked.selector, config[0].asset),
+            abi.encode(1000)
+        );
+        vm.mockCall(
+            solidStakingViewActions,
+            abi.encodeWithSelector(ISolidStakingViewActions.totalStaked.selector, config[1].asset),
+            abi.encode(2000)
+        );
+        vm.mockCall(
+            address(config[0].rewardOracle),
+            abi.encodeWithSelector(IEACAggregatorProxy.latestAnswer.selector),
+            abi.encode(15)
+        );
+        vm.mockCall(
+            address(config[1].rewardOracle),
+            abi.encodeWithSelector(IEACAggregatorProxy.latestAnswer.selector),
+            abi.encode(15)
+        );
+        vm.mockCall(
+            config[0].asset,
+            abi.encodeWithSelector(IERC20Metadata.decimals.selector),
+            abi.encode(18)
+        );
+        vm.mockCall(
+            config[1].asset,
+            abi.encodeWithSelector(IERC20Metadata.decimals.selector),
+            abi.encode(0)
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IRewardsDistributor.InvalidAssetDecimals.selector,
+                config[1].asset
+            )
+        );
+        vm.prank(emissionManager);
+        rewardsController.configureAssets(config);
+    }
+
     function testConfigureAssets() public {
         RewardsDataTypes.RewardsConfigInput[]
             memory config = new RewardsDataTypes.RewardsConfigInput[](2);

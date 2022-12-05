@@ -190,7 +190,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         vm.expectEmit(true, true, false, true, address(manager));
         emit WeeklyRewardMinted(address(rewardToken1), mintAmount1);
 
-        vm.prank(rewardsEmissionManager);
+        vm.prank(weeklyRewardsMinter);
         manager.mintWeeklyCarbonRewards(carbonRewards, rewardAmounts, rewardsVault);
 
         assertEq(rewardToken0.balanceOf(rewardsVault), mintAmount0);
