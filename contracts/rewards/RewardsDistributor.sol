@@ -36,6 +36,15 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         _;
     }
 
+    modifier distributionExists(address asset, address reward) {
+        RewardsDataTypes.RewardData storage rewardConfig = _assets[asset].rewards[reward];
+        uint decimals = _assets[asset].decimals;
+        if (decimals == 0 || rewardConfig.lastUpdateTimestamp == 0) {
+            revert DistributionNonExistent(asset, reward);
+        }
+        _;
+    }
+
     /// @inheritdoc IRewardsDistributor
     function getRewardsData(address asset, address reward)
         public
@@ -174,8 +183,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address asset,
         address reward,
         uint32 newDistributionEnd
-    ) external override onlyEmissionManager {
+    ) external override onlyEmissionManager distributionExists(asset, reward) {
         uint oldDistributionEnd = _setDistributionEnd(asset, reward, newDistributionEnd);
+        uint index = _assets[asset].rewards[reward].index;
 
         emit AssetConfigUpdated(
             asset,
@@ -184,7 +194,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             _assets[asset].rewards[reward].emissionPerSecond,
             oldDistributionEnd,
             newDistributionEnd,
-            _assets[asset].rewards[reward].index
+            index
         );
     }
 
@@ -281,6 +291,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     function canUpdateCarbonRewardDistribution(address asset, address reward)
         external
         view
+        distributionExists(asset, reward)
         returns (bool)
     {
         return _canUpdateCarbonRewardDistribution(asset, reward);
