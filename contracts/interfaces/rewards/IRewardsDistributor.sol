@@ -11,6 +11,10 @@ interface IRewardsDistributor {
     error IndexOverflow(uint newIndex);
     error DistributionNonExistent(address asset, address reward);
 
+    /// @param asset The address of the incentivized asset
+    /// @param reward The address of the reward token
+    error UpdateDistributionNotApplicable(address asset, address reward);
+
     /// @dev Emitted when the configuration of the rewards of an asset is updated.
     /// @param asset The address of the incentivized asset
     /// @param reward The address of the reward token
@@ -52,10 +56,6 @@ interface IRewardsDistributor {
         address indexed oldEmissionManager,
         address indexed newEmissionManager
     );
-
-    /// @param asset The address of the incentivized asset
-    /// @param reward The address of the reward token
-    error UpdateDistributionNotApplicable(address asset, address reward);
 
     /// @dev Sets the end date for the distribution
     /// @param asset The asset to incentivize
