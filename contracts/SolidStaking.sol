@@ -58,12 +58,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
         userStake[token][msg.sender] = oldUserStake + amount;
         IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
 
-        rewardsController.handleUserStakeChangedForAsset(
-            token,
-            msg.sender,
-            oldUserStake,
-            oldTotalStake
-        );
+        rewardsController.handleUserStakeChanged(token, msg.sender, oldUserStake, oldTotalStake);
 
         emit Stake(msg.sender, token, amount);
     }
@@ -121,12 +116,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
 
         IERC20(token).safeTransfer(msg.sender, amount);
 
-        rewardsController.handleUserStakeChangedForAsset(
-            token,
-            msg.sender,
-            oldUserStake,
-            oldTotalStake
-        );
+        rewardsController.handleUserStakeChanged(token, msg.sender, oldUserStake, oldTotalStake);
 
         emit Withdraw(msg.sender, token, amount);
     }

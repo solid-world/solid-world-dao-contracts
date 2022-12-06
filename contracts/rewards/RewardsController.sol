@@ -98,7 +98,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     }
 
     /// @inheritdoc IRewardsController
-    function handleUserStakeChangedForAsset(
+    function handleUserStakeChanged(
         address asset,
         address user,
         uint oldUserStake,

@@ -28,7 +28,7 @@ contract SolidStakingTest is Test {
 
         vm.mockCall(
             rewardsController,
-            abi.encodeWithSelector(IRewardsController.handleUserStakeChangedForAsset.selector),
+            abi.encodeWithSelector(IRewardsController.handleUserStakeChanged.selector),
             abi.encode()
         );
 
@@ -98,7 +98,7 @@ contract SolidStakingTest is Test {
         vm.expectCall(
             rewardsController,
             abi.encodeCall(
-                IRewardsController.handleUserStakeChangedForAsset,
+                IRewardsController.handleUserStakeChanged,
                 (tokenAddress, testAccount, 0, 0)
             )
         );
@@ -149,7 +149,7 @@ contract SolidStakingTest is Test {
         vm.expectCall(
             rewardsController,
             abi.encodeCall(
-                IRewardsController.handleUserStakeChangedForAsset,
+                IRewardsController.handleUserStakeChanged,
                 (tokenAddress, testAccount, amountToStake, amountToStake)
             )
         );
@@ -223,7 +223,7 @@ contract SolidStakingTest is Test {
         vm.expectCall(
             rewardsController,
             abi.encodeCall(
-                IRewardsController.handleUserStakeChangedForAsset,
+                IRewardsController.handleUserStakeChanged,
                 (tokenAddress, testAccount, amountToStake, amountToStake)
             )
         );

@@ -91,7 +91,7 @@ interface IRewardsController is IRewardsDistributor {
     /// @param user The address of the user whose asset balance has changed
     /// @param oldUserStake The amount of assets staked by the user, prior to stake change
     /// @param oldTotalStaked The total amount staked of the asset, prior to stake change
-    function handleUserStakeChangedForAsset(
+    function handleUserStakeChanged(
         address asset,
         address user,
         uint oldUserStake,
