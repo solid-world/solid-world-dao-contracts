@@ -106,8 +106,18 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     }
 
     /// @inheritdoc IEmissionManager
+    function setRewardsVault(address rewardsVault) external override onlyOwner {
+        _rewardsController.setRewardsVault(rewardsVault);
+    }
+
+    /// @inheritdoc IEmissionManager
     function setEmissionManager(address emissionManager) external override onlyOwner {
         _rewardsController.setEmissionManager(emissionManager);
+    }
+
+    /// @inheritdoc IEmissionManager
+    function setSolidStaking(address solidStaking) external override onlyOwner {
+        _rewardsController.setSolidStaking(solidStaking);
     }
 
     /// @inheritdoc IEmissionManager

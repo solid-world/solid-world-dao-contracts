@@ -87,6 +87,17 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     }
 
     /// @inheritdoc IRewardsController
+    function setRewardsVault(address rewardsVault) external override onlyEmissionManager {
+        REWARDS_VAULT = rewardsVault;
+        emit RewardsVaultUpdated(rewardsVault);
+    }
+
+    function setSolidStaking(address solidStaking) external override onlyEmissionManager {
+        solidStakingViewActions = ISolidStakingViewActions(solidStaking);
+        emit SolidStakingUpdated(solidStaking);
+    }
+
+    /// @inheritdoc IRewardsController
     function handleUserStakeChangedForAsset(
         address asset,
         address user,

@@ -75,6 +75,14 @@ interface IEmissionManager {
     /// @param claimer The address of the claimer
     function setClaimer(address user, address claimer) external;
 
+    /// @dev Only callable by the owner of the EmissionManager
+    /// @param rewardsVault The address of the account that secures ERC20 rewards.
+    function setRewardsVault(address rewardsVault) external;
+
+    /// @dev Only callable by the owner of the EmissionManager
+    /// @param solidStaking Used to fetch the total amount staked and the stake of an user for a given asset
+    function setSolidStaking(address solidStaking) external;
+
     /// @dev Updates the address of the emission manager
     /// @dev Only callable by the owner of the EmissionManager
     /// @param emissionManager The address of the new EmissionManager
