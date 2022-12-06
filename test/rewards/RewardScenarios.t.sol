@@ -183,7 +183,7 @@ contract RewardScenarios is Test {
             uint mangroveEmissionPerSecond, //100145660714285
             uint lastUpdateTimestamp,
             uint distributionEnd
-        ) = rewardsController.getRewardsData(assetMangrove, mangroveRewardToken);
+        ) = rewardsController.getRewardDistribution(assetMangrove, mangroveRewardToken);
 
         assertEq(lastUpdateTimestamp, INITIAL_CARBON_DISTRIBUTION_END);
         assertEq(distributionEnd, INITIAL_CARBON_DISTRIBUTION_END + 1 weeks);
@@ -255,7 +255,7 @@ contract RewardScenarios is Test {
         categoryIds[0] = CATEGORY_ID;
 
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);
-        (, uint mangroveEmissionPerSecond, , ) = rewardsController.getRewardsData(
+        (, uint mangroveEmissionPerSecond, , ) = rewardsController.getRewardDistribution(
             assetMangrove,
             mangroveRewardToken
         );

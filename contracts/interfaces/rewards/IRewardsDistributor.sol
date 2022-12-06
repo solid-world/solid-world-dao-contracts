@@ -119,7 +119,7 @@ interface IRewardsDistributor {
     /// @return The emission per second of the reward distribution
     /// @return The timestamp of the last update of the index
     /// @return The timestamp of the distribution end
-    function getRewardsData(address asset, address reward)
+    function getRewardDistribution(address asset, address reward)
         external
         view
         returns (

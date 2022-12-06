@@ -104,13 +104,13 @@ contract RewardsDistributorTest is Test {
         vm.label(emissionManager, "emissionManager");
     }
 
-    function testGetRewardsData() public {
+    function testGetRewardDistribution() public {
         (
             uint index0,
             uint emissionPerSecond0,
             uint lastUpdateTimestamp0,
             uint distributionEnd0
-        ) = rewardsDistributor.getRewardsData(asset0, reward00);
+        ) = rewardsDistributor.getRewardDistribution(asset0, reward00);
 
         assertEq(index0, 0);
         assertEq(emissionPerSecond0, 0);
@@ -122,7 +122,7 @@ contract RewardsDistributorTest is Test {
             uint emissionPerSecond1,
             uint lastUpdateTimestamp1,
             uint distributionEnd1
-        ) = rewardsDistributor.getRewardsData(asset1, reward1);
+        ) = rewardsDistributor.getRewardDistribution(asset1, reward1);
 
         assertEq(index1, 0);
         assertEq(emissionPerSecond1, 0);
@@ -134,7 +134,7 @@ contract RewardsDistributorTest is Test {
             uint emissionPerSecond2,
             uint lastUpdateTimestamp2,
             uint distributionEnd2
-        ) = rewardsDistributor.getRewardsData(asset0, reward01);
+        ) = rewardsDistributor.getRewardDistribution(asset0, reward01);
 
         assertEq(index2, 0);
         assertEq(emissionPerSecond2, 0);
@@ -146,7 +146,7 @@ contract RewardsDistributorTest is Test {
             uint emissionPerSecond,
             uint lastUpdateTimestamp,
             uint distributionEnd
-        ) = rewardsDistributor.getRewardsData(vm.addr(77), vm.addr(77));
+        ) = rewardsDistributor.getRewardDistribution(vm.addr(77), vm.addr(77));
 
         assertEq(index, 0);
         assertEq(emissionPerSecond, 0);
@@ -219,7 +219,7 @@ contract RewardsDistributorTest is Test {
             uint emissionPerSecond0,
             uint lastUpdateTimestamp0,
             uint distributionEnd0
-        ) = rewardsDistributor.getRewardsData(asset0, reward00);
+        ) = rewardsDistributor.getRewardDistribution(asset0, reward00);
         assertEq(index0, 1);
         assertEq(emissionPerSecond0, 100);
         assertEq(lastUpdateTimestamp0, CURRENT_DATE + 5 seconds);
@@ -230,7 +230,7 @@ contract RewardsDistributorTest is Test {
             uint emissionPerSecond1,
             uint lastUpdateTimestamp1,
             uint distributionEnd1
-        ) = rewardsDistributor.getRewardsData(asset0, reward01);
+        ) = rewardsDistributor.getRewardDistribution(asset0, reward01);
         assertEq(index1, 2);
         assertEq(emissionPerSecond1, 200);
         assertEq(lastUpdateTimestamp1, CURRENT_DATE + 5 seconds);
@@ -482,13 +482,13 @@ contract RewardsDistributorTest is Test {
 
         vm.stopPrank();
 
-        (, , , uint distributionEnd00) = rewardsDistributor.getRewardsData(asset0, reward00);
+        (, , , uint distributionEnd00) = rewardsDistributor.getRewardDistribution(asset0, reward00);
         assertEq(distributionEnd00, CURRENT_DATE + 1 weeks);
 
-        (, , , uint distributionEnd1) = rewardsDistributor.getRewardsData(asset1, reward1);
+        (, , , uint distributionEnd1) = rewardsDistributor.getRewardDistribution(asset1, reward1);
         assertEq(distributionEnd1, CURRENT_DATE + 2 weeks);
 
-        (, , , uint distributionEnd01) = rewardsDistributor.getRewardsData(asset0, reward01);
+        (, , , uint distributionEnd01) = rewardsDistributor.getRewardDistribution(asset0, reward01);
         assertEq(distributionEnd01, CURRENT_DATE + 3 weeks);
     }
 
@@ -564,19 +564,19 @@ contract RewardsDistributorTest is Test {
         vm.stopPrank();
 
         (uint index00, uint emissionPerSecond00, uint lastUpdateTimestamp00, ) = rewardsDistributor
-            .getRewardsData(asset0, reward00);
+            .getRewardDistribution(asset0, reward00);
         assertEq(index00, 0);
         assertEq(emissionPerSecond00, 100);
         assertEq(lastUpdateTimestamp00, CURRENT_DATE);
 
         (uint index01, uint emissionPerSecond01, uint lastUpdateTimestamp01, ) = rewardsDistributor
-            .getRewardsData(asset0, reward01);
+            .getRewardDistribution(asset0, reward01);
         assertEq(index01, 0);
         assertEq(emissionPerSecond01, 200);
         assertEq(lastUpdateTimestamp01, CURRENT_DATE);
 
         (uint index1, uint emissionPerSecond1, uint lastUpdateTimestamp1, ) = rewardsDistributor
-            .getRewardsData(asset1, reward1);
+            .getRewardDistribution(asset1, reward1);
         assertEq(index1, 0);
         assertEq(emissionPerSecond1, 300);
         assertEq(lastUpdateTimestamp1, CURRENT_DATE);
@@ -645,19 +645,19 @@ contract RewardsDistributorTest is Test {
         vm.stopPrank();
 
         (uint index00, uint emissionPerSecond00, uint lastUpdateTimestamp00, ) = rewardsDistributor
-            .getRewardsData(asset0, reward00);
+            .getRewardDistribution(asset0, reward00);
         assertEq(index00, 1);
         assertEq(emissionPerSecond00, newEmissionsPerSecond0[0]);
         assertEq(lastUpdateTimestamp00, updateTimestamp);
 
         (uint index01, uint emissionPerSecond01, uint lastUpdateTimestamp01, ) = rewardsDistributor
-            .getRewardsData(asset0, reward01);
+            .getRewardDistribution(asset0, reward01);
         assertEq(index01, 2);
         assertEq(emissionPerSecond01, newEmissionsPerSecond0[1]);
         assertEq(lastUpdateTimestamp01, updateTimestamp);
 
         (uint index1, uint emissionPerSecond1, uint lastUpdateTimestamp1, ) = rewardsDistributor
-            .getRewardsData(asset1, reward1);
+            .getRewardDistribution(asset1, reward1);
         assertEq(index1, 3);
         assertEq(emissionPerSecond1, newEmissionsPerSecond1[0]);
         assertEq(lastUpdateTimestamp1, updateTimestamp);
@@ -827,14 +827,14 @@ contract RewardsDistributorTest is Test {
             uint emissionPerSecond,
             uint lastUpdateTimestamp,
             uint distributionEnd
-        ) = rewardsDistributor.getRewardsData(asset0, reward00);
+        ) = rewardsDistributor.getRewardDistribution(asset0, reward00);
         assertEq(index, 0);
         assertEq(emissionPerSecond, 10e18 / secondsTillNextDistributionEnd);
         assertEq(lastUpdateTimestamp, callTimeStamp);
         assertEq(distributionEnd, updateTimestamp + 1 weeks);
 
         (index, emissionPerSecond, lastUpdateTimestamp, distributionEnd) = rewardsDistributor
-            .getRewardsData(asset1, reward1);
+            .getRewardDistribution(asset1, reward1);
         assertEq(index, 0);
         assertEq(emissionPerSecond, 12e18 / secondsTillNextDistributionEnd);
         assertEq(lastUpdateTimestamp, callTimeStamp);

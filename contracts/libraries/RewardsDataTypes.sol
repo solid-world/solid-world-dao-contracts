@@ -19,12 +19,14 @@ library RewardsDataTypes {
         uint totalStaked;
     }
 
-    struct UserData {
-        uint104 index;
-        uint128 accrued;
+    struct AssetData {
+        mapping(address => RewardDistribution) rewardDistribution;
+        mapping(uint128 => address) availableRewards;
+        uint128 availableRewardsCount;
+        uint8 decimals;
     }
 
-    struct RewardData {
+    struct RewardDistribution {
         uint104 index;
         uint88 emissionPerSecond;
         uint32 lastUpdateTimestamp;
@@ -32,10 +34,8 @@ library RewardsDataTypes {
         mapping(address => UserData) usersData;
     }
 
-    struct AssetData {
-        mapping(address => RewardData) rewards;
-        mapping(uint128 => address) availableRewards;
-        uint128 availableRewardsCount;
-        uint8 decimals;
+    struct UserData {
+        uint104 index;
+        uint128 accrued;
     }
 }

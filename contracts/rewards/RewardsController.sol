@@ -182,10 +182,13 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
                 if (rewardsList[j] == address(0)) {
                     rewardsList[j] = _rewardsList[j];
                 }
-                uint rewardAmount = _assets[asset].rewards[rewardsList[j]].usersData[user].accrued;
+                uint rewardAmount = _assets[asset]
+                    .rewardDistribution[rewardsList[j]]
+                    .usersData[user]
+                    .accrued;
                 if (rewardAmount != 0) {
                     claimedAmounts[j] += rewardAmount;
-                    _assets[asset].rewards[rewardsList[j]].usersData[user].accrued = 0;
+                    _assets[asset].rewardDistribution[rewardsList[j]].usersData[user].accrued = 0;
                 }
             }
         }
