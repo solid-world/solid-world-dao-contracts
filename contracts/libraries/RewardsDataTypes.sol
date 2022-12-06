@@ -13,7 +13,7 @@ library RewardsDataTypes {
         IEACAggregatorProxy rewardOracle;
     }
 
-    struct UserAssetBalance {
+    struct AssetStakedAmounts {
         address asset;
         uint userStake;
         uint totalStaked;

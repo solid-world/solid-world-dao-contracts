@@ -140,23 +140,20 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         return _claimAllRewards(assets, msg.sender, msg.sender, msg.sender);
     }
 
-    /// @dev Get user balances and total supply of all the assets specified by the assets parameter
-    /// @param assets List of assets to retrieve user balance and total supply
-    /// @param user Address of the user
-    /// @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
-    function _getUserAssetBalances(address[] calldata assets, address user)
+    /// @inheritdoc RewardsDistributor
+    function _getAssetStakedAmounts(address[] calldata assets, address user)
         internal
         view
         override
-        returns (RewardsDataTypes.UserAssetBalance[] memory userAssetBalances)
+        returns (RewardsDataTypes.AssetStakedAmounts[] memory assetStakedAmounts)
     {
-        userAssetBalances = new RewardsDataTypes.UserAssetBalance[](assets.length);
+        assetStakedAmounts = new RewardsDataTypes.AssetStakedAmounts[](assets.length);
         for (uint i; i < assets.length; i++) {
-            userAssetBalances[i].asset = assets[i];
-            userAssetBalances[i].userStake = solidStakingViewActions.balanceOf(assets[i], user);
-            userAssetBalances[i].totalStaked = solidStakingViewActions.totalStaked(assets[i]);
+            assetStakedAmounts[i].asset = assets[i];
+            assetStakedAmounts[i].userStake = solidStakingViewActions.balanceOf(assets[i], user);
+            assetStakedAmounts[i].totalStaked = solidStakingViewActions.totalStaked(assets[i]);
         }
-        return userAssetBalances;
+        return assetStakedAmounts;
     }
 
     /// @dev Claims one type of reward for a user on behalf, on all the assets of the pool, accumulating the pending rewards.
@@ -177,7 +174,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         rewardsList = new address[](rewardsListLength);
         claimedAmounts = new uint[](rewardsListLength);
 
-        _updateDataMultiple(user, _getUserAssetBalances(assets, user));
+        _updateDataMultiple(user, _getAssetStakedAmounts(assets, user));
 
         for (uint i; i < assets.length; i++) {
             address asset = assets[i];
