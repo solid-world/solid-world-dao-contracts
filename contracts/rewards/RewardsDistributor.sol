@@ -98,7 +98,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address asset,
         address reward
     ) public view override returns (uint) {
-        return _assets[asset].rewardDistribution[reward].usersData[user].index;
+        return _assets[asset].rewardDistribution[reward].userReward[user].index;
     }
 
     /// @inheritdoc IRewardsDistributor
@@ -112,7 +112,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         for (uint i; i < _assetsList.length; i++) {
             totalAccrued += _assets[_assetsList[i]]
                 .rewardDistribution[reward]
-                .usersData[user]
+                .userReward[user]
                 .accrued;
         }
 
@@ -134,14 +134,14 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             if (assetStakedAmounts[i].userStake == 0) {
                 unclaimedRewards += _assets[assetStakedAmounts[i].asset]
                     .rewardDistribution[reward]
-                    .usersData[user]
+                    .userReward[user]
                     .accrued;
             } else {
                 unclaimedRewards +=
                     _getPendingRewards(user, reward, assetStakedAmounts[i]) +
                     _assets[assetStakedAmounts[i].asset]
                         .rewardDistribution[reward]
-                        .usersData[user]
+                        .userReward[user]
                         .accrued;
             }
         }
@@ -169,7 +169,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
                 rewardsList[r] = _rewardsList[r];
                 unclaimedAmounts[r] += _assets[assetStakedAmounts[i].asset]
                     .rewardDistribution[rewardsList[r]]
-                    .usersData[user]
+                    .userReward[user]
                     .accrued;
 
                 if (assetStakedAmounts[i].userStake == 0) {
@@ -440,7 +440,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
                     assetUnit
                 );
 
-                (uint rewardsAccrued, bool userDataUpdated) = _updateUserData(
+                (uint rewardsAccrued, bool userRewardUpdated) = _updateUserReward(
                     rewardDistribution,
                     user,
                     userStake,
@@ -448,7 +448,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
                     assetUnit
                 );
 
-                if (rewardDistributionUpdated || userDataUpdated) {
+                if (rewardDistributionUpdated || userRewardUpdated) {
                     emit Accrued(asset, reward, user, newAssetIndex, newAssetIndex, rewardsAccrued);
                 }
             }
@@ -496,23 +496,23 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     /// @param newAssetIndex The new index of the asset distribution
     /// @param assetUnit One unit of asset (10**decimals)
     /// @return The rewards accrued since the last update
-    function _updateUserData(
+    function _updateUserReward(
         RewardsDataTypes.RewardDistribution storage rewardDistribution,
         address user,
         uint userStake,
         uint newAssetIndex,
         uint assetUnit
     ) internal returns (uint, bool) {
-        uint userIndex = rewardDistribution.usersData[user].index;
+        uint userIndex = rewardDistribution.userReward[user].index;
         uint rewardsAccrued;
         bool dataUpdated;
         if ((dataUpdated = userIndex != newAssetIndex)) {
             // already checked for overflow in _updateRewardDistribution
-            rewardDistribution.usersData[user].index = uint104(newAssetIndex);
+            rewardDistribution.userReward[user].index = uint104(newAssetIndex);
             if (userStake != 0) {
                 rewardsAccrued = _getRewards(userStake, newAssetIndex, userIndex, assetUnit);
 
-                rewardDistribution.usersData[user].accrued += rewardsAccrued.toUint128();
+                rewardDistribution.userReward[user].accrued += rewardsAccrued.toUint128();
             }
         }
         return (rewardsAccrued, dataUpdated);
@@ -542,7 +542,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             _getRewards(
                 assetStakedAmounts.userStake,
                 nextIndex,
-                rewardDistribution.usersData[user].index,
+                rewardDistribution.userReward[user].index,
                 assetUnit
             );
     }

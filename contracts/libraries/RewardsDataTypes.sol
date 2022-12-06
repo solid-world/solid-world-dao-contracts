@@ -31,10 +31,10 @@ library RewardsDataTypes {
         uint88 emissionPerSecond;
         uint32 lastUpdateTimestamp;
         uint32 distributionEnd;
-        mapping(address => UserData) usersData;
+        mapping(address => UserReward) userReward;
     }
 
-    struct UserData {
+    struct UserReward {
         uint104 index;
         uint128 accrued;
     }
