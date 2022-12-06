@@ -157,7 +157,6 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         rewardsList = new address[](_rewardsList.length);
         unclaimedAmounts = new uint[](rewardsList.length);
 
-        // Add unrealized rewards from user to unclaimedRewards
         for (uint i; i < assetStakedAmounts.length; i++) {
             for (uint r; r < rewardsList.length; r++) {
                 rewardsList[r] = _rewardsList[r];
@@ -475,7 +474,6 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
             indexUpdated = true;
 
-            //optimization: storing one after another saves one SSTORE
             rewardDistribution.index = uint104(newIndex);
             rewardDistribution.lastUpdateTimestamp = block.timestamp.toUint32();
         } else {
@@ -503,7 +501,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         uint rewardsAccrued;
         bool dataUpdated;
         if ((dataUpdated = userIndex != newAssetIndex)) {
-            // already checked for overflow in _updateRewardDistribution
+            if (newAssetIndex > type(uint104).max) {
+                revert IndexOverflow(newAssetIndex);
+            }
+
             rewardDistribution.userReward[user].index = uint104(newAssetIndex);
             if (userStake != 0) {
                 rewardsAccrued = _computeAccruedRewardAmount(

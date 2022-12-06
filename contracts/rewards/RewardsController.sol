@@ -9,15 +9,10 @@ import "../PostConstruct.sol";
 import "../libraries/GPv2SafeERC20.sol";
 
 contract RewardsController is IRewardsController, RewardsDistributor, PostConstruct {
-    // This mapping allows whitelisted addresses to claim on behalf of others
-    // useful for contracts that hold tokens to be rewarded but don't have any native logic to claim Liquidity Mining rewards
+    /// @dev user => claimer
     mapping(address => address) internal _authorizedClaimers;
 
-    // This mapping contains the price oracle per reward.
-    // A price oracle is enforced for integrators to be able to show incentives at
-    // the current Aave UI without the need to setup an external price registry
-    // At the moment of reward configuration, the Incentives Controller performs
-    // a check to see if the provided reward oracle contains `latestAnswer`.
+    /// @dev reward => rewardOracle
     mapping(address => IEACAggregatorProxy) internal _rewardOracle;
 
     /// @dev Account that secures ERC20 rewards.
@@ -63,10 +58,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         onlyEmissionManager
     {
         for (uint i; i < config.length; i++) {
-            // Get the current total staked amount for the asset
             config[i].totalStaked = solidStakingViewActions.totalStaked(config[i].asset);
-
-            // Set reward oracle, enforces input oracle to have latestPrice function
             _setRewardOracle(config[i].reward, config[i].rewardOracle);
         }
         _configureAssets(config);

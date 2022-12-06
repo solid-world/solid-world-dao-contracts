@@ -19,7 +19,6 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     IRewardsController internal _rewardsController;
     address internal carbonRewardAdmin;
 
-    /// @dev Only emission admin of the given reward can call functions marked by this modifier.
     modifier onlyEmissionAdmin(address reward) {
         if (_emissionAdmins[reward] != msg.sender) {
             revert NotEmissionAdmin(msg.sender, reward);
