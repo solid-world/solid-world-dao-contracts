@@ -175,8 +175,8 @@ contract RewardsDistributorTest is Test {
         assertEq(rewards2.length, 0);
     }
 
-    function testGetRewardsList() public {
-        address[] memory rewards = rewardsDistributor.getRewardsList();
+    function testGetAllRewards() public {
+        address[] memory rewards = rewardsDistributor.getAllRewards();
         assertEq(rewards.length, 3);
         assertEq(rewards[0], reward00);
         assertEq(rewards[1], reward1);
@@ -257,7 +257,7 @@ contract RewardsDistributorTest is Test {
         assertEq(unclaimedAmounts[2], 200);
     }
 
-    function testGetUserAssetIndex() public {
+    function testGetUserIndex() public {
         address[] memory rewards = new address[](2);
         rewards[0] = reward00;
         rewards[1] = reward01;
@@ -284,9 +284,9 @@ contract RewardsDistributorTest is Test {
             totalStaked
         );
 
-        assertEq(rewardsDistributor.getUserAssetIndex(user, asset, reward00), 1);
-        assertEq(rewardsDistributor.getUserAssetIndex(user, asset, reward01), 2);
-        assertEq(rewardsDistributor.getUserAssetIndex(user, asset, reward1), 0);
+        assertEq(rewardsDistributor.getUserIndex(user, asset, reward00), 1);
+        assertEq(rewardsDistributor.getUserIndex(user, asset, reward01), 2);
+        assertEq(rewardsDistributor.getUserIndex(user, asset, reward1), 0);
     }
 
     function testGetUserAccruedRewards() public {

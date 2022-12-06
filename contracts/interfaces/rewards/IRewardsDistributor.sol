@@ -106,7 +106,7 @@ interface IRewardsDistributor {
     /// @param asset The incentivized asset
     /// @param reward The reward token of the incentivized asset
     /// @return The current user asset index, not including new distributions
-    function getUserAssetIndex(
+    function getUserIndex(
         address user,
         address asset,
         address reward
@@ -136,7 +136,7 @@ interface IRewardsDistributor {
 
     /// @dev Returns the list of available reward addresses
     /// @return List of rewards supported in this contract
-    function getRewardsList() external view returns (address[] memory);
+    function getAllRewards() external view returns (address[] memory);
 
     /// @dev Returns the accrued rewards balance of a user, not including virtually accrued rewards since last distribution.
     /// @param user The address of the user

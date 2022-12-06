@@ -11,20 +11,14 @@ import "../interfaces/staking/ISolidStakingViewActions.sol";
 abstract contract RewardsDistributor is IRewardsDistributor {
     using SafeCast for uint;
 
-    // manager of incentives
-    address internal _emissionManager;
-
     // asset => AssetData
-    mapping(address => RewardsDataTypes.AssetData) internal _assets;
-
+    mapping(address => RewardsDataTypes.AssetData) internal _assetData;
     // reward => enabled
     mapping(address => bool) internal _isRewardEnabled;
 
-    // global rewards list
     address[] internal _rewardsList;
-
-    //global assets list
     address[] internal _assetsList;
+    address internal _emissionManager;
 
     /// @dev Used to fetch the total amount staked and the stake of an user for a given asset
     ISolidStakingViewActions public solidStakingViewActions;
@@ -37,9 +31,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     }
 
     modifier distributionExists(address asset, address reward) {
-        RewardsDataTypes.RewardDistribution storage rewardDistribution = _assets[asset]
+        RewardsDataTypes.RewardDistribution storage rewardDistribution = _assetData[asset]
             .rewardDistribution[reward];
-        uint decimals = _assets[asset].decimals;
+        uint decimals = _assetData[asset].decimals;
         if (decimals == 0 || rewardDistribution.lastUpdateTimestamp == 0) {
             revert DistributionNonExistent(asset, reward);
         }
@@ -59,10 +53,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         )
     {
         return (
-            _assets[asset].rewardDistribution[reward].index,
-            _assets[asset].rewardDistribution[reward].emissionPerSecond,
-            _assets[asset].rewardDistribution[reward].lastUpdateTimestamp,
-            _assets[asset].rewardDistribution[reward].distributionEnd
+            _assetData[asset].rewardDistribution[reward].index,
+            _assetData[asset].rewardDistribution[reward].emissionPerSecond,
+            _assetData[asset].rewardDistribution[reward].lastUpdateTimestamp,
+            _assetData[asset].rewardDistribution[reward].distributionEnd
         );
     }
 
@@ -73,32 +67,32 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         override
         returns (uint)
     {
-        return _assets[asset].rewardDistribution[reward].distributionEnd;
+        return _assetData[asset].rewardDistribution[reward].distributionEnd;
     }
 
     /// @inheritdoc IRewardsDistributor
     function getRewardsByAsset(address asset) external view override returns (address[] memory) {
-        uint128 rewardsCount = _assets[asset].availableRewardsCount;
-        address[] memory availableRewards = new address[](rewardsCount);
+        uint128 rewardsCount = _assetData[asset].availableRewardsCount;
+        address[] memory rewards = new address[](rewardsCount);
 
         for (uint128 i; i < rewardsCount; i++) {
-            availableRewards[i] = _assets[asset].availableRewards[i];
+            rewards[i] = _assetData[asset].availableRewards[i];
         }
-        return availableRewards;
+        return rewards;
     }
 
     /// @inheritdoc IRewardsDistributor
-    function getRewardsList() external view override returns (address[] memory) {
+    function getAllRewards() external view override returns (address[] memory) {
         return _rewardsList;
     }
 
     /// @inheritdoc IRewardsDistributor
-    function getUserAssetIndex(
+    function getUserIndex(
         address user,
         address asset,
         address reward
     ) public view override returns (uint) {
-        return _assets[asset].rewardDistribution[reward].userReward[user].index;
+        return _assetData[asset].rewardDistribution[reward].userReward[user].index;
     }
 
     /// @inheritdoc IRewardsDistributor
@@ -110,7 +104,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     {
         uint totalAccrued;
         for (uint i; i < _assetsList.length; i++) {
-            totalAccrued += _assets[_assetsList[i]]
+            totalAccrued += _assetData[_assetsList[i]]
                 .rewardDistribution[reward]
                 .userReward[user]
                 .accrued;
@@ -132,14 +126,14 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
         for (uint i; i < assetStakedAmounts.length; i++) {
             if (assetStakedAmounts[i].userStake == 0) {
-                unclaimedRewards += _assets[assetStakedAmounts[i].asset]
+                unclaimedRewards += _assetData[assetStakedAmounts[i].asset]
                     .rewardDistribution[reward]
                     .userReward[user]
                     .accrued;
             } else {
                 unclaimedRewards +=
                     _getPendingRewards(user, reward, assetStakedAmounts[i]) +
-                    _assets[assetStakedAmounts[i].asset]
+                    _assetData[assetStakedAmounts[i].asset]
                         .rewardDistribution[reward]
                         .userReward[user]
                         .accrued;
@@ -167,7 +161,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         for (uint i; i < assetStakedAmounts.length; i++) {
             for (uint r; r < rewardsList.length; r++) {
                 rewardsList[r] = _rewardsList[r];
-                unclaimedAmounts[r] += _assets[assetStakedAmounts[i].asset]
+                unclaimedAmounts[r] += _assetData[assetStakedAmounts[i].asset]
                     .rewardDistribution[rewardsList[r]]
                     .userReward[user]
                     .accrued;
@@ -192,13 +186,13 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         uint32 newDistributionEnd
     ) external override onlyEmissionManager distributionExists(asset, reward) {
         uint oldDistributionEnd = _setDistributionEnd(asset, reward, newDistributionEnd);
-        uint index = _assets[asset].rewardDistribution[reward].index;
+        uint index = _assetData[asset].rewardDistribution[reward].index;
 
         emit AssetConfigUpdated(
             asset,
             reward,
-            _assets[asset].rewardDistribution[reward].emissionPerSecond,
-            _assets[asset].rewardDistribution[reward].emissionPerSecond,
+            _assetData[asset].rewardDistribution[reward].emissionPerSecond,
+            _assetData[asset].rewardDistribution[reward].emissionPerSecond,
             oldDistributionEnd,
             newDistributionEnd,
             index
@@ -281,7 +275,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
     /// @inheritdoc IRewardsDistributor
     function getAssetDecimals(address asset) external view returns (uint8) {
-        return _assets[asset].decimals;
+        return _assetData[asset].decimals;
     }
 
     /// @inheritdoc IRewardsDistributor
@@ -309,7 +303,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         view
         returns (bool)
     {
-        uint32 currentDistributionEnd = _assets[asset].rewardDistribution[reward].distributionEnd;
+        uint32 currentDistributionEnd = _assetData[asset]
+            .rewardDistribution[reward]
+            .distributionEnd;
         uint32 nextDistributionEnd = _computeNewCarbonRewardDistributionEnd(asset, reward);
 
         bool isInitializedDistribution = currentDistributionEnd != 0;
@@ -324,12 +320,14 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         view
         returns (uint32 newDistributionEnd)
     {
-        uint32 currentDistributionEnd = _assets[asset].rewardDistribution[reward].distributionEnd;
+        uint32 currentDistributionEnd = _assetData[asset]
+            .rewardDistribution[reward]
+            .distributionEnd;
 
         newDistributionEnd = currentDistributionEnd + 1 weeks;
     }
 
-    /// @dev Configure the _assets for a specific emission
+    /// @dev Configure the _assetData for a specific emission
     /// @param rewardsInput The array of each asset configuration
     function _configureAssets(RewardsDataTypes.DistributionConfig[] memory rewardsInput) internal {
         for (uint i; i < rewardsInput.length; i++) {
@@ -339,23 +337,21 @@ abstract contract RewardsDistributor is IRewardsDistributor {
                 revert InvalidAssetDecimals(rewardsInput[i].asset);
             }
 
-            if (_assets[rewardsInput[i].asset].decimals == 0) {
-                //never initialized before, adding to the list of assets
+            if (_assetData[rewardsInput[i].asset].decimals == 0) {
                 _assetsList.push(rewardsInput[i].asset);
             }
 
-            _assets[rewardsInput[i].asset].decimals = decimals;
+            _assetData[rewardsInput[i].asset].decimals = decimals;
 
-            RewardsDataTypes.RewardDistribution storage rewardDistribution = _assets[
+            RewardsDataTypes.RewardDistribution storage rewardDistribution = _assetData[
                 rewardsInput[i].asset
             ].rewardDistribution[rewardsInput[i].reward];
 
-            // Add reward address to asset available rewards if latestUpdateTimestamp is zero
             if (rewardDistribution.lastUpdateTimestamp == 0) {
-                _assets[rewardsInput[i].asset].availableRewards[
-                    _assets[rewardsInput[i].asset].availableRewardsCount
-                ] = rewardsInput[i].reward;
-                _assets[rewardsInput[i].asset].availableRewardsCount++;
+                uint128 rewardCount = _assetData[rewardsInput[i].asset].availableRewardsCount;
+                _assetData[rewardsInput[i].asset].availableRewards[rewardCount] = rewardsInput[i]
+                    .reward;
+                _assetData[rewardsInput[i].asset].availableRewardsCount++;
             }
 
             // Add reward address to global rewards list if still not enabled
@@ -371,7 +367,6 @@ abstract contract RewardsDistributor is IRewardsDistributor {
                 10**decimals
             );
 
-            // Configure emission and distribution end of the reward per asset
             uint88 oldEmissionsPerSecond = rewardDistribution.emissionPerSecond;
             uint32 oldDistributionEnd = rewardDistribution.distributionEnd;
             rewardDistribution.emissionPerSecond = rewardsInput[i].emissionPerSecond;
@@ -420,9 +415,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         uint totalStaked
     ) internal {
         uint assetUnit;
-        uint numAvailableRewards = _assets[asset].availableRewardsCount;
+        uint numAvailableRewards = _assetData[asset].availableRewardsCount;
         unchecked {
-            assetUnit = 10**_assets[asset].decimals;
+            assetUnit = 10**_assetData[asset].decimals;
         }
 
         if (numAvailableRewards == 0) {
@@ -430,8 +425,8 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         }
         unchecked {
             for (uint128 r; r < numAvailableRewards; r++) {
-                address reward = _assets[asset].availableRewards[r];
-                RewardsDataTypes.RewardDistribution storage rewardDistribution = _assets[asset]
+                address reward = _assetData[asset].availableRewards[r];
+                RewardsDataTypes.RewardDistribution storage rewardDistribution = _assetData[asset]
                     .rewardDistribution[reward];
 
                 (uint newAssetIndex, bool rewardDistributionUpdated) = _updateRewardDistribution(
@@ -528,10 +523,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address reward,
         RewardsDataTypes.AssetStakedAmounts memory assetStakedAmounts
     ) internal view returns (uint) {
-        RewardsDataTypes.RewardDistribution storage rewardDistribution = _assets[
+        RewardsDataTypes.RewardDistribution storage rewardDistribution = _assetData[
             assetStakedAmounts.asset
         ].rewardDistribution[reward];
-        uint assetUnit = 10**_assets[assetStakedAmounts.asset].decimals;
+        uint assetUnit = 10**_assetData[assetStakedAmounts.asset].decimals;
         (, uint nextIndex) = _computeNewAssetIndex(
             rewardDistribution,
             assetStakedAmounts.totalStaked,
@@ -630,8 +625,8 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             uint distributionEnd
         )
     {
-        RewardsDataTypes.AssetData storage assetConfig = _assets[asset];
-        RewardsDataTypes.RewardDistribution storage rewardDistribution = _assets[asset]
+        RewardsDataTypes.AssetData storage assetConfig = _assetData[asset];
+        RewardsDataTypes.RewardDistribution storage rewardDistribution = _assetData[asset]
             .rewardDistribution[reward];
         uint decimals = assetConfig.decimals;
         if (decimals == 0 || rewardDistribution.lastUpdateTimestamp == 0) {
@@ -655,7 +650,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address reward,
         uint32 newDistributionEnd
     ) internal returns (uint oldDistributionEnd) {
-        oldDistributionEnd = _assets[asset].rewardDistribution[reward].distributionEnd;
-        _assets[asset].rewardDistribution[reward].distributionEnd = newDistributionEnd;
+        oldDistributionEnd = _assetData[asset].rewardDistribution[reward].distributionEnd;
+        _assetData[asset].rewardDistribution[reward].distributionEnd = newDistributionEnd;
     }
 }
