@@ -72,7 +72,7 @@ interface IRewardsController is IRewardsDistributor {
     ///   address reward: The reward token address
     ///   IEACAggregatorProxy rewardOracle: The Price Oracle of a reward to visualize the incentives at the UI Frontend.
     ///                                     Must follow Chainlink Aggregator IEACAggregatorProxy interface to be compatible.
-    function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config) external;
+    function configureAssets(RewardsDataTypes.DistributionConfig[] memory config) external;
 
     /// @dev Called by the corresponding asset on transfer hook in order to update the rewards distribution.
     /// @param asset The incentivized asset address

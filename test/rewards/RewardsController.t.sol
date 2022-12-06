@@ -52,12 +52,12 @@ contract RewardsControllerTest is Test {
                 notEmissionManager
             )
         );
-        rewardsController.configureAssets(new RewardsDataTypes.RewardsConfigInput[](0));
+        rewardsController.configureAssets(new RewardsDataTypes.DistributionConfig[](0));
     }
 
     function testConfigureAssets_failsForInvalidDecimals() public {
-        RewardsDataTypes.RewardsConfigInput[]
-            memory config = new RewardsDataTypes.RewardsConfigInput[](2);
+        RewardsDataTypes.DistributionConfig[]
+            memory config = new RewardsDataTypes.DistributionConfig[](2);
         config[0].reward = vm.addr(4);
         config[0].asset = vm.addr(5);
         config[0].emissionPerSecond = 100;
@@ -111,8 +111,8 @@ contract RewardsControllerTest is Test {
     }
 
     function testConfigureAssets() public {
-        RewardsDataTypes.RewardsConfigInput[]
-            memory config = new RewardsDataTypes.RewardsConfigInput[](2);
+        RewardsDataTypes.DistributionConfig[]
+            memory config = new RewardsDataTypes.DistributionConfig[](2);
         config[0].reward = vm.addr(4);
         config[0].asset = vm.addr(5);
         config[0].emissionPerSecond = 100;

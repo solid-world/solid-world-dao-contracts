@@ -58,8 +58,8 @@ contract EmissionManagerTest is Test {
     }
 
     function testConfigureAssets() public {
-        RewardsDataTypes.RewardsConfigInput[]
-            memory config = new RewardsDataTypes.RewardsConfigInput[](2);
+        RewardsDataTypes.DistributionConfig[]
+            memory config = new RewardsDataTypes.DistributionConfig[](2);
         config[0].reward = vm.addr(113);
         config[0].asset = vm.addr(114);
         config[0].rewardOracle = IEACAggregatorProxy(vm.addr(115));
@@ -91,8 +91,8 @@ contract EmissionManagerTest is Test {
     }
 
     function testConfigureAssets_failsIfNotCalledByEmissionAdmin() public {
-        RewardsDataTypes.RewardsConfigInput[]
-            memory config = new RewardsDataTypes.RewardsConfigInput[](2);
+        RewardsDataTypes.DistributionConfig[]
+            memory config = new RewardsDataTypes.DistributionConfig[](2);
         config[0].reward = vm.addr(113);
         config[0].asset = vm.addr(114);
         config[0].rewardOracle = IEACAggregatorProxy(vm.addr(115));

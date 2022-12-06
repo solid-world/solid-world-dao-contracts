@@ -38,7 +38,7 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     }
 
     /// @inheritdoc IEmissionManager
-    function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config)
+    function configureAssets(RewardsDataTypes.DistributionConfig[] memory config)
         external
         override
     {
@@ -120,6 +120,11 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     /// @inheritdoc IEmissionManager
     function setRewardsController(address controller) external override onlyOwner {
         _rewardsController = IRewardsController(controller);
+    }
+
+    /// @inheritdoc IEmissionManager
+    function setCarbonRewardsManager(address carbonRewardsManager) external override onlyOwner {
+        _carbonRewardsManager = IWeeklyCarbonRewardsManager(carbonRewardsManager);
     }
 
     /// @inheritdoc IEmissionManager

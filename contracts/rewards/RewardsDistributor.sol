@@ -324,7 +324,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
     /// @dev Configure the _assets for a specific emission
     /// @param rewardsInput The array of each asset configuration
-    function _configureAssets(RewardsDataTypes.RewardsConfigInput[] memory rewardsInput) internal {
+    function _configureAssets(RewardsDataTypes.DistributionConfig[] memory rewardsInput) internal {
         for (uint i; i < rewardsInput.length; i++) {
             uint8 decimals = IERC20Metadata(rewardsInput[i].asset).decimals();
 

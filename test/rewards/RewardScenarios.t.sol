@@ -358,11 +358,17 @@ contract RewardScenarios is Test {
             4130.352e18 + 12391.056e18 + 25e18 * 2,
             DELTA
         );
+
+        assertApproxEqAbs(
+            CollateralizedBasketToken(mangroveRewardToken).balanceOf(address(rewardsVault)),
+            0,
+            DELTA
+        );
     }
 
     function _initialConfigurationCarbonRewards() internal {
-        RewardsDataTypes.RewardsConfigInput[]
-            memory carbonConfig = new RewardsDataTypes.RewardsConfigInput[](2);
+        RewardsDataTypes.DistributionConfig[]
+            memory carbonConfig = new RewardsDataTypes.DistributionConfig[](2);
         carbonConfig[0].asset = assetMangrove;
         carbonConfig[0].reward = mangroveRewardToken;
         carbonConfig[0].emissionPerSecond = 0;
@@ -381,8 +387,8 @@ contract RewardScenarios is Test {
     function _initialConfigurationUSDCRewards() internal {
         vm.warp(CURRENT_DATE + 5 days);
 
-        RewardsDataTypes.RewardsConfigInput[]
-            memory usdcConfig = new RewardsDataTypes.RewardsConfigInput[](2);
+        RewardsDataTypes.DistributionConfig[]
+            memory usdcConfig = new RewardsDataTypes.DistributionConfig[](2);
         usdcConfig[0].asset = assetMangrove;
         usdcConfig[0].reward = usdcToken;
         usdcConfig[0].emissionPerSecond = 0;

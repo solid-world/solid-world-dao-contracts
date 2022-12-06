@@ -4,7 +4,7 @@ pragma solidity ^0.8.16;
 import "../interfaces/rewards/IEACAggregatorProxy.sol";
 
 library RewardsDataTypes {
-    struct RewardsConfigInput {
+    struct DistributionConfig {
         uint88 emissionPerSecond;
         uint totalStaked;
         uint32 distributionEnd;

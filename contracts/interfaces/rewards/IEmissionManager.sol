@@ -30,7 +30,7 @@ interface IEmissionManager {
     ///   address reward: The reward token address
     ///   IEACAggregatorProxy rewardOracle: The Price Oracle of a reward to visualize the incentives at the UI Frontend.
     ///                                     Must follow Chainlink Aggregator IEACAggregatorProxy interface to be compatible.
-    function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config) external;
+    function configureAssets(RewardsDataTypes.DistributionConfig[] memory config) external;
 
     /// @dev Sets an Aave Oracle contract to enforce rewards with a source of value.
     /// @dev Only callable by the emission admin of the given reward
@@ -90,6 +90,10 @@ interface IEmissionManager {
     /// @dev Only callable by the owner of the EmissionManager
     /// @param controller the address of the RewardsController contract
     function setRewardsController(address controller) external;
+
+    /// @dev Only callable by the owner of the EmissionManager
+    /// @param carbonRewardsManager the address of the IWeeklyCarbonRewardsManager contract
+    function setCarbonRewardsManager(address carbonRewardsManager) external;
 
     /// @dev Returns the rewards controller address
     /// @return The address of the RewardsController contract

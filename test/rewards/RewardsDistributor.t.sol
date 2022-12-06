@@ -62,8 +62,8 @@ contract RewardsDistributorTest is Test {
             emissionManager
         );
 
-        RewardsDataTypes.RewardsConfigInput[]
-            memory config = new RewardsDataTypes.RewardsConfigInput[](3);
+        RewardsDataTypes.DistributionConfig[]
+            memory config = new RewardsDataTypes.DistributionConfig[](3);
         config[0].asset = asset0;
         config[0].reward = reward00;
         config[0].rewardOracle = IEACAggregatorProxy(rewardOracle);
