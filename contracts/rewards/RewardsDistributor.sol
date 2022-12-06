@@ -132,7 +132,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
                     .accrued;
             } else {
                 unclaimedAmount +=
-                    _getPendingRewards(user, reward, assetStakedAmounts[i]) +
+                    _computePendingRewardAmountForUser(user, reward, assetStakedAmounts[i]) +
                     _assetData[assetStakedAmounts[i].asset]
                         .rewardDistribution[reward]
                         .userReward[user]
@@ -169,7 +169,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
                 if (assetStakedAmounts[i].userStake == 0) {
                     continue;
                 }
-                unclaimedAmounts[r] += _getPendingRewards(
+                unclaimedAmounts[r] += _computePendingRewardAmountForUser(
                     user,
                     rewardsList[r],
                     assetStakedAmounts[i]
@@ -328,71 +328,72 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     }
 
     /// @dev Configure the _assetData for a specific emission
-    /// @param rewardsInput The array of each asset configuration
-    function _configureAssets(RewardsDataTypes.DistributionConfig[] memory rewardsInput) internal {
-        for (uint i; i < rewardsInput.length; i++) {
-            uint8 decimals = IERC20Metadata(rewardsInput[i].asset).decimals();
+    /// @param distributionConfig The array of each asset configuration
+    function _configureAssets(RewardsDataTypes.DistributionConfig[] memory distributionConfig)
+        internal
+    {
+        for (uint i; i < distributionConfig.length; i++) {
+            uint8 decimals = IERC20Metadata(distributionConfig[i].asset).decimals();
 
             if (decimals == 0) {
-                revert InvalidAssetDecimals(rewardsInput[i].asset);
+                revert InvalidAssetDecimals(distributionConfig[i].asset);
             }
 
-            if (_assetData[rewardsInput[i].asset].decimals == 0) {
-                _assetsList.push(rewardsInput[i].asset);
+            if (_assetData[distributionConfig[i].asset].decimals == 0) {
+                _assetsList.push(distributionConfig[i].asset);
             }
 
-            _assetData[rewardsInput[i].asset].decimals = decimals;
+            _assetData[distributionConfig[i].asset].decimals = decimals;
 
             RewardsDataTypes.RewardDistribution storage rewardDistribution = _assetData[
-                rewardsInput[i].asset
-            ].rewardDistribution[rewardsInput[i].reward];
+                distributionConfig[i].asset
+            ].rewardDistribution[distributionConfig[i].reward];
 
             if (rewardDistribution.lastUpdateTimestamp == 0) {
-                uint128 rewardCount = _assetData[rewardsInput[i].asset].availableRewardsCount;
-                _assetData[rewardsInput[i].asset].availableRewards[rewardCount] = rewardsInput[i]
-                    .reward;
-                _assetData[rewardsInput[i].asset].availableRewardsCount++;
+                uint128 rewardCount = _assetData[distributionConfig[i].asset].availableRewardsCount;
+                _assetData[distributionConfig[i].asset].availableRewards[
+                    rewardCount
+                ] = distributionConfig[i].reward;
+                _assetData[distributionConfig[i].asset].availableRewardsCount++;
             }
 
-            // Add reward address to global rewards list if still not enabled
-            if (_isRewardEnabled[rewardsInput[i].reward] == false) {
-                _isRewardEnabled[rewardsInput[i].reward] = true;
-                _rewardsList.push(rewardsInput[i].reward);
+            if (_isRewardEnabled[distributionConfig[i].reward] == false) {
+                _isRewardEnabled[distributionConfig[i].reward] = true;
+                _rewardsList.push(distributionConfig[i].reward);
             }
 
-            // Due emissions is still zero, updates only latestUpdateTimestamp
-            (uint newIndex, ) = _updateRewardDistribution(
+            (uint newAssetIndex, ) = _updateRewardDistribution(
                 rewardDistribution,
-                rewardsInput[i].totalStaked,
+                distributionConfig[i].totalStaked,
                 10**decimals
             );
 
             uint88 oldEmissionsPerSecond = rewardDistribution.emissionPerSecond;
             uint32 oldDistributionEnd = rewardDistribution.distributionEnd;
-            rewardDistribution.emissionPerSecond = rewardsInput[i].emissionPerSecond;
-            rewardDistribution.distributionEnd = rewardsInput[i].distributionEnd;
+            rewardDistribution.emissionPerSecond = distributionConfig[i].emissionPerSecond;
+            rewardDistribution.distributionEnd = distributionConfig[i].distributionEnd;
 
             emit AssetConfigUpdated(
-                rewardsInput[i].asset,
-                rewardsInput[i].reward,
+                distributionConfig[i].asset,
+                distributionConfig[i].reward,
                 oldEmissionsPerSecond,
-                rewardsInput[i].emissionPerSecond,
+                distributionConfig[i].emissionPerSecond,
                 oldDistributionEnd,
-                rewardsInput[i].distributionEnd,
-                newIndex
+                distributionConfig[i].distributionEnd,
+                newAssetIndex
             );
         }
     }
 
-    /// @dev Accrues all the rewards of the assets specified in the assetStakedAmounts list
+    /// @dev Updates rewards distribution and user rewards for all rewards configured for the specified assets
     /// @param user The address of the user
     /// @param assetStakedAmounts List of structs with the user stake and total staked of a set of assets
-    function _updateDataMultiple(
+    function _updateAllRewardDistributionsAndUserRewardsForAssets(
         address user,
         RewardsDataTypes.AssetStakedAmounts[] memory assetStakedAmounts
     ) internal {
         for (uint i; i < assetStakedAmounts.length; i++) {
-            _updateData(
+            _updateAllRewardDistributionsAndUserRewardsForAsset(
                 assetStakedAmounts[i].asset,
                 user,
                 assetStakedAmounts[i].userStake,
@@ -401,14 +402,14 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         }
     }
 
-    /// @dev Iterates and accrues all the rewards for asset of the specific user
+    /// @dev Updates rewards distribution and user rewards for all rewards configured for the specified asset
     /// @dev When call origin is (un)staking, `userStake` and `totalStaked` are prior to the (un)stake action
     /// @dev When call origin is rewards claiming, `userStake` and `totalStaked` are current values
-    /// @param asset The address of the reference asset of the distribution
+    /// @param asset The address of the incentivized asset
     /// @param user The user address
     /// @param userStake The amount of assets staked by the user
     /// @param totalStaked The total amount staked of the asset
-    function _updateData(
+    function _updateAllRewardDistributionsAndUserRewardsForAsset(
         address asset,
         address user,
         uint userStake,
@@ -505,7 +506,12 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             // already checked for overflow in _updateRewardDistribution
             rewardDistribution.userReward[user].index = uint104(newAssetIndex);
             if (userStake != 0) {
-                rewardsAccrued = _getRewards(userStake, newAssetIndex, userIndex, assetUnit);
+                rewardsAccrued = _computeAccruedRewardAmount(
+                    userStake,
+                    newAssetIndex,
+                    userIndex,
+                    assetUnit
+                );
 
                 rewardDistribution.userReward[user].accrued += rewardsAccrued.toUint128();
             }
@@ -513,12 +519,12 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         return (rewardsAccrued, dataUpdated);
     }
 
-    /// @dev Calculates the pending (not yet accrued) rewards since the last user action
+    /// @dev Calculates the pending (not yet accrued) reward amount since the last user action
     /// @param user The address of the user
     /// @param reward The address of the reward token
     /// @param assetStakedAmounts struct with the user stake and total staked of the incentivized asset
     /// @return The pending rewards for the user since the last user action
-    function _getPendingRewards(
+    function _computePendingRewardAmountForUser(
         address user,
         address reward,
         RewardsDataTypes.AssetStakedAmounts memory assetStakedAmounts
@@ -534,7 +540,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         );
 
         return
-            _getRewards(
+            _computeAccruedRewardAmount(
                 assetStakedAmounts.userStake,
                 nextIndex,
                 rewardDistribution.userReward[user].index,
@@ -544,21 +550,21 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
     /// @dev Internal function for the calculation of user's rewards on a distribution
     /// @param userStake The amount of assets staked by the user on a distribution
-    /// @param reserveIndex Current index of the distribution
-    /// @param userIndex Index stored for the user, representation his staking moment
+    /// @param assetIndex Current index of the asset reward distribution
+    /// @param userIndex Index stored for the user, representing his staking moment
     /// @param assetUnit One unit of asset (10**decimals)
-    /// @return The rewards
-    function _getRewards(
+    /// @return accruedRewardAmount The accrued reward amount
+    function _computeAccruedRewardAmount(
         uint userStake,
-        uint reserveIndex,
+        uint assetIndex,
         uint userIndex,
         uint assetUnit
-    ) internal pure returns (uint) {
-        uint result = userStake * (reserveIndex - userIndex);
+    ) internal pure returns (uint accruedRewardAmount) {
+        accruedRewardAmount = userStake * (assetIndex - userIndex);
+
         assembly {
-            result := div(result, assetUnit)
+            accruedRewardAmount := div(accruedRewardAmount, assetUnit)
         }
-        return result;
     }
 
     /// @dev Calculates the next value of an specific distribution index, with validations

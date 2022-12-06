@@ -207,7 +207,7 @@ contract RewardsDistributorTest is Test {
         vm.expectEmit(true, true, true, true, address(rewardsDistributor));
         emit Accrued(asset, reward01, user, 2, 2, 200);
         vm.prank(solidStakingViewActions);
-        IRewardsController(address(rewardsDistributor)).handleAction( // call handleAction which calls _updateData
+        IRewardsController(address(rewardsDistributor)).handleUserStakeChangedForAsset( // call handleUserStakeChangedForAsset which calls _updateAllRewardDistributionsAndUserRewardsForAsset
             asset,
             user,
             userStake,
@@ -277,7 +277,7 @@ contract RewardsDistributorTest is Test {
 
         vm.warp(CURRENT_DATE + 5 seconds);
         vm.prank(solidStakingViewActions);
-        IRewardsController(address(rewardsDistributor)).handleAction( // updates user index
+        IRewardsController(address(rewardsDistributor)).handleUserStakeChangedForAsset( // updates user index
             asset,
             user,
             userStake,
@@ -309,7 +309,7 @@ contract RewardsDistributorTest is Test {
 
         vm.warp(CURRENT_DATE + 5 seconds);
         vm.prank(solidStakingViewActions);
-        IRewardsController(address(rewardsDistributor)).handleAction( // updates user index
+        IRewardsController(address(rewardsDistributor)).handleUserStakeChangedForAsset( // updates user index
             asset,
             user,
             userStake,
@@ -341,7 +341,7 @@ contract RewardsDistributorTest is Test {
 
         vm.warp(CURRENT_DATE + 5 seconds);
         vm.prank(solidStakingViewActions);
-        IRewardsController(address(rewardsDistributor)).handleAction( // updates user index
+        IRewardsController(address(rewardsDistributor)).handleUserStakeChangedForAsset( // updates user index
             asset,
             user,
             userStake,
@@ -390,13 +390,13 @@ contract RewardsDistributorTest is Test {
 
         vm.warp(CURRENT_DATE + 5 seconds);
         vm.startPrank(solidStakingViewActions);
-        IRewardsController(address(rewardsDistributor)).handleAction(
+        IRewardsController(address(rewardsDistributor)).handleUserStakeChangedForAsset(
             asset0,
             user,
             userStake,
             totalStaked
         );
-        IRewardsController(address(rewardsDistributor)).handleAction(
+        IRewardsController(address(rewardsDistributor)).handleUserStakeChangedForAsset(
             asset1,
             user,
             userStake,

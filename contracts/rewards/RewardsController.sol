@@ -87,17 +87,22 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     }
 
     /// @inheritdoc IRewardsController
-    function handleAction(
+    function handleUserStakeChangedForAsset(
         address asset,
         address user,
-        uint userStake,
-        uint totalStaked
+        uint oldUserStake,
+        uint oldTotalStaked
     ) external override {
         if (msg.sender != address(solidStakingViewActions)) {
             revert NotSolidStaking(msg.sender);
         }
 
-        _updateData(asset, user, userStake, totalStaked);
+        _updateAllRewardDistributionsAndUserRewardsForAsset(
+            asset,
+            user,
+            oldUserStake,
+            oldTotalStaked
+        );
     }
 
     /// @inheritdoc IRewardsController
@@ -156,7 +161,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         return assetStakedAmounts;
     }
 
-    /// @dev Claims one type of reward for a user on behalf, on all the assets of the pool, accumulating the pending rewards.
+    /// @dev Claims all accrued rewards for a user on behalf, for the specified asset, accumulating the pending rewards.
     /// @param assets List of assets to check eligible distributions before claiming rewards
     /// @param claimer Address of the claimer on behalf of user
     /// @param user Address to check and claim rewards
@@ -174,7 +179,10 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         rewardsList = new address[](rewardsListLength);
         claimedAmounts = new uint[](rewardsListLength);
 
-        _updateDataMultiple(user, _getAssetStakedAmounts(assets, user));
+        _updateAllRewardDistributionsAndUserRewardsForAssets(
+            user,
+            _getAssetStakedAmounts(assets, user)
+        );
 
         for (uint i; i < assets.length; i++) {
             address asset = assets[i];

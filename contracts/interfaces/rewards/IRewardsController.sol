@@ -77,13 +77,13 @@ interface IRewardsController is IRewardsDistributor {
     /// @dev Called by the corresponding asset on transfer hook in order to update the rewards distribution.
     /// @param asset The incentivized asset address
     /// @param user The address of the user whose asset balance has changed
-    /// @param userStake The amount of assets staked by the user, prior to stake change
-    /// @param totalStaked The total amount staked of the asset, prior to stake change
-    function handleAction(
+    /// @param oldUserStake The amount of assets staked by the user, prior to stake change
+    /// @param oldTotalStaked The total amount staked of the asset, prior to stake change
+    function handleUserStakeChangedForAsset(
         address asset,
         address user,
-        uint userStake,
-        uint totalStaked
+        uint oldUserStake,
+        uint oldTotalStaked
     ) external;
 
     /// @dev Claims all rewards for a user to the desired address, on all the assets of the pool, accumulating the pending rewards

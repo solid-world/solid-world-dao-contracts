@@ -243,13 +243,13 @@ contract RewardsControllerTest is Test {
         assertEq(rewardsController.getClaimer(user), claimer);
     }
 
-    function testHandleAction_failsIfNotCalledBySolidStaking() public {
+    function testHandleUserStakeChangedForAsset_failsIfNotCalledBySolidStaking() public {
         address notSolidStaking = vm.addr(4);
         vm.expectRevert(
             abi.encodeWithSelector(IRewardsController.NotSolidStaking.selector, notSolidStaking)
         );
         vm.prank(notSolidStaking);
-        rewardsController.handleAction(vm.addr(5), vm.addr(6), 0, 0);
+        rewardsController.handleUserStakeChangedForAsset(vm.addr(5), vm.addr(6), 0, 0);
     }
 
     function testClaimAllRewards_failsForInvalidToAddress() public {
