@@ -244,7 +244,7 @@ contract RewardsDistributorTest is Test {
             abi.encode(userStake)
         );
         (address[] memory rewardsList, uint[] memory unclaimedAmounts) = rewardsDistributor
-            .getAllUserRewards(assets, vm.addr(10));
+            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, vm.addr(10));
 
         assertEq(rewardsList.length, 3);
         assertEq(rewardsList[0], reward00);
@@ -289,7 +289,7 @@ contract RewardsDistributorTest is Test {
         assertEq(rewardsDistributor.getUserIndex(user, asset, reward1), 0);
     }
 
-    function testGetUserAccruedRewards() public {
+    function testGetAccruedRewardAmountForUser() public {
         address[] memory rewards = new address[](2);
         rewards[0] = reward00;
         rewards[1] = reward01;
@@ -316,12 +316,12 @@ contract RewardsDistributorTest is Test {
             totalStaked
         );
 
-        assertEq(rewardsDistributor.getUserAccruedRewards(user, reward00), 100);
-        assertEq(rewardsDistributor.getUserAccruedRewards(user, reward01), 200);
-        assertEq(rewardsDistributor.getUserAccruedRewards(user, reward1), 0);
+        assertEq(rewardsDistributor.getAccruedRewardAmountForUser(user, reward00), 100);
+        assertEq(rewardsDistributor.getAccruedRewardAmountForUser(user, reward01), 200);
+        assertEq(rewardsDistributor.getAccruedRewardAmountForUser(user, reward1), 0);
     }
 
-    function testGetUserRewards() public {
+    function testGetUnclaimedRewardAmountForUserAndAssets() public {
         address[] memory rewards = new address[](2);
         rewards[0] = reward00;
         rewards[1] = reward01;
@@ -355,12 +355,16 @@ contract RewardsDistributorTest is Test {
             abi.encodeWithSelector(ISolidStakingViewActions.balanceOf.selector),
             abi.encode(userStake)
         );
-        uint reward = rewardsDistributor.getUserRewards(assets, user, reward00);
+        uint reward = rewardsDistributor.getUnclaimedRewardAmountForUserAndAssets(
+            assets,
+            user,
+            reward00
+        );
 
         assertEq(reward, 100);
     }
 
-    function testGetAllUserRewards() public {
+    function testGetAllUnclaimedRewardAmountsForUserAndAssets() public {
         address[] memory rewards0 = new address[](2);
         rewards0[0] = reward00;
         rewards0[1] = reward01;
@@ -416,7 +420,7 @@ contract RewardsDistributorTest is Test {
             abi.encode(totalStaked)
         );
         (address[] memory rewardsList, uint[] memory unclaimedAmounts) = rewardsDistributor
-            .getAllUserRewards(assets, user);
+            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, user);
 
         assertEq(rewardsList.length, 3);
         assertEq(rewardsList[0], reward00);

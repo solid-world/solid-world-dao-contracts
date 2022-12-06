@@ -96,7 +96,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     }
 
     /// @inheritdoc IRewardsDistributor
-    function getUserAccruedRewards(address user, address reward)
+    function getAccruedRewardAmountForUser(address user, address reward)
         external
         view
         override
@@ -114,11 +114,11 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     }
 
     /// @inheritdoc IRewardsDistributor
-    function getUserRewards(
+    function getUnclaimedRewardAmountForUserAndAssets(
         address[] calldata assets,
         address user,
         address reward
-    ) external view override returns (uint unclaimedRewards) {
+    ) external view override returns (uint unclaimedAmount) {
         RewardsDataTypes.AssetStakedAmounts[] memory assetStakedAmounts = _getAssetStakedAmounts(
             assets,
             user
@@ -126,12 +126,12 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
         for (uint i; i < assetStakedAmounts.length; i++) {
             if (assetStakedAmounts[i].userStake == 0) {
-                unclaimedRewards += _assetData[assetStakedAmounts[i].asset]
+                unclaimedAmount += _assetData[assetStakedAmounts[i].asset]
                     .rewardDistribution[reward]
                     .userReward[user]
                     .accrued;
             } else {
-                unclaimedRewards +=
+                unclaimedAmount +=
                     _getPendingRewards(user, reward, assetStakedAmounts[i]) +
                     _assetData[assetStakedAmounts[i].asset]
                         .rewardDistribution[reward]
@@ -140,11 +140,11 @@ abstract contract RewardsDistributor is IRewardsDistributor {
             }
         }
 
-        return unclaimedRewards;
+        return unclaimedAmount;
     }
 
     /// @inheritdoc IRewardsDistributor
-    function getAllUserRewards(address[] calldata assets, address user)
+    function getAllUnclaimedRewardAmountsForUserAndAssets(address[] calldata assets, address user)
         external
         view
         override

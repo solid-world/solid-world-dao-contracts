@@ -142,14 +142,17 @@ interface IRewardsDistributor {
     /// @param user The address of the user
     /// @param reward The address of the reward token
     /// @return Unclaimed rewards, not including new distributions
-    function getUserAccruedRewards(address user, address reward) external view returns (uint);
+    function getAccruedRewardAmountForUser(address user, address reward)
+        external
+        view
+        returns (uint);
 
     /// @dev Returns a single rewards balance of a user, including virtually accrued and unrealized claimable rewards.
     /// @param assets List of incentivized assets to check eligible distributions
     /// @param user The address of the user
     /// @param reward The address of the reward token
     /// @return The rewards amount
-    function getUserRewards(
+    function getUnclaimedRewardAmountForUserAndAssets(
         address[] calldata assets,
         address user,
         address reward
@@ -160,7 +163,7 @@ interface IRewardsDistributor {
     /// @param user The address of the user
     /// @return The list of reward addresses
     /// @return The list of unclaimed amount of rewards
-    function getAllUserRewards(address[] calldata assets, address user)
+    function getAllUnclaimedRewardAmountsForUserAndAssets(address[] calldata assets, address user)
         external
         view
         returns (address[] memory, uint[] memory);
