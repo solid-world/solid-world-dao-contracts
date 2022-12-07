@@ -183,7 +183,7 @@ contract RewardScenarios is Test {
             uint mangroveEmissionPerSecond, //100145660714285
             uint lastUpdateTimestamp,
             uint distributionEnd
-        ) = rewardsController.getRewardsData(assetMangrove, mangroveRewardToken);
+        ) = rewardsController.getRewardDistribution(assetMangrove, mangroveRewardToken);
 
         assertEq(lastUpdateTimestamp, INITIAL_CARBON_DISTRIBUTION_END);
         assertEq(distributionEnd, INITIAL_CARBON_DISTRIBUTION_END + 1 weeks);
@@ -206,7 +206,7 @@ contract RewardScenarios is Test {
         address[] memory incentivizedAssets = new address[](1);
         incentivizedAssets[0] = assetMangrove;
         (address[] memory rewardsList0, uint[] memory unclaimedAmounts0) = rewardsController
-            .getAllUserRewards(incentivizedAssets, user0);
+            .getAllUnclaimedRewardAmountsForUserAndAssets(incentivizedAssets, user0);
         assertEq(rewardsList0.length, 3);
         assertEq(unclaimedAmounts0.length, 3);
         assertEq(rewardsList0[0], mangroveRewardToken);
@@ -220,7 +220,7 @@ contract RewardScenarios is Test {
         assertEq(unclaimedAmounts0[2], (1e18 / 2) * 6 days);
 
         (address[] memory rewardsList1, uint[] memory unclaimedAmounts1) = rewardsController
-            .getAllUserRewards(incentivizedAssets, user1);
+            .getAllUnclaimedRewardAmountsForUserAndAssets(incentivizedAssets, user1);
         assertEq(rewardsList1.length, 3);
         assertEq(unclaimedAmounts1.length, 3);
         assertEq(rewardsList1[0], mangroveRewardToken);
@@ -255,7 +255,7 @@ contract RewardScenarios is Test {
         categoryIds[0] = CATEGORY_ID;
 
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);
-        (, uint mangroveEmissionPerSecond, , ) = rewardsController.getRewardsData(
+        (, uint mangroveEmissionPerSecond, , ) = rewardsController.getRewardDistribution(
             assetMangrove,
             mangroveRewardToken
         );
@@ -268,7 +268,8 @@ contract RewardScenarios is Test {
         solidStaking.stake(assetMangrove, 5000e18);
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 2 days);
-        (, uint[] memory unclaimedAmounts0) = rewardsController.getAllUserRewards(assets, user0);
+        (, uint[] memory unclaimedAmounts0) = rewardsController
+            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, user0);
         assertApproxEqAbs(
             unclaimedAmounts0[0],
             mangroveEmissionPerSecond * 1 days + (mangroveEmissionPerSecond / 2) * 1 days,
@@ -278,13 +279,15 @@ contract RewardScenarios is Test {
         rewardsController.claimAllRewardsToSelf(assets);
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 3 days);
-        (, uint[] memory unclaimedAmounts1) = rewardsController.getAllUserRewards(assets, user0);
+        (, uint[] memory unclaimedAmounts1) = rewardsController
+            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, user0);
         assertApproxEqAbs(unclaimedAmounts1[0], (mangroveEmissionPerSecond / 2) * 1 days, DELTA);
         vm.prank(user0);
         solidStaking.withdrawStakeAndClaimRewards(assetMangrove, 2500e18);
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 5 days);
-        (, uint[] memory unclaimedAmounts2) = rewardsController.getAllUserRewards(assets, user0);
+        (, uint[] memory unclaimedAmounts2) = rewardsController
+            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, user0);
         assertApproxEqAbs(unclaimedAmounts2[0], (mangroveEmissionPerSecond / 3) * 2 days, DELTA);
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 7 days); // distribution ended
@@ -316,9 +319,11 @@ contract RewardScenarios is Test {
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 8 days);
 
-        (, uint[] memory unclaimedAmounts3) = rewardsController.getAllUserRewards(assets, user0);
+        (, uint[] memory unclaimedAmounts3) = rewardsController
+            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, user0);
         assertEq(unclaimedAmounts3[0], 0);
-        (, uint[] memory unclaimedAmounts4) = rewardsController.getAllUserRewards(assets, user1);
+        (, uint[] memory unclaimedAmounts4) = rewardsController
+            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, user1);
         assertEq(unclaimedAmounts4[0], 0);
     }
 
@@ -358,11 +363,17 @@ contract RewardScenarios is Test {
             4130.352e18 + 12391.056e18 + 25e18 * 2,
             DELTA
         );
+
+        assertApproxEqAbs(
+            CollateralizedBasketToken(mangroveRewardToken).balanceOf(address(rewardsVault)),
+            0,
+            DELTA
+        );
     }
 
     function _initialConfigurationCarbonRewards() internal {
-        RewardsDataTypes.RewardsConfigInput[]
-            memory carbonConfig = new RewardsDataTypes.RewardsConfigInput[](2);
+        RewardsDataTypes.DistributionConfig[]
+            memory carbonConfig = new RewardsDataTypes.DistributionConfig[](2);
         carbonConfig[0].asset = assetMangrove;
         carbonConfig[0].reward = mangroveRewardToken;
         carbonConfig[0].emissionPerSecond = 0;
@@ -381,8 +392,8 @@ contract RewardScenarios is Test {
     function _initialConfigurationUSDCRewards() internal {
         vm.warp(CURRENT_DATE + 5 days);
 
-        RewardsDataTypes.RewardsConfigInput[]
-            memory usdcConfig = new RewardsDataTypes.RewardsConfigInput[](2);
+        RewardsDataTypes.DistributionConfig[]
+            memory usdcConfig = new RewardsDataTypes.DistributionConfig[](2);
         usdcConfig[0].asset = assetMangrove;
         usdcConfig[0].reward = usdcToken;
         usdcConfig[0].emissionPerSecond = 0;

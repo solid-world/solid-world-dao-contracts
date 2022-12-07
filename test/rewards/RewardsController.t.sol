@@ -16,6 +16,8 @@ contract RewardsControllerTest is Test {
     );
     event RewardOracleUpdated(address indexed reward, address indexed rewardOracle);
     event ClaimerSet(address indexed user, address indexed claimer);
+    event RewardsVaultUpdated(address indexed rewardsVault);
+    event SolidStakingUpdated(address indexed solidStaking);
 
     uint32 constant CURRENT_DATE = 1666016743;
 
@@ -52,12 +54,12 @@ contract RewardsControllerTest is Test {
                 notEmissionManager
             )
         );
-        rewardsController.configureAssets(new RewardsDataTypes.RewardsConfigInput[](0));
+        rewardsController.configureAssets(new RewardsDataTypes.DistributionConfig[](0));
     }
 
     function testConfigureAssets_failsForInvalidDecimals() public {
-        RewardsDataTypes.RewardsConfigInput[]
-            memory config = new RewardsDataTypes.RewardsConfigInput[](2);
+        RewardsDataTypes.DistributionConfig[]
+            memory config = new RewardsDataTypes.DistributionConfig[](2);
         config[0].reward = vm.addr(4);
         config[0].asset = vm.addr(5);
         config[0].emissionPerSecond = 100;
@@ -111,8 +113,8 @@ contract RewardsControllerTest is Test {
     }
 
     function testConfigureAssets() public {
-        RewardsDataTypes.RewardsConfigInput[]
-            memory config = new RewardsDataTypes.RewardsConfigInput[](2);
+        RewardsDataTypes.DistributionConfig[]
+            memory config = new RewardsDataTypes.DistributionConfig[](2);
         config[0].reward = vm.addr(4);
         config[0].asset = vm.addr(5);
         config[0].emissionPerSecond = 100;
@@ -243,13 +245,60 @@ contract RewardsControllerTest is Test {
         assertEq(rewardsController.getClaimer(user), claimer);
     }
 
-    function testHandleAction_failsIfNotCalledBySolidStaking() public {
+    function testSetRewardsVault_failsIfNotEmissionManager() public {
+        address notEmissionManager = vm.addr(4);
+        vm.prank(notEmissionManager);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IRewardsDistributor.NotEmissionManager.selector,
+                notEmissionManager
+            )
+        );
+        rewardsController.setRewardsVault(vm.addr(3));
+    }
+
+    function testSetRewardsVault() public {
+        address _rewardsVault = vm.addr(4);
+        vm.expectEmit(true, false, false, false, address(rewardsController));
+        emit RewardsVaultUpdated(_rewardsVault);
+        vm.prank(emissionManager);
+        rewardsController.setRewardsVault(_rewardsVault);
+
+        assertEq(rewardsController.getRewardsVault(), _rewardsVault);
+    }
+
+    function testSetSolidStaking_failsIfNotEmissionManager() public {
+        address notEmissionManager = vm.addr(4);
+        vm.prank(notEmissionManager);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IRewardsDistributor.NotEmissionManager.selector,
+                notEmissionManager
+            )
+        );
+        rewardsController.setSolidStaking(vm.addr(3));
+    }
+
+    function testSetSolidStaking() public {
+        address solidStaking = vm.addr(4);
+        vm.expectEmit(true, false, false, false, address(rewardsController));
+        emit SolidStakingUpdated(solidStaking);
+        vm.prank(emissionManager);
+        rewardsController.setSolidStaking(solidStaking);
+
+        assertEq(
+            address(RewardsController(address(rewardsController)).solidStakingViewActions()),
+            solidStaking
+        );
+    }
+
+    function testHandleUserStakeChanged_failsIfNotCalledBySolidStaking() public {
         address notSolidStaking = vm.addr(4);
         vm.expectRevert(
             abi.encodeWithSelector(IRewardsController.NotSolidStaking.selector, notSolidStaking)
         );
         vm.prank(notSolidStaking);
-        rewardsController.handleAction(vm.addr(5), vm.addr(6), 0, 0);
+        rewardsController.handleUserStakeChanged(vm.addr(5), vm.addr(6), 0, 0);
     }
 
     function testClaimAllRewards_failsForInvalidToAddress() public {

@@ -30,7 +30,7 @@ interface IEmissionManager {
     ///   address reward: The reward token address
     ///   IEACAggregatorProxy rewardOracle: The Price Oracle of a reward to visualize the incentives at the UI Frontend.
     ///                                     Must follow Chainlink Aggregator IEACAggregatorProxy interface to be compatible.
-    function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config) external;
+    function configureAssets(RewardsDataTypes.DistributionConfig[] memory config) external;
 
     /// @dev Sets an Aave Oracle contract to enforce rewards with a source of value.
     /// @dev Only callable by the emission admin of the given reward
@@ -75,6 +75,14 @@ interface IEmissionManager {
     /// @param claimer The address of the claimer
     function setClaimer(address user, address claimer) external;
 
+    /// @dev Only callable by the owner of the EmissionManager
+    /// @param rewardsVault The address of the account that secures ERC20 rewards.
+    function setRewardsVault(address rewardsVault) external;
+
+    /// @dev Only callable by the owner of the EmissionManager
+    /// @param solidStaking Used to fetch the total amount staked and the stake of an user for a given asset
+    function setSolidStaking(address solidStaking) external;
+
     /// @dev Updates the address of the emission manager
     /// @dev Only callable by the owner of the EmissionManager
     /// @param emissionManager The address of the new EmissionManager
@@ -90,6 +98,10 @@ interface IEmissionManager {
     /// @dev Only callable by the owner of the EmissionManager
     /// @param controller the address of the RewardsController contract
     function setRewardsController(address controller) external;
+
+    /// @dev Only callable by the owner of the EmissionManager
+    /// @param carbonRewardsManager the address of the IWeeklyCarbonRewardsManager contract
+    function setCarbonRewardsManager(address carbonRewardsManager) external;
 
     /// @dev Returns the rewards controller address
     /// @return The address of the RewardsController contract

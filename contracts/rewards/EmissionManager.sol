@@ -19,7 +19,6 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     IRewardsController internal _rewardsController;
     address internal carbonRewardAdmin;
 
-    /// @dev Only emission admin of the given reward can call functions marked by this modifier.
     modifier onlyEmissionAdmin(address reward) {
         if (_emissionAdmins[reward] != msg.sender) {
             revert NotEmissionAdmin(msg.sender, reward);
@@ -38,7 +37,7 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     }
 
     /// @inheritdoc IEmissionManager
-    function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config)
+    function configureAssets(RewardsDataTypes.DistributionConfig[] memory config)
         external
         override
     {
@@ -106,8 +105,18 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     }
 
     /// @inheritdoc IEmissionManager
+    function setRewardsVault(address rewardsVault) external override onlyOwner {
+        _rewardsController.setRewardsVault(rewardsVault);
+    }
+
+    /// @inheritdoc IEmissionManager
     function setEmissionManager(address emissionManager) external override onlyOwner {
         _rewardsController.setEmissionManager(emissionManager);
+    }
+
+    /// @inheritdoc IEmissionManager
+    function setSolidStaking(address solidStaking) external override onlyOwner {
+        _rewardsController.setSolidStaking(solidStaking);
     }
 
     /// @inheritdoc IEmissionManager
@@ -120,6 +129,11 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     /// @inheritdoc IEmissionManager
     function setRewardsController(address controller) external override onlyOwner {
         _rewardsController = IRewardsController(controller);
+    }
+
+    /// @inheritdoc IEmissionManager
+    function setCarbonRewardsManager(address carbonRewardsManager) external override onlyOwner {
+        _carbonRewardsManager = IWeeklyCarbonRewardsManager(carbonRewardsManager);
     }
 
     /// @inheritdoc IEmissionManager

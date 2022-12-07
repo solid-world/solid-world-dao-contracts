@@ -173,8 +173,8 @@ contract CarbonRewardDistributionGasTest is GasTest {
 
         address[] memory assets = new address[](rewards);
         uint[] memory categoryIds = new uint[](rewards);
-        RewardsDataTypes.RewardsConfigInput[]
-            memory config = new RewardsDataTypes.RewardsConfigInput[](rewards);
+        RewardsDataTypes.DistributionConfig[]
+            memory config = new RewardsDataTypes.DistributionConfig[](rewards);
 
         for (uint i = 0; i < rewards; i++) {
             assets[i] = address(new CollateralizedBasketToken("", ""));

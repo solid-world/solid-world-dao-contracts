@@ -106,7 +106,7 @@ interface IRewardsDistributor {
     /// @param asset The incentivized asset
     /// @param reward The reward token of the incentivized asset
     /// @return The current user asset index, not including new distributions
-    function getUserAssetIndex(
+    function getUserIndex(
         address user,
         address asset,
         address reward
@@ -119,7 +119,7 @@ interface IRewardsDistributor {
     /// @return The emission per second of the reward distribution
     /// @return The timestamp of the last update of the index
     /// @return The timestamp of the distribution end
-    function getRewardsData(address asset, address reward)
+    function getRewardDistribution(address asset, address reward)
         external
         view
         returns (
@@ -136,20 +136,23 @@ interface IRewardsDistributor {
 
     /// @dev Returns the list of available reward addresses
     /// @return List of rewards supported in this contract
-    function getRewardsList() external view returns (address[] memory);
+    function getAllRewards() external view returns (address[] memory);
 
     /// @dev Returns the accrued rewards balance of a user, not including virtually accrued rewards since last distribution.
     /// @param user The address of the user
     /// @param reward The address of the reward token
     /// @return Unclaimed rewards, not including new distributions
-    function getUserAccruedRewards(address user, address reward) external view returns (uint);
+    function getAccruedRewardAmountForUser(address user, address reward)
+        external
+        view
+        returns (uint);
 
     /// @dev Returns a single rewards balance of a user, including virtually accrued and unrealized claimable rewards.
     /// @param assets List of incentivized assets to check eligible distributions
     /// @param user The address of the user
     /// @param reward The address of the reward token
     /// @return The rewards amount
-    function getUserRewards(
+    function getUnclaimedRewardAmountForUserAndAssets(
         address[] calldata assets,
         address user,
         address reward
@@ -160,7 +163,7 @@ interface IRewardsDistributor {
     /// @param user The address of the user
     /// @return The list of reward addresses
     /// @return The list of unclaimed amount of rewards
-    function getAllUserRewards(address[] calldata assets, address user)
+    function getAllUnclaimedRewardAmountsForUserAndAssets(address[] calldata assets, address user)
         external
         view
         returns (address[] memory, uint[] memory);

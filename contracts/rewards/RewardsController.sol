@@ -9,15 +9,10 @@ import "../PostConstruct.sol";
 import "../libraries/GPv2SafeERC20.sol";
 
 contract RewardsController is IRewardsController, RewardsDistributor, PostConstruct {
-    // This mapping allows whitelisted addresses to claim on behalf of others
-    // useful for contracts that hold tokens to be rewarded but don't have any native logic to claim Liquidity Mining rewards
+    /// @dev user => claimer
     mapping(address => address) internal _authorizedClaimers;
 
-    // This mapping contains the price oracle per reward.
-    // A price oracle is enforced for integrators to be able to show incentives at
-    // the current Aave UI without the need to setup an external price registry
-    // At the moment of reward configuration, the Incentives Controller performs
-    // a check to see if the provided reward oracle contains `latestAnswer`.
+    /// @dev reward => rewardOracle
     mapping(address => IEACAggregatorProxy) internal _rewardOracle;
 
     /// @dev Account that secures ERC20 rewards.
@@ -57,16 +52,13 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     }
 
     /// @inheritdoc IRewardsController
-    function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config)
+    function configureAssets(RewardsDataTypes.DistributionConfig[] memory config)
         external
         override
         onlyEmissionManager
     {
         for (uint i; i < config.length; i++) {
-            // Get the current total staked amount for the asset
             config[i].totalStaked = solidStakingViewActions.totalStaked(config[i].asset);
-
-            // Set reward oracle, enforces input oracle to have latestPrice function
             _setRewardOracle(config[i].reward, config[i].rewardOracle);
         }
         _configureAssets(config);
@@ -87,17 +79,33 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     }
 
     /// @inheritdoc IRewardsController
-    function handleAction(
+    function setRewardsVault(address rewardsVault) external override onlyEmissionManager {
+        REWARDS_VAULT = rewardsVault;
+        emit RewardsVaultUpdated(rewardsVault);
+    }
+
+    function setSolidStaking(address solidStaking) external override onlyEmissionManager {
+        solidStakingViewActions = ISolidStakingViewActions(solidStaking);
+        emit SolidStakingUpdated(solidStaking);
+    }
+
+    /// @inheritdoc IRewardsController
+    function handleUserStakeChanged(
         address asset,
         address user,
-        uint userStake,
-        uint totalStaked
+        uint oldUserStake,
+        uint oldTotalStaked
     ) external override {
         if (msg.sender != address(solidStakingViewActions)) {
             revert NotSolidStaking(msg.sender);
         }
 
-        _updateData(asset, user, userStake, totalStaked);
+        _updateAllRewardDistributionsAndUserRewardsForAsset(
+            asset,
+            user,
+            oldUserStake,
+            oldTotalStaked
+        );
     }
 
     /// @inheritdoc IRewardsController
@@ -140,26 +148,23 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         return _claimAllRewards(assets, msg.sender, msg.sender, msg.sender);
     }
 
-    /// @dev Get user balances and total supply of all the assets specified by the assets parameter
-    /// @param assets List of assets to retrieve user balance and total supply
-    /// @param user Address of the user
-    /// @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
-    function _getUserAssetBalances(address[] calldata assets, address user)
+    /// @inheritdoc RewardsDistributor
+    function _getAssetStakedAmounts(address[] calldata assets, address user)
         internal
         view
         override
-        returns (RewardsDataTypes.UserAssetBalance[] memory userAssetBalances)
+        returns (RewardsDataTypes.AssetStakedAmounts[] memory assetStakedAmounts)
     {
-        userAssetBalances = new RewardsDataTypes.UserAssetBalance[](assets.length);
+        assetStakedAmounts = new RewardsDataTypes.AssetStakedAmounts[](assets.length);
         for (uint i; i < assets.length; i++) {
-            userAssetBalances[i].asset = assets[i];
-            userAssetBalances[i].userStake = solidStakingViewActions.balanceOf(assets[i], user);
-            userAssetBalances[i].totalStaked = solidStakingViewActions.totalStaked(assets[i]);
+            assetStakedAmounts[i].asset = assets[i];
+            assetStakedAmounts[i].userStake = solidStakingViewActions.balanceOf(assets[i], user);
+            assetStakedAmounts[i].totalStaked = solidStakingViewActions.totalStaked(assets[i]);
         }
-        return userAssetBalances;
+        return assetStakedAmounts;
     }
 
-    /// @dev Claims one type of reward for a user on behalf, on all the assets of the pool, accumulating the pending rewards.
+    /// @dev Claims all accrued rewards for a user on behalf, for the specified asset, accumulating the pending rewards.
     /// @param assets List of assets to check eligible distributions before claiming rewards
     /// @param claimer Address of the claimer on behalf of user
     /// @param user Address to check and claim rewards
@@ -177,7 +182,10 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         rewardsList = new address[](rewardsListLength);
         claimedAmounts = new uint[](rewardsListLength);
 
-        _updateDataMultiple(user, _getUserAssetBalances(assets, user));
+        _updateAllRewardDistributionsAndUserRewardsForAssets(
+            user,
+            _getAssetStakedAmounts(assets, user)
+        );
 
         for (uint i; i < assets.length; i++) {
             address asset = assets[i];
@@ -185,10 +193,16 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
                 if (rewardsList[j] == address(0)) {
                     rewardsList[j] = _rewardsList[j];
                 }
-                uint rewardAmount = _assets[asset].rewards[rewardsList[j]].usersData[user].accrued;
+                uint rewardAmount = _assetData[asset]
+                    .rewardDistribution[rewardsList[j]]
+                    .userReward[user]
+                    .accrued;
                 if (rewardAmount != 0) {
                     claimedAmounts[j] += rewardAmount;
-                    _assets[asset].rewards[rewardsList[j]].usersData[user].accrued = 0;
+                    _assetData[asset]
+                        .rewardDistribution[rewardsList[j]]
+                        .userReward[user]
+                        .accrued = 0;
                 }
             }
         }

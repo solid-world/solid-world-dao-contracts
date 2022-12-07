@@ -36,6 +36,12 @@ interface IRewardsController is IRewardsDistributor {
     /// @param rewardOracle The address of oracle
     event RewardOracleUpdated(address indexed reward, address indexed rewardOracle);
 
+    /// @param rewardsVault The address of the account that secures ERC20 rewards.
+    event RewardsVaultUpdated(address indexed rewardsVault);
+
+    /// @param solidStaking Used to fetch the total amount staked and the stake of an user for a given asset
+    event SolidStakingUpdated(address indexed solidStaking);
+
     /// @dev Whitelists an address to claim the rewards on behalf of another address
     /// @param user The address of the user
     /// @param claimer The address of the claimer
@@ -49,6 +55,12 @@ interface IRewardsController is IRewardsDistributor {
     /// @param reward The address of the reward to set the price aggregator
     /// @param rewardOracle The address of price aggregator that follows IEACAggregatorProxy interface
     function setRewardOracle(address reward, IEACAggregatorProxy rewardOracle) external;
+
+    /// @param rewardsVault The address of the account that secures ERC20 rewards.
+    function setRewardsVault(address rewardsVault) external;
+
+    /// @param solidStaking Used to fetch the total amount staked and the stake of an user for a given asset
+    function setSolidStaking(address solidStaking) external;
 
     /// @dev Get the price aggregator oracle address
     /// @param reward The address of the reward
@@ -72,18 +84,18 @@ interface IRewardsController is IRewardsDistributor {
     ///   address reward: The reward token address
     ///   IEACAggregatorProxy rewardOracle: The Price Oracle of a reward to visualize the incentives at the UI Frontend.
     ///                                     Must follow Chainlink Aggregator IEACAggregatorProxy interface to be compatible.
-    function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config) external;
+    function configureAssets(RewardsDataTypes.DistributionConfig[] memory config) external;
 
     /// @dev Called by the corresponding asset on transfer hook in order to update the rewards distribution.
     /// @param asset The incentivized asset address
     /// @param user The address of the user whose asset balance has changed
-    /// @param userStake The amount of assets staked by the user, prior to stake change
-    /// @param totalStaked The total amount staked of the asset, prior to stake change
-    function handleAction(
+    /// @param oldUserStake The amount of assets staked by the user, prior to stake change
+    /// @param oldTotalStaked The total amount staked of the asset, prior to stake change
+    function handleUserStakeChanged(
         address asset,
         address user,
-        uint userStake,
-        uint totalStaked
+        uint oldUserStake,
+        uint oldTotalStaked
     ) external;
 
     /// @dev Claims all rewards for a user to the desired address, on all the assets of the pool, accumulating the pending rewards
