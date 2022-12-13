@@ -211,4 +211,33 @@ library SolidMath {
             TIME_APPRECIATION_BASIS_POINTS**2
         );
     }
+
+    /// @dev Converts a rate quantified per year to a rate quantified per week
+    /// @dev Computes: 1 - (1 - annualRate) ** (1/52.1)
+    /// @dev Taking form: 1 - e ** (ln(1 - annualRate) * (1/52.1))
+    /// @param annualRate 1% = 10000, 0.0984% = 984
+    /// @return weeklyRate the rate quantified per week
+    function toWeeklyRate(uint annualRate) internal pure returns (uint weeklyRate) {
+        uint annualDiscountPoints = TIME_APPRECIATION_BASIS_POINTS - annualRate;
+        int128 annualDiscount = ABDKMath64x64.div(
+            annualDiscountPoints,
+            TIME_APPRECIATION_BASIS_POINTS
+        );
+
+        int128 annualDiscountLN = ABDKMath64x64.ln(annualDiscount);
+        int128 weeksInYearInverse = ABDKMath64x64.inv(weeksInYear());
+        int128 weeklyDiscount = ABDKMath64x64.exp(
+            ABDKMath64x64.mul(annualDiscountLN, weeksInYearInverse)
+        );
+        uint weeklyDiscountPoints = ABDKMath64x64.mulu(
+            weeklyDiscount,
+            TIME_APPRECIATION_BASIS_POINTS
+        );
+
+        weeklyRate = TIME_APPRECIATION_BASIS_POINTS - weeklyDiscountPoints;
+    }
+
+    function weeksInYear() internal pure returns (int128) {
+        return ABDKMath64x64.div(521, 10);
+    }
 }
