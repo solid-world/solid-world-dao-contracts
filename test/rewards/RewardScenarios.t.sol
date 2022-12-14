@@ -94,7 +94,7 @@ contract RewardScenarios is Test {
         solidWorldManager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
         for (uint i = 0; i < 4; i++) {
             solidWorldManager.addBatch(
-                SolidWorldManager.Batch({
+                DomainDataTypes.Batch({
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
@@ -106,7 +106,7 @@ contract RewardScenarios is Test {
                 })
             );
             solidWorldManager.addBatch(
-                SolidWorldManager.Batch({
+                DomainDataTypes.Batch({
                     id: BATCH_ID + i + 4,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),

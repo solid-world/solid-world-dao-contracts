@@ -158,7 +158,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
 
         for (uint i = 1; i < batches + 1; i++) {
             manager.addBatch(
-                SolidWorldManager.Batch({
+                DomainDataTypes.Batch({
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % rewards),

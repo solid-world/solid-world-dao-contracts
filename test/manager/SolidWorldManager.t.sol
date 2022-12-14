@@ -82,7 +82,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         vm.expectEmit(true, false, false, false, address(manager));
         emit BatchCreated(batchId);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: batchId,
                 status: 0,
                 projectId: 5,
@@ -125,7 +125,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         assertEq(manager.getBatchIdsByProject(5).length, 0);
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: 7,
                 status: 0,
                 projectId: 5,
@@ -138,7 +138,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: 11,
                 status: 0,
                 projectId: 5,
@@ -162,7 +162,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         assertEq(manager.forwardContractBatch().balanceOf(address(this), 7), 0);
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: 7,
                 status: 0,
                 projectId: 5,
@@ -188,7 +188,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -214,7 +214,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -245,7 +245,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -272,7 +272,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -310,7 +310,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -350,7 +350,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -372,7 +372,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -404,7 +404,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -441,7 +441,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -494,7 +494,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -537,7 +537,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -565,7 +565,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -606,7 +606,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "Test token", "TT");
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -619,7 +619,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -672,7 +672,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -685,7 +685,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -698,7 +698,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID + 2,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -711,7 +711,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID + 3,
                 status: 0,
                 projectId: PROJECT_ID + 1,
@@ -724,7 +724,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID + 4,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -748,7 +748,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
         vm.stopPrank();
 
-        SolidWorldManager.TokenDecollateralizationInfo[] memory info = manager
+        DomainDataTypes.TokenDecollateralizationInfo[] memory info = manager
             .getBatchesDecollateralizationInfo(PROJECT_ID, 2022);
 
         assertEq(info.length, 3);
@@ -767,7 +767,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
     function testFailAddBatchWhenProjectDoesntExist() public {
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: 7,
                 status: 0,
                 projectId: 5,
@@ -785,7 +785,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addProject(3, 5);
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: 7,
                 status: 0,
                 projectId: 5,
@@ -798,7 +798,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: 7,
                 status: 0,
                 projectId: 5,
@@ -816,7 +816,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addProject(3, 5);
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: 7,
                 status: 0,
                 projectId: 5,
@@ -834,7 +834,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addProject(3, 5);
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: 7,
                 status: 0,
                 projectId: 5,
@@ -852,7 +852,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addProject(3, 5);
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: 7,
                 status: 0,
                 projectId: 5,
