@@ -11,6 +11,7 @@ import "./libraries/SolidMath.sol";
 import "./libraries/GPv2SafeERC20.sol";
 import "./interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 import "./interfaces/manager/ISolidWorldManagerErrors.sol";
+import "./libraries/DomainDataTypes.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -20,40 +21,6 @@ contract SolidWorldManager is
     IWeeklyCarbonRewardsManager,
     ISolidWorldManagerErrors
 {
-    /// @notice Structure that holds necessary information for minting collateralized basket tokens (ERC-20).
-    /// @param id ID of the batch in the database
-    /// @param projectId Project ID this batch belongs to
-    /// @param totalAmount Amount of carbon tons in the batch, this amount will be minted as forward contract batch tokens (ERC-1155)
-    /// @param owner Address who receives forward contract batch tokens (ERC-1155)
-    /// @param expectedDueDate When the batch is about to be delivered; affects on how many collateralized basket tokens (ERC-20) may be minted
-    /// @param vintage The year an emission reduction occurred or the offset was issued. The older the vintage, the cheaper the price per credit.
-    /// @param status Status for the batch (ex. CAN_BE_DEPOSITED | IS_ACCUMULATING | READY_FOR_DELIVERY etc.)
-    /// @param discountRate Coefficient that affects on how many collateralized basket tokens (ERC-20) may be minted / ton. Forward is worth less than spot.
-    struct Batch {
-        uint id;
-        uint projectId;
-        uint totalAmount;
-        address owner;
-        uint32 expectedDueDate;
-        uint16 vintage;
-        uint8 status;
-        uint24 discountRate;
-    }
-
-    /// @notice Structure that holds necessary information for decollateralizing ERC20 tokens to ERC1155 tokens with id `batchId`
-    /// @param batchId id of the batch
-    /// @param availableBatchTokens Amount of ERC1155 tokens with id `batchId` that are available to be redeemed
-    /// @param amountOut ERC1155 tokens with id `batchId` to be received by msg.sender
-    /// @param minAmountIn minimum amount of ERC20 tokens to decollateralize `amountOut` ERC1155 tokens with id `batchId`
-    /// @param minCbtDaoCut ERC20 tokens to be received by feeReceiver for decollateralizing minAmountIn ERC20 tokens
-    struct TokenDecollateralizationInfo {
-        uint batchId;
-        uint availableBatchTokens;
-        uint amountOut;
-        uint minAmountIn;
-        uint minCbtDaoCut;
-    }
-
     /// @notice Constant used as input for decollateralization simulation for ordering batches with the same category and vintage
     uint public constant DECOLLATERALIZATION_SIMULATION_INPUT = 1000e18;
 
@@ -73,8 +40,8 @@ contract SolidWorldManager is
     uint[] public batchIds;
 
     /// @notice Property stores info about a batch
-    /// @dev BatchId => Batch
-    mapping(uint => Batch) public batches;
+    /// @dev BatchId => DomainDataTypes.Batch
+    mapping(uint => DomainDataTypes.Batch) public batches;
 
     /// @notice Mapping determines a respective CollateralizedBasketToken (ERC-20) of a category
     /// @dev CategoryId => CollateralizedBasketToken address (ERC-20)
@@ -188,7 +155,7 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
-    function addBatch(Batch calldata batch) external {
+    function addBatch(DomainDataTypes.Batch calldata batch) external {
         if (!projectIds[batch.projectId]) {
             revert InvalidProjectId(batch.projectId);
         }
@@ -433,11 +400,10 @@ contract SolidWorldManager is
     function getBatchesDecollateralizationInfo(uint projectId, uint vintage)
         external
         view
-        returns (TokenDecollateralizationInfo[] memory result)
+        returns (DomainDataTypes.TokenDecollateralizationInfo[] memory result)
     {
-        TokenDecollateralizationInfo[] memory allInfos = new TokenDecollateralizationInfo[](
-            batchIds.length
-        );
+        DomainDataTypes.TokenDecollateralizationInfo[]
+            memory allInfos = new DomainDataTypes.TokenDecollateralizationInfo[](batchIds.length);
         uint infoCount;
 
         for (uint i; i < batchIds.length; i++) {
@@ -453,7 +419,7 @@ contract SolidWorldManager is
                 DECOLLATERALIZATION_SIMULATION_INPUT
             );
 
-            allInfos[infoCount] = TokenDecollateralizationInfo(
+            allInfos[infoCount] = DomainDataTypes.TokenDecollateralizationInfo(
                 batchId,
                 availableCredits,
                 amountOut,
@@ -463,7 +429,7 @@ contract SolidWorldManager is
             infoCount = infoCount + 1;
         }
 
-        result = new TokenDecollateralizationInfo[](infoCount);
+        result = new DomainDataTypes.TokenDecollateralizationInfo[](infoCount);
         for (uint i; i < infoCount; i++) {
             result[i] = allInfos[i];
         }
@@ -536,7 +502,7 @@ contract SolidWorldManager is
                     continue;
                 }
 
-                Batch storage batch = batches[batchId];
+                DomainDataTypes.Batch storage batch = batches[batchId];
                 rewardAmount += SolidMath.computeWeeklyBatchReward(
                     batch.expectedDueDate,
                     availableCredits,

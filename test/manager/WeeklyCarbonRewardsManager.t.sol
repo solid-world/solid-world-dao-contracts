@@ -39,7 +39,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
         for (uint i = 1; i < 6; i++) {
             manager.addBatch(
-                SolidWorldManager.Batch({
+                DomainDataTypes.Batch({
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
@@ -84,7 +84,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
         for (uint i = 1; i < 6; i++) {
             manager.addBatch(
-                SolidWorldManager.Batch({
+                DomainDataTypes.Batch({
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
@@ -98,7 +98,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         }
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID + 6,
                 status: 0,
                 projectId: PROJECT_ID,
@@ -111,7 +111,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         );
 
         manager.addBatch(
-            SolidWorldManager.Batch({
+            DomainDataTypes.Batch({
                 id: BATCH_ID + 7,
                 status: 0,
                 projectId: PROJECT_ID + 1,
