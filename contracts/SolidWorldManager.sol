@@ -91,6 +91,12 @@ contract SolidWorldManager is
         address indexed tokensOwner
     );
     event CategoryCreated(uint indexed categoryId);
+    event CategoryUpdated(
+        uint indexed categoryId,
+        uint indexed volumeCoefficient,
+        uint indexed decayPerSecond,
+        uint maxDepreciation
+    );
     event ProjectCreated(uint indexed projectId);
     event BatchCreated(uint indexed batchId);
 
@@ -142,6 +148,26 @@ contract SolidWorldManager is
         categories[categoryId].averageTA = initialTA;
 
         emit CategoryCreated(categoryId);
+    }
+
+    // todo #121: add authorization
+    function updateCategory(
+        uint categoryId,
+        uint volumeCoefficient,
+        uint40 decayPerSecond,
+        uint24 maxDepreciation
+    ) external {
+        if (!categoryIds[categoryId]) {
+            revert InvalidCategoryId(categoryId);
+        }
+
+        categories[categoryId].volumeCoefficient = volumeCoefficient;
+        categories[categoryId].decayPerSecond = decayPerSecond;
+        categories[categoryId].maxDepreciation = maxDepreciation;
+
+        // todo #204: implement logic for updating the other fields of the category based on the new values
+
+        emit CategoryUpdated(categoryId, volumeCoefficient, decayPerSecond, maxDepreciation);
     }
 
     // todo #121: add authorization

@@ -19,6 +19,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         address indexed tokensOwner
     );
     event CategoryCreated(uint indexed categoryId);
+    event CategoryUpdated(
+        uint indexed categoryId,
+        uint indexed volumeCoefficient,
+        uint indexed decayPerSecond,
+        uint maxDepreciation
+    );
     event ProjectCreated(uint indexed projectId);
     event BatchCreated(uint indexed batchId);
 
@@ -37,6 +43,28 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
         (, , , uint24 averageTA, , , ) = manager.categories(CATEGORY_ID);
         assertEq(averageTA, INITIAL_CATEGORY_TA);
+    }
+
+    function testUpdateCategory_failsForInvalidCategoryId() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidCategoryId.selector, CATEGORY_ID)
+        );
+        manager.updateCategory(CATEGORY_ID, 0, 0, 0);
+    }
+
+    function testUpdateCategory() public {
+        manager.addCategory(CATEGORY_ID, "", "", INITIAL_CATEGORY_TA);
+
+        vm.expectEmit(true, true, true, true, address(manager));
+        emit CategoryUpdated(CATEGORY_ID, 11, 13, 17);
+        manager.updateCategory(CATEGORY_ID, 11, 13, 17);
+
+        (uint volumeCoefficient, uint40 decayPerSecond, uint24 maxDepreciation, , , , ) = manager
+            .categories(CATEGORY_ID);
+
+        assertEq(volumeCoefficient, 11);
+        assertEq(decayPerSecond, 13);
+        assertEq(maxDepreciation, 17);
     }
 
     function testAddProject() public {
