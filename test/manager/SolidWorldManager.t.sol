@@ -25,13 +25,18 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     function testAddCategory() public {
         assertEq(address(manager.categoryToken(CATEGORY_ID)), address(0));
         assertEq(manager.categoryIds(CATEGORY_ID), false);
+        (, , , uint24 averageTAStart, , , ) = manager.categories(CATEGORY_ID);
+        assertEq(averageTAStart, 0);
 
         vm.expectEmit(true, false, false, false, address(manager));
         emit CategoryCreated(CATEGORY_ID);
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
 
         assertNotEq(address(manager.categoryToken(CATEGORY_ID)), address(0));
         assertEq(manager.categoryIds(CATEGORY_ID), true);
+
+        (, , , uint24 averageTA, , , ) = manager.categories(CATEGORY_ID);
+        assertEq(averageTA, INITIAL_CATEGORY_TA);
     }
 
     function testAddProject() public {
@@ -40,7 +45,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
         assertEq(manager.projectIds(projectId), false);
 
-        manager.addCategory(categoryId, "Test token", "TT");
+        manager.addCategory(categoryId, "Test token", "TT", INITIAL_CATEGORY_TA);
 
         vm.expectEmit(true, false, false, false, address(manager));
         emit ProjectCreated(projectId);
@@ -52,7 +57,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     function testAddMultipleProjects() public {
         assertEq(manager.getProjectIdsByCategory(3).length, 0);
 
-        manager.addCategory(3, "Test token", "TT");
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
         manager.addProject(3, 7);
 
@@ -66,7 +71,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testFailAddProjectWhenProjectAlreadyAdded() public {
-        manager.addCategory(3, "Test token", "TT");
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
         manager.addProject(3, 5);
     }
@@ -74,7 +79,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     function testAddBatch() public {
         uint batchId = 7;
 
-        manager.addCategory(3, "Test token", "TT");
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
 
         assertEq(manager.batchCreated(batchId), false);
@@ -119,7 +124,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testAddMultipleBatches() public {
-        manager.addCategory(3, "Test token", "TT");
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
 
         assertEq(manager.getBatchIdsByProject(5).length, 0);
@@ -156,7 +161,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testAddBatchIssuesERC1155Tokens() public {
-        manager.addCategory(3, "Test token", "TT");
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
 
         assertEq(manager.forwardContractBatch().balanceOf(address(this), 7), 0);
@@ -185,7 +190,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatchWhenNotEnoughFunds() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -211,7 +216,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
     function testCollateralizeBatchWhenERC20OutputIsLessThanMinimum() public {
         uint cbtUserCut = 81e18;
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -242,7 +247,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatch_failsIfBatchIsCertified() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -269,7 +274,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         uint cbtUserCut = 81e18;
         uint cbtDaoCut = 9e18;
 
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -307,7 +312,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         uint cbtUserCut = 90e18;
         uint cbtDaoCut = 0;
 
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -347,7 +352,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testDecollateralizeTokensWhenNotEnoughFunds() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -369,7 +374,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     function testDecollateralizeTokensWhenERC20InputIsTooLow() public {
         uint amountOutMin = 81e18;
 
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -401,7 +406,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     function testDecollateralizeTokensWhenERC1155OutputIsLessThanMinimum() public {
         uint cbtUserCut = 81e18;
 
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -438,7 +443,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         uint cbtUserCut = 8100e18;
         uint cbtDaoCut = 900e18;
 
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -491,7 +496,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         uint cbtUserCut = 8100e18;
         uint cbtDaoCut = 900e18;
 
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -534,7 +539,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testSimulateBatchCollateralization_failsIfBatchIsCertified() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -562,7 +567,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         uint expectedCbtDaoCut = 900e18;
         uint expectedCbtForfeited = 1000e18;
 
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -603,7 +608,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testBulkDecollateralizeTokens() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
             DomainDataTypes.Batch({
@@ -667,8 +672,8 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testGetBatchesDecollateralizationInfo() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
-        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
         manager.addBatch(
@@ -781,7 +786,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testFailAddBatchWhenBatchAlreadyAdded() public {
-        manager.addCategory(3, "Test token", "TT");
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
 
         manager.addBatch(
@@ -812,7 +817,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testFailAddBatchWhenOwnerIsNotDefined() public {
-        manager.addCategory(3, "Test token", "TT");
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
 
         manager.addBatch(
@@ -830,7 +835,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testFailAddBatchWhenDueDateIsNow() public {
-        manager.addCategory(3, "Test token", "TT");
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
 
         manager.addBatch(
@@ -848,7 +853,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     }
 
     function testFailAddBatchWhenDueDateInThePast() public {
-        manager.addCategory(3, "Test token", "TT");
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
 
         manager.addBatch(

@@ -15,6 +15,7 @@ abstract contract BaseSolidWorldManager is Test {
     uint constant CATEGORY_ID = 1;
     uint constant PROJECT_ID = 3;
     uint constant BATCH_ID = 5;
+    uint24 constant INITIAL_CATEGORY_TA = 1599; // 8% per year
 
     uint constant CURRENT_DATE = 1666016743;
 
