@@ -28,6 +28,10 @@ contract SolidWorldManager is
     /// @dev CategoryId => isAdded
     mapping(uint => bool) public categoryIds;
 
+    /// @notice Stores the state of categories
+    /// @dev CategoryId => DomainDataTypes.Category
+    mapping(uint => DomainDataTypes.Category) public categories;
+
     /// @notice Property is used for checking if Project ID is already added
     /// @dev ProjectId => isAdded
     mapping(uint => bool) public projectIds;
@@ -129,7 +133,8 @@ contract SolidWorldManager is
     function addCategory(
         uint categoryId,
         string calldata tokenName,
-        string calldata tokenSymbol
+        string calldata tokenSymbol,
+        uint24 initialTA
     ) external {
         if (categoryIds[categoryId]) {
             revert CategoryAlreadyExists(categoryId);
@@ -137,6 +142,8 @@ contract SolidWorldManager is
 
         categoryIds[categoryId] = true;
         categoryToken[categoryId] = new CollateralizedBasketToken(tokenName, tokenSymbol);
+
+        categories[categoryId].averageTA = initialTA;
 
         emit CategoryCreated(categoryId);
     }

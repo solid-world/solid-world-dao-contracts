@@ -152,7 +152,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
         uint rewards
     ) internal {
         for (uint i = 0; i < rewards; i++) {
-            manager.addCategory(CATEGORY_ID + i, "", "");
+            manager.addCategory(CATEGORY_ID + i, "", "", 1599);
             manager.addProject(CATEGORY_ID + i, PROJECT_ID + i);
         }
 

@@ -33,8 +33,8 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testComputeWeeklyCarbonRewards_allBatchesUsed() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
-        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
         for (uint i = 1; i < 6; i++) {
@@ -78,8 +78,8 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testComputeWeeklyCarbonRewards_certifiedBatchesAreSkipped() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT");
-        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT");
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
         for (uint i = 1; i < 6; i++) {
