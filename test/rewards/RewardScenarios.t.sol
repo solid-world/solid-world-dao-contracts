@@ -98,24 +98,24 @@ contract RewardScenarios is Test {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
-                    totalAmount: 10000 * (i + 1),
-                    expectedDueDate: uint32(CURRENT_DATE + ONE_YEAR),
+                    certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
-                    discountRate: 1647,
-                    owner: i % 2 == 0 ? user0 : user1
-                })
+                    reactiveTA: 1647,
+                    supplier: i % 2 == 0 ? user0 : user1
+                }),
+                10000 * (i + 1)
             );
             solidWorldManager.addBatch(
                 DomainDataTypes.Batch({
                     id: BATCH_ID + i + 4,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
-                    totalAmount: 10000 * (i + 1),
-                    expectedDueDate: uint32(CURRENT_DATE + ONE_YEAR),
+                    certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
-                    discountRate: 1647,
-                    owner: i % 2 == 0 ? user1 : user0
-                })
+                    reactiveTA: 1647,
+                    supplier: i % 2 == 0 ? user1 : user0
+                }),
+                10000 * (i + 1)
             );
         }
 

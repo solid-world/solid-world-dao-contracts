@@ -43,12 +43,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
-                    totalAmount: 10000,
-                    expectedDueDate: uint32(CURRENT_DATE + 1 minutes),
+                    certificationDate: uint32(CURRENT_DATE + 1 minutes),
                     vintage: 2022,
-                    discountRate: 1647,
-                    owner: address(manager)
-                })
+                    reactiveTA: 1647,
+                    supplier: address(manager)
+                }),
+                10000
             );
         }
 
@@ -88,12 +88,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
-                    totalAmount: 10000,
-                    expectedDueDate: uint32(CURRENT_DATE + 7 weeks),
+                    certificationDate: uint32(CURRENT_DATE + 7 weeks),
                     vintage: 2022,
-                    discountRate: 1647,
-                    owner: address(manager)
-                })
+                    reactiveTA: 1647,
+                    supplier: address(manager)
+                }),
+                10000
             );
         }
 
@@ -102,12 +102,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 6,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 minutes),
+                certificationDate: uint32(CURRENT_DATE + 1 minutes),
                 vintage: 2022,
-                discountRate: 1647,
-                owner: address(manager)
-            })
+                reactiveTA: 1647,
+                supplier: address(manager)
+            }),
+            10000
         );
 
         manager.addBatch(
@@ -115,12 +115,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 7,
                 status: 0,
                 projectId: PROJECT_ID + 1,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 2 weeks),
+                certificationDate: uint32(CURRENT_DATE + 2 weeks),
                 vintage: 2022,
-                discountRate: 1647,
-                owner: address(manager)
-            })
+                reactiveTA: 1647,
+                supplier: address(manager)
+            }),
+            10000
         );
 
         // Batches 11 and 12 are certified

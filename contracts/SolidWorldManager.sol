@@ -55,6 +55,10 @@ contract SolidWorldManager is
     /// @dev ProjectId => CategoryId
     mapping(uint => uint) public projectCategory;
 
+    /// @notice Mapping determines what category a batch belongs to
+    /// @dev BatchId => CategoryId
+    mapping(uint => uint) public batchCategory;
+
     /// @notice Mapping determines what batches a project has
     /// @dev ProjectId => BatchId[]
     mapping(uint => uint[]) public projectBatches;
@@ -78,7 +82,7 @@ contract SolidWorldManager is
         uint indexed batchId,
         uint amountIn,
         uint amountOut,
-        address indexed batchOwner
+        address indexed batchSupplier
     );
     event TokensDecollateralized(
         uint indexed batchId,
@@ -155,7 +159,7 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
-    function addBatch(DomainDataTypes.Batch calldata batch) external {
+    function addBatch(DomainDataTypes.Batch calldata batch, uint mintableAmount) external {
         if (!projectIds[batch.projectId]) {
             revert InvalidProjectId(batch.projectId);
         }
@@ -164,19 +168,20 @@ contract SolidWorldManager is
             revert BatchAlreadyExists(batch.id);
         }
 
-        if (batch.owner == address(0)) {
-            revert InvalidBatchOwner();
+        if (batch.supplier == address(0)) {
+            revert InvalidBatchSupplier();
         }
 
-        if (batch.expectedDueDate <= block.timestamp) {
-            revert BatchDueDateInThePast(batch.expectedDueDate);
+        if (batch.certificationDate <= block.timestamp) {
+            revert BatchCertificationDateInThePast(batch.certificationDate);
         }
 
         batchCreated[batch.id] = true;
         batches[batch.id] = batch;
         batchIds.push(batch.id);
         projectBatches[batch.projectId].push(batch.id);
-        forwardContractBatch.mint(batch.owner, batch.id, batch.totalAmount, "");
+        batchCategory[batch.id] = projectCategory[batch.projectId];
+        forwardContractBatch.mint(batch.supplier, batch.id, mintableAmount, "");
 
         emit BatchCreated(batch.id);
     }
@@ -253,9 +258,9 @@ contract SolidWorldManager is
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
 
         (uint cbtUserCut, uint cbtDaoCut, ) = SolidMath.computeCollateralizationOutcome(
-            batches[batchId].expectedDueDate,
+            batches[batchId].certificationDate,
             amountIn,
-            batches[batchId].discountRate,
+            batches[batchId].reactiveTA,
             collateralizationFee,
             collateralizedToken.decimals()
         );
@@ -287,9 +292,9 @@ contract SolidWorldManager is
 
         (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
             .computeDecollateralizationOutcome(
-                batches[batchId].expectedDueDate,
+                batches[batchId].certificationDate,
                 amountIn,
-                batches[batchId].discountRate,
+                batches[batchId].reactiveTA,
                 decollateralizationFee,
                 collateralizedToken.decimals()
             );
@@ -349,9 +354,9 @@ contract SolidWorldManager is
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
 
         (cbtUserCut, cbtDaoCut, cbtForfeited) = SolidMath.computeCollateralizationOutcome(
-            batches[batchId].expectedDueDate,
+            batches[batchId].certificationDate,
             amountIn,
-            batches[batchId].discountRate,
+            batches[batchId].reactiveTA,
             collateralizationFee,
             collateralizedToken.decimals()
         );
@@ -376,17 +381,17 @@ contract SolidWorldManager is
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
 
         (amountOut, , ) = SolidMath.computeDecollateralizationOutcome(
-            batches[batchId].expectedDueDate,
+            batches[batchId].certificationDate,
             amountIn,
-            batches[batchId].discountRate,
+            batches[batchId].reactiveTA,
             decollateralizationFee,
             collateralizedToken.decimals()
         );
 
         (minAmountIn, minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
-            batches[batchId].expectedDueDate,
+            batches[batchId].certificationDate,
             amountOut,
-            batches[batchId].discountRate,
+            batches[batchId].reactiveTA,
             decollateralizationFee,
             collateralizedToken.decimals()
         );
@@ -504,9 +509,9 @@ contract SolidWorldManager is
 
                 DomainDataTypes.Batch storage batch = batches[batchId];
                 rewardAmount += SolidMath.computeWeeklyBatchReward(
-                    batch.expectedDueDate,
+                    batch.certificationDate,
                     availableCredits,
-                    batch.discountRate,
+                    batch.reactiveTA,
                     rewardDecimals
                 );
             }
@@ -527,6 +532,6 @@ contract SolidWorldManager is
     }
 
     function _isBatchCertified(uint batchId) internal view returns (bool) {
-        return batches[batchId].expectedDueDate <= block.timestamp;
+        return batches[batchId].certificationDate <= block.timestamp;
     }
 }
