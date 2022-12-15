@@ -10,7 +10,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         uint indexed batchId,
         uint amountIn,
         uint amountOut,
-        address indexed batchOwner
+        address indexed batchSupplier
     );
     event TokensDecollateralized(
         uint indexed batchId,
@@ -119,12 +119,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: batchId,
                 status: 0,
                 projectId: 5,
-                totalAmount: 10,
-                expectedDueDate: uint32(CURRENT_DATE + 12),
+                certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                discountRate: 1,
-                owner: testAccount
-            })
+                reactiveTA: 1,
+                supplier: testAccount
+            }),
+            10
         );
 
         assertEq(manager.batchCreated(batchId), true);
@@ -132,22 +132,20 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         (
             uint id,
             uint projectId,
-            uint totalAmount,
-            address owner,
-            uint32 expectedDueDate,
+            address supplier,
+            uint32 certificationDate,
             uint16 vintage,
             uint8 status,
-            uint24 discountRate
+            uint24 reactiveTA
         ) = manager.batches(batchId);
 
         assertEq(id, batchId);
         assertEq(status, 0);
         assertEq(projectId, 5);
-        assertEq(totalAmount, 10);
-        assertEq(expectedDueDate, uint32(CURRENT_DATE + 12));
+        assertEq(certificationDate, uint32(CURRENT_DATE + 12));
         assertEq(vintage, 2022);
-        assertEq(discountRate, 1);
-        assertEq(owner, testAccount);
+        assertEq(reactiveTA, 1);
+        assertEq(supplier, testAccount);
         assertEq(manager.batchIds(0), batchId);
     }
 
@@ -162,12 +160,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
-                totalAmount: 10,
-                expectedDueDate: uint32(CURRENT_DATE + 12),
+                certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                discountRate: 1,
-                owner: testAccount
-            })
+                reactiveTA: 1,
+                supplier: testAccount
+            }),
+            10
         );
 
         manager.addBatch(
@@ -175,12 +173,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: 11,
                 status: 0,
                 projectId: 5,
-                totalAmount: 20,
-                expectedDueDate: uint32(CURRENT_DATE + 24),
+                certificationDate: uint32(CURRENT_DATE + 24),
                 vintage: 2022,
-                discountRate: 1,
-                owner: testAccount
-            })
+                reactiveTA: 1,
+                supplier: testAccount
+            }),
+            20
         );
 
         assertEq(manager.getBatchIdsByProject(5).length, 2);
@@ -199,12 +197,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
-                totalAmount: 10,
-                expectedDueDate: uint32(CURRENT_DATE + 12),
+                certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                discountRate: 1,
-                owner: testAccount
-            })
+                reactiveTA: 1,
+                supplier: testAccount
+            }),
+            10
         );
 
         assertEq(manager.forwardContractBatch().balanceOf(testAccount, 7), 10);
@@ -225,12 +223,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 100,
-                expectedDueDate: uint32(CURRENT_DATE + 12),
+                certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                discountRate: 1,
-                owner: testAccount
-            })
+                reactiveTA: 1,
+                supplier: testAccount
+            }),
+            100
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
@@ -251,12 +249,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 100,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            100
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
@@ -282,12 +280,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 100,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            100
         );
 
         vm.warp(CURRENT_DATE + 1 weeks);
@@ -309,12 +307,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 100,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            100
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
@@ -347,12 +345,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 100,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            100
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
@@ -387,12 +385,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 100,
-                expectedDueDate: uint32(CURRENT_DATE + 12),
+                certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                discountRate: 1,
-                owner: testAccount
-            })
+                reactiveTA: 1,
+                supplier: testAccount
+            }),
+            100
         );
 
         vm.expectRevert(abi.encodePacked("ERC20: insufficient allowance"));
@@ -409,12 +407,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
@@ -441,12 +439,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
@@ -478,12 +476,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
@@ -531,12 +529,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
@@ -574,12 +572,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2025,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
         );
 
         vm.warp(CURRENT_DATE + 1 weeks);
@@ -602,12 +600,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2025,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
         );
 
         (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = manager
@@ -643,12 +641,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
         );
 
         manager.addBatch(
@@ -656,12 +654,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: 5_0000, // 5%
-                owner: testAccount
-            })
+                reactiveTA: 5_0000, // 5%
+                supplier: testAccount
+            }),
+            10000
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
@@ -709,12 +707,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
         );
 
         manager.addBatch(
@@ -722,12 +720,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
         );
 
         manager.addBatch(
@@ -735,12 +733,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 2,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2023,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
         );
 
         manager.addBatch(
@@ -748,12 +746,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 3,
                 status: 0,
                 projectId: PROJECT_ID + 1,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: TIME_APPRECIATION,
-                owner: testAccount
-            })
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
         );
 
         manager.addBatch(
@@ -761,12 +759,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 4,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 10000,
-                expectedDueDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                discountRate: 5_0000, // 5%
-                owner: testAccount
-            })
+                reactiveTA: 5_0000, // 5%
+                supplier: testAccount
+            }),
+            10000
         );
 
         vm.startPrank(testAccount);
@@ -804,12 +802,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
-                totalAmount: 10,
-                expectedDueDate: uint32(CURRENT_DATE + 12),
+                certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                discountRate: 1,
-                owner: testAccount
-            })
+                reactiveTA: 1,
+                supplier: testAccount
+            }),
+            10000
         );
     }
 
@@ -822,12 +820,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
-                totalAmount: 10,
-                expectedDueDate: uint32(CURRENT_DATE + 12),
+                certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                discountRate: 1,
-                owner: testAccount
-            })
+                reactiveTA: 1,
+                supplier: testAccount
+            }),
+            10000
         );
 
         manager.addBatch(
@@ -835,16 +833,16 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
-                totalAmount: 10,
-                expectedDueDate: uint32(CURRENT_DATE + 12),
+                certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                discountRate: 1,
-                owner: testAccount
-            })
+                reactiveTA: 1,
+                supplier: testAccount
+            }),
+            10000
         );
     }
 
-    function testFailAddBatchWhenOwnerIsNotDefined() public {
+    function testFailAddBatchWhenSupplierIsNotDefined() public {
         manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
 
@@ -853,12 +851,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
-                totalAmount: 10,
-                expectedDueDate: uint32(CURRENT_DATE + 12),
+                certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                discountRate: 1,
-                owner: address(0)
-            })
+                reactiveTA: 1,
+                supplier: address(0)
+            }),
+            10000
         );
     }
 
@@ -871,12 +869,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
-                totalAmount: 10,
-                expectedDueDate: uint32(CURRENT_DATE),
+                certificationDate: uint32(CURRENT_DATE),
                 vintage: 2022,
-                discountRate: 1,
-                owner: testAccount
-            })
+                reactiveTA: 1,
+                supplier: testAccount
+            }),
+            10000
         );
     }
 
@@ -889,12 +887,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
-                totalAmount: 10,
-                expectedDueDate: uint32(CURRENT_DATE - 1),
+                certificationDate: uint32(CURRENT_DATE - 1),
                 vintage: 2022,
-                discountRate: 1,
-                owner: testAccount
-            })
+                reactiveTA: 1,
+                supplier: testAccount
+            }),
+            10000
         );
     }
 

@@ -5,21 +5,20 @@ library DomainDataTypes {
     /// @notice Structure that holds necessary information for minting collateralized basket tokens (ERC-20).
     /// @param id ID of the batch in the database
     /// @param projectId Project ID this batch belongs to
-    /// @param totalAmount Amount of carbon tons in the batch, this amount will be minted as forward contract batch tokens (ERC-1155)
-    /// @param owner Address who receives forward contract batch tokens (ERC-1155)
-    /// @param expectedDueDate When the batch is about to be delivered; affects on how many collateralized basket tokens (ERC-20) may be minted
+    /// @param supplier Address who receives forward contract batch tokens (ERC-1155)
+    /// @param certificationDate When the batch is about to be delivered; affects on how many collateralized basket tokens (ERC-20) may be minted
     /// @param vintage The year an emission reduction occurred or the offset was issued. The older the vintage, the cheaper the price per credit.
     /// @param status Status for the batch (ex. CAN_BE_DEPOSITED | IS_ACCUMULATING | READY_FOR_DELIVERY etc.)
-    /// @param discountRate Coefficient that affects on how many collateralized basket tokens (ERC-20) may be minted / ton. Forward is worth less than spot.
+    /// @param reactiveTA Coefficient that affects on how many collateralized basket tokens (ERC-20) may be minted / ton
+    ///                   depending on market conditions. Forward is worth less than spot.
     struct Batch {
         uint id;
         uint projectId;
-        uint totalAmount;
-        address owner;
-        uint32 expectedDueDate;
+        address supplier;
+        uint32 certificationDate;
         uint16 vintage;
         uint8 status;
-        uint24 discountRate;
+        uint24 reactiveTA;
     }
 
     /// @notice Structure that holds state of a category of forward carbon credits. Used for computing collateralization.
