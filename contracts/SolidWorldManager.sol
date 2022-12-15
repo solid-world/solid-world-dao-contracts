@@ -165,6 +165,8 @@ contract SolidWorldManager is
 
         categories[categoryId].averageTA = initialTA;
 
+        categories[categoryId].averageTA = initialTA;
+
         emit CategoryCreated(categoryId);
     }
 
