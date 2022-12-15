@@ -1,5 +1,3 @@
-const LOCALHOST_ID = '31337'
-
 const deployMockPoolAndFactory = async (deployer, deployments) => {
   const Pool = await deployments.deploy('MockUniswapV3Pool', {
     from: deployer,
@@ -56,7 +54,7 @@ task('deploy-reward-oracle', 'Deploys a reward price oracle contract')
   .setAction(
     async (
       { owner, factory, baseToken, quoteToken, fee, secondsAgo },
-      { getNamedAccounts, deployments, getChainId }
+      { getNamedAccounts, deployments, network }
     ) => {
       const { deployer, contractsOwner } = await getNamedAccounts()
 
@@ -65,13 +63,10 @@ task('deploy-reward-oracle', 'Deploys a reward price oracle contract')
       let actualBaseToken = baseToken
       let actualQuoteToken = quoteToken
 
-      const chainId = await getChainId()
-      if (chainId === LOCALHOST_ID) {
+      if (isLocalhost(network.name)) {
         actualFactory ??= await deployMockPoolAndFactory(deployer, deployments)
-        actualBaseToken ??= actualQuoteToken ??= await deployMockERC20(
-          deployer,
-          deployments
-        )
+        actualBaseToken ??= await deployMockERC20(deployer, deployments)
+        actualQuoteToken ??= await deployMockERC20(deployer, deployments)
       }
 
       const UniswapEACAggregatorProxyAdapter = await deployments.deploy(
@@ -96,3 +91,7 @@ task('deploy-reward-oracle', 'Deploys a reward price oracle contract')
       )
     }
   )
+
+function isLocalhost(networkName) {
+  return ['localhost', 'foundry'].includes(networkName)
+}
