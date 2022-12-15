@@ -370,17 +370,4 @@ contract SolidMathTest is Test {
             18
         );
     }
-
-    function testToWeeklyRate() public {
-        assertEq(SolidMath.toWeeklyRate(0), 0);
-
-        // js result: 1599.1347781311172
-        assertEq(SolidMath.toWeeklyRate(80000), 1600);
-
-        // js result: 4273.826727360097
-        assertEq(SolidMath.toWeeklyRate(200000), 4274);
-
-        // js result: 84597.09972808382
-        assertEq(SolidMath.toWeeklyRate(990000), 84598);
-    }
 }

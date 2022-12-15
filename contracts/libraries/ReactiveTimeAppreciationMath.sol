@@ -4,23 +4,57 @@ pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/math/SignedMath.sol";
 import "./DomainDataTypes.sol";
+import "./SolidMath.sol";
 
 library ReactiveTimeAppreciationMath {
     /// @dev Basis points in which the `decayPerSecond` must be expressed
     uint constant DECAY_BASIS_POINTS = 100_000_000_000;
 
-    function computeReactiveTA(DomainDataTypes.Category memory categoryState, uint fcbtAmount)
-        internal
-        view
-        returns (uint decayingMomentum, uint24 reactiveTA)
-    {
+    error ForwardCreditsInputAmountTooLarge(uint forwardCreditsAmount);
+
+    /// @dev Computes a time appreciation value that is reactive to market conditions
+    /// @dev The reactive time appreciation starts at averageTA - maxDepreciation and increases with momentum and input amount
+    /// @param categoryState The current state of the category to compute the time appreciation for
+    /// @param forwardCreditsAmount The size of the forward credits to be collateralized
+    /// @return decayingMomentum The current decaying momentum of the category
+    /// @return reactiveTA The time appreciation value influenced by current market conditions
+    function computeReactiveTA(
+        DomainDataTypes.Category memory categoryState,
+        uint forwardCreditsAmount
+    ) internal view returns (uint decayingMomentum, uint24 reactiveTA) {
         decayingMomentum = computeDecayingMomentum(
             categoryState.decayPerSecond,
             categoryState.lastCollateralizationMomentum,
             categoryState.lastCollateralizationTimestamp
         );
+
+        uint volume = decayingMomentum + forwardCreditsAmount / 2;
+        uint reactiveFactorAnnually = Math.mulDiv(
+            volume,
+            SolidMath.TIME_APPRECIATION_BASIS_POINTS,
+            categoryState.volumeCoefficient * 100
+        );
+        if (reactiveFactorAnnually >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
+            revert ForwardCreditsInputAmountTooLarge(forwardCreditsAmount);
+        }
+
+        uint reactiveFactorWeekly = toWeeklyRate(reactiveFactorAnnually);
+        reactiveTA = uint24(
+            categoryState.averageTA - categoryState.maxDepreciation + reactiveFactorWeekly
+        );
+
+        if (reactiveTA >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
+            revert ForwardCreditsInputAmountTooLarge(forwardCreditsAmount);
+        }
     }
 
+    /// @dev Decays the `lastCollateralizationMomentum` with the `decayPerSecond` rate since the `lastCollateralizationTimestamp`
+    /// @dev e.g a momentum of 100 with a decay of 5% per day will decay to 95 after 1 day
+    /// @dev The minimum decaying momentum is 0
+    /// @param decayPerSecond The rate at which the `lastCollateralizationMomentum` decays per second
+    /// @param lastCollateralizationMomentum The last collateralization momentum
+    /// @param lastCollateralizationTimestamp The last collateralization timestamp
+    /// @return decayingMomentum The decaying momentum value
     function computeDecayingMomentum(
         uint decayPerSecond,
         uint lastCollateralizationMomentum,
@@ -38,5 +72,34 @@ library ReactiveTimeAppreciationMath {
             uint(decayMultiplier),
             DECAY_BASIS_POINTS
         );
+    }
+
+    /// @dev Converts a rate quantified per year to a rate quantified per week
+    /// @dev Computes: 1 - (1 - annualRate) ** (1/52.1)
+    /// @dev Taking form: 1 - e ** (ln(1 - annualRate) * (1/52.1))
+    /// @param annualRate 1% = 10000, 0.0984% = 984
+    /// @return weeklyRate the rate quantified per week
+    function toWeeklyRate(uint annualRate) internal pure returns (uint weeklyRate) {
+        uint annualDiscountPoints = SolidMath.TIME_APPRECIATION_BASIS_POINTS - annualRate;
+        int128 annualDiscount = ABDKMath64x64.div(
+            annualDiscountPoints,
+            SolidMath.TIME_APPRECIATION_BASIS_POINTS
+        );
+
+        int128 annualDiscountLN = ABDKMath64x64.ln(annualDiscount);
+        int128 weeksInYearInverse = ABDKMath64x64.inv(weeksInYear());
+        int128 weeklyDiscount = ABDKMath64x64.exp(
+            ABDKMath64x64.mul(annualDiscountLN, weeksInYearInverse)
+        );
+        uint weeklyDiscountPoints = ABDKMath64x64.mulu(
+            weeklyDiscount,
+            SolidMath.TIME_APPRECIATION_BASIS_POINTS
+        );
+
+        weeklyRate = SolidMath.TIME_APPRECIATION_BASIS_POINTS - weeklyDiscountPoints;
+    }
+
+    function weeksInYear() internal pure returns (int128) {
+        return ABDKMath64x64.div(521, 10);
     }
 }
