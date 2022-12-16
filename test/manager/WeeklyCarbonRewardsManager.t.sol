@@ -189,12 +189,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
-                    totalAmount: 10000 * ((i % 2) + 1),
-                    expectedDueDate: uint32(CURRENT_DATE + 7 weeks),
+                    certificationDate: uint32(CURRENT_DATE + 7 weeks),
                     vintage: 2022,
-                    discountRate: uint24(1647 + (i * 100)), // 1747, 1847, 1947, 2047, 2147
-                    owner: address(manager)
-                })
+                    reactiveTA: uint24(1647 + (i * 100)), // 1747, 1847, 1947, 2047, 2147
+                    supplier: address(manager)
+                }),
+                10000 * ((i % 2) + 1)
             );
         }
         manager.addBatch(
@@ -202,24 +202,24 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 6,
                 status: 0,
                 projectId: PROJECT_ID,
-                totalAmount: 1000000,
-                expectedDueDate: uint32(CURRENT_DATE + 3 weeks), // should be skipped
+                certificationDate: uint32(CURRENT_DATE + 3 weeks), // should be skipped
                 vintage: 2022,
-                discountRate: uint24(9999),
-                owner: address(manager)
-            })
+                reactiveTA: uint24(9999),
+                supplier: address(manager)
+            }),
+            1000000
         );
         manager.addBatch(
             DomainDataTypes.Batch({
                 id: BATCH_ID + 7,
                 status: 0,
                 projectId: PROJECT_ID + 2,
-                totalAmount: 0,
-                expectedDueDate: uint32(CURRENT_DATE + 7 weeks),
+                certificationDate: uint32(CURRENT_DATE + 7 weeks),
                 vintage: 2022,
-                discountRate: 1647,
-                owner: address(manager)
-            })
+                reactiveTA: 1647,
+                supplier: address(manager)
+            }),
+            0
         );
         vm.warp(CURRENT_DATE + 6 weeks);
         CollateralizedBasketToken rewardToken0 = manager.categoryToken(CATEGORY_ID);
