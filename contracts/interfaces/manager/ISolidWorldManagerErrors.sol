@@ -8,6 +8,7 @@ interface ISolidWorldManagerErrors {
     error InvalidBatchId(uint batchId);
     error InvalidBatchSupplier();
     error BatchCertificationDateInThePast(uint32 dueDate);
+    error BatchesNotInSameCategory(uint batchId1, uint batchId2);
 
     error CategoryAlreadyExists(uint categoryId);
     error InvalidCategoryId(uint categoryId);

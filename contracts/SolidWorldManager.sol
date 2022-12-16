@@ -332,7 +332,8 @@ contract SolidWorldManager is
 
     /// @dev Decollateralizes `amountIn` of ERC20 tokens and sends `amountOut` ERC1155 tokens with id `batchId` to msg.sender
     /// @dev prior to calling, msg.sender must approve SolidWorldManager to spend `amountIn` ERC20 tokens
-    /// @dev nonReentrant, to avoid possible reentrancy after calling safeTransferFrom
+    /// @dev nonReentrant (_decollateralizeTokens), to avoid possible reentrancy after calling safeTransferFrom
+    /// @dev will trigger a rebalance of the Category
     /// @param batchId id of the batch
     /// @param amountIn ERC20 tokens to decollateralize
     /// @param amountOutMin minimum output amount of ERC1155 tokens for transaction to succeed
@@ -340,36 +341,17 @@ contract SolidWorldManager is
         uint batchId,
         uint amountIn,
         uint amountOutMin
-    ) public nonReentrant validBatch(batchId) {
-        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
+    ) external {
+        _decollateralizeTokens(batchId, amountIn, amountOutMin);
 
-        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
-            .computeDecollateralizationOutcome(
-                batches[batchId].certificationDate,
-                amountIn,
-                batches[batchId].reactiveTA,
-                decollateralizationFee,
-                collateralizedToken.decimals()
-            );
-
-        if (amountOut <= 0) {
-            revert AmountOutTooLow(amountOut);
-        }
-
-        if (amountOut < amountOutMin) {
-            revert AmountOutLessThanMinimum(amountOut, amountOutMin);
-        }
-
-        collateralizedToken.burnFrom(msg.sender, cbtToBurn);
-        GPv2SafeERC20.safeTransferFrom(collateralizedToken, msg.sender, feeReceiver, cbtDaoCut);
-
-        forwardContractBatch.safeTransferFrom(address(this), msg.sender, batchId, amountOut, "");
-
-        emit TokensDecollateralized(batchId, amountIn, amountOut, msg.sender);
+        _rebalanceCategory(batchCategory[batchId]);
     }
 
     /// @dev Bulk-decollateralizes ERC20 tokens into multiple ERC1155 tokens with specified amounts
     /// @dev prior to calling, msg.sender must approve SolidWorldManager to spend `sum(amountsIn)` ERC20 tokens
+    /// @dev nonReentrant (_decollateralizeTokens), to avoid possible reentrancy after calling safeTransferFrom
+    /// @dev _batchIds must belong to the same Category
+    /// @dev will trigger a rebalance of the Category
     /// @param _batchIds ids of the batches
     /// @param amountsIn ERC20 tokens to decollateralize
     /// @param amountsOutMin minimum output amounts of ERC1155 tokens for transaction to succeed
@@ -382,9 +364,21 @@ contract SolidWorldManager is
             revert InvalidInput();
         }
 
-        for (uint i; i < _batchIds.length; i++) {
-            decollateralizeTokens(_batchIds[i], amountsIn[i], amountsOutMin[i]);
+        for (uint i = 1; i < _batchIds.length; i++) {
+            uint currentBatchCategoryId = batchCategory[_batchIds[i]];
+            uint previousBatchCategoryId = batchCategory[_batchIds[i - 1]];
+
+            if (currentBatchCategoryId != previousBatchCategoryId) {
+                revert BatchesNotInSameCategory(currentBatchCategoryId, previousBatchCategoryId);
+            }
         }
+
+        for (uint i; i < _batchIds.length; i++) {
+            _decollateralizeTokens(_batchIds[i], amountsIn[i], amountsOutMin[i]);
+        }
+
+        uint decollateralizedCategoryId = batchCategory[_batchIds[0]];
+        _rebalanceCategory(decollateralizedCategoryId);
     }
 
     /// @dev Simulates collateralization of `amountIn` ERC1155 tokens with id `batchId` for msg.sender
@@ -609,6 +603,44 @@ contract SolidWorldManager is
         categories[categoryId].totalCollateralized = totalCollateralizedForwardCredits;
 
         emit CategoryRebalanced(categoryId, latestAverageTA, totalCollateralizedForwardCredits);
+    }
+
+    /// @dev Decollateralizes `amountIn` of ERC20 tokens and sends `amountOut` ERC1155 tokens with id `batchId` to msg.sender
+    /// @dev prior to calling, msg.sender must approve SolidWorldManager to spend `amountIn` ERC20 tokens
+    /// @dev nonReentrant, to avoid possible reentrancy after calling safeTransferFrom
+    /// @param batchId id of the batch
+    /// @param amountIn ERC20 tokens to decollateralize
+    /// @param amountOutMin minimum output amount of ERC1155 tokens for transaction to succeed
+    function _decollateralizeTokens(
+        uint batchId,
+        uint amountIn,
+        uint amountOutMin
+    ) internal nonReentrant validBatch(batchId) {
+        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
+
+        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
+            .computeDecollateralizationOutcome(
+                batches[batchId].certificationDate,
+                amountIn,
+                batches[batchId].reactiveTA,
+                decollateralizationFee,
+                collateralizedToken.decimals()
+            );
+
+        if (amountOut <= 0) {
+            revert AmountOutTooLow(amountOut);
+        }
+
+        if (amountOut < amountOutMin) {
+            revert AmountOutLessThanMinimum(amountOut, amountOutMin);
+        }
+
+        collateralizedToken.burnFrom(msg.sender, cbtToBurn);
+        GPv2SafeERC20.safeTransferFrom(collateralizedToken, msg.sender, feeReceiver, cbtDaoCut);
+
+        forwardContractBatch.safeTransferFrom(address(this), msg.sender, batchId, amountOut, "");
+
+        emit TokensDecollateralized(batchId, amountIn, amountOut, msg.sender);
     }
 
     function _getCollateralizedTokenForBatchId(uint batchId)

@@ -557,6 +557,44 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut + 810e18);
     }
 
+    function testDecollateralizeTokens_triggersCategoryRebalance() public {
+        uint cbtUserCut = 8100e18;
+
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+
+        vm.startPrank(testAccount);
+        collateralizedToken.approve(address(manager), cbtUserCut);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
+
+        vm.expectEmit(true, true, true, true, address(manager));
+        emit TokensDecollateralized(BATCH_ID, cbtUserCut, 8100, testAccount);
+        vm.expectEmit(true, true, true, false, address(manager));
+        emit CategoryRebalanced(CATEGORY_ID, TIME_APPRECIATION, 10000 - 8100);
+        manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 8100);
+        vm.stopPrank();
+
+        (, , , uint24 averageTA, uint totalCollateralized, , ) = manager.categories(CATEGORY_ID);
+        assertEq(averageTA, TIME_APPRECIATION);
+        assertEq(totalCollateralized, 10000 - 8100);
+    }
+
     function testSimulateBatchCollateralizationWhenBatchIdIsInvalid() public {
         vm.expectRevert(
             abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidBatchId.selector, 5)
@@ -633,7 +671,68 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.bulkDecollateralizeTokens(arrayLength2, arrayLength1, arrayLength1);
     }
 
-    function testBulkDecollateralizeTokens() public {
+    function testBulkDecollateralizeTokens_failsForBatchesBelongingToDifferentCategories() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID + 1,
+                status: 0,
+                projectId: PROJECT_ID + 1,
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                reactiveTA: 5_0000, // 5%
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+
+        vm.startPrank(testAccount);
+        collateralizedToken.approve(address(manager), 8000e18);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        manager.collateralizeBatch(BATCH_ID, 10000, 8100e18);
+        manager.collateralizeBatch(BATCH_ID + 1, 10000, 8550e18);
+
+        uint[] memory batchIds = new uint[](2);
+        batchIds[0] = BATCH_ID;
+        batchIds[1] = BATCH_ID + 1;
+        uint[] memory amountsIn = new uint[](2);
+        amountsIn[0] = 4000e18;
+        amountsIn[1] = 4000e18;
+        uint[] memory amountsOutMin = new uint[](2);
+        amountsOutMin[0] = 4000;
+        amountsOutMin[1] = 3789;
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ISolidWorldManagerErrors.BatchesNotInSameCategory.selector,
+                CATEGORY_ID + 1,
+                CATEGORY_ID
+            )
+        );
+        manager.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
+        vm.stopPrank();
+    }
+
+    function testBulkDecollateralizeTokens_verifyTokenBalances() public {
         manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
@@ -695,6 +794,68 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
             8100e18 + 8550e18 - 4000e18 - 4000e18
         );
         assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), 2650e18);
+    }
+
+    function testBulkDecollateralizeTokens_triggersCategoryRebalance() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                reactiveTA: TIME_APPRECIATION,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID + 1,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                vintage: 2022,
+                reactiveTA: 5_0000, // 5%
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+
+        vm.startPrank(testAccount);
+        collateralizedToken.approve(address(manager), 8000e18);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        manager.collateralizeBatch(BATCH_ID, 10000, 8100e18);
+        manager.collateralizeBatch(BATCH_ID + 1, 10000, 8550e18);
+
+        uint[] memory batchIds = new uint[](2);
+        batchIds[0] = BATCH_ID;
+        batchIds[1] = BATCH_ID + 1;
+        uint[] memory amountsIn = new uint[](2);
+        amountsIn[0] = 4000e18;
+        amountsIn[1] = 4000e18;
+        uint[] memory amountsOutMin = new uint[](2);
+        amountsOutMin[0] = 4000;
+        amountsOutMin[1] = 3789;
+
+        uint newTotalCollateralized = 10000 - 4000 + 10000 - 3789;
+        uint newAverageTA = ((uint(TIME_APPRECIATION) * (10000 - 4000)) +
+            (5_0000 * (10000 - 3789))) / newTotalCollateralized;
+
+        vm.expectEmit(true, true, true, false, address(manager));
+        emit CategoryRebalanced(CATEGORY_ID, newAverageTA, newTotalCollateralized);
+        manager.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
+        vm.stopPrank();
+
+        (, , , uint24 averageTA, uint totalCollateralized, , ) = manager.categories(CATEGORY_ID);
+        assertEq(averageTA, newAverageTA);
+        assertEq(totalCollateralized, newTotalCollateralized);
     }
 
     function testGetBatchesDecollateralizationInfo() public {
