@@ -365,7 +365,7 @@ contract SolidWorldManager is
         }
 
         for (uint i; i < _batchIds.length; i++) {
-            _decollateralizeTokens(_batchIds[i], amountsIn[i], amountsOutMin[i]);
+            _decollateralizeTokens(_batchIds[i], amountsIn[i], amountsOutMin[i], false);
         }
 
         uint decollateralizedCategoryId = batchCategory[_batchIds[0]];
