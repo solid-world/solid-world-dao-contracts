@@ -4,11 +4,6 @@ import "./BaseSolidWorldManager.t.sol";
 
 contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     event WeeklyRewardMinted(address indexed rewardToken, uint indexed rewardAmount);
-    event CategoryRebalanced(
-        uint indexed categoryId,
-        uint indexed averageTA,
-        uint indexed totalCollateralized
-    );
 
     function testComputeWeeklyCarbonRewards_failsInputsOfDifferentLengths() public {
         vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));

@@ -6,6 +6,12 @@ import "forge-std/console.sol";
 import "../../contracts/SolidWorldManager.sol";
 
 abstract contract BaseSolidWorldManager is Test {
+    event CategoryRebalanced(
+        uint indexed categoryId,
+        uint indexed averageTA,
+        uint indexed totalCollateralized
+    );
+
     SolidWorldManager manager;
     address root = address(this);
     address testAccount = vm.addr(1);
