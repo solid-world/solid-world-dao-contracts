@@ -592,7 +592,7 @@ contract SolidWorldManager is
                 }
 
                 totalQuantifiedForwardCredits +=
-                    batches[batchId].discountRate *
+                    batches[batchId].reactiveTA *
                     collateralizedForwardCredits;
                 totalCollateralizedForwardCredits += collateralizedForwardCredits;
             }
