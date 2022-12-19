@@ -86,12 +86,18 @@ contract ReactiveTimeAppreciationMathTest is Test {
         categoryStates[1].lastCollateralizationTimestamp = CURRENT_DATE; // decayingMomentum = lastCollateralizationMomentum
         categoryStates[1].lastCollateralizationMomentum = 30000;
 
-        (uint decayingMomentum0, uint24 reactiveTA0) = ReactiveTimeAppreciationMath
-            .computeReactiveTA(categoryStates[0], 10000);
-        (uint decayingMomentum1, uint24 reactiveTA1) = ReactiveTimeAppreciationMath
-            .computeReactiveTA(categoryStates[1], 10000);
-        (uint decayingMomentum2, uint24 reactiveTA2) = ReactiveTimeAppreciationMath
-            .computeReactiveTA(categoryStates[0], 0);
+        (uint decayingMomentum0, uint reactiveTA0) = ReactiveTimeAppreciationMath.computeReactiveTA(
+            categoryStates[0],
+            10000
+        );
+        (uint decayingMomentum1, uint reactiveTA1) = ReactiveTimeAppreciationMath.computeReactiveTA(
+            categoryStates[1],
+            10000
+        );
+        (uint decayingMomentum2, uint reactiveTA2) = ReactiveTimeAppreciationMath.computeReactiveTA(
+            categoryStates[0],
+            0
+        );
 
         assertEq(decayingMomentum0, 0);
         // 7.1% yearly rate
@@ -127,6 +133,42 @@ contract ReactiveTimeAppreciationMathTest is Test {
             )
         );
         ReactiveTimeAppreciationMath.computeReactiveTA(categoryState, forwardCreditsAmount);
+    }
+
+    function testInferBatchTA_weeksTillCertificationAre0() public {
+        uint cbtDecimals = 18;
+        uint circulatingCBT = 945 * 10**cbtDecimals;
+        uint totalCollateralizedForwardCredits = 1000;
+        uint certificationDate = CURRENT_DATE;
+
+        uint batchTA = ReactiveTimeAppreciationMath.inferBatchTA(
+            circulatingCBT,
+            totalCollateralizedForwardCredits,
+            certificationDate,
+            cbtDecimals
+        );
+
+        assertEq(batchTA, 0);
+    }
+
+    function testFailInferBatchTA_invalidInputs() public view {
+        ReactiveTimeAppreciationMath.inferBatchTA(0, 0, CURRENT_DATE, 18);
+    }
+
+    function testInferBatchTA() public {
+        uint circulatingCBT = 945.525410012776e18;
+        uint totalCollateralizedForwardCredits = 1000;
+        uint certificationDate = CURRENT_DATE + 35 weeks;
+        uint cbtDecimals = 18;
+
+        uint batchTA = ReactiveTimeAppreciationMath.inferBatchTA(
+            circulatingCBT,
+            totalCollateralizedForwardCredits,
+            certificationDate,
+            cbtDecimals
+        );
+
+        assertEq(batchTA, 1600);
     }
 
     function testToWeeklyRate() public {
