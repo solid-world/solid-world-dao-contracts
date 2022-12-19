@@ -4,6 +4,11 @@ import "./BaseSolidWorldManager.t.sol";
 
 contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     event WeeklyRewardMinted(address indexed rewardToken, uint indexed rewardAmount);
+    event CategoryRebalanced(
+        uint indexed categoryId,
+        uint indexed averageTA,
+        uint indexed totalCollateralized
+    );
 
     function testComputeWeeklyCarbonRewards_failsInputsOfDifferentLengths() public {
         vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
@@ -12,7 +17,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
 
     function testMintWeeklyCarbonRewards_failsInputsOfDifferentLengths() public {
         vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
-        manager.mintWeeklyCarbonRewards(new address[](2), new uint[](1), testAccount);
+        manager.mintWeeklyCarbonRewards(
+            new uint[](2),
+            new address[](2),
+            new uint[](1),
+            testAccount
+        );
     }
 
     function testComputeWeeklyCarbonRewards_failsInputUnknownCategory() public {
@@ -167,34 +177,111 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testMintWeeklyCarbonRewards_allBatchesUsed() public {
-        vm.startPrank(address(manager));
-        CollateralizedBasketToken rewardToken0 = new CollateralizedBasketToken("Test token", "TT");
-        CollateralizedBasketToken rewardToken1 = new CollateralizedBasketToken("Test token", "TT");
-        vm.stopPrank();
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addCategory(CATEGORY_ID + 2, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
+        manager.addProject(CATEGORY_ID + 2, PROJECT_ID + 2);
+        for (uint i = 1; i < 6; i++) {
+            manager.addBatch(
+                DomainDataTypes.Batch({
+                    id: BATCH_ID + i,
+                    status: 0,
+                    projectId: PROJECT_ID + (i % 2),
+                    totalAmount: 10000 * ((i % 2) + 1),
+                    expectedDueDate: uint32(CURRENT_DATE + 7 weeks),
+                    vintage: 2022,
+                    discountRate: uint24(1647 + (i * 100)), // 1747, 1847, 1947, 2047, 2147
+                    owner: address(manager)
+                })
+            );
+        }
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID + 6,
+                status: 0,
+                projectId: PROJECT_ID,
+                totalAmount: 1000000,
+                expectedDueDate: uint32(CURRENT_DATE + 3 weeks), // should be skipped
+                vintage: 2022,
+                discountRate: uint24(9999),
+                owner: address(manager)
+            })
+        );
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID + 7,
+                status: 0,
+                projectId: PROJECT_ID + 2,
+                totalAmount: 0,
+                expectedDueDate: uint32(CURRENT_DATE + 7 weeks),
+                vintage: 2022,
+                discountRate: 1647,
+                owner: address(manager)
+            })
+        );
+        vm.warp(CURRENT_DATE + 6 weeks);
+        CollateralizedBasketToken rewardToken0 = manager.categoryToken(CATEGORY_ID);
+        CollateralizedBasketToken rewardToken1 = manager.categoryToken(CATEGORY_ID + 1);
+        CollateralizedBasketToken rewardToken2 = manager.categoryToken(CATEGORY_ID + 2);
 
         uint mintAmount0 = 1000;
         uint mintAmount1 = 2000;
+        uint mintAmount2 = 0;
 
         address rewardsVault = vm.addr(6);
 
-        address[] memory carbonRewards = new address[](2);
-        uint[] memory rewardAmounts = new uint[](2);
+        uint[] memory categoryIds = new uint[](3);
+        address[] memory carbonRewards = new address[](3);
+        uint[] memory rewardAmounts = new uint[](3);
+        categoryIds[0] = CATEGORY_ID;
+        categoryIds[1] = CATEGORY_ID + 1;
+        categoryIds[2] = CATEGORY_ID + 2;
         carbonRewards[0] = address(rewardToken0);
         carbonRewards[1] = address(rewardToken1);
+        carbonRewards[2] = address(rewardToken2);
         rewardAmounts[0] = mintAmount0;
         rewardAmounts[1] = mintAmount1;
+        rewardAmounts[2] = mintAmount2;
 
         vm.expectEmit(true, true, false, true, address(manager));
         emit WeeklyRewardMinted(address(rewardToken0), mintAmount0);
-
         vm.expectEmit(true, true, false, true, address(manager));
         emit WeeklyRewardMinted(address(rewardToken1), mintAmount1);
+        vm.expectEmit(true, true, false, true, address(manager));
+        emit WeeklyRewardMinted(address(rewardToken2), mintAmount2);
 
         vm.prank(weeklyRewardsMinter);
-        manager.mintWeeklyCarbonRewards(carbonRewards, rewardAmounts, rewardsVault);
+        manager.mintWeeklyCarbonRewards(categoryIds, carbonRewards, rewardAmounts, rewardsVault);
 
-        assertEq(rewardToken0.balanceOf(rewardsVault), mintAmount0);
-        assertEq(rewardToken1.balanceOf(rewardsVault), mintAmount1);
+        vm.expectEmit(true, true, true, false, address(manager));
+        emit CategoryRebalanced(CATEGORY_ID, uint24(1947), 20000);
+        vm.expectEmit(true, true, true, false, address(manager));
+        emit CategoryRebalanced(CATEGORY_ID + 1, 1947, 60000);
+        vm.expectEmit(true, true, true, false, address(manager));
+        emit CategoryRebalanced(CATEGORY_ID + 2, INITIAL_CATEGORY_TA, 0);
+        vm.prank(weeklyRewardsMinter);
+        manager.mintWeeklyCarbonRewards(categoryIds, carbonRewards, rewardAmounts, rewardsVault);
+
+        assertEq(rewardToken0.balanceOf(rewardsVault), mintAmount0 * 2);
+        assertEq(rewardToken1.balanceOf(rewardsVault), mintAmount1 * 2);
+        assertEq(rewardToken2.balanceOf(rewardsVault), mintAmount2);
+
+        (, , , uint24 averageTA0, uint totalCollateralized0, , ) = manager.categories(CATEGORY_ID);
+        (, , , uint24 averageTA1, uint totalCollateralized1, , ) = manager.categories(
+            CATEGORY_ID + 1
+        );
+        (, , , uint24 averageTA2, uint totalCollateralized2, , ) = manager.categories(
+            CATEGORY_ID + 2
+        );
+
+        assertEq(averageTA0, 1947);
+        assertEq(totalCollateralized0, 20000);
+        assertEq(averageTA1, 1947);
+        assertEq(totalCollateralized1, 60000);
+        assertEq(averageTA2, INITIAL_CATEGORY_TA);
+        assertEq(totalCollateralized2, 0);
     }
 
     function testMintWeeklyCarbonRewards_failsIfNotCalledByWeeklyRewardsMinter() public {
@@ -204,6 +291,11 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 address(this)
             )
         );
-        manager.mintWeeklyCarbonRewards(new address[](0), new uint[](0), testAccount);
+        manager.mintWeeklyCarbonRewards(
+            new uint[](0),
+            new address[](0),
+            new uint[](0),
+            testAccount
+        );
     }
 }

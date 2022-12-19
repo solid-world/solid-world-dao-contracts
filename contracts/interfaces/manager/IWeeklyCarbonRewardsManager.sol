@@ -22,10 +22,12 @@ interface IWeeklyCarbonRewardsManager {
         view
         returns (address[] memory carbonRewards, uint[] memory rewardAmounts);
 
+    /// @param _categoryIds The categories to which the incentivized assets belong
     /// @param carbonRewards List of carbon rewards to mint
     /// @param rewardAmounts List of carbon reward amounts to mint
     /// @param rewardsVault Account that secures ERC20 rewards
     function mintWeeklyCarbonRewards(
+        uint[] calldata _categoryIds,
         address[] calldata carbonRewards,
         uint[] calldata rewardAmounts,
         address rewardsVault
