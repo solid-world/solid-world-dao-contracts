@@ -31,7 +31,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     function testAddCategory() public {
         assertEq(address(manager.categoryToken(CATEGORY_ID)), address(0));
         assertEq(manager.categoryIds(CATEGORY_ID), false);
-        (, , , uint24 averageTAStart, , , ) = manager.categories(CATEGORY_ID);
+        (, , , , uint24 averageTAStart, , , ) = manager.categories(CATEGORY_ID);
         assertEq(averageTAStart, 0);
 
         vm.expectEmit(true, false, false, false, address(manager));
@@ -41,7 +41,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         assertNotEq(address(manager.categoryToken(CATEGORY_ID)), address(0));
         assertEq(manager.categoryIds(CATEGORY_ID), true);
 
-        (, , , uint24 averageTA, , , ) = manager.categories(CATEGORY_ID);
+        (, , , , uint24 averageTA, , , ) = manager.categories(CATEGORY_ID);
         assertEq(averageTA, INITIAL_CATEGORY_TA);
     }
 
@@ -49,7 +49,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         vm.expectRevert(
             abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidCategoryId.selector, CATEGORY_ID)
         );
-        manager.updateCategory(CATEGORY_ID, 0, 0, 0);
+        manager.updateCategory(CATEGORY_ID, 0, 0, 0, 0);
     }
 
     function testUpdateCategory() public {
@@ -57,9 +57,9 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
         vm.expectEmit(true, true, true, true, address(manager));
         emit CategoryUpdated(CATEGORY_ID, 11, 13, 17);
-        manager.updateCategory(CATEGORY_ID, 11, 13, 17);
+        manager.updateCategory(CATEGORY_ID, 11, 13, 0, 17);
 
-        (uint volumeCoefficient, uint40 decayPerSecond, uint24 maxDepreciation, , , , ) = manager
+        (uint volumeCoefficient, uint40 decayPerSecond, , uint24 maxDepreciation, , , , ) = manager
             .categories(CATEGORY_ID);
 
         assertEq(volumeCoefficient, 11);
@@ -386,7 +386,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         (, , , , , , uint24 batchTA) = manager.batches(BATCH_ID);
         assertEq(batchTA, TIME_APPRECIATION);
 
-        (, , , uint24 averageTA, uint totalCollateralized, , ) = manager.categories(CATEGORY_ID);
+        (, , , , uint24 averageTA, uint totalCollateralized, , ) = manager.categories(CATEGORY_ID);
         assertEq(averageTA, TIME_APPRECIATION);
         assertEq(totalCollateralized, 100);
     }
@@ -649,7 +649,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 8100);
         vm.stopPrank();
 
-        (, , , uint24 averageTA, uint totalCollateralized, , ) = manager.categories(CATEGORY_ID);
+        (, , , , uint24 averageTA, uint totalCollateralized, , ) = manager.categories(CATEGORY_ID);
         assertEq(averageTA, TIME_APPRECIATION);
         assertEq(totalCollateralized, 10000 - 8100);
     }
@@ -910,7 +910,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
         vm.stopPrank();
 
-        (, , , uint24 averageTA, uint totalCollateralized, , ) = manager.categories(CATEGORY_ID);
+        (, , , , uint24 averageTA, uint totalCollateralized, , ) = manager.categories(CATEGORY_ID);
         assertEq(averageTA, newAverageTA);
         assertEq(totalCollateralized, newTotalCollateralized);
     }

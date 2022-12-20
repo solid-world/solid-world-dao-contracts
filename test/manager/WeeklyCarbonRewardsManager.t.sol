@@ -263,11 +263,13 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         assertEq(rewardToken1.balanceOf(rewardsVault), mintAmount1 * 2);
         assertEq(rewardToken2.balanceOf(rewardsVault), mintAmount2);
 
-        (, , , uint24 averageTA0, uint totalCollateralized0, , ) = manager.categories(CATEGORY_ID);
-        (, , , uint24 averageTA1, uint totalCollateralized1, , ) = manager.categories(
+        (, , , , uint24 averageTA0, uint totalCollateralized0, , ) = manager.categories(
+            CATEGORY_ID
+        );
+        (, , , , uint24 averageTA1, uint totalCollateralized1, , ) = manager.categories(
             CATEGORY_ID + 1
         );
-        (, , , uint24 averageTA2, uint totalCollateralized2, , ) = manager.categories(
+        (, , , , uint24 averageTA2, uint totalCollateralized2, , ) = manager.categories(
             CATEGORY_ID + 2
         );
 

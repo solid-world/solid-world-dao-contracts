@@ -165,6 +165,7 @@ contract SolidWorldManager is
         uint categoryId,
         uint volumeCoefficient,
         uint40 decayPerSecond,
+        uint16 maxDepreciationPerYear,
         uint24 maxDepreciation
     ) external {
         if (!categoryIds[categoryId]) {

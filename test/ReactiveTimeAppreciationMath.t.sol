@@ -66,12 +66,14 @@ contract ReactiveTimeAppreciationMathTest is Test {
 
     function testComputeReactiveTA() public {
         uint24 decayPerSecond = uint24(getTestDecayPerSecond());
+        uint16 maxDepreciationPerYear = 10; // 1% yearly rate
         uint24 maxDepreciation = 193; // 1% yearly rate
         uint24 averageTA = 1599; // 8% yearly rate
 
         DomainDataTypes.Category[] memory categoryStates = new DomainDataTypes.Category[](2);
         categoryStates[0].volumeCoefficient = 50000;
         categoryStates[0].decayPerSecond = decayPerSecond;
+        categoryStates[0].maxDepreciationPerYear = maxDepreciationPerYear;
         categoryStates[0].maxDepreciation = maxDepreciation;
         categoryStates[0].averageTA = averageTA;
         categoryStates[0].totalCollateralized = 0;
@@ -80,6 +82,7 @@ contract ReactiveTimeAppreciationMathTest is Test {
 
         categoryStates[1].volumeCoefficient = 50000;
         categoryStates[1].decayPerSecond = decayPerSecond;
+        categoryStates[1].maxDepreciationPerYear = maxDepreciationPerYear;
         categoryStates[1].maxDepreciation = maxDepreciation;
         categoryStates[1].averageTA = averageTA;
         categoryStates[1].totalCollateralized = 0;
