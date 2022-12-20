@@ -174,6 +174,56 @@ contract ReactiveTimeAppreciationMathTest is Test {
         assertEq(batchTA, 1600);
     }
 
+    function testComputeInitialMomentum() public {
+        uint volumeCoefficient = 50000;
+        uint maxDepreciationPerYear = 10; // 1% yearly rate
+
+        uint initialMomentum = ReactiveTimeAppreciationMath.computeInitialMomentum(
+            volumeCoefficient,
+            maxDepreciationPerYear
+        );
+
+        assertEq(initialMomentum, 50000);
+    }
+
+    function testComputeAdjustedMomentum() public {
+        DomainDataTypes.Category memory category;
+        category.volumeCoefficient = 50000;
+        category.decayPerSecond = uint40(getTestDecayPerSecond());
+        category.maxDepreciationPerYear = 10; // 1% yearly rate
+        category.maxDepreciation = 193; // 1% yearly rate
+        category.averageTA = 1599; // 8% yearly rate
+        category.totalCollateralized = 0;
+        category.lastCollateralizationTimestamp = CURRENT_DATE;
+        category.lastCollateralizationMomentum = 50000;
+
+        uint newVolumeCoefficient = 75000;
+        uint newMaxDepreciationPerYear0 = 20; // 2% yearly rate
+        uint newMaxDepreciationPerYear1 = 10; // 1% yearly rate
+        uint newMaxDepreciationPerYear2 = 5; // 0.5% yearly rate
+
+        vm.warp(CURRENT_DATE + 2 days);
+        uint adjustedMomentum0 = ReactiveTimeAppreciationMath.computeAdjustedMomentum(
+            category,
+            newVolumeCoefficient,
+            newMaxDepreciationPerYear0
+        );
+        uint adjustedMomentum1 = ReactiveTimeAppreciationMath.computeAdjustedMomentum(
+            category,
+            newVolumeCoefficient,
+            newMaxDepreciationPerYear1
+        );
+        uint adjustedMomentum2 = ReactiveTimeAppreciationMath.computeAdjustedMomentum(
+            category,
+            newVolumeCoefficient,
+            newMaxDepreciationPerYear2
+        );
+
+        assertEq(adjustedMomentum0, 142500);
+        assertEq(adjustedMomentum1, 67500);
+        assertEq(adjustedMomentum2, 67500);
+    }
+
     function testToWeeklyRate() public {
         assertEq(ReactiveTimeAppreciationMath.toWeeklyRate(0), 0);
 

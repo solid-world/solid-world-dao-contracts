@@ -52,19 +52,93 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.updateCategory(CATEGORY_ID, 0, 0, 0, 0);
     }
 
+    function testUpdateCategory_failsForInvalidInput() public {
+        manager.addCategory(CATEGORY_ID, "", "", INITIAL_CATEGORY_TA);
+
+        vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
+        manager.updateCategory(CATEGORY_ID, 0, 0, 0, 0);
+    }
+
     function testUpdateCategory() public {
         manager.addCategory(CATEGORY_ID, "", "", INITIAL_CATEGORY_TA);
 
+        uint volumeCoefficientInput0 = 50000;
+        uint40 decayPerSecondInput0 = getTestDecayPerSecond();
+        uint16 maxDepreciationPerYearInput0 = 10; // 1% yearly rate
+        uint24 maxDepreciationInput0 = 193;
+
+        vm.warp(CURRENT_DATE + 2 days);
         vm.expectEmit(true, true, true, true, address(manager));
-        emit CategoryUpdated(CATEGORY_ID, 11, 13, 17);
-        manager.updateCategory(CATEGORY_ID, 11, 13, 0, 17);
+        emit CategoryUpdated(
+            CATEGORY_ID,
+            volumeCoefficientInput0,
+            decayPerSecondInput0,
+            maxDepreciationInput0
+        );
+        manager.updateCategory(
+            CATEGORY_ID,
+            volumeCoefficientInput0,
+            decayPerSecondInput0,
+            maxDepreciationPerYearInput0,
+            maxDepreciationInput0
+        );
 
-        (uint volumeCoefficient, uint40 decayPerSecond, , uint24 maxDepreciation, , , , ) = manager
-            .categories(CATEGORY_ID);
+        (
+            uint volumeCoefficient0,
+            uint40 decayPerSecond0,
+            uint16 maxDepreciationPerYear0,
+            uint24 maxDepreciation0,
+            ,
+            ,
+            uint32 lastCollateralizationTimestamp0,
+            uint lastCollateralizationMomentum0
+        ) = manager.categories(CATEGORY_ID);
 
-        assertEq(volumeCoefficient, 11);
-        assertEq(decayPerSecond, 13);
-        assertEq(maxDepreciation, 17);
+        assertEq(volumeCoefficient0, volumeCoefficientInput0);
+        assertEq(decayPerSecond0, decayPerSecondInput0);
+        assertEq(maxDepreciationPerYear0, maxDepreciationPerYearInput0);
+        assertEq(maxDepreciation0, maxDepreciationInput0);
+        assertEq(lastCollateralizationTimestamp0, CURRENT_DATE + 2 days);
+        assertEq(lastCollateralizationMomentum0, 50000);
+
+        uint volumeCoefficientInput1 = 75000;
+        uint40 decayPerSecondInput1 = getTestDecayPerSecond();
+        uint16 maxDepreciationPerYearInput1 = 20; // 2% yearly rate
+        uint24 maxDepreciationInput1 = 388;
+
+        vm.warp(CURRENT_DATE + 4 days);
+        vm.expectEmit(true, true, true, true, address(manager));
+        emit CategoryUpdated(
+            CATEGORY_ID,
+            volumeCoefficientInput1,
+            decayPerSecondInput1,
+            maxDepreciationInput1
+        );
+        manager.updateCategory(
+            CATEGORY_ID,
+            volumeCoefficientInput1,
+            decayPerSecondInput1,
+            maxDepreciationPerYearInput1,
+            maxDepreciationInput1
+        );
+
+        (
+            uint volumeCoefficient1,
+            uint40 decayPerSecond1,
+            uint16 maxDepreciationPerYear1,
+            uint24 maxDepreciation1,
+            ,
+            ,
+            uint32 lastCollateralizationTimestamp1,
+            uint lastCollateralizationMomentum1
+        ) = manager.categories(CATEGORY_ID);
+
+        assertEq(volumeCoefficient1, volumeCoefficientInput1);
+        assertEq(decayPerSecond1, decayPerSecondInput1);
+        assertEq(maxDepreciationPerYear1, maxDepreciationPerYearInput1);
+        assertEq(maxDepreciation1, maxDepreciationInput1);
+        assertEq(lastCollateralizationTimestamp1, CURRENT_DATE + 4 days);
+        assertEq(lastCollateralizationMomentum1, 142500); // 90% * 50000 * 75000 / 50000 + 75000 = 142500
     }
 
     function testAddProject() public {
@@ -1121,5 +1195,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
             emit log_named_address("    Actual", a);
             fail();
         }
+    }
+
+    function getTestDecayPerSecond() internal pure returns (uint40 decayPerSecond) {
+        // 5% decay per day quantified per second
+        decayPerSecond = uint40(
+            Math.mulDiv(5, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS, 100 * 1 days)
+        );
     }
 }

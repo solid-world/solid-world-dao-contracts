@@ -121,6 +121,22 @@ library ReactiveTimeAppreciationMath {
         batchTA = SolidMath.TIME_APPRECIATION_BASIS_POINTS - aggregatedWeeklyDiscountPoints;
     }
 
+    /// @dev Determines the momentum for the specified Category based on current state and the new params
+    /// @param category The category to compute the momentum for
+    /// @param newVolumeCoefficient The new volume coefficient of the category
+    /// @param newMaxDepreciationPerYear The new max depreciation per year of the category
+    function inferMomentum(
+        DomainDataTypes.Category memory category,
+        uint newVolumeCoefficient,
+        uint newMaxDepreciationPerYear
+    ) internal view returns (uint) {
+        if (category.volumeCoefficient == 0 || category.decayPerSecond == 0) {
+            return computeInitialMomentum(newVolumeCoefficient, newMaxDepreciationPerYear);
+        }
+
+        return computeAdjustedMomentum(category, newVolumeCoefficient, newMaxDepreciationPerYear);
+    }
+
     /// @dev Computes the initial value of momentum with the specified parameters
     /// @param volumeCoefficient The volume coefficient of the category
     /// @param maxDepreciationPerYear how much the reactive TA can drop from the averageTA value, quantified per year
@@ -143,7 +159,7 @@ library ReactiveTimeAppreciationMath {
     /// @param newMaxDepreciationPerYear The new max depreciation per year of the category
     /// @return adjustedMomentum The adjusted momentum value
     function computeAdjustedMomentum(
-        DomainDataTypes.Category storage category,
+        DomainDataTypes.Category memory category,
         uint newVolumeCoefficient,
         uint newMaxDepreciationPerYear
     ) internal view returns (uint adjustedMomentum) {
