@@ -152,7 +152,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
         uint rewards
     ) internal {
         for (uint i = 0; i < rewards; i++) {
-            manager.addCategory(CATEGORY_ID + i, "", "", 1599);
+            manager.addCategory(CATEGORY_ID + i, "", "", 1647);
             manager.addProject(CATEGORY_ID + i, PROJECT_ID + i);
         }
 
@@ -164,7 +164,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
                     projectId: PROJECT_ID + (i % rewards),
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR * yearsFromCertification),
                     vintage: 2022,
-                    reactiveTA: 1647,
+                    reactiveTA: 0,
                     supplier: address(manager)
                 }),
                 10000

@@ -21,7 +21,11 @@ library ReactiveTimeAppreciationMath {
     function computeReactiveTA(
         DomainDataTypes.Category memory categoryState,
         uint forwardCreditsAmount
-    ) internal view returns (uint decayingMomentum, uint24 reactiveTA) {
+    ) internal view returns (uint decayingMomentum, uint reactiveTA) {
+        if (categoryState.volumeCoefficient == 0) {
+            return (0, categoryState.averageTA);
+        }
+
         decayingMomentum = computeDecayingMomentum(
             categoryState.decayPerSecond,
             categoryState.lastCollateralizationMomentum,
@@ -39,9 +43,7 @@ library ReactiveTimeAppreciationMath {
         }
 
         uint reactiveFactorWeekly = toWeeklyRate(reactiveFactorAnnually);
-        reactiveTA = uint24(
-            categoryState.averageTA - categoryState.maxDepreciation + reactiveFactorWeekly
-        );
+        reactiveTA = categoryState.averageTA - categoryState.maxDepreciation + reactiveFactorWeekly;
 
         if (reactiveTA >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
             revert ForwardCreditsInputAmountTooLarge(forwardCreditsAmount);
@@ -72,6 +74,48 @@ library ReactiveTimeAppreciationMath {
             uint(decayMultiplier),
             DECAY_BASIS_POINTS
         );
+    }
+
+    /// @dev Derives what the time appreciation should be for a batch based on ERC20 in circulation, underlying ERC1155
+    ///      amount and its certification date
+    /// @dev Computes: 1 - (circulatingCBT / totalCollateralizedBatchForwardCredits) ** (1 / weeksTillCertification)
+    /// @dev Taking form: 1 - e ** (ln(circulatingCBT / totalCollateralizedBatchForwardCredits) * (1 / weeksTillCertification))
+    /// @param circulatingCBT The circulating CBT amount minted for the batch
+    /// @param totalCollateralizedForwardCredits The total collateralized batch forward credits
+    /// @param certificationDate The batch certification date
+    /// @param cbtDecimals Collateralized basket token number of decimals
+    function inferBatchTA(
+        uint circulatingCBT,
+        uint totalCollateralizedForwardCredits,
+        uint certificationDate,
+        uint cbtDecimals
+    ) internal view returns (uint batchTA) {
+        assert(circulatingCBT != 0 && totalCollateralizedForwardCredits != 0);
+
+        uint weeksTillCertification = SolidMath.weeksBetween(block.timestamp, certificationDate);
+
+        if (weeksTillCertification == 0) {
+            return 0;
+        }
+
+        int128 weeksTillCertificationInverse = ABDKMath64x64.inv(
+            ABDKMath64x64.fromUInt(weeksTillCertification)
+        );
+        int128 aggregateDiscount = ABDKMath64x64.div(
+            circulatingCBT,
+            totalCollateralizedForwardCredits * 10**cbtDecimals
+        );
+
+        int128 aggregateDiscountLN = ABDKMath64x64.ln(aggregateDiscount);
+        int128 aggregatedWeeklyDiscount = ABDKMath64x64.exp(
+            ABDKMath64x64.mul(aggregateDiscountLN, weeksTillCertificationInverse)
+        );
+        uint aggregatedWeeklyDiscountPoints = ABDKMath64x64.mulu(
+            aggregatedWeeklyDiscount,
+            SolidMath.TIME_APPRECIATION_BASIS_POINTS
+        );
+
+        batchTA = SolidMath.TIME_APPRECIATION_BASIS_POINTS - aggregatedWeeklyDiscountPoints;
     }
 
     /// @dev Converts a rate quantified per year to a rate quantified per week

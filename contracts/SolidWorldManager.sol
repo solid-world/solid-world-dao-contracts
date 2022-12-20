@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgrad
 import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketToken.sol";
 import "./libraries/SolidMath.sol";
+import "./libraries/ReactiveTimeAppreciationMath.sol";
 import "./libraries/GPv2SafeERC20.sol";
 import "./interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 import "./interfaces/manager/ISolidWorldManagerErrors.sol";
@@ -299,12 +300,21 @@ contract SolidWorldManager is
         uint amountIn,
         uint amountOutMin
     ) external nonReentrant validBatch(batchId) batchUnderway(batchId) {
+        if (amountIn == 0) {
+            revert InvalidInput();
+        }
+
+        (uint decayingMomentum, uint reactiveTA) = ReactiveTimeAppreciationMath.computeReactiveTA(
+            categories[batchCategory[batchId]],
+            amountIn
+        );
+
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
 
         (uint cbtUserCut, uint cbtDaoCut, ) = SolidMath.computeCollateralizationOutcome(
             batches[batchId].certificationDate,
             amountIn,
-            batches[batchId].reactiveTA,
+            reactiveTA,
             collateralizationFee,
             collateralizedToken.decimals()
         );
@@ -312,6 +322,15 @@ contract SolidWorldManager is
         if (cbtUserCut < amountOutMin) {
             revert AmountOutLessThanMinimum(cbtUserCut, amountOutMin);
         }
+
+        _updateBatchTA(
+            batchId,
+            reactiveTA,
+            amountIn,
+            cbtUserCut + cbtDaoCut,
+            collateralizedToken.decimals()
+        );
+        _rebalanceCategory(batchCategory[batchId], reactiveTA, amountIn, decayingMomentum);
 
         collateralizedToken.mint(msg.sender, cbtUserCut);
         collateralizedToken.mint(feeReceiver, cbtDaoCut);
@@ -389,12 +408,19 @@ contract SolidWorldManager is
             uint cbtForfeited
         )
     {
+        if (amountIn == 0) {
+            revert InvalidInput();
+        }
+
+        DomainDataTypes.Category storage category = categories[batchCategory[batchId]];
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
+
+        (, uint reactiveTA) = ReactiveTimeAppreciationMath.computeReactiveTA(category, amountIn);
 
         (cbtUserCut, cbtDaoCut, cbtForfeited) = SolidMath.computeCollateralizationOutcome(
             batches[batchId].certificationDate,
             amountIn,
-            batches[batchId].reactiveTA,
+            reactiveTA,
             collateralizationFee,
             collateralizedToken.decimals()
         );
@@ -558,6 +584,38 @@ contract SolidWorldManager is
         return rewardAmount;
     }
 
+    function _updateBatchTA(
+        uint batchId,
+        uint reactiveTA,
+        uint toBeCollateralizedForwardCredits,
+        uint toBeMintedCBT,
+        uint cbtDecimals
+    ) internal {
+        DomainDataTypes.Batch storage batch = batches[batchId];
+        uint collateralizedForwardCredits = forwardContractBatch.balanceOf(address(this), batch.id);
+        if (collateralizedForwardCredits == 0) {
+            batch.reactiveTA = uint24(reactiveTA);
+            return;
+        }
+
+        (uint circulatingCBT, , ) = SolidMath.computeCollateralizationOutcome(
+            batch.certificationDate,
+            collateralizedForwardCredits,
+            batch.reactiveTA,
+            0, // compute without fee
+            cbtDecimals
+        );
+
+        batch.reactiveTA = uint24(
+            ReactiveTimeAppreciationMath.inferBatchTA(
+                circulatingCBT + toBeMintedCBT,
+                collateralizedForwardCredits + toBeCollateralizedForwardCredits,
+                batch.certificationDate,
+                cbtDecimals
+            )
+        );
+    }
+
     function _rebalanceCategory(uint categoryId) internal {
         uint totalQuantifiedForwardCredits;
         uint totalCollateralizedForwardCredits;
@@ -594,6 +652,28 @@ contract SolidWorldManager is
         categories[categoryId].totalCollateralized = totalCollateralizedForwardCredits;
 
         emit CategoryRebalanced(categoryId, latestAverageTA, totalCollateralizedForwardCredits);
+    }
+
+    function _rebalanceCategory(
+        uint categoryId,
+        uint reactiveTA,
+        uint currentCollateralizedAmount,
+        uint decayingMomentum
+    ) internal {
+        DomainDataTypes.Category storage category = categories[categoryId];
+
+        uint latestAverageTA = (category.averageTA *
+            category.totalCollateralized +
+            reactiveTA *
+            currentCollateralizedAmount) /
+            (category.totalCollateralized + currentCollateralizedAmount);
+
+        category.averageTA = uint24(latestAverageTA);
+        category.totalCollateralized += currentCollateralizedAmount;
+        category.lastCollateralizationMomentum = decayingMomentum + currentCollateralizedAmount;
+        category.lastCollateralizationTimestamp = uint32(block.timestamp);
+
+        emit CategoryRebalanced(categoryId, latestAverageTA, category.totalCollateralized);
     }
 
     /// @dev Decollateralizes `amountIn` of ERC20 tokens and sends `amountOut` ERC1155 tokens with id `batchId` to msg.sender
