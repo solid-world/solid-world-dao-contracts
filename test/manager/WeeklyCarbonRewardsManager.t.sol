@@ -50,7 +50,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     projectId: PROJECT_ID + (i % 2),
                     certificationDate: uint32(CURRENT_DATE + 1 minutes),
                     vintage: 2022,
-                    reactiveTA: 1647,
+                    batchTA: 1647,
                     supplier: address(manager)
                 }),
                 10000
@@ -95,7 +95,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     projectId: PROJECT_ID + (i % 2),
                     certificationDate: uint32(CURRENT_DATE + 7 weeks),
                     vintage: 2022,
-                    reactiveTA: 1647,
+                    batchTA: 1647,
                     supplier: address(manager)
                 }),
                 10000
@@ -109,7 +109,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 minutes),
                 vintage: 2022,
-                reactiveTA: 1647,
+                batchTA: 1647,
                 supplier: address(manager)
             }),
             10000
@@ -122,7 +122,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID + 1,
                 certificationDate: uint32(CURRENT_DATE + 2 weeks),
                 vintage: 2022,
-                reactiveTA: 1647,
+                batchTA: 1647,
                 supplier: address(manager)
             }),
             10000
@@ -186,7 +186,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     projectId: PROJECT_ID + (i % 2),
                     certificationDate: uint32(CURRENT_DATE + 7 weeks),
                     vintage: 2022,
-                    reactiveTA: uint24(1647 + (i * 100)), // 1747, 1847, 1947, 2047, 2147
+                    batchTA: uint24(1647 + (i * 100)), // 1747, 1847, 1947, 2047, 2147
                     supplier: address(manager)
                 }),
                 10000 * ((i % 2) + 1)
@@ -199,7 +199,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 3 weeks), // should be skipped
                 vintage: 2022,
-                reactiveTA: uint24(9999),
+                batchTA: uint24(9999),
                 supplier: address(manager)
             }),
             1000000
@@ -211,7 +211,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID + 2,
                 certificationDate: uint32(CURRENT_DATE + 7 weeks),
                 vintage: 2022,
-                reactiveTA: 1647,
+                batchTA: 1647,
                 supplier: address(manager)
             }),
             0

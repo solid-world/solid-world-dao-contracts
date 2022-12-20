@@ -164,7 +164,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
                     projectId: PROJECT_ID + (i % rewards),
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR * yearsFromCertification),
                     vintage: 2022,
-                    reactiveTA: 0,
+                    batchTA: 0,
                     supplier: address(manager)
                 }),
                 10000

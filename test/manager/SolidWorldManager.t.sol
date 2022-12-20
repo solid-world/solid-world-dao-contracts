@@ -121,7 +121,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: 5,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                reactiveTA: 1,
+                batchTA: 1,
                 supplier: testAccount
             }),
             10
@@ -162,7 +162,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: 5,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                reactiveTA: 1,
+                batchTA: 1,
                 supplier: testAccount
             }),
             10
@@ -175,7 +175,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: 5,
                 certificationDate: uint32(CURRENT_DATE + 24),
                 vintage: 2022,
-                reactiveTA: 1,
+                batchTA: 1,
                 supplier: testAccount
             }),
             20
@@ -199,7 +199,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: 5,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                reactiveTA: 1,
+                batchTA: 1,
                 supplier: testAccount
             }),
             10
@@ -225,7 +225,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             100
@@ -250,7 +250,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             100
@@ -276,7 +276,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             100
@@ -307,7 +307,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             100
@@ -334,7 +334,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             100
@@ -367,7 +367,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             100
@@ -406,7 +406,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             100
@@ -446,7 +446,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                reactiveTA: 1,
+                batchTA: 1,
                 supplier: testAccount
             }),
             100
@@ -468,7 +468,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -500,7 +500,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -537,7 +537,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -590,7 +590,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -628,7 +628,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -671,7 +671,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2025,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -699,7 +699,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2025,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -742,7 +742,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -755,7 +755,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID + 1,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -801,7 +801,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -814,7 +814,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -864,7 +864,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -877,7 +877,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -927,7 +927,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -940,7 +940,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -953,7 +953,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2023,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -966,7 +966,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID + 1,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -979,7 +979,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: PROJECT_ID,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
-                reactiveTA: 0,
+                batchTA: 0,
                 supplier: testAccount
             }),
             10000
@@ -1022,7 +1022,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: 5,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                reactiveTA: 1,
+                batchTA: 1,
                 supplier: testAccount
             }),
             10000
@@ -1040,7 +1040,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: 5,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                reactiveTA: 1,
+                batchTA: 1,
                 supplier: testAccount
             }),
             10000
@@ -1053,7 +1053,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: 5,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                reactiveTA: 1,
+                batchTA: 1,
                 supplier: testAccount
             }),
             10000
@@ -1071,7 +1071,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: 5,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
-                reactiveTA: 1,
+                batchTA: 1,
                 supplier: address(0)
             }),
             10000
@@ -1089,7 +1089,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: 5,
                 certificationDate: uint32(CURRENT_DATE),
                 vintage: 2022,
-                reactiveTA: 1,
+                batchTA: 1,
                 supplier: testAccount
             }),
             10000
@@ -1107,7 +1107,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
                 projectId: 5,
                 certificationDate: uint32(CURRENT_DATE - 1),
                 vintage: 2022,
-                reactiveTA: 1,
+                batchTA: 1,
                 supplier: testAccount
             }),
             10000

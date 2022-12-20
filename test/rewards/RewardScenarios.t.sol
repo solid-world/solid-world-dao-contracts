@@ -106,7 +106,7 @@ contract RewardScenarios is Test {
                     projectId: PROJECT_ID + (i % 2),
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
-                    reactiveTA: 0,
+                    batchTA: 0,
                     supplier: i % 2 == 0 ? user0 : user1
                 }),
                 10000 * (i + 1)
@@ -118,7 +118,7 @@ contract RewardScenarios is Test {
                     projectId: PROJECT_ID + (i % 2),
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
-                    reactiveTA: 0,
+                    batchTA: 0,
                     supplier: i % 2 == 0 ? user1 : user0
                 }),
                 10000 * (i + 1)

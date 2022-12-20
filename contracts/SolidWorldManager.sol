@@ -447,7 +447,7 @@ contract SolidWorldManager is
         (amountOut, , ) = SolidMath.computeDecollateralizationOutcome(
             batches[batchId].certificationDate,
             amountIn,
-            batches[batchId].reactiveTA,
+            batches[batchId].batchTA,
             decollateralizationFee,
             collateralizedToken.decimals()
         );
@@ -455,7 +455,7 @@ contract SolidWorldManager is
         (minAmountIn, minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
             batches[batchId].certificationDate,
             amountOut,
-            batches[batchId].reactiveTA,
+            batches[batchId].batchTA,
             decollateralizationFee,
             collateralizedToken.decimals()
         );
@@ -575,7 +575,7 @@ contract SolidWorldManager is
                 rewardAmount += SolidMath.computeWeeklyBatchReward(
                     batch.certificationDate,
                     availableCredits,
-                    batch.reactiveTA,
+                    batch.batchTA,
                     rewardDecimals
                 );
             }
@@ -594,19 +594,19 @@ contract SolidWorldManager is
         DomainDataTypes.Batch storage batch = batches[batchId];
         uint collateralizedForwardCredits = forwardContractBatch.balanceOf(address(this), batch.id);
         if (collateralizedForwardCredits == 0) {
-            batch.reactiveTA = uint24(reactiveTA);
+            batch.batchTA = uint24(reactiveTA);
             return;
         }
 
         (uint circulatingCBT, , ) = SolidMath.computeCollateralizationOutcome(
             batch.certificationDate,
             collateralizedForwardCredits,
-            batch.reactiveTA,
+            batch.batchTA,
             0, // compute without fee
             cbtDecimals
         );
 
-        batch.reactiveTA = uint24(
+        batch.batchTA = uint24(
             ReactiveTimeAppreciationMath.inferBatchTA(
                 circulatingCBT + toBeMintedCBT,
                 collateralizedForwardCredits + toBeCollateralizedForwardCredits,
@@ -635,7 +635,7 @@ contract SolidWorldManager is
                 }
 
                 totalQuantifiedForwardCredits +=
-                    batches[batchId].reactiveTA *
+                    batches[batchId].batchTA *
                     collateralizedForwardCredits;
                 totalCollateralizedForwardCredits += collateralizedForwardCredits;
             }
@@ -693,7 +693,7 @@ contract SolidWorldManager is
             .computeDecollateralizationOutcome(
                 batches[batchId].certificationDate,
                 amountIn,
-                batches[batchId].reactiveTA,
+                batches[batchId].batchTA,
                 decollateralizationFee,
                 collateralizedToken.decimals()
             );
