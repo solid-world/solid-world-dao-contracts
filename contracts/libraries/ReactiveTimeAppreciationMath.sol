@@ -10,6 +10,9 @@ library ReactiveTimeAppreciationMath {
     /// @dev Basis points in which the `decayPerSecond` must be expressed
     uint constant DECAY_BASIS_POINTS = 100_000_000_000;
 
+    /// @dev Basis points in which the `maxDepreciationPerYear` must be expressed
+    uint constant DEPRECIATION_BASIS_POINTS = 10;
+
     error ForwardCreditsInputAmountTooLarge(uint forwardCreditsAmount);
 
     /// @dev Computes a time appreciation value that is reactive to market conditions
@@ -116,6 +119,55 @@ library ReactiveTimeAppreciationMath {
         );
 
         batchTA = SolidMath.TIME_APPRECIATION_BASIS_POINTS - aggregatedWeeklyDiscountPoints;
+    }
+
+    /// @dev Computes the initial value of momentum with the specified parameters
+    /// @param volumeCoefficient The volume coefficient of the category
+    /// @param maxDepreciationPerYear how much the reactive TA can drop from the averageTA value, quantified per year
+    /// @return initialMomentum The initial momentum value
+    function computeInitialMomentum(uint volumeCoefficient, uint maxDepreciationPerYear)
+        internal
+        pure
+        returns (uint initialMomentum)
+    {
+        initialMomentum = Math.mulDiv(
+            volumeCoefficient,
+            maxDepreciationPerYear,
+            DEPRECIATION_BASIS_POINTS
+        );
+    }
+
+    /// @dev Computes the adjusted value of momentum for a category when category update event occurs
+    /// @param category The category to compute the adjusted momentum for
+    /// @param newVolumeCoefficient The new volume coefficient of the category
+    /// @param newMaxDepreciationPerYear The new max depreciation per year of the category
+    /// @return adjustedMomentum The adjusted momentum value
+    function computeAdjustedMomentum(
+        DomainDataTypes.Category storage category,
+        uint newVolumeCoefficient,
+        uint newMaxDepreciationPerYear
+    ) internal view returns (uint adjustedMomentum) {
+        adjustedMomentum = computeDecayingMomentum(
+            category.decayPerSecond,
+            category.lastCollateralizationMomentum,
+            category.lastCollateralizationTimestamp
+        );
+
+        adjustedMomentum = Math.mulDiv(
+            adjustedMomentum,
+            newVolumeCoefficient,
+            category.volumeCoefficient
+        );
+
+        int depreciationDiff = int(newMaxDepreciationPerYear) -
+            int(uint(category.maxDepreciationPerYear));
+        if (depreciationDiff > 0) {
+            adjustedMomentum += Math.mulDiv(
+                newVolumeCoefficient,
+                uint(depreciationDiff),
+                DEPRECIATION_BASIS_POINTS
+            );
+        }
     }
 
     /// @dev Converts a rate quantified per year to a rate quantified per week

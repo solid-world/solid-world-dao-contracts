@@ -172,11 +172,27 @@ contract SolidWorldManager is
             revert InvalidCategoryId(categoryId);
         }
 
-        categories[categoryId].volumeCoefficient = volumeCoefficient;
-        categories[categoryId].decayPerSecond = decayPerSecond;
-        categories[categoryId].maxDepreciation = maxDepreciation;
+        if (volumeCoefficient == 0 || decayPerSecond == 0) {
+            revert InvalidInput();
+        }
 
-        // todo #204: implement logic for updating the other fields of the category based on the new values
+        DomainDataTypes.Category storage category = categories[categoryId];
+        category.volumeCoefficient = volumeCoefficient;
+        category.decayPerSecond = decayPerSecond;
+        category.maxDepreciationPerYear = maxDepreciationPerYear;
+        category.maxDepreciation = maxDepreciation;
+        category.lastCollateralizationTimestamp = uint32(block.timestamp);
+        category.lastCollateralizationMomentum = (category.volumeCoefficient == 0 ||
+            category.decayPerSecond == 0)
+            ? ReactiveTimeAppreciationMath.computeInitialMomentum(
+                volumeCoefficient,
+                maxDepreciationPerYear
+            )
+            : ReactiveTimeAppreciationMath.computeAdjustedMomentum(
+                category,
+                volumeCoefficient,
+                maxDepreciationPerYear
+            );
 
         emit CategoryUpdated(categoryId, volumeCoefficient, decayPerSecond, maxDepreciation);
     }
