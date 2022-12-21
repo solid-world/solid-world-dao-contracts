@@ -14,6 +14,7 @@ contract RewardScenarios is Test {
 
     uint16 constant COLLATERALIZATION_FEE = 1000; // 10%
     uint16 constant DECOLLATERALIZATION_FEE = 1000; // 10%
+    uint16 constant REWARDS_FEE = 1000; // 10%
 
     uint32 constant CURRENT_DATE = 1666016743;
     uint32 constant INITIAL_CARBON_DISTRIBUTION_END = CURRENT_DATE + 3 days;
@@ -73,6 +74,7 @@ contract RewardScenarios is Test {
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,
+            REWARDS_FEE,
             feeReceiver,
             address(emissionManager)
         );

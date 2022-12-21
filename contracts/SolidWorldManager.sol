@@ -83,6 +83,9 @@ contract SolidWorldManager is
     /// @notice Fee charged by DAO when decollateralizing collateralized basket tokens.
     uint16 public decollateralizationFee;
 
+    /// @notice Fee charged by DAO on the weekly carbon rewards.
+    uint16 public rewardsFee;
+
     event BatchCollateralized(
         uint indexed batchId,
         uint amountIn,
@@ -109,6 +112,8 @@ contract SolidWorldManager is
     );
     event ProjectCreated(uint indexed projectId);
     event BatchCreated(uint indexed batchId);
+    event CollateralizationFeeUpdated(uint indexed collateralizationFee);
+    event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
 
     modifier validBatch(uint batchId) {
         if (!batchCreated[batchId]) {
@@ -128,6 +133,7 @@ contract SolidWorldManager is
         ForwardContractBatchToken _forwardContractBatch,
         uint16 _collateralizationFee,
         uint16 _decollateralizationFee,
+        uint16 _rewardsFee,
         address _feeReceiver,
         address _weeklyRewardsMinter
     ) public initializer {
@@ -137,6 +143,7 @@ contract SolidWorldManager is
         forwardContractBatch = _forwardContractBatch;
         collateralizationFee = _collateralizationFee;
         decollateralizationFee = _decollateralizationFee;
+        rewardsFee = _rewardsFee;
         feeReceiver = _feeReceiver;
         weeklyRewardsMinter = _weeklyRewardsMinter;
     }
@@ -240,6 +247,8 @@ contract SolidWorldManager is
     /// @inheritdoc IWeeklyCarbonRewardsManager
     function setWeeklyRewardsMinter(address _weeklyRewardsMinter) external {
         weeklyRewardsMinter = _weeklyRewardsMinter;
+
+        emit RewardsMinterUpdated(_weeklyRewardsMinter);
     }
 
     /// @inheritdoc IWeeklyCarbonRewardsManager
@@ -516,25 +525,37 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
-    function setCollateralizationFee(uint16 _collateralizationFee) public {
+    function setCollateralizationFee(uint16 _collateralizationFee) external {
         collateralizationFee = _collateralizationFee;
+
+        emit CollateralizationFeeUpdated(_collateralizationFee);
     }
 
     // todo #121: add authorization
-    function setDecollateralizationFee(uint16 _decollateralizationFee) public {
+    function setDecollateralizationFee(uint16 _decollateralizationFee) external {
         decollateralizationFee = _decollateralizationFee;
+
+        emit DecollateralizationFeeUpdated(_decollateralizationFee);
     }
 
     // todo #121: add authorization
-    function setFeeReceiver(address _feeReceiver) public {
+    /// @inheritdoc IWeeklyCarbonRewardsManager
+    function setRewardsFee(uint16 _rewardsFee) external {
+        rewardsFee = _rewardsFee;
+
+        emit RewardsFeeUpdated(_rewardsFee);
+    }
+
+    // todo #121: add authorization
+    function setFeeReceiver(address _feeReceiver) external {
         feeReceiver = _feeReceiver;
     }
 
-    function getProjectIdsByCategory(uint categoryId) public view returns (uint[] memory) {
+    function getProjectIdsByCategory(uint categoryId) external view returns (uint[] memory) {
         return categoryProjects[categoryId];
     }
 
-    function getBatchIdsByProject(uint projectId) public view returns (uint[] memory) {
+    function getBatchIdsByProject(uint projectId) external view returns (uint[] memory) {
         return projectBatches[projectId];
     }
 

@@ -4,6 +4,8 @@ import "./BaseSolidWorldManager.t.sol";
 
 contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     event WeeklyRewardMinted(address indexed rewardToken, uint indexed rewardAmount);
+    event RewardsFeeUpdated(uint indexed rewardsFee);
+    event RewardsMinterUpdated(address indexed rewardsMinter);
 
     function testComputeWeeklyCarbonRewards_failsInputsOfDifferentLengths() public {
         vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
@@ -294,5 +296,23 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
             new uint[](0),
             testAccount
         );
+    }
+
+    function testSetRewardsFee() public {
+        uint16 newRewardsFee = 1234;
+
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit RewardsFeeUpdated(newRewardsFee);
+        manager.setRewardsFee(newRewardsFee);
+        assertEq(manager.rewardsFee(), newRewardsFee);
+    }
+
+    function testSetWeeklyRewardsMinter() public {
+        address newWeeklyRewardsMinter = vm.addr(1234);
+
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit RewardsMinterUpdated(newWeeklyRewardsMinter);
+        manager.setWeeklyRewardsMinter(newWeeklyRewardsMinter);
+        assertEq(manager.weeklyRewardsMinter(), newWeeklyRewardsMinter);
     }
 }
