@@ -27,6 +27,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     );
     event ProjectCreated(uint indexed projectId);
     event BatchCreated(uint indexed batchId);
+    event FeeReceiverUpdated(address indexed feeReceiver);
     event CollateralizationFeeUpdated(uint indexed collateralizationFee);
     event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
 
@@ -1206,6 +1207,15 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         emit DecollateralizationFeeUpdated(newDecollateralizationFee);
         manager.setDecollateralizationFee(newDecollateralizationFee);
         assertEq(manager.decollateralizationFee(), newDecollateralizationFee);
+    }
+
+    function testSetFeeReceiver() public {
+        address newFeeReceiver = vm.addr(1234);
+
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit FeeReceiverUpdated(newFeeReceiver);
+        manager.setFeeReceiver(newFeeReceiver);
+        assertEq(manager.feeReceiver(), newFeeReceiver);
     }
 
     function assertNotEq(address a, address b) private {
