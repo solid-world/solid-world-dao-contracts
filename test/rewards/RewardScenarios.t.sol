@@ -69,7 +69,9 @@ contract RewardScenarios is Test {
 
         ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
         forwardContractBatch.transferOwnership(address(solidWorldManager));
+        CollateralizedBasketTokenDeployer collateralizedBasketTokenDeployer = new CollateralizedBasketTokenDeployer();
         solidWorldManager.initialize(
+            collateralizedBasketTokenDeployer,
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,

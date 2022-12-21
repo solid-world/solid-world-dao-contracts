@@ -12,6 +12,7 @@ import "./libraries/GPv2SafeERC20.sol";
 import "./interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 import "./interfaces/manager/ISolidWorldManagerErrors.sol";
 import "./libraries/DomainDataTypes.sol";
+import "./CollateralizedBasketTokenDeployer.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -68,6 +69,9 @@ contract SolidWorldManager is
     /// @notice The only account that is allowed to mint weekly carbon rewards
     address public weeklyRewardsMinter;
 
+    /// @notice Contract that deploys new collateralized basket tokens. Allows this contract to mint tokens.
+    CollateralizedBasketTokenDeployer public collateralizedBasketTokenDeployer;
+
     /// @notice Fee charged by DAO when collateralizing forward contract batch tokens.
     uint16 public collateralizationFee;
 
@@ -105,6 +109,7 @@ contract SolidWorldManager is
     }
 
     function initialize(
+        CollateralizedBasketTokenDeployer _collateralizedBasketTokenDeployer,
         ForwardContractBatchToken _forwardContractBatch,
         uint16 _collateralizationFee,
         uint16 _decollateralizationFee,
@@ -114,6 +119,7 @@ contract SolidWorldManager is
         __Ownable_init();
         __ReentrancyGuard_init();
 
+        collateralizedBasketTokenDeployer = _collateralizedBasketTokenDeployer;
         forwardContractBatch = _forwardContractBatch;
         collateralizationFee = _collateralizationFee;
         decollateralizationFee = _decollateralizationFee;
@@ -132,7 +138,10 @@ contract SolidWorldManager is
         }
 
         categoryIds[categoryId] = true;
-        categoryToken[categoryId] = new CollateralizedBasketToken(tokenName, tokenSymbol);
+        categoryToken[categoryId] = collateralizedBasketTokenDeployer.deploy(
+            tokenName,
+            tokenSymbol
+        );
 
         emit CategoryCreated(categoryId);
     }
