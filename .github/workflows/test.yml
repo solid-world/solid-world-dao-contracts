@@ -36,6 +36,9 @@ jobs:
       with:
         version: nightly
 
+    - name: Validate smart contract sizes
+      run: yarn contracts:validate-size
+
     - name: Run tests
       run: yarn test
 
