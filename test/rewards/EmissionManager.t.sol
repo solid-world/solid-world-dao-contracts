@@ -256,7 +256,9 @@ contract EmissionManagerTest is Test {
         address[] memory carbonRewards = new address[](1);
         carbonRewards[0] = vm.addr(3);
         uint[] memory rewardAmounts = new uint[](1);
-        rewardAmounts[0] = 100;
+        rewardAmounts[0] = 90;
+        uint[] memory feeAmounts = new uint[](1);
+        feeAmounts[0] = 10;
 
         vm.mockCall(
             controller,
@@ -266,7 +268,7 @@ contract EmissionManagerTest is Test {
         vm.mockCall(
             carbonRewardsManager,
             abi.encodeWithSelector(IWeeklyCarbonRewardsManager.computeWeeklyCarbonRewards.selector),
-            abi.encode(carbonRewards, rewardAmounts)
+            abi.encode(carbonRewards, rewardAmounts, feeAmounts)
         );
         vm.expectCall(
             controller,
@@ -279,7 +281,7 @@ contract EmissionManagerTest is Test {
             carbonRewardsManager,
             abi.encodeCall(
                 IWeeklyCarbonRewardsManager.mintWeeklyCarbonRewards,
-                (categoryIds, carbonRewards, rewardAmounts, rewardsVault)
+                (categoryIds, carbonRewards, rewardAmounts, feeAmounts, rewardsVault)
             )
         );
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);

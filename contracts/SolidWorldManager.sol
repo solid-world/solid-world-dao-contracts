@@ -256,7 +256,11 @@ contract SolidWorldManager is
         external
         view
         override
-        returns (address[] memory carbonRewards, uint[] memory rewardAmounts)
+        returns (
+            address[] memory carbonRewards,
+            uint[] memory rewardAmounts,
+            uint[] memory rewardFees
+        )
     {
         if (assets.length != _categoryIds.length) {
             revert InvalidInput();
@@ -264,6 +268,7 @@ contract SolidWorldManager is
 
         carbonRewards = new address[](assets.length);
         rewardAmounts = new uint[](assets.length);
+        rewardFees = new uint[](assets.length);
 
         for (uint i; i < assets.length; i++) {
             uint categoryId = _categoryIds[i];
@@ -272,10 +277,14 @@ contract SolidWorldManager is
             }
 
             CollateralizedBasketToken rewardToken = categoryToken[categoryId];
-            uint rewardAmount = _computeWeeklyCategoryReward(categoryId, rewardToken.decimals());
+            (uint rewardAmount, uint rewardFee) = _computeWeeklyCategoryReward(
+                categoryId,
+                rewardToken.decimals()
+            );
 
             carbonRewards[i] = address(rewardToken);
             rewardAmounts[i] = rewardAmount;
+            rewardFees[i] = rewardFee;
         }
     }
 
@@ -284,11 +293,13 @@ contract SolidWorldManager is
         uint[] calldata _categoryIds,
         address[] calldata carbonRewards,
         uint[] calldata rewardAmounts,
+        uint[] calldata rewardFees,
         address rewardsVault
     ) external override {
         if (
             _categoryIds.length != carbonRewards.length ||
-            carbonRewards.length != rewardAmounts.length
+            carbonRewards.length != rewardAmounts.length ||
+            rewardAmounts.length != rewardFees.length
         ) {
             revert InvalidInput();
         }
@@ -301,9 +312,10 @@ contract SolidWorldManager is
             address carbonReward = carbonRewards[i];
             CollateralizedBasketToken rewardToken = CollateralizedBasketToken(carbonReward);
             uint rewardAmount = rewardAmounts[i];
-
             rewardToken.mint(rewardsVault, rewardAmount);
             emit WeeklyRewardMinted(carbonReward, rewardAmount);
+
+            rewardToken.mint(feeReceiver, rewardFees[i]);
 
             _rebalanceCategory(_categoryIds[i]);
         }
@@ -621,17 +633,16 @@ contract SolidWorldManager is
 
     /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
     /// @param categoryId The source category for the ERC20 rewards
+    /// @return rewardAmount carbon reward amount to mint
+    /// @return rewardFee fee amount charged by the DAO
     function _computeWeeklyCategoryReward(uint categoryId, uint rewardDecimals)
         internal
         view
-        returns (uint)
+        returns (uint rewardAmount, uint rewardFee)
     {
-        uint rewardAmount;
-
         uint[] storage projects = categoryProjects[categoryId];
         for (uint i; i < projects.length; i++) {
-            uint projectId = projects[i];
-            uint[] storage _batches = projectBatches[projectId];
+            uint[] storage _batches = projectBatches[projects[i]];
             for (uint j; j < _batches.length; j++) {
                 uint batchId = _batches[j];
                 uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
@@ -639,17 +650,17 @@ contract SolidWorldManager is
                     continue;
                 }
 
-                DomainDataTypes.Batch storage batch = batches[batchId];
-                rewardAmount += SolidMath.computeWeeklyBatchReward(
-                    batch.certificationDate,
+                (uint netRewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
+                    batches[batchId].certificationDate,
                     availableCredits,
-                    batch.batchTA,
+                    batches[batchId].batchTA,
+                    rewardsFee,
                     rewardDecimals
                 );
+                rewardAmount += netRewardAmount;
+                rewardFee += feeAmount;
             }
         }
-
-        return rewardAmount;
     }
 
     function _updateBatchTA(

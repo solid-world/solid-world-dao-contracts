@@ -26,19 +26,26 @@ interface IWeeklyCarbonRewardsManager {
     /// @param _categoryIds The categories to which the incentivized assets belong
     /// @return carbonRewards List of carbon rewards getting distributed.
     /// @return rewardAmounts List of carbon reward amounts getting distributed
+    /// @return rewardFees List of fee amounts charged by the DAO on carbon rewards
     function computeWeeklyCarbonRewards(address[] calldata assets, uint[] calldata _categoryIds)
         external
         view
-        returns (address[] memory carbonRewards, uint[] memory rewardAmounts);
+        returns (
+            address[] memory carbonRewards,
+            uint[] memory rewardAmounts,
+            uint[] memory rewardFees
+        );
 
     /// @param _categoryIds The categories to which the incentivized assets belong
     /// @param carbonRewards List of carbon rewards to mint
     /// @param rewardAmounts List of carbon reward amounts to mint
+    /// @param rewardFees List of fee amounts charged by the DAO on carbon rewards
     /// @param rewardsVault Account that secures ERC20 rewards
     function mintWeeklyCarbonRewards(
         uint[] calldata _categoryIds,
         address[] calldata carbonRewards,
         uint[] calldata rewardAmounts,
+        uint[] calldata rewardFees,
         address rewardsVault
     ) external;
 }

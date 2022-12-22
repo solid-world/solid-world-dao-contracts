@@ -27,7 +27,7 @@ abstract contract BaseSolidWorldManager is Test {
 
     uint16 constant COLLATERALIZATION_FEE = 1000; // 10%
     uint16 constant DECOLLATERALIZATION_FEE = 1000; // 10%
-    uint16 constant REWARDS_FEE = 1000; // 10%
+    uint16 constant REWARDS_FEE = 500; // 5%
 
     function setUp() public virtual {
         vm.warp(CURRENT_DATE);
