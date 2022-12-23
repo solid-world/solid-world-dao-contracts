@@ -28,6 +28,10 @@ contract SolidWorldManager is
     /// @dev CategoryId => isAdded
     mapping(uint => bool) public categoryIds;
 
+    /// @notice Stores the state of categories
+    /// @dev CategoryId => DomainDataTypes.Category
+    mapping(uint => DomainDataTypes.Category) public categories;
+
     /// @notice Property is used for checking if Project ID is already added
     /// @dev ProjectId => isAdded
     mapping(uint => bool) public projectIds;
@@ -87,6 +91,17 @@ contract SolidWorldManager is
         address indexed tokensOwner
     );
     event CategoryCreated(uint indexed categoryId);
+    event CategoryUpdated(
+        uint indexed categoryId,
+        uint indexed volumeCoefficient,
+        uint indexed decayPerSecond,
+        uint maxDepreciation
+    );
+    event CategoryRebalanced(
+        uint indexed categoryId,
+        uint indexed averageTA,
+        uint indexed totalCollateralized
+    );
     event ProjectCreated(uint indexed projectId);
     event BatchCreated(uint indexed batchId);
 
@@ -125,7 +140,8 @@ contract SolidWorldManager is
     function addCategory(
         uint categoryId,
         string calldata tokenName,
-        string calldata tokenSymbol
+        string calldata tokenSymbol,
+        uint24 initialTA
     ) external {
         if (categoryIds[categoryId]) {
             revert CategoryAlreadyExists(categoryId);
@@ -134,7 +150,29 @@ contract SolidWorldManager is
         categoryIds[categoryId] = true;
         categoryToken[categoryId] = new CollateralizedBasketToken(tokenName, tokenSymbol);
 
+        categories[categoryId].averageTA = initialTA;
+
         emit CategoryCreated(categoryId);
+    }
+
+    // todo #121: add authorization
+    function updateCategory(
+        uint categoryId,
+        uint volumeCoefficient,
+        uint40 decayPerSecond,
+        uint24 maxDepreciation
+    ) external {
+        if (!categoryIds[categoryId]) {
+            revert InvalidCategoryId(categoryId);
+        }
+
+        categories[categoryId].volumeCoefficient = volumeCoefficient;
+        categories[categoryId].decayPerSecond = decayPerSecond;
+        categories[categoryId].maxDepreciation = maxDepreciation;
+
+        // todo #204: implement logic for updating the other fields of the category based on the new values
+
+        emit CategoryUpdated(categoryId, volumeCoefficient, decayPerSecond, maxDepreciation);
     }
 
     // todo #121: add authorization
@@ -217,11 +255,15 @@ contract SolidWorldManager is
 
     /// @inheritdoc IWeeklyCarbonRewardsManager
     function mintWeeklyCarbonRewards(
+        uint[] calldata _categoryIds,
         address[] calldata carbonRewards,
         uint[] calldata rewardAmounts,
         address rewardsVault
     ) external override {
-        if (carbonRewards.length != rewardAmounts.length) {
+        if (
+            _categoryIds.length != carbonRewards.length ||
+            carbonRewards.length != rewardAmounts.length
+        ) {
             revert InvalidInput();
         }
 
@@ -236,6 +278,8 @@ contract SolidWorldManager is
 
             rewardToken.mint(rewardsVault, rewardAmount);
             emit WeeklyRewardMinted(carbonReward, rewardAmount);
+
+            _rebalanceCategory(_categoryIds[i]);
         }
     }
 
@@ -513,6 +557,44 @@ contract SolidWorldManager is
         }
 
         return rewardAmount;
+    }
+
+    function _rebalanceCategory(uint categoryId) internal {
+        uint totalQuantifiedForwardCredits;
+        uint totalCollateralizedForwardCredits;
+
+        uint[] storage projects = categoryProjects[categoryId];
+        for (uint i; i < projects.length; i++) {
+            uint projectId = projects[i];
+            uint[] storage _batches = projectBatches[projectId];
+            for (uint j; j < _batches.length; j++) {
+                uint batchId = _batches[j];
+                uint collateralizedForwardCredits = forwardContractBatch.balanceOf(
+                    address(this),
+                    batchId
+                );
+                if (collateralizedForwardCredits == 0 || _isBatchCertified(batchId)) {
+                    continue;
+                }
+
+                totalQuantifiedForwardCredits +=
+                    batches[batchId].discountRate *
+                    collateralizedForwardCredits;
+                totalCollateralizedForwardCredits += collateralizedForwardCredits;
+            }
+        }
+
+        if (totalCollateralizedForwardCredits == 0) {
+            categories[categoryId].totalCollateralized = 0;
+            emit CategoryRebalanced(categoryId, categories[categoryId].averageTA, 0);
+            return;
+        }
+
+        uint latestAverageTA = totalQuantifiedForwardCredits / totalCollateralizedForwardCredits;
+        categories[categoryId].averageTA = uint24(latestAverageTA);
+        categories[categoryId].totalCollateralized = totalCollateralizedForwardCredits;
+
+        emit CategoryRebalanced(categoryId, latestAverageTA, totalCollateralizedForwardCredits);
     }
 
     function _getCollateralizedTokenForBatchId(uint batchId)

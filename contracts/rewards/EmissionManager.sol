@@ -93,6 +93,7 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
         _rewardsController.updateCarbonRewardDistribution(assets, carbonRewards, rewardAmounts);
 
         _carbonRewardsManager.mintWeeklyCarbonRewards(
+            categoryIds,
             carbonRewards,
             rewardAmounts,
             _rewardsController.getRewardsVault()

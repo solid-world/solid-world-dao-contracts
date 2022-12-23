@@ -279,7 +279,7 @@ contract EmissionManagerTest is Test {
             carbonRewardsManager,
             abi.encodeCall(
                 IWeeklyCarbonRewardsManager.mintWeeklyCarbonRewards,
-                (carbonRewards, rewardAmounts, rewardsVault)
+                (categoryIds, carbonRewards, rewardAmounts, rewardsVault)
             )
         );
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);
