@@ -8,6 +8,15 @@ async function deploySolidWorldManager(
   ForwardContractBatchToken,
   EmissionManager
 ) {
+  const CollateralizedBasketTokenDeployer = await deployments.deploy(
+    'CollateralizedBasketTokenDeployer',
+    {
+      from: deployer,
+      args: [],
+      log: true
+    }
+  )
+
   return await deployments.deploy('SolidWorldManager', {
     from: deployer,
     args: [],
@@ -17,6 +26,7 @@ async function deploySolidWorldManager(
       execute: {
         methodName: 'initialize',
         args: [
+          CollateralizedBasketTokenDeployer.address,
           ForwardContractBatchToken,
           INITIAL_COLLATERALIZATION_FEE,
           INITIAL_DECOLLATERALIZATION_FEE,

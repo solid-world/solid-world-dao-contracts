@@ -30,11 +30,14 @@ abstract contract BaseSolidWorldManager is Test {
         ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
         forwardContractBatch.transferOwnership(address(manager));
 
+        CollateralizedBasketTokenDeployer collateralizedBasketTokenDeployer = new CollateralizedBasketTokenDeployer();
+
         vm.label(testAccount, "Test account");
         vm.label(feeReceiver, "Protocol fee receiver account");
         vm.label(weeklyRewardsMinter, "Weekly rewards minter");
 
         manager.initialize(
+            collateralizedBasketTokenDeployer,
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,

@@ -37,7 +37,15 @@ contract CarbonRewardDistributionGasTest is GasTest {
 
         ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
         forwardContractBatch.transferOwnership(address(manager));
-        manager.initialize(forwardContractBatch, 1000, 1000, feeReceiver, address(emissionManager));
+        CollateralizedBasketTokenDeployer collateralizedBasketTokenDeployer = new CollateralizedBasketTokenDeployer();
+        manager.initialize(
+            collateralizedBasketTokenDeployer,
+            forwardContractBatch,
+            1000,
+            1000,
+            feeReceiver,
+            address(emissionManager)
+        );
 
         rewardsController.setup(staking, rewardsVault, address(emissionManager));
         staking.setup(rewardsController, address(this));
