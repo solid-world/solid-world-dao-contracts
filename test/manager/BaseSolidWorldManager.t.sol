@@ -6,6 +6,12 @@ import "forge-std/console.sol";
 import "../../contracts/SolidWorldManager.sol";
 
 abstract contract BaseSolidWorldManager is Test {
+    event CategoryRebalanced(
+        uint indexed categoryId,
+        uint indexed averageTA,
+        uint indexed totalCollateralized
+    );
+
     SolidWorldManager manager;
     address root = address(this);
     address testAccount = vm.addr(1);
@@ -21,6 +27,7 @@ abstract contract BaseSolidWorldManager is Test {
 
     uint16 constant COLLATERALIZATION_FEE = 1000; // 10%
     uint16 constant DECOLLATERALIZATION_FEE = 1000; // 10%
+    uint16 constant REWARDS_FEE = 500; // 5%
 
     function setUp() public virtual {
         vm.warp(CURRENT_DATE);
@@ -41,6 +48,7 @@ abstract contract BaseSolidWorldManager is Test {
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,
+            REWARDS_FEE,
             feeReceiver,
             weeklyRewardsMinter
         );

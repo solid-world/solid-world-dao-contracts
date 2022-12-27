@@ -6,8 +6,9 @@ pragma solidity ^0.8.16;
 interface ISolidWorldManagerErrors {
     error BatchAlreadyExists(uint batchId);
     error InvalidBatchId(uint batchId);
-    error InvalidBatchOwner();
-    error BatchDueDateInThePast(uint32 dueDate);
+    error InvalidBatchSupplier();
+    error BatchCertificationDateInThePast(uint32 dueDate);
+    error BatchesNotInSameCategory(uint batchId1, uint batchId2);
 
     error CategoryAlreadyExists(uint categoryId);
     error InvalidCategoryId(uint categoryId);

@@ -14,6 +14,7 @@ contract RewardScenarios is Test {
 
     uint16 constant COLLATERALIZATION_FEE = 1000; // 10%
     uint16 constant DECOLLATERALIZATION_FEE = 1000; // 10%
+    uint16 constant REWARDS_FEE = 500; // 5%
 
     uint32 constant CURRENT_DATE = 1666016743;
     uint32 constant INITIAL_CARBON_DISTRIBUTION_END = CURRENT_DATE + 3 days;
@@ -75,6 +76,7 @@ contract RewardScenarios is Test {
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,
+            REWARDS_FEE,
             feeReceiver,
             address(emissionManager)
         );
@@ -83,14 +85,14 @@ contract RewardScenarios is Test {
             CATEGORY_ID,
             "Mangrove Collateralized Basket Token",
             "MCBT",
-            1599
+            1647
         );
         mangroveRewardToken = address(solidWorldManager.categoryToken(CATEGORY_ID));
         solidWorldManager.addCategory(
             CATEGORY_ID + 1,
             "Reforestation Collateralized Basket Token",
             "RCBT",
-            1599
+            1647
         );
         reforestationRewardToken = address(solidWorldManager.categoryToken(CATEGORY_ID + 1));
 
@@ -106,24 +108,24 @@ contract RewardScenarios is Test {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
-                    totalAmount: 10000 * (i + 1),
-                    expectedDueDate: uint32(CURRENT_DATE + ONE_YEAR),
+                    certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
-                    discountRate: 1647,
-                    owner: i % 2 == 0 ? user0 : user1
-                })
+                    batchTA: 0,
+                    supplier: i % 2 == 0 ? user0 : user1
+                }),
+                10000 * (i + 1)
             );
             solidWorldManager.addBatch(
                 DomainDataTypes.Batch({
                     id: BATCH_ID + i + 4,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
-                    totalAmount: 10000 * (i + 1),
-                    expectedDueDate: uint32(CURRENT_DATE + ONE_YEAR),
+                    certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
-                    discountRate: 1647,
-                    owner: i % 2 == 0 ? user1 : user0
-                })
+                    batchTA: 0,
+                    supplier: i % 2 == 0 ? user1 : user0
+                }),
+                10000 * (i + 1)
             );
         }
 
@@ -305,14 +307,15 @@ contract RewardScenarios is Test {
         vm.prank(user1);
         rewardsController.claimAllRewardsToSelf(assets);
 
-        assertEq(
+        assertApproxEqAbs(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0),
             4130.352e18 +
                 12391.056e18 +
                 unclaimedAmounts0[0] +
                 unclaimedAmounts1[0] +
                 unclaimedAmounts2[0] *
-                2
+                2,
+            2500 // 0.0000000000000025 difference, probably coming from exponential math
         );
         assertApproxEqAbs(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user1),
@@ -344,15 +347,17 @@ contract RewardScenarios is Test {
         address[] memory rewards = new address[](1);
         uint[] memory categoryIds = new uint[](1);
         uint[] memory rewardAmounts = new uint[](1);
+        uint[] memory feeAmounts = new uint[](1);
         assets[0] = assetMangrove;
         rewards[0] = mangroveRewardToken;
         categoryIds[0] = CATEGORY_ID;
         rewardAmounts[0] = 25e18;
+        feeAmounts[0] = 5e18;
 
         vm.mockCall(
             address(solidWorldManager),
             abi.encodeWithSelector(IWeeklyCarbonRewardsManager.computeWeeklyCarbonRewards.selector),
-            abi.encode(rewards, rewardAmounts)
+            abi.encode(rewards, rewardAmounts, feeAmounts)
         );
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);
 

@@ -6,6 +6,7 @@ import "../contracts/libraries/SolidMath.sol";
 contract SolidMathTest is Test {
     uint constant COLLATERALIZATION_FEE = 200; // 2%
     uint constant DECOLLATERALIZATION_FEE = 500; // 5%
+    uint constant REWARDS_FEE = 500; // 5%
     uint constant ONE_YEAR = 1 weeks * 52;
     uint constant CURRENT_DATE = 1666016743;
 
@@ -46,11 +47,11 @@ contract SolidMathTest is Test {
 
     function testComputeTimeAppreciationDiscountSingleWeek() public {
         uint timeAppreciation = 80_000; // 8%
-        uint expectedCertificationDate = block.timestamp + 1 weeks;
+        uint certificationDate = block.timestamp + 1 weeks;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(
             timeAppreciation,
-            expectedCertificationDate
+            certificationDate
         );
         uint expected = 920_000; // 92%
 
@@ -59,11 +60,11 @@ contract SolidMathTest is Test {
 
     function testComputeTimeAppreciationDiscountFewWeeks() public {
         uint timeAppreciation = 80_000; // 8%
-        uint expectedCertificationDate = block.timestamp + 5 weeks;
+        uint certificationDate = block.timestamp + 5 weeks;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(
             timeAppreciation,
-            expectedCertificationDate
+            certificationDate
         );
         uint expected = 659_081; // 65.90815232%
 
@@ -72,11 +73,11 @@ contract SolidMathTest is Test {
 
     function testComputeTimeAppreciationDiscountOneYear() public {
         uint timeAppreciation = 80_000; // 8%
-        uint expectedCertificationDate = block.timestamp + ONE_YEAR;
+        uint certificationDate = block.timestamp + ONE_YEAR;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(
             timeAppreciation,
-            expectedCertificationDate
+            certificationDate
         );
         uint expected = 13_090; // 1.309082514%
 
@@ -291,11 +292,11 @@ contract SolidMathTest is Test {
         timeAppreciation = bound(timeAppreciation, 1, 4273); // max 20% annual
         decollateralizationFee = bound(decollateralizationFee, 1, 5000); // max 50% fee
 
-        uint expectedCertificationDate = block.timestamp + timeToCertificationDate;
+        uint certificationDate = block.timestamp + timeToCertificationDate;
 
         (uint minAmountIn, uint minCbtDaoCut) = SolidMath
             .computeDecollateralizationMinAmountInAndDaoCut(
-                expectedCertificationDate,
+                certificationDate,
                 expectedFcbtAmount,
                 timeAppreciation,
                 decollateralizationFee,
@@ -303,7 +304,7 @@ contract SolidMathTest is Test {
             );
 
         (uint amountOut, uint cbtDaoCut, ) = SolidMath.computeDecollateralizationOutcome(
-            expectedCertificationDate,
+            certificationDate,
             minAmountIn,
             timeAppreciation,
             decollateralizationFee,
@@ -315,50 +316,55 @@ contract SolidMathTest is Test {
     }
 
     function testComputeWeeklyBatchReward_batchIsCertified() public {
-        uint rewardAmount = SolidMath.computeWeeklyBatchReward(
+        (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
             block.timestamp - 1 minutes,
             10000,
             1647,
+            REWARDS_FEE,
             18
         );
 
         assertEq(rewardAmount, 0);
+        assertEq(feeAmount, 0);
     }
 
     function testComputeWeeklyBatchReward_lessThanOneWeek() public {
-        uint rewardAmount = SolidMath.computeWeeklyBatchReward(
+        (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
             block.timestamp + 1 minutes,
             10000,
             1647,
+            REWARDS_FEE,
             18
         );
 
-        assertEq(rewardAmount, 16.47e18);
+        assertEq(rewardAmount, 15.6465e18);
+        assertEq(feeAmount, 0.8235e18);
     }
 
     function testComputeWeeklyBatchReward_oneWeek() public {
-        uint rewardAmount = SolidMath.computeWeeklyBatchReward(
+        (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
             block.timestamp + 1 weeks + 1 minutes,
             10000,
             1647,
+            REWARDS_FEE,
             18
         );
 
-        assertEq(rewardAmount, 16.44287391e18);
+        assertEq(rewardAmount, 15.6207302145e18);
+        assertEq(feeAmount, 0.8221436955e18);
     }
 
     function testComputeWeeklyBatchReward_fiveYears() public {
-        uint rewardAmount = SolidMath.computeWeeklyBatchReward(
+        (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
             block.timestamp + 5 * ONE_YEAR + 1 minutes,
             10000,
             1647,
+            REWARDS_FEE,
             18
         );
 
-        // FixedNumber math:    10729184129332830000
-        // sol result:          10729183860000000000
-        // delta = 10729184129332830000 - 10729183860000000000 = 269332830000 = ~270000000000
-        assertApproxEqAbs(rewardAmount, 10.72918412933283e18, 270000000000);
+        assertApproxEqAbs(rewardAmount, 10.1927249229e18, 256500000000);
+        assertApproxEqAbs(feeAmount, 0.5364592065e18, 13500000000);
     }
 
     function testFailComputeCollateralizationOutcome_ifCertificationDateIsInThePast() public view {

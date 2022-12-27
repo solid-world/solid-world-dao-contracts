@@ -5,21 +5,20 @@ library DomainDataTypes {
     /// @notice Structure that holds necessary information for minting collateralized basket tokens (ERC-20).
     /// @param id ID of the batch in the database
     /// @param projectId Project ID this batch belongs to
-    /// @param totalAmount Amount of carbon tons in the batch, this amount will be minted as forward contract batch tokens (ERC-1155)
-    /// @param owner Address who receives forward contract batch tokens (ERC-1155)
-    /// @param expectedDueDate When the batch is about to be delivered; affects on how many collateralized basket tokens (ERC-20) may be minted
+    /// @param supplier Address who receives forward contract batch tokens (ERC-1155)
+    /// @param certificationDate When the batch is about to be delivered; affects on how many collateralized basket tokens (ERC-20) may be minted
     /// @param vintage The year an emission reduction occurred or the offset was issued. The older the vintage, the cheaper the price per credit.
     /// @param status Status for the batch (ex. CAN_BE_DEPOSITED | IS_ACCUMULATING | READY_FOR_DELIVERY etc.)
-    /// @param discountRate Coefficient that affects on how many collateralized basket tokens (ERC-20) may be minted / ton. Forward is worth less than spot.
+    /// @param batchTA Coefficient that affects on how many collateralized basket tokens (ERC-20) may be minted / ton
+    ///                   depending on market conditions. Forward is worth less than spot.
     struct Batch {
         uint id;
         uint projectId;
-        uint totalAmount;
-        address owner;
-        uint32 expectedDueDate;
+        address supplier;
+        uint32 certificationDate;
         uint16 vintage;
         uint8 status;
-        uint24 discountRate;
+        uint24 batchTA;
     }
 
     /// @notice Structure that holds state of a category of forward carbon credits. Used for computing collateralization.
@@ -27,7 +26,8 @@ library DomainDataTypes {
     /// The higher, the more you have to input to raise the TA.
     /// @param decayPerSecond controls how fast the built momentum drops over time.
     /// The bigger, the faster the momentum drops.
-    /// @param maxDepreciation controls how much the reactive TA can drop from the averageTA value.
+    /// @param maxDepreciationPerYear controls how much the reactive TA can drop from the averageTA value. Quantified per year.
+    /// @param maxDepreciation controls how much the reactive TA can drop from the averageTA value. Quantified per week.
     /// @param averageTA is the average time appreciation of the category.
     /// @param totalCollateralized is the total amount of collateralized tokens for this category.
     /// @param lastCollateralizationTimestamp the timestamp of the last collateralization.
@@ -35,6 +35,7 @@ library DomainDataTypes {
     struct Category {
         uint volumeCoefficient;
         uint40 decayPerSecond;
+        uint16 maxDepreciationPerYear;
         uint24 maxDepreciation;
         uint24 averageTA;
         uint totalCollateralized;

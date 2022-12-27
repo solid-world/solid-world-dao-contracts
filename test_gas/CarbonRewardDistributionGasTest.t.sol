@@ -43,7 +43,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
             forwardContractBatch,
             1000,
             1000,
-            feeReceiver,
+           1000, feeReceiver,
             address(emissionManager)
         );
 
@@ -160,7 +160,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
         uint rewards
     ) internal {
         for (uint i = 0; i < rewards; i++) {
-            manager.addCategory(CATEGORY_ID + i, "", "", 1599);
+            manager.addCategory(CATEGORY_ID + i, "", "", 1647);
             manager.addProject(CATEGORY_ID + i, PROJECT_ID + i);
         }
 
@@ -170,12 +170,12 @@ contract CarbonRewardDistributionGasTest is GasTest {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % rewards),
-                    totalAmount: 10000,
-                    expectedDueDate: uint32(CURRENT_DATE + ONE_YEAR * yearsFromCertification),
+                    certificationDate: uint32(CURRENT_DATE + ONE_YEAR * yearsFromCertification),
                     vintage: 2022,
-                    discountRate: 1647,
-                    owner: address(manager)
-                })
+                    batchTA: 0,
+                    supplier: address(manager)
+                }),
+                10000
             );
         }
 
