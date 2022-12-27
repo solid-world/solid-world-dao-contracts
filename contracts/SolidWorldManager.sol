@@ -83,6 +83,9 @@ contract SolidWorldManager is
     /// @notice Fee charged by DAO when decollateralizing collateralized basket tokens.
     uint16 public decollateralizationFee;
 
+    /// @notice Fee charged by DAO on the weekly carbon rewards.
+    uint16 public rewardsFee;
+
     event BatchCollateralized(
         uint indexed batchId,
         uint amountIn,
@@ -109,6 +112,9 @@ contract SolidWorldManager is
     );
     event ProjectCreated(uint indexed projectId);
     event BatchCreated(uint indexed batchId);
+    event FeeReceiverUpdated(address indexed feeReceiver);
+    event CollateralizationFeeUpdated(uint indexed collateralizationFee);
+    event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
 
     modifier validBatch(uint batchId) {
         if (!batchCreated[batchId]) {
@@ -128,6 +134,7 @@ contract SolidWorldManager is
         ForwardContractBatchToken _forwardContractBatch,
         uint16 _collateralizationFee,
         uint16 _decollateralizationFee,
+        uint16 _rewardsFee,
         address _feeReceiver,
         address _weeklyRewardsMinter
     ) public initializer {
@@ -135,10 +142,12 @@ contract SolidWorldManager is
         __ReentrancyGuard_init();
 
         forwardContractBatch = _forwardContractBatch;
-        collateralizationFee = _collateralizationFee;
-        decollateralizationFee = _decollateralizationFee;
-        feeReceiver = _feeReceiver;
-        weeklyRewardsMinter = _weeklyRewardsMinter;
+
+        _setCollateralizationFee(_collateralizationFee);
+        _setDecollateralizationFee(_decollateralizationFee);
+        _setRewardsFee(_rewardsFee);
+        _setFeeReceiver(_feeReceiver);
+        _setWeeklyRewardsMinter(_weeklyRewardsMinter);
     }
 
     // todo #121: add authorization
@@ -239,7 +248,7 @@ contract SolidWorldManager is
     // todo #121: add authorization
     /// @inheritdoc IWeeklyCarbonRewardsManager
     function setWeeklyRewardsMinter(address _weeklyRewardsMinter) external {
-        weeklyRewardsMinter = _weeklyRewardsMinter;
+        _setWeeklyRewardsMinter(_weeklyRewardsMinter);
     }
 
     /// @inheritdoc IWeeklyCarbonRewardsManager
@@ -247,7 +256,11 @@ contract SolidWorldManager is
         external
         view
         override
-        returns (address[] memory carbonRewards, uint[] memory rewardAmounts)
+        returns (
+            address[] memory carbonRewards,
+            uint[] memory rewardAmounts,
+            uint[] memory rewardFees
+        )
     {
         if (assets.length != _categoryIds.length) {
             revert InvalidInput();
@@ -255,6 +268,7 @@ contract SolidWorldManager is
 
         carbonRewards = new address[](assets.length);
         rewardAmounts = new uint[](assets.length);
+        rewardFees = new uint[](assets.length);
 
         for (uint i; i < assets.length; i++) {
             uint categoryId = _categoryIds[i];
@@ -263,10 +277,14 @@ contract SolidWorldManager is
             }
 
             CollateralizedBasketToken rewardToken = categoryToken[categoryId];
-            uint rewardAmount = _computeWeeklyCategoryReward(categoryId, rewardToken.decimals());
+            (uint rewardAmount, uint rewardFee) = _computeWeeklyCategoryReward(
+                categoryId,
+                rewardToken.decimals()
+            );
 
             carbonRewards[i] = address(rewardToken);
             rewardAmounts[i] = rewardAmount;
+            rewardFees[i] = rewardFee;
         }
     }
 
@@ -275,11 +293,13 @@ contract SolidWorldManager is
         uint[] calldata _categoryIds,
         address[] calldata carbonRewards,
         uint[] calldata rewardAmounts,
+        uint[] calldata rewardFees,
         address rewardsVault
     ) external override {
         if (
             _categoryIds.length != carbonRewards.length ||
-            carbonRewards.length != rewardAmounts.length
+            carbonRewards.length != rewardAmounts.length ||
+            rewardAmounts.length != rewardFees.length
         ) {
             revert InvalidInput();
         }
@@ -292,9 +312,10 @@ contract SolidWorldManager is
             address carbonReward = carbonRewards[i];
             CollateralizedBasketToken rewardToken = CollateralizedBasketToken(carbonReward);
             uint rewardAmount = rewardAmounts[i];
-
             rewardToken.mint(rewardsVault, rewardAmount);
             emit WeeklyRewardMinted(carbonReward, rewardAmount);
+
+            rewardToken.mint(feeReceiver, rewardFees[i]);
 
             _rebalanceCategory(_categoryIds[i]);
         }
@@ -444,32 +465,15 @@ contract SolidWorldManager is
     /// @return minAmountIn minimum amount of ERC20 tokens to decollateralize `amountOut` ERC1155 tokens with id `batchId`
     /// @return minCbtDaoCut ERC20 tokens to be received by feeReceiver for decollateralizing minAmountIn ERC20 tokens
     function simulateDecollateralization(uint batchId, uint amountIn)
-        public
+        external
         view
-        validBatch(batchId)
         returns (
             uint amountOut,
             uint minAmountIn,
             uint minCbtDaoCut
         )
     {
-        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
-
-        (amountOut, , ) = SolidMath.computeDecollateralizationOutcome(
-            batches[batchId].certificationDate,
-            amountIn,
-            batches[batchId].batchTA,
-            decollateralizationFee,
-            collateralizedToken.decimals()
-        );
-
-        (minAmountIn, minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
-            batches[batchId].certificationDate,
-            amountOut,
-            batches[batchId].batchTA,
-            decollateralizationFee,
-            collateralizedToken.decimals()
-        );
+        (amountOut, minAmountIn, minCbtDaoCut) = _simulateDecollateralization(batchId, amountIn);
     }
 
     /// @dev Computes relevant info for the decollateralization process involving batches
@@ -494,7 +498,7 @@ contract SolidWorldManager is
 
             uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
 
-            (uint amountOut, uint minAmountIn, uint minCbtDaoCut) = simulateDecollateralization(
+            (uint amountOut, uint minAmountIn, uint minCbtDaoCut) = _simulateDecollateralization(
                 batchId,
                 DECOLLATERALIZATION_SIMULATION_INPUT
             );
@@ -516,25 +520,31 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
-    function setCollateralizationFee(uint16 _collateralizationFee) public {
-        collateralizationFee = _collateralizationFee;
+    function setCollateralizationFee(uint16 _collateralizationFee) external {
+        _setCollateralizationFee(_collateralizationFee);
     }
 
     // todo #121: add authorization
-    function setDecollateralizationFee(uint16 _decollateralizationFee) public {
-        decollateralizationFee = _decollateralizationFee;
+    function setDecollateralizationFee(uint16 _decollateralizationFee) external {
+        _setDecollateralizationFee(_decollateralizationFee);
     }
 
     // todo #121: add authorization
-    function setFeeReceiver(address _feeReceiver) public {
-        feeReceiver = _feeReceiver;
+    /// @inheritdoc IWeeklyCarbonRewardsManager
+    function setRewardsFee(uint16 _rewardsFee) external {
+        _setRewardsFee(_rewardsFee);
     }
 
-    function getProjectIdsByCategory(uint categoryId) public view returns (uint[] memory) {
+    // todo #121: add authorization
+    function setFeeReceiver(address _feeReceiver) external {
+        _setFeeReceiver(_feeReceiver);
+    }
+
+    function getProjectIdsByCategory(uint categoryId) external view returns (uint[] memory) {
         return categoryProjects[categoryId];
     }
 
-    function getBatchIdsByProject(uint projectId) public view returns (uint[] memory) {
+    function getBatchIdsByProject(uint projectId) external view returns (uint[] memory) {
         return projectBatches[projectId];
     }
 
@@ -562,19 +572,77 @@ contract SolidWorldManager is
         return interfaceId == 0xd9b67a26; // The ERC-165 identifier for ERC-1155
     }
 
+    function _setWeeklyRewardsMinter(address _weeklyRewardsMinter) internal {
+        weeklyRewardsMinter = _weeklyRewardsMinter;
+
+        emit RewardsMinterUpdated(_weeklyRewardsMinter);
+    }
+
+    function _setCollateralizationFee(uint16 _collateralizationFee) internal {
+        collateralizationFee = _collateralizationFee;
+
+        emit CollateralizationFeeUpdated(_collateralizationFee);
+    }
+
+    function _setDecollateralizationFee(uint16 _decollateralizationFee) internal {
+        decollateralizationFee = _decollateralizationFee;
+
+        emit DecollateralizationFeeUpdated(_decollateralizationFee);
+    }
+
+    function _setRewardsFee(uint16 _rewardsFee) internal {
+        rewardsFee = _rewardsFee;
+
+        emit RewardsFeeUpdated(_rewardsFee);
+    }
+
+    function _setFeeReceiver(address _feeReceiver) internal {
+        feeReceiver = _feeReceiver;
+
+        emit FeeReceiverUpdated(_feeReceiver);
+    }
+
+    function _simulateDecollateralization(uint batchId, uint amountIn)
+        internal
+        view
+        validBatch(batchId)
+        returns (
+            uint amountOut,
+            uint minAmountIn,
+            uint minCbtDaoCut
+        )
+    {
+        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(batchId);
+
+        (amountOut, , ) = SolidMath.computeDecollateralizationOutcome(
+            batches[batchId].certificationDate,
+            amountIn,
+            batches[batchId].batchTA,
+            decollateralizationFee,
+            collateralizedToken.decimals()
+        );
+
+        (minAmountIn, minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
+            batches[batchId].certificationDate,
+            amountOut,
+            batches[batchId].batchTA,
+            decollateralizationFee,
+            collateralizedToken.decimals()
+        );
+    }
+
     /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
     /// @param categoryId The source category for the ERC20 rewards
+    /// @return rewardAmount carbon reward amount to mint
+    /// @return rewardFee fee amount charged by the DAO
     function _computeWeeklyCategoryReward(uint categoryId, uint rewardDecimals)
         internal
         view
-        returns (uint)
+        returns (uint rewardAmount, uint rewardFee)
     {
-        uint rewardAmount;
-
         uint[] storage projects = categoryProjects[categoryId];
         for (uint i; i < projects.length; i++) {
-            uint projectId = projects[i];
-            uint[] storage _batches = projectBatches[projectId];
+            uint[] storage _batches = projectBatches[projects[i]];
             for (uint j; j < _batches.length; j++) {
                 uint batchId = _batches[j];
                 uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
@@ -582,17 +650,17 @@ contract SolidWorldManager is
                     continue;
                 }
 
-                DomainDataTypes.Batch storage batch = batches[batchId];
-                rewardAmount += SolidMath.computeWeeklyBatchReward(
-                    batch.certificationDate,
+                (uint netRewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
+                    batches[batchId].certificationDate,
                     availableCredits,
-                    batch.batchTA,
+                    batches[batchId].batchTA,
+                    rewardsFee,
                     rewardDecimals
                 );
+                rewardAmount += netRewardAmount;
+                rewardFee += feeAmount;
             }
         }
-
-        return rewardAmount;
     }
 
     function _updateBatchTA(

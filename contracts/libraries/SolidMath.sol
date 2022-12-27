@@ -188,16 +188,19 @@ library SolidMath {
     /// @param certificationDate expected date for project certification
     /// @param availableCredits amount of ERC1155 tokens backing the reward
     /// @param timeAppreciation 1% = 10000, 0.0984% = 984
+    /// @param rewardsFee fee charged by DAO on the weekly carbon rewards
     /// @param decimals reward token number of decimals
-    /// @return rewardAmount ERC20 reward amount. Returns 0 if `certificationDate` is in the past
+    /// @return netRewardAmount ERC20 reward amount. Returns 0 if `certificationDate` is in the past
+    /// @return feeAmount fee amount charged by the DAO. Returns 0 if `certificationDate` is in the past
     function computeWeeklyBatchReward(
         uint certificationDate,
         uint availableCredits,
         uint timeAppreciation,
+        uint rewardsFee,
         uint decimals
-    ) internal view returns (uint rewardAmount) {
+    ) internal view returns (uint netRewardAmount, uint feeAmount) {
         if (certificationDate <= block.timestamp) {
-            return 0;
+            return (0, 0);
         }
 
         uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
@@ -205,10 +208,13 @@ library SolidMath {
             certificationDate
         );
 
-        rewardAmount = Math.mulDiv(
+        uint grossRewardAmount = Math.mulDiv(
             availableCredits * timeAppreciation * timeAppreciationDiscount,
             10**decimals,
             TIME_APPRECIATION_BASIS_POINTS**2
         );
+
+        feeAmount = Math.mulDiv(grossRewardAmount, rewardsFee, FEE_BASIS_POINTS);
+        netRewardAmount = grossRewardAmount - feeAmount;
     }
 }

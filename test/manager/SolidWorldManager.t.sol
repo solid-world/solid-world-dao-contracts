@@ -27,6 +27,9 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     );
     event ProjectCreated(uint indexed projectId);
     event BatchCreated(uint indexed batchId);
+    event FeeReceiverUpdated(address indexed feeReceiver);
+    event CollateralizationFeeUpdated(uint indexed collateralizationFee);
+    event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
 
     function testAddCategory() public {
         assertEq(address(manager.categoryToken(CATEGORY_ID)), address(0));
@@ -1186,6 +1189,33 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
             }),
             10000
         );
+    }
+
+    function testSetCollateralizationFee() public {
+        uint16 newCollateralizationFee = 1234;
+
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit CollateralizationFeeUpdated(newCollateralizationFee);
+        manager.setCollateralizationFee(newCollateralizationFee);
+        assertEq(manager.collateralizationFee(), newCollateralizationFee);
+    }
+
+    function testSetDecollateralizationFee() public {
+        uint16 newDecollateralizationFee = 1234;
+
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit DecollateralizationFeeUpdated(newDecollateralizationFee);
+        manager.setDecollateralizationFee(newDecollateralizationFee);
+        assertEq(manager.decollateralizationFee(), newDecollateralizationFee);
+    }
+
+    function testSetFeeReceiver() public {
+        address newFeeReceiver = vm.addr(1234);
+
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit FeeReceiverUpdated(newFeeReceiver);
+        manager.setFeeReceiver(newFeeReceiver);
+        assertEq(manager.feeReceiver(), newFeeReceiver);
     }
 
     function assertNotEq(address a, address b) private {
