@@ -1,5 +1,5 @@
 {
-  "address": "0xF2A454FF3D1AE39C5131D3b141f8a016416da790",
+  "address": "0x3fe16207cED7D3476F85bABcaD50C48E7b419539",
   "abi": [
     {
       "anonymous": false,
@@ -165,6 +165,17 @@
     {
       "inputs": [
         {
+          "internalType": "uint32",
+          "name": "dueDate",
+          "type": "uint32"
+        }
+      ],
+      "name": "BatchCertificationDateInThePast",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "uint256",
           "name": "batchId",
           "type": "uint256"
@@ -176,12 +187,17 @@
     {
       "inputs": [
         {
-          "internalType": "uint32",
-          "name": "dueDate",
-          "type": "uint32"
+          "internalType": "uint256",
+          "name": "batchId1",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "batchId2",
+          "type": "uint256"
         }
       ],
-      "name": "BatchDueDateInThePast",
+      "name": "BatchesNotInSameCategory",
       "type": "error"
     },
     {
@@ -193,6 +209,17 @@
         }
       ],
       "name": "CategoryAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "forwardCreditsAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "ForwardCreditsInputAmountTooLarge",
       "type": "error"
     },
     {
@@ -224,7 +251,7 @@
     },
     {
       "inputs": [],
-      "name": "InvalidBatchOwner",
+      "name": "InvalidBatchSupplier",
       "type": "error"
     },
     {
@@ -300,7 +327,7 @@
         {
           "indexed": true,
           "internalType": "address",
-          "name": "batchOwner",
+          "name": "batchSupplier",
           "type": "address"
         }
       ],
@@ -393,6 +420,45 @@
       "anonymous": false,
       "inputs": [
         {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collateralizationFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "CollateralizationFeeUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "decollateralizationFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "DecollateralizationFeeUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "feeReceiver",
+          "type": "address"
+        }
+      ],
+      "name": "FeeReceiverUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": false,
           "internalType": "uint8",
           "name": "version",
@@ -432,6 +498,32 @@
         }
       ],
       "name": "ProjectCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "rewardsFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "RewardsFeeUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "rewardsMinter",
+          "type": "address"
+        }
+      ],
+      "name": "RewardsMinterUpdated",
       "type": "event"
     },
     {
@@ -512,18 +604,13 @@
               "type": "uint256"
             },
             {
-              "internalType": "uint256",
-              "name": "totalAmount",
-              "type": "uint256"
-            },
-            {
               "internalType": "address",
-              "name": "owner",
+              "name": "supplier",
               "type": "address"
             },
             {
               "internalType": "uint32",
-              "name": "expectedDueDate",
+              "name": "certificationDate",
               "type": "uint32"
             },
             {
@@ -538,13 +625,18 @@
             },
             {
               "internalType": "uint24",
-              "name": "discountRate",
+              "name": "batchTA",
               "type": "uint24"
             }
           ],
           "internalType": "struct DomainDataTypes.Batch",
           "name": "batch",
           "type": "tuple"
+        },
+        {
+          "internalType": "uint256",
+          "name": "mintableAmount",
+          "type": "uint256"
         }
       ],
       "name": "addBatch",
@@ -606,6 +698,25 @@
           "type": "uint256"
         }
       ],
+      "name": "batchCategory",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
       "name": "batchCreated",
       "outputs": [
         {
@@ -657,18 +768,13 @@
           "type": "uint256"
         },
         {
-          "internalType": "uint256",
-          "name": "totalAmount",
-          "type": "uint256"
-        },
-        {
           "internalType": "address",
-          "name": "owner",
+          "name": "supplier",
           "type": "address"
         },
         {
           "internalType": "uint32",
-          "name": "expectedDueDate",
+          "name": "certificationDate",
           "type": "uint32"
         },
         {
@@ -683,7 +789,7 @@
         },
         {
           "internalType": "uint24",
-          "name": "discountRate",
+          "name": "batchTA",
           "type": "uint24"
         }
       ],
@@ -732,6 +838,11 @@
           "internalType": "uint40",
           "name": "decayPerSecond",
           "type": "uint40"
+        },
+        {
+          "internalType": "uint16",
+          "name": "maxDepreciationPerYear",
+          "type": "uint16"
         },
         {
           "internalType": "uint24",
@@ -896,6 +1007,11 @@
         {
           "internalType": "uint256[]",
           "name": "rewardAmounts",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "rewardFees",
           "type": "uint256[]"
         }
       ],
@@ -1076,6 +1192,11 @@
           "type": "uint16"
         },
         {
+          "internalType": "uint16",
+          "name": "_rewardsFee",
+          "type": "uint16"
+        },
+        {
           "internalType": "address",
           "name": "_feeReceiver",
           "type": "address"
@@ -1106,6 +1227,11 @@
         {
           "internalType": "uint256[]",
           "name": "rewardAmounts",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "rewardFees",
           "type": "uint256[]"
         },
         {
@@ -1280,6 +1406,19 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "rewardsFee",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint16",
@@ -1314,6 +1453,19 @@
         }
       ],
       "name": "setFeeReceiver",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "_rewardsFee",
+          "type": "uint16"
+        }
+      ],
+      "name": "setRewardsFee",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1449,6 +1601,11 @@
           "type": "uint40"
         },
         {
+          "internalType": "uint16",
+          "name": "maxDepreciationPerYear",
+          "type": "uint16"
+        },
+        {
           "internalType": "uint24",
           "name": "maxDepreciation",
           "type": "uint24"
@@ -1494,78 +1651,143 @@
       "type": "constructor"
     }
   ],
-  "transactionHash": "0xfd840ada7ca075253201ec04693207c83d775467e96bf0fd3ce4a903da8d63d7",
+  "transactionHash": "0x5aff768577794a9bfe910fd443996bb58fe97e944dedcf982ddc95ad8d87f3b3",
   "receipt": {
     "to": null,
     "from": "0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299",
-    "contractAddress": "0xF2A454FF3D1AE39C5131D3b141f8a016416da790",
-    "transactionIndex": 45,
-    "gasUsed": "884104",
-    "logsBloom": "0x00000000000000000000000000000000400000000000000400800000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000002000000000002000001000000000000000000000000000000001001020000000000000000000800000000800000000000000000000000400000000000000000000000000000000000000000400080000000000000800000000000000000000000000000000400000000000000000000000000000000000000000020000020000001000000040000000000000400000000000000000020000000000000000000000000000000000000000000000000000000000000000000",
-    "blockHash": "0xa26052e80ebf608133479dac7007c05ee8eaba00de2b163fb1663f7a525e85d7",
-    "transactionHash": "0xfd840ada7ca075253201ec04693207c83d775467e96bf0fd3ce4a903da8d63d7",
+    "contractAddress": "0x3fe16207cED7D3476F85bABcaD50C48E7b419539",
+    "transactionIndex": 7,
+    "gasUsed": "891044",
+    "logsBloom": "0x00000000000000004000010000000020400000000000000000800000800000000400000000000000000000000400000000004010000010000001000000000000002002000000008000000000000002000001002000000000000000000000800000001002021000000004000000000800000080800000000000000000040000400000000000000000000000000000000000000400000280000000000000802000100000400000000000000000000400000000000000000000000000000000001000000020000020000200000000040000000200000400000000000000000020000000000000000008080000000100000000000400000000000000000100000000",
+    "blockHash": "0x364a41f35bd860b81981d48874dbf92e144f31d5792356de5166887e61231a7b",
+    "transactionHash": "0x5aff768577794a9bfe910fd443996bb58fe97e944dedcf982ddc95ad8d87f3b3",
     "logs": [
       {
-        "transactionIndex": 45,
-        "blockNumber": 8209881,
-        "transactionHash": "0xfd840ada7ca075253201ec04693207c83d775467e96bf0fd3ce4a903da8d63d7",
-        "address": "0xF2A454FF3D1AE39C5131D3b141f8a016416da790",
+        "transactionIndex": 7,
+        "blockNumber": 8211814,
+        "transactionHash": "0x5aff768577794a9bfe910fd443996bb58fe97e944dedcf982ddc95ad8d87f3b3",
+        "address": "0x3fe16207cED7D3476F85bABcaD50C48E7b419539",
         "topics": [
           "0xbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b",
-          "0x0000000000000000000000007da27a82d5a6d309234b6264457fa67369b80c44"
+          "0x0000000000000000000000007a08e79e31b1ebaf38ce25afb2f48a936aa89380"
         ],
         "data": "0x",
-        "logIndex": 73,
-        "blockHash": "0xa26052e80ebf608133479dac7007c05ee8eaba00de2b163fb1663f7a525e85d7"
+        "logIndex": 12,
+        "blockHash": "0x364a41f35bd860b81981d48874dbf92e144f31d5792356de5166887e61231a7b"
       },
       {
-        "transactionIndex": 45,
-        "blockNumber": 8209881,
-        "transactionHash": "0xfd840ada7ca075253201ec04693207c83d775467e96bf0fd3ce4a903da8d63d7",
-        "address": "0xF2A454FF3D1AE39C5131D3b141f8a016416da790",
+        "transactionIndex": 7,
+        "blockNumber": 8211814,
+        "transactionHash": "0x5aff768577794a9bfe910fd443996bb58fe97e944dedcf982ddc95ad8d87f3b3",
+        "address": "0x3fe16207cED7D3476F85bABcaD50C48E7b419539",
         "topics": [
           "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
           "0x0000000000000000000000000000000000000000000000000000000000000000",
           "0x0000000000000000000000008b3a08b22d25c60e4b2bfd984e331568eca4c299"
         ],
         "data": "0x",
-        "logIndex": 74,
-        "blockHash": "0xa26052e80ebf608133479dac7007c05ee8eaba00de2b163fb1663f7a525e85d7"
+        "logIndex": 13,
+        "blockHash": "0x364a41f35bd860b81981d48874dbf92e144f31d5792356de5166887e61231a7b"
       },
       {
-        "transactionIndex": 45,
-        "blockNumber": 8209881,
-        "transactionHash": "0xfd840ada7ca075253201ec04693207c83d775467e96bf0fd3ce4a903da8d63d7",
-        "address": "0xF2A454FF3D1AE39C5131D3b141f8a016416da790",
+        "transactionIndex": 7,
+        "blockNumber": 8211814,
+        "transactionHash": "0x5aff768577794a9bfe910fd443996bb58fe97e944dedcf982ddc95ad8d87f3b3",
+        "address": "0x3fe16207cED7D3476F85bABcaD50C48E7b419539",
+        "topics": [
+          "0x3a9c3d19b54b2e3f3f98d9114e62f0bae208d7e9b303286f2ffc42c95d7813c3",
+          "0x000000000000000000000000000000000000000000000000000000000000001e"
+        ],
+        "data": "0x",
+        "logIndex": 14,
+        "blockHash": "0x364a41f35bd860b81981d48874dbf92e144f31d5792356de5166887e61231a7b"
+      },
+      {
+        "transactionIndex": 7,
+        "blockNumber": 8211814,
+        "transactionHash": "0x5aff768577794a9bfe910fd443996bb58fe97e944dedcf982ddc95ad8d87f3b3",
+        "address": "0x3fe16207cED7D3476F85bABcaD50C48E7b419539",
+        "topics": [
+          "0x3a1bac3fdaf2d00c05b0cb3e9dce0dbaa14b865551f42b7b4755ebed6d08daf1",
+          "0x00000000000000000000000000000000000000000000000000000000000001f4"
+        ],
+        "data": "0x",
+        "logIndex": 15,
+        "blockHash": "0x364a41f35bd860b81981d48874dbf92e144f31d5792356de5166887e61231a7b"
+      },
+      {
+        "transactionIndex": 7,
+        "blockNumber": 8211814,
+        "transactionHash": "0x5aff768577794a9bfe910fd443996bb58fe97e944dedcf982ddc95ad8d87f3b3",
+        "address": "0x3fe16207cED7D3476F85bABcaD50C48E7b419539",
+        "topics": [
+          "0x7b2fbd696a2aa5afaf39d5a0171b41f5a9779043dd3ad3a8d3c752c43b7410f9",
+          "0x00000000000000000000000000000000000000000000000000000000000000c8"
+        ],
+        "data": "0x",
+        "logIndex": 16,
+        "blockHash": "0x364a41f35bd860b81981d48874dbf92e144f31d5792356de5166887e61231a7b"
+      },
+      {
+        "transactionIndex": 7,
+        "blockNumber": 8211814,
+        "transactionHash": "0x5aff768577794a9bfe910fd443996bb58fe97e944dedcf982ddc95ad8d87f3b3",
+        "address": "0x3fe16207cED7D3476F85bABcaD50C48E7b419539",
+        "topics": [
+          "0x27aae5db36d94179909d019ae0b1ac7c16d96d953148f63c0f6a0a9c8ead79ee",
+          "0x0000000000000000000000008b3a08b22d25c60e4b2bfd984e331568eca4c299"
+        ],
+        "data": "0x",
+        "logIndex": 17,
+        "blockHash": "0x364a41f35bd860b81981d48874dbf92e144f31d5792356de5166887e61231a7b"
+      },
+      {
+        "transactionIndex": 7,
+        "blockNumber": 8211814,
+        "transactionHash": "0x5aff768577794a9bfe910fd443996bb58fe97e944dedcf982ddc95ad8d87f3b3",
+        "address": "0x3fe16207cED7D3476F85bABcaD50C48E7b419539",
+        "topics": [
+          "0x15068720be8003d38a8ddc3b461d6b850cc264a3721cf2d60d0acff74283e85f",
+          "0x000000000000000000000000ea093a518632a556e80b50b3cf4d5d361d36e74c"
+        ],
+        "data": "0x",
+        "logIndex": 18,
+        "blockHash": "0x364a41f35bd860b81981d48874dbf92e144f31d5792356de5166887e61231a7b"
+      },
+      {
+        "transactionIndex": 7,
+        "blockNumber": 8211814,
+        "transactionHash": "0x5aff768577794a9bfe910fd443996bb58fe97e944dedcf982ddc95ad8d87f3b3",
+        "address": "0x3fe16207cED7D3476F85bABcaD50C48E7b419539",
         "topics": [
           "0x7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb3847402498"
         ],
         "data": "0x0000000000000000000000000000000000000000000000000000000000000001",
-        "logIndex": 75,
-        "blockHash": "0xa26052e80ebf608133479dac7007c05ee8eaba00de2b163fb1663f7a525e85d7"
+        "logIndex": 19,
+        "blockHash": "0x364a41f35bd860b81981d48874dbf92e144f31d5792356de5166887e61231a7b"
       },
       {
-        "transactionIndex": 45,
-        "blockNumber": 8209881,
-        "transactionHash": "0xfd840ada7ca075253201ec04693207c83d775467e96bf0fd3ce4a903da8d63d7",
-        "address": "0xF2A454FF3D1AE39C5131D3b141f8a016416da790",
+        "transactionIndex": 7,
+        "blockNumber": 8211814,
+        "transactionHash": "0x5aff768577794a9bfe910fd443996bb58fe97e944dedcf982ddc95ad8d87f3b3",
+        "address": "0x3fe16207cED7D3476F85bABcaD50C48E7b419539",
         "topics": [
           "0x7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f"
         ],
-        "data": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000fdf406d82115bcfc77fd93ba9de7f8c4be76e73b",
-        "logIndex": 76,
-        "blockHash": "0xa26052e80ebf608133479dac7007c05ee8eaba00de2b163fb1663f7a525e85d7"
+        "data": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000003218dfc3549f87040b03ec154f1e876b879cc12e",
+        "logIndex": 20,
+        "blockHash": "0x364a41f35bd860b81981d48874dbf92e144f31d5792356de5166887e61231a7b"
       }
     ],
-    "blockNumber": 8209881,
-    "cumulativeGasUsed": "5001239",
+    "blockNumber": 8211814,
+    "cumulativeGasUsed": "1557555",
     "status": 1,
     "byzantium": true
   },
   "args": [
-    "0x7dA27a82d5A6D309234b6264457fa67369B80C44",
-    "0xFdf406D82115bCFC77FD93Ba9DE7F8C4BE76E73b",
-    "0x4ca3063400000000000000000000000098ab9c306857aed3703e9ce44e6ab854fb95ba0f000000000000000000000000d78f82ff93a14f2f23bba447c6643e1e467c3f77000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000000000000000000000000000000000000000001f40000000000000000000000008b3a08b22d25c60e4b2bfd984e331568eca4c299000000000000000000000000252e7f78c44fa4514fac465bbf156a33f720607f"
+    "0x7a08E79E31B1eBAf38cE25Afb2f48a936aA89380",
+    "0x3218dFc3549f87040B03EC154f1E876b879CC12E",
+    "0xabdc1022000000000000000000000000f29da2bd4f95f88b88c4bd730d79cf352fb907f2000000000000000000000000717f249041270f1e1c929ba1473a0d0622aec5fa000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000000000000000000000000000000000000000001f400000000000000000000000000000000000000000000000000000000000000c80000000000000000000000008b3a08b22d25c60e4b2bfd984e331568eca4c299000000000000000000000000ea093a518632a556e80b50b3cf4d5d361d36e74c"
   ],
   "numDeployments": 1,
   "solcInputHash": "0e89febeebc7444140de8e67c9067d2c",
@@ -1575,8 +1797,8 @@
   "execute": {
     "methodName": "initialize",
     "args": [
-      "0x98Ab9c306857AEd3703E9CE44e6Ab854FB95Ba0F",
-      "0xd78f82Ff93a14f2f23bBA447C6643E1e467c3f77",
+      "0xF29DA2bd4F95f88b88c4bd730D79CF352fb907F2",
+      "0x717F249041270f1e1c929bA1473A0d0622AeC5fa",
       {
         "type": "BigNumber",
         "hex": "0x1e"
@@ -1585,11 +1807,15 @@
         "type": "BigNumber",
         "hex": "0x01f4"
       },
+      {
+        "type": "BigNumber",
+        "hex": "0xc8"
+      },
       "0x8B3A08b22d25C60e4b2BfD984e331568ECa4C299",
-      "0x252E7f78c44fA4514FAc465Bbf156A33f720607f"
+      "0xEA093A518632a556E80B50B3Cf4d5d361d36e74c"
     ]
   },
-  "implementation": "0x7dA27a82d5A6D309234b6264457fa67369B80C44",
+  "implementation": "0x7a08E79E31B1eBAf38cE25Afb2f48a936aA89380",
   "devdoc": {
     "details": "This contract implements a proxy that is upgradeable by an admin. To avoid https://medium.com/nomic-labs-blog/malicious-backdoors-in-ethereum-proxies-62629adf3357[proxy selector clashing], which can potentially be used in an attack, this contract uses the https://blog.openzeppelin.com/the-transparent-proxy-pattern/[transparent proxy pattern]. This pattern implies two things that go hand in hand: 1. If any account other than the admin calls the proxy, the call will be forwarded to the implementation, even if that call matches one of the admin functions exposed by the proxy itself. 2. If the admin calls the proxy, it can access the admin functions, but its calls will never be forwarded to the implementation. If the admin tries to call a function on the implementation it will fail with an error that says \"admin cannot fallback to proxy target\". These properties mean that the admin account can only be used for admin actions like upgrading the proxy or changing the admin, so it's best if it's a dedicated account that is not used for anything else. This will avoid headaches due to sudden errors when trying to call a function from the proxy implementation. Our recommendation is for the dedicated account to be an instance of the {ProxyAdmin} contract. If set up this way, you should think of the `ProxyAdmin` instance as the real administrative interface of your proxy.",
     "kind": "dev",
