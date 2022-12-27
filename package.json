@@ -8,7 +8,8 @@
     "test:gasReport": "forge test -vvv --gas-report",
     "test:coverage": "forge coverage",
     "deploy:local": "hardhat deploy --network localhost",
-    "export:local": "hardhat export --export - --network localhost"
+    "export:local": "hardhat export --export - --network localhost",
+    "contracts:validate-size": "forge build --sizes"
   },
   "repository": {
     "type": "git",
