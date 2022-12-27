@@ -66,12 +66,14 @@ contract ReactiveTimeAppreciationMathTest is Test {
 
     function testComputeReactiveTA() public {
         uint24 decayPerSecond = uint24(getTestDecayPerSecond());
+        uint16 maxDepreciationPerYear = 10; // 1% yearly rate
         uint24 maxDepreciation = 193; // 1% yearly rate
         uint24 averageTA = 1599; // 8% yearly rate
 
         DomainDataTypes.Category[] memory categoryStates = new DomainDataTypes.Category[](2);
         categoryStates[0].volumeCoefficient = 50000;
         categoryStates[0].decayPerSecond = decayPerSecond;
+        categoryStates[0].maxDepreciationPerYear = maxDepreciationPerYear;
         categoryStates[0].maxDepreciation = maxDepreciation;
         categoryStates[0].averageTA = averageTA;
         categoryStates[0].totalCollateralized = 0;
@@ -80,6 +82,7 @@ contract ReactiveTimeAppreciationMathTest is Test {
 
         categoryStates[1].volumeCoefficient = 50000;
         categoryStates[1].decayPerSecond = decayPerSecond;
+        categoryStates[1].maxDepreciationPerYear = maxDepreciationPerYear;
         categoryStates[1].maxDepreciation = maxDepreciation;
         categoryStates[1].averageTA = averageTA;
         categoryStates[1].totalCollateralized = 0;
@@ -169,6 +172,56 @@ contract ReactiveTimeAppreciationMathTest is Test {
         );
 
         assertEq(batchTA, 1600);
+    }
+
+    function testComputeInitialMomentum() public {
+        uint volumeCoefficient = 50000;
+        uint maxDepreciationPerYear = 10; // 1% yearly rate
+
+        uint initialMomentum = ReactiveTimeAppreciationMath.computeInitialMomentum(
+            volumeCoefficient,
+            maxDepreciationPerYear
+        );
+
+        assertEq(initialMomentum, 50000);
+    }
+
+    function testComputeAdjustedMomentum() public {
+        DomainDataTypes.Category memory category;
+        category.volumeCoefficient = 50000;
+        category.decayPerSecond = uint40(getTestDecayPerSecond());
+        category.maxDepreciationPerYear = 10; // 1% yearly rate
+        category.maxDepreciation = 193; // 1% yearly rate
+        category.averageTA = 1599; // 8% yearly rate
+        category.totalCollateralized = 0;
+        category.lastCollateralizationTimestamp = CURRENT_DATE;
+        category.lastCollateralizationMomentum = 50000;
+
+        uint newVolumeCoefficient = 75000;
+        uint newMaxDepreciationPerYear0 = 20; // 2% yearly rate
+        uint newMaxDepreciationPerYear1 = 10; // 1% yearly rate
+        uint newMaxDepreciationPerYear2 = 5; // 0.5% yearly rate
+
+        vm.warp(CURRENT_DATE + 2 days);
+        uint adjustedMomentum0 = ReactiveTimeAppreciationMath.computeAdjustedMomentum(
+            category,
+            newVolumeCoefficient,
+            newMaxDepreciationPerYear0
+        );
+        uint adjustedMomentum1 = ReactiveTimeAppreciationMath.computeAdjustedMomentum(
+            category,
+            newVolumeCoefficient,
+            newMaxDepreciationPerYear1
+        );
+        uint adjustedMomentum2 = ReactiveTimeAppreciationMath.computeAdjustedMomentum(
+            category,
+            newVolumeCoefficient,
+            newMaxDepreciationPerYear2
+        );
+
+        assertEq(adjustedMomentum0, 142500);
+        assertEq(adjustedMomentum1, 67500);
+        assertEq(adjustedMomentum2, 67500);
     }
 
     function testToWeeklyRate() public {

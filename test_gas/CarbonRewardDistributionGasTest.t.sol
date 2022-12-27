@@ -43,7 +43,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
             forwardContractBatch,
             1000,
             1000,
-            feeReceiver,
+           1000, feeReceiver,
             address(emissionManager)
         );
 
@@ -172,7 +172,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
                     projectId: PROJECT_ID + (i % rewards),
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR * yearsFromCertification),
                     vintage: 2022,
-                    reactiveTA: 0,
+                    batchTA: 0,
                     supplier: address(manager)
                 }),
                 10000

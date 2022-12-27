@@ -9,7 +9,7 @@ library DomainDataTypes {
     /// @param certificationDate When the batch is about to be delivered; affects on how many collateralized basket tokens (ERC-20) may be minted
     /// @param vintage The year an emission reduction occurred or the offset was issued. The older the vintage, the cheaper the price per credit.
     /// @param status Status for the batch (ex. CAN_BE_DEPOSITED | IS_ACCUMULATING | READY_FOR_DELIVERY etc.)
-    /// @param reactiveTA Coefficient that affects on how many collateralized basket tokens (ERC-20) may be minted / ton
+    /// @param batchTA Coefficient that affects on how many collateralized basket tokens (ERC-20) may be minted / ton
     ///                   depending on market conditions. Forward is worth less than spot.
     struct Batch {
         uint id;
@@ -18,7 +18,7 @@ library DomainDataTypes {
         uint32 certificationDate;
         uint16 vintage;
         uint8 status;
-        uint24 reactiveTA;
+        uint24 batchTA;
     }
 
     /// @notice Structure that holds state of a category of forward carbon credits. Used for computing collateralization.
@@ -26,7 +26,8 @@ library DomainDataTypes {
     /// The higher, the more you have to input to raise the TA.
     /// @param decayPerSecond controls how fast the built momentum drops over time.
     /// The bigger, the faster the momentum drops.
-    /// @param maxDepreciation controls how much the reactive TA can drop from the averageTA value.
+    /// @param maxDepreciationPerYear controls how much the reactive TA can drop from the averageTA value. Quantified per year.
+    /// @param maxDepreciation controls how much the reactive TA can drop from the averageTA value. Quantified per week.
     /// @param averageTA is the average time appreciation of the category.
     /// @param totalCollateralized is the total amount of collateralized tokens for this category.
     /// @param lastCollateralizationTimestamp the timestamp of the last collateralization.
@@ -34,6 +35,7 @@ library DomainDataTypes {
     struct Category {
         uint volumeCoefficient;
         uint40 decayPerSecond;
+        uint16 maxDepreciationPerYear;
         uint24 maxDepreciation;
         uint24 averageTA;
         uint totalCollateralized;
