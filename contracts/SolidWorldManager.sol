@@ -578,7 +578,8 @@ contract SolidWorldManager is
     }
 
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
-        return interfaceId == 0xd9b67a26; // The ERC-165 identifier for ERC-1155
+        // ERC165 && ERC1155TokenReceiver support
+        return interfaceId == 0x01ffc9a7 || interfaceId == 0x4e2312e0;
     }
 
     function _setWeeklyRewardsMinter(address _weeklyRewardsMinter) internal {
