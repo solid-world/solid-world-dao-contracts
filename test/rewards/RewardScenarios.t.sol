@@ -64,7 +64,7 @@ contract RewardScenarios is Test {
             new CollateralizedBasketToken("Reforestation hypervisor", "RH")
         );
 
-        rewardsController.setup(solidStaking, rewardsVault, address(emissionManager));
+        rewardsController.setup(address(solidStaking), rewardsVault, address(emissionManager));
         solidStaking.setup(rewardsController, address(this));
         emissionManager.setup(
             address(solidWorldManager),
