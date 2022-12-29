@@ -15,6 +15,8 @@ contract EmissionManagerTest is Test {
         address indexed oldAdmin,
         address indexed newAdmin
     );
+    event RewardsControllerUpdated(address indexed newRewardsController);
+    event CarbonRewardsManagerUpdated(address indexed newCarbonRewardsManager);
 
     EmissionManager emissionManager;
     address carbonRewardsManager;
@@ -31,11 +33,12 @@ contract EmissionManagerTest is Test {
         rewardsVault = vm.addr(1);
 
         emissionManager = new EmissionManager();
-        emissionManager.setup(
-            IWeeklyCarbonRewardsManager(carbonRewardsManager),
-            IRewardsController(controller),
-            owner
-        );
+
+        vm.expectEmit(true, false, false, false, address(emissionManager));
+        emit CarbonRewardsManagerUpdated(carbonRewardsManager);
+        vm.expectEmit(true, false, false, false, address(emissionManager));
+        emit RewardsControllerUpdated(controller);
+        emissionManager.setup(carbonRewardsManager, controller, owner);
 
         vm.label(address(emissionManager), "emissionManager");
         vm.label(carbonRewardsManager, "carbonRewardsManager");
@@ -50,11 +53,7 @@ contract EmissionManagerTest is Test {
         assertEq(address(emissionManager.getRewardsController()), controller);
 
         vm.expectRevert(abi.encodeWithSelector(PostConstruct.AlreadyInitialized.selector));
-        emissionManager.setup(
-            IWeeklyCarbonRewardsManager(carbonRewardsManager),
-            IRewardsController(controller),
-            owner
-        );
+        emissionManager.setup(carbonRewardsManager, controller, owner);
     }
 
     function testConfigureAssets() public {
@@ -371,8 +370,30 @@ contract EmissionManagerTest is Test {
         address newController = vm.addr(115);
 
         vm.prank(owner);
+        vm.expectEmit(true, false, false, false, address(emissionManager));
+        emit RewardsControllerUpdated(newController);
         emissionManager.setRewardsController(newController);
 
         assertEq(address(emissionManager.getRewardsController()), newController);
+    }
+
+    function testCarbonRewardsManager_failsIfNotCalledByOwner() public {
+        address notOwner = vm.addr(119);
+        address newCarbonRewardsManager = vm.addr(115);
+
+        vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
+        vm.prank(notOwner);
+        emissionManager.setCarbonRewardsManager(newCarbonRewardsManager);
+    }
+
+    function testSetCarbonRewardsManager() public {
+        address newCarbonRewardsManager = vm.addr(115);
+
+        vm.prank(owner);
+        vm.expectEmit(true, false, false, false, address(emissionManager));
+        emit CarbonRewardsManagerUpdated(newCarbonRewardsManager);
+        emissionManager.setCarbonRewardsManager(newCarbonRewardsManager);
+
+        assertEq(address(emissionManager.getCarbonRewardsManager()), newCarbonRewardsManager);
     }
 }
