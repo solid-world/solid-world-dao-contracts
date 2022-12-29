@@ -27,12 +27,12 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     }
 
     function setup(
-        IWeeklyCarbonRewardsManager carbonRewardsManager,
-        IRewardsController controller,
+        address carbonRewardsManager,
+        address controller,
         address owner
     ) external postConstruct {
-        _carbonRewardsManager = carbonRewardsManager;
-        _rewardsController = controller;
+        _setCarbonRewardsManager(carbonRewardsManager);
+        _setRewardsController(controller);
         transferOwnership(owner);
     }
 
@@ -133,12 +133,12 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
 
     /// @inheritdoc IEmissionManager
     function setRewardsController(address controller) external override onlyOwner {
-        _rewardsController = IRewardsController(controller);
+        _setRewardsController(controller);
     }
 
     /// @inheritdoc IEmissionManager
     function setCarbonRewardsManager(address carbonRewardsManager) external override onlyOwner {
-        _carbonRewardsManager = IWeeklyCarbonRewardsManager(carbonRewardsManager);
+        _setCarbonRewardsManager(carbonRewardsManager);
     }
 
     /// @inheritdoc IEmissionManager
@@ -154,5 +154,17 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     /// @inheritdoc IEmissionManager
     function getCarbonRewardsManager() external view override returns (address) {
         return address(_carbonRewardsManager);
+    }
+
+    function _setCarbonRewardsManager(address carbonRewardsManager) internal {
+        _carbonRewardsManager = IWeeklyCarbonRewardsManager(carbonRewardsManager);
+
+        emit CarbonRewardsManagerUpdated(carbonRewardsManager);
+    }
+
+    function _setRewardsController(address controller) internal {
+        _rewardsController = IRewardsController(controller);
+
+        emit RewardsControllerUpdated(controller);
     }
 }

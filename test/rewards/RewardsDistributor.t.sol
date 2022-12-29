@@ -56,11 +56,7 @@ contract RewardsDistributorTest is Test {
         reward1 = address(new CollateralizedBasketToken("", ""));
 
         RewardsController rewardsController = new RewardsController();
-        rewardsController.setup(
-            ISolidStakingViewActions(solidStakingViewActions),
-            rewardsVault,
-            emissionManager
-        );
+        rewardsController.setup(solidStakingViewActions, rewardsVault, emissionManager);
 
         RewardsDataTypes.DistributionConfig[]
             memory config = new RewardsDataTypes.DistributionConfig[](3);

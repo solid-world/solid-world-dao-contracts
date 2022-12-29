@@ -27,12 +27,12 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     }
 
     function setup(
-        ISolidStakingViewActions _solidStakingViewActions,
+        address _solidStakingViewActions,
         address rewardsVault,
         address emissionManager
     ) external postConstruct {
-        solidStakingViewActions = _solidStakingViewActions;
-        REWARDS_VAULT = rewardsVault;
+        _setSolidStaking(_solidStakingViewActions);
+        _setRewardsVault(rewardsVault);
         _setEmissionManager(emissionManager);
     }
 
@@ -80,13 +80,11 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
 
     /// @inheritdoc IRewardsController
     function setRewardsVault(address rewardsVault) external override onlyEmissionManager {
-        REWARDS_VAULT = rewardsVault;
-        emit RewardsVaultUpdated(rewardsVault);
+        _setRewardsVault(rewardsVault);
     }
 
     function setSolidStaking(address solidStaking) external override onlyEmissionManager {
-        solidStakingViewActions = ISolidStakingViewActions(solidStaking);
-        emit SolidStakingUpdated(solidStaking);
+        _setSolidStaking(solidStaking);
     }
 
     /// @inheritdoc IRewardsController
@@ -236,5 +234,15 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
 
         _rewardOracle[reward] = rewardOracle;
         emit RewardOracleUpdated(reward, address(rewardOracle));
+    }
+
+    function _setRewardsVault(address rewardsVault) internal {
+        REWARDS_VAULT = rewardsVault;
+        emit RewardsVaultUpdated(rewardsVault);
+    }
+
+    function _setSolidStaking(address solidStaking) internal {
+        solidStakingViewActions = ISolidStakingViewActions(solidStaking);
+        emit SolidStakingUpdated(solidStaking);
     }
 }

@@ -34,8 +34,12 @@ contract RewardsControllerTest is Test {
         emissionManager = vm.addr(3);
 
         rewardsController = new RewardsController();
+        vm.expectEmit(true, false, false, false, address(rewardsController));
+        emit SolidStakingUpdated(solidStakingViewActions);
+        vm.expectEmit(true, false, false, false, address(rewardsController));
+        emit RewardsVaultUpdated(rewardsVault);
         RewardsController(address(rewardsController)).setup(
-            ISolidStakingViewActions(solidStakingViewActions),
+            solidStakingViewActions,
             rewardsVault,
             emissionManager
         );

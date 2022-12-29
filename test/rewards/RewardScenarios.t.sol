@@ -64,9 +64,13 @@ contract RewardScenarios is Test {
             new CollateralizedBasketToken("Reforestation hypervisor", "RH")
         );
 
-        rewardsController.setup(solidStaking, rewardsVault, address(emissionManager));
+        rewardsController.setup(address(solidStaking), rewardsVault, address(emissionManager));
         solidStaking.setup(rewardsController, address(this));
-        emissionManager.setup(solidWorldManager, rewardsController, address(this));
+        emissionManager.setup(
+            address(solidWorldManager),
+            address(rewardsController),
+            address(this)
+        );
 
         ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
         forwardContractBatch.transferOwnership(address(solidWorldManager));

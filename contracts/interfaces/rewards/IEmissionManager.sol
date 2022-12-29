@@ -10,15 +10,13 @@ import "./IRewardsController.sol";
 interface IEmissionManager {
     error NotEmissionAdmin(address sender, address reward);
 
-    /// @dev Emitted when the admin of a reward emission is updated.
-    /// @param reward The address of the rewarding token
-    /// @param oldAdmin The address of the old emission admin
-    /// @param newAdmin The address of the new emission admin
     event EmissionAdminUpdated(
         address indexed reward,
         address indexed oldAdmin,
         address indexed newAdmin
     );
+    event RewardsControllerUpdated(address indexed newRewardsController);
+    event CarbonRewardsManagerUpdated(address indexed newCarbonRewardsManager);
 
     /// @dev Configure assets to incentivize with an emission of rewards per second until the end of distribution.
     /// @dev Only callable by the emission admin of the given rewards
