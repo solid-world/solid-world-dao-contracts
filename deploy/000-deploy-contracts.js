@@ -36,6 +36,7 @@ const func = async ({ getNamedAccounts, deployments, getChainId }) => {
   const SolidWorldManager = await deploySolidWorldManager(
     deployments,
     deployer,
+    contractsOwner,
     ForwardContractBatchToken.address,
     EmissionManager.address
   )

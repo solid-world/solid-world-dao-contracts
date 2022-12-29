@@ -6,6 +6,7 @@ const INITIAL_REWARDS_FEE = BigNumber.from(200) // 2.0%
 async function deploySolidWorldManager(
   deployments,
   deployer,
+  contractsOwner,
   ForwardContractBatchToken,
   EmissionManager
 ) {
@@ -23,18 +24,21 @@ async function deploySolidWorldManager(
     args: [],
     log: true,
     proxy: {
+      owner: contractsOwner,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
-        methodName: 'initialize',
-        args: [
-          CollateralizedBasketTokenDeployer.address,
-          ForwardContractBatchToken,
-          INITIAL_COLLATERALIZATION_FEE,
-          INITIAL_DECOLLATERALIZATION_FEE,
-          INITIAL_REWARDS_FEE,
-          deployer,
-          EmissionManager
-        ]
+        init: {
+          methodName: 'initialize',
+          args: [
+            CollateralizedBasketTokenDeployer.address,
+            ForwardContractBatchToken,
+            INITIAL_COLLATERALIZATION_FEE,
+            INITIAL_DECOLLATERALIZATION_FEE,
+            INITIAL_REWARDS_FEE,
+            deployer,
+            EmissionManager
+          ]
+        }
       }
     }
   })
