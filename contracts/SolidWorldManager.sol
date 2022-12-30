@@ -14,6 +14,7 @@ import "./interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 import "./interfaces/manager/ISolidWorldManagerErrors.sol";
 import "./libraries/DomainDataTypes.sol";
 import "./CollateralizedBasketTokenDeployer.sol";
+import "./SolidWorldManagerStorage.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -21,74 +22,11 @@ contract SolidWorldManager is
     IERC1155ReceiverUpgradeable,
     ReentrancyGuardUpgradeable,
     IWeeklyCarbonRewardsManager,
-    ISolidWorldManagerErrors
+    ISolidWorldManagerErrors,
+    SolidWorldManagerStorage
 {
     /// @notice Constant used as input for decollateralization simulation for ordering batches with the same category and vintage
     uint public constant DECOLLATERALIZATION_SIMULATION_INPUT = 1000e18;
-
-    /// @notice Mapping is used for checking if Category ID is already added
-    /// @dev CategoryId => isAdded
-    mapping(uint => bool) public categoryIds;
-
-    /// @notice Stores the state of categories
-    /// @dev CategoryId => DomainDataTypes.Category
-    mapping(uint => DomainDataTypes.Category) public categories;
-
-    /// @notice Property is used for checking if Project ID is already added
-    /// @dev ProjectId => isAdded
-    mapping(uint => bool) public projectIds;
-
-    /// @notice Property is used for checking if Batch ID is already added
-    /// @dev BatchId => isAdded
-    mapping(uint => bool) public batchCreated;
-
-    /// @notice Stores all batch ids ever created
-    uint[] public batchIds;
-
-    /// @notice Property stores info about a batch
-    /// @dev BatchId => DomainDataTypes.Batch
-    mapping(uint => DomainDataTypes.Batch) public batches;
-
-    /// @notice Mapping determines a respective CollateralizedBasketToken (ERC-20) of a category
-    /// @dev CategoryId => CollateralizedBasketToken address (ERC-20)
-    mapping(uint => CollateralizedBasketToken) public categoryToken;
-
-    /// @notice Mapping determines what projects a category has
-    /// @dev CategoryId => ProjectId[]
-    mapping(uint => uint[]) public categoryProjects;
-
-    /// @notice Mapping determines what category a project belongs to
-    /// @dev ProjectId => CategoryId
-    mapping(uint => uint) public projectCategory;
-
-    /// @notice Mapping determines what category a batch belongs to
-    /// @dev BatchId => CategoryId
-    mapping(uint => uint) public batchCategory;
-
-    /// @notice Mapping determines what batches a project has
-    /// @dev ProjectId => BatchId[]
-    mapping(uint => uint[]) public projectBatches;
-
-    /// @notice Contract that operates forward contract batch tokens (ERC-1155). Allows this contract to mint tokens.
-    ForwardContractBatchToken public forwardContractBatch;
-
-    /// @notice The account where all protocol fees are captured.
-    address public feeReceiver;
-
-    /// @notice The only account that is allowed to mint weekly carbon rewards
-    address public weeklyRewardsMinter;
-
-    /// @notice Contract that deploys new collateralized basket tokens. Allows this contract to mint tokens.
-    CollateralizedBasketTokenDeployer public collateralizedBasketTokenDeployer;
-
-    /// @notice Fee charged by DAO when collateralizing forward contract batch tokens.
-    uint16 public collateralizationFee;
-
-    /// @notice Fee charged by DAO when decollateralizing collateralized basket tokens.
-    uint16 public decollateralizationFee;
-
-    /// @notice Fee charged by DAO on the weekly carbon rewards.
-    uint16 public rewardsFee;
 
     event BatchCollateralized(
         uint indexed batchId,
@@ -135,8 +73,8 @@ contract SolidWorldManager is
     }
 
     function initialize(
-        CollateralizedBasketTokenDeployer _collateralizedBasketTokenDeployer,
-        ForwardContractBatchToken _forwardContractBatch,
+        CollateralizedBasketTokenDeployer collateralizedBasketTokenDeployer,
+        ForwardContractBatchToken forwardContractBatch,
         uint16 _collateralizationFee,
         uint16 _decollateralizationFee,
         uint16 _rewardsFee,
@@ -146,8 +84,8 @@ contract SolidWorldManager is
         __Ownable_init();
         __ReentrancyGuard_init();
 
-        collateralizedBasketTokenDeployer = _collateralizedBasketTokenDeployer;
-        forwardContractBatch = _forwardContractBatch;
+        _collateralizedBasketTokenDeployer = collateralizedBasketTokenDeployer;
+        _forwardContractBatch = forwardContractBatch;
 
         _setCollateralizationFee(_collateralizationFee);
         _setDecollateralizationFee(_decollateralizationFee);
@@ -163,12 +101,12 @@ contract SolidWorldManager is
         string calldata tokenSymbol,
         uint24 initialTA
     ) external {
-        if (categoryIds[categoryId]) {
+        if (categoryCreated[categoryId]) {
             revert CategoryAlreadyExists(categoryId);
         }
 
-        categoryIds[categoryId] = true;
-        categoryToken[categoryId] = collateralizedBasketTokenDeployer.deploy(
+        categoryCreated[categoryId] = true;
+        categoryToken[categoryId] = _collateralizedBasketTokenDeployer.deploy(
             tokenName,
             tokenSymbol
         );
@@ -186,7 +124,7 @@ contract SolidWorldManager is
         uint16 maxDepreciationPerYear,
         uint24 maxDepreciation
     ) external {
-        if (!categoryIds[categoryId]) {
+        if (!categoryCreated[categoryId]) {
             revert InvalidCategoryId(categoryId);
         }
 
@@ -211,24 +149,24 @@ contract SolidWorldManager is
 
     // todo #121: add authorization
     function addProject(uint categoryId, uint projectId) external {
-        if (!categoryIds[categoryId]) {
+        if (!categoryCreated[categoryId]) {
             revert InvalidCategoryId(categoryId);
         }
 
-        if (projectIds[projectId]) {
+        if (projectCreated[projectId]) {
             revert ProjectAlreadyExists(projectId);
         }
 
         categoryProjects[categoryId].push(projectId);
         projectCategory[projectId] = categoryId;
-        projectIds[projectId] = true;
+        projectCreated[projectId] = true;
 
         emit ProjectCreated(projectId);
     }
 
     // todo #121: add authorization
     function addBatch(DomainDataTypes.Batch calldata batch, uint mintableAmount) external {
-        if (!projectIds[batch.projectId]) {
+        if (!projectCreated[batch.projectId]) {
             revert InvalidProjectId(batch.projectId);
         }
 
@@ -249,7 +187,7 @@ contract SolidWorldManager is
         batchIds.push(batch.id);
         projectBatches[batch.projectId].push(batch.id);
         batchCategory[batch.id] = projectCategory[batch.projectId];
-        forwardContractBatch.mint(batch.supplier, batch.id, mintableAmount, "");
+        _forwardContractBatch.mint(batch.supplier, batch.id, mintableAmount, "");
 
         emit BatchCreated(batch.id);
     }
@@ -281,7 +219,7 @@ contract SolidWorldManager is
 
         for (uint i; i < assets.length; i++) {
             uint categoryId = _categoryIds[i];
-            if (!categoryIds[categoryId]) {
+            if (!categoryCreated[categoryId]) {
                 revert InvalidCategoryId(categoryId);
             }
 
@@ -376,7 +314,7 @@ contract SolidWorldManager is
         collateralizedToken.mint(msg.sender, cbtUserCut);
         collateralizedToken.mint(feeReceiver, cbtDaoCut);
 
-        forwardContractBatch.safeTransferFrom(msg.sender, address(this), batchId, amountIn, "");
+        _forwardContractBatch.safeTransferFrom(msg.sender, address(this), batchId, amountIn, "");
 
         emit BatchCollateralized(batchId, amountIn, cbtUserCut, msg.sender);
     }
@@ -505,7 +443,7 @@ contract SolidWorldManager is
                 continue;
             }
 
-            uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
+            uint availableCredits = _forwardContractBatch.balanceOf(address(this), batchId);
 
             (uint amountOut, uint minAmountIn, uint minCbtDaoCut) = _simulateDecollateralization(
                 batchId,
@@ -655,7 +593,7 @@ contract SolidWorldManager is
             uint[] storage _batches = projectBatches[projects[i]];
             for (uint j; j < _batches.length; j++) {
                 uint batchId = _batches[j];
-                uint availableCredits = forwardContractBatch.balanceOf(address(this), batchId);
+                uint availableCredits = _forwardContractBatch.balanceOf(address(this), batchId);
                 if (availableCredits == 0 || _isBatchCertified(batchId)) {
                     continue;
                 }
@@ -681,7 +619,10 @@ contract SolidWorldManager is
         uint cbtDecimals
     ) internal {
         DomainDataTypes.Batch storage batch = batches[batchId];
-        uint collateralizedForwardCredits = forwardContractBatch.balanceOf(address(this), batch.id);
+        uint collateralizedForwardCredits = _forwardContractBatch.balanceOf(
+            address(this),
+            batch.id
+        );
         if (collateralizedForwardCredits == 0) {
             batch.batchTA = uint24(reactiveTA);
             return;
@@ -715,7 +656,7 @@ contract SolidWorldManager is
             uint[] storage _batches = projectBatches[projectId];
             for (uint j; j < _batches.length; j++) {
                 uint batchId = _batches[j];
-                uint collateralizedForwardCredits = forwardContractBatch.balanceOf(
+                uint collateralizedForwardCredits = _forwardContractBatch.balanceOf(
                     address(this),
                     batchId
                 );
@@ -798,7 +739,7 @@ contract SolidWorldManager is
         collateralizedToken.burnFrom(msg.sender, cbtToBurn);
         GPv2SafeERC20.safeTransferFrom(collateralizedToken, msg.sender, feeReceiver, cbtDaoCut);
 
-        forwardContractBatch.safeTransferFrom(address(this), msg.sender, batchId, amountOut, "");
+        _forwardContractBatch.safeTransferFrom(address(this), msg.sender, batchId, amountOut, "");
 
         emit TokensDecollateralized(batchId, amountIn, amountOut, msg.sender);
     }

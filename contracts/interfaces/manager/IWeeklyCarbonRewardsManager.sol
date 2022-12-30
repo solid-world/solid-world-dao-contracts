@@ -15,12 +15,8 @@ interface IWeeklyCarbonRewardsManager {
     /// @param _weeklyRewardsMinter The only account allowed to mint weekly carbon rewards
     function setWeeklyRewardsMinter(address _weeklyRewardsMinter) external;
 
-    function weeklyRewardsMinter() external view returns (address);
-
     /// @param _rewardsFee The new rewards fee charged on weekly rewards
     function setRewardsFee(uint16 _rewardsFee) external;
-
-    function rewardsFee() external view returns (uint16);
 
     /// @param assets The incentivized assets (LP tokens)
     /// @param _categoryIds The categories to which the incentivized assets belong

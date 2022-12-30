@@ -91,14 +91,14 @@ contract RewardScenarios is Test {
             "MCBT",
             1647
         );
-        mangroveRewardToken = address(solidWorldManager.categoryToken(CATEGORY_ID));
+        mangroveRewardToken = address(solidWorldManager.getCategoryToken(CATEGORY_ID));
         solidWorldManager.addCategory(
             CATEGORY_ID + 1,
             "Reforestation Collateralized Basket Token",
             "RCBT",
             1647
         );
-        reforestationRewardToken = address(solidWorldManager.categoryToken(CATEGORY_ID + 1));
+        reforestationRewardToken = address(solidWorldManager.getCategoryToken(CATEGORY_ID + 1));
 
         emissionManager.setEmissionAdmin(mangroveRewardToken, address(this));
         emissionManager.setEmissionAdmin(reforestationRewardToken, address(this));

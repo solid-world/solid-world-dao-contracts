@@ -50,7 +50,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
 
         rewardsController.setup(address(staking), rewardsVault, address(emissionManager));
         staking.setup(rewardsController, address(this));
-        emissionManager.setup(manager, rewardsController, address(this));
+        emissionManager.setup(address(manager), address(rewardsController), address(this));
 
         vm.mockCall(
             rewardOracle,
@@ -190,14 +190,14 @@ contract CarbonRewardDistributionGasTest is GasTest {
             categoryIds[i] = CATEGORY_ID + i;
 
             emissionManager.setEmissionAdmin(
-                address(manager.categoryToken(CATEGORY_ID + i)),
+                address(manager.getCategoryToken(CATEGORY_ID + i)),
                 address(this)
             );
 
             staking.addToken(assets[i]);
 
             config[i].asset = assets[i];
-            config[i].reward = address(manager.categoryToken(CATEGORY_ID + i));
+            config[i].reward = address(manager.getCategoryToken(CATEGORY_ID + i));
             config[i].rewardOracle = IEACAggregatorProxy(rewardOracle);
             config[i].distributionEnd = CURRENT_DATE;
         }

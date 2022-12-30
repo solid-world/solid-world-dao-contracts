@@ -32,20 +32,20 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
     event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
 
     function testAddCategory() public {
-        assertEq(address(manager.categoryToken(CATEGORY_ID)), address(0));
-        assertEq(manager.categoryIds(CATEGORY_ID), false);
-        (, , , , uint24 averageTAStart, , , ) = manager.categories(CATEGORY_ID);
-        assertEq(averageTAStart, 0);
+        assertEq(address(manager.getCategoryToken(CATEGORY_ID)), address(0));
+        assertEq(manager.isCategoryCreated(CATEGORY_ID), false);
+        DomainDataTypes.Category memory categoryStart = manager.getCategory(CATEGORY_ID);
+        assertEq(categoryStart.averageTA, 0);
 
         vm.expectEmit(true, false, false, false, address(manager));
         emit CategoryCreated(CATEGORY_ID);
         manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
 
-        assertNotEq(address(manager.categoryToken(CATEGORY_ID)), address(0));
-        assertEq(manager.categoryIds(CATEGORY_ID), true);
+        assertNotEq(address(manager.getCategoryToken(CATEGORY_ID)), address(0));
+        assertEq(manager.isCategoryCreated(CATEGORY_ID), true);
 
-        (, , , , uint24 averageTA, , , ) = manager.categories(CATEGORY_ID);
-        assertEq(averageTA, INITIAL_CATEGORY_TA);
+        DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
+        assertEq(category.averageTA, INITIAL_CATEGORY_TA);
     }
 
     function testUpdateCategory_failsForInvalidCategoryId() public {
@@ -86,23 +86,14 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
             maxDepreciationInput0
         );
 
-        (
-            uint volumeCoefficient0,
-            uint40 decayPerSecond0,
-            uint16 maxDepreciationPerYear0,
-            uint24 maxDepreciation0,
-            ,
-            ,
-            uint32 lastCollateralizationTimestamp0,
-            uint lastCollateralizationMomentum0
-        ) = manager.categories(CATEGORY_ID);
+        DomainDataTypes.Category memory category0 = manager.getCategory(CATEGORY_ID);
 
-        assertEq(volumeCoefficient0, volumeCoefficientInput0);
-        assertEq(decayPerSecond0, decayPerSecondInput0);
-        assertEq(maxDepreciationPerYear0, maxDepreciationPerYearInput0);
-        assertEq(maxDepreciation0, maxDepreciationInput0);
-        assertEq(lastCollateralizationTimestamp0, CURRENT_DATE + 2 days);
-        assertEq(lastCollateralizationMomentum0, 50000);
+        assertEq(category0.volumeCoefficient, volumeCoefficientInput0);
+        assertEq(category0.decayPerSecond, decayPerSecondInput0);
+        assertEq(category0.maxDepreciationPerYear, maxDepreciationPerYearInput0);
+        assertEq(category0.maxDepreciation, maxDepreciationInput0);
+        assertEq(category0.lastCollateralizationTimestamp, CURRENT_DATE + 2 days);
+        assertEq(category0.lastCollateralizationMomentum, 50000);
 
         uint volumeCoefficientInput1 = 75000;
         uint40 decayPerSecondInput1 = getTestDecayPerSecond();
@@ -125,30 +116,21 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
             maxDepreciationInput1
         );
 
-        (
-            uint volumeCoefficient1,
-            uint40 decayPerSecond1,
-            uint16 maxDepreciationPerYear1,
-            uint24 maxDepreciation1,
-            ,
-            ,
-            uint32 lastCollateralizationTimestamp1,
-            uint lastCollateralizationMomentum1
-        ) = manager.categories(CATEGORY_ID);
+        DomainDataTypes.Category memory category1 = manager.getCategory(CATEGORY_ID);
 
-        assertEq(volumeCoefficient1, volumeCoefficientInput1);
-        assertEq(decayPerSecond1, decayPerSecondInput1);
-        assertEq(maxDepreciationPerYear1, maxDepreciationPerYearInput1);
-        assertEq(maxDepreciation1, maxDepreciationInput1);
-        assertEq(lastCollateralizationTimestamp1, CURRENT_DATE + 4 days);
-        assertEq(lastCollateralizationMomentum1, 142500); // 90% * 50000 * 75000 / 50000 + 75000 = 142500
+        assertEq(category1.volumeCoefficient, volumeCoefficientInput1);
+        assertEq(category1.decayPerSecond, decayPerSecondInput1);
+        assertEq(category1.maxDepreciationPerYear, maxDepreciationPerYearInput1);
+        assertEq(category1.maxDepreciation, maxDepreciationInput1);
+        assertEq(category1.lastCollateralizationTimestamp, CURRENT_DATE + 4 days);
+        assertEq(category1.lastCollateralizationMomentum, 142500); // 90% * 50000 * 75000 / 50000 + 75000 = 142500
     }
 
     function testAddProject() public {
         uint projectId = 5;
         uint categoryId = 3;
 
-        assertEq(manager.projectIds(projectId), false);
+        assertEq(manager.isProjectCreated(projectId), false);
 
         manager.addCategory(categoryId, "Test token", "TT", INITIAL_CATEGORY_TA);
 
@@ -156,7 +138,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         emit ProjectCreated(projectId);
         manager.addProject(categoryId, projectId);
 
-        assertEq(manager.projectIds(projectId), true);
+        assertEq(manager.isProjectCreated(projectId), true);
     }
 
     function testAddMultipleProjects() public {
@@ -187,7 +169,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
 
-        assertEq(manager.batchCreated(batchId), false);
+        assertEq(manager.isBatchCreated(batchId), false);
 
         vm.expectEmit(true, false, false, false, address(manager));
         emit BatchCreated(batchId);
@@ -204,26 +186,18 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
             10
         );
 
-        assertEq(manager.batchCreated(batchId), true);
+        assertEq(manager.isBatchCreated(batchId), true);
 
-        (
-            uint id,
-            uint projectId,
-            address supplier,
-            uint32 certificationDate,
-            uint16 vintage,
-            uint8 status,
-            uint24 reactiveTA
-        ) = manager.batches(batchId);
+        DomainDataTypes.Batch memory batch = manager.getBatch(batchId);
 
-        assertEq(id, batchId);
-        assertEq(status, 0);
-        assertEq(projectId, 5);
-        assertEq(certificationDate, uint32(CURRENT_DATE + 12));
-        assertEq(vintage, 2022);
-        assertEq(reactiveTA, 1);
-        assertEq(supplier, testAccount);
-        assertEq(manager.batchIds(0), batchId);
+        assertEq(batch.id, batchId);
+        assertEq(batch.status, 0);
+        assertEq(batch.projectId, 5);
+        assertEq(batch.certificationDate, uint32(CURRENT_DATE + 12));
+        assertEq(batch.vintage, 2022);
+        assertEq(batch.batchTA, 1);
+        assertEq(batch.supplier, testAccount);
+        assertEq(manager.getBatchId(0), batchId);
     }
 
     function testAddMultipleBatches() public {
@@ -430,8 +404,8 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 0);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
+        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut);
+        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
     }
 
     function testCollateralizeBatch_updatesBatchTAAndRebalancesCategory() public {
@@ -460,12 +434,12 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.collateralizeBatch(BATCH_ID, 100, 0);
         vm.stopPrank();
 
-        (, , , , , , uint24 batchTA) = manager.batches(BATCH_ID);
-        assertEq(batchTA, TIME_APPRECIATION);
+        DomainDataTypes.Batch memory batch = manager.getBatch(BATCH_ID);
+        assertEq(batch.batchTA, TIME_APPRECIATION);
 
-        (, , , , uint24 averageTA, uint totalCollateralized, , ) = manager.categories(CATEGORY_ID);
-        assertEq(averageTA, TIME_APPRECIATION);
-        assertEq(totalCollateralized, 100);
+        DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
+        assertEq(category.averageTA, TIME_APPRECIATION);
+        assertEq(category.totalCollateralized, 100);
     }
 
     function testCollateralizeBatchWorksWhenCollateralizationFeeIs0() public {
@@ -502,8 +476,8 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 0);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
+        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut);
+        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
     }
 
     function testDecollateralizeTokensWhenInvalidBatchId() public {
@@ -552,7 +526,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
-        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+        CollateralizedBasketToken collateralizedToken = manager.getCategoryToken(CATEGORY_ID);
 
         vm.startPrank(testAccount);
         collateralizedToken.approve(address(manager), 10000);
@@ -584,7 +558,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
-        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+        CollateralizedBasketToken collateralizedToken = manager.getCategoryToken(CATEGORY_ID);
 
         vm.startPrank(testAccount);
         collateralizedToken.approve(address(manager), 10000);
@@ -621,7 +595,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
-        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+        CollateralizedBasketToken collateralizedToken = manager.getCategoryToken(CATEGORY_ID);
 
         vm.startPrank(testAccount);
         collateralizedToken.approve(address(manager), cbtUserCut);
@@ -650,8 +624,8 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
             forwardContractBatch.balanceOf(address(manager), BATCH_ID),
             10000 - expectedAmountDecollateralized
         );
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), 0);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut + 810e18);
+        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), 0);
+        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut + 810e18);
     }
 
     function testDecollateralizeTokensBurnsERC20AndReceivesERC1155() public {
@@ -674,7 +648,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
-        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+        CollateralizedBasketToken collateralizedToken = manager.getCategoryToken(CATEGORY_ID);
 
         vm.startPrank(testAccount);
         collateralizedToken.approve(address(manager), cbtUserCut);
@@ -689,8 +663,8 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 8100);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 10000 - 8100);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(testAccount), 0);
-        assertEq(manager.categoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut + 810e18);
+        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), 0);
+        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut + 810e18);
     }
 
     function testDecollateralizeTokens_triggersCategoryRebalance() public {
@@ -712,7 +686,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
-        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+        CollateralizedBasketToken collateralizedToken = manager.getCategoryToken(CATEGORY_ID);
 
         vm.startPrank(testAccount);
         collateralizedToken.approve(address(manager), cbtUserCut);
@@ -726,9 +700,9 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 8100);
         vm.stopPrank();
 
-        (, , , , uint24 averageTA, uint totalCollateralized, , ) = manager.categories(CATEGORY_ID);
-        assertEq(averageTA, TIME_APPRECIATION);
-        assertEq(totalCollateralized, 10000 - 8100);
+        DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
+        assertEq(category.averageTA, TIME_APPRECIATION);
+        assertEq(category.totalCollateralized, 10000 - 8100);
     }
 
     function testSimulateBatchCollateralizationWhenBatchIdIsInvalid() public {
@@ -839,7 +813,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
-        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+        CollateralizedBasketToken collateralizedToken = manager.getCategoryToken(CATEGORY_ID);
 
         vm.startPrank(testAccount);
         collateralizedToken.approve(address(manager), 8000e18);
@@ -898,7 +872,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
-        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+        CollateralizedBasketToken collateralizedToken = manager.getCategoryToken(CATEGORY_ID);
 
         vm.startPrank(testAccount);
         collateralizedToken.approve(address(manager), 8000e18);
@@ -926,7 +900,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID + 1), 10000 - 4000);
 
         assertEq(
-            manager.categoryToken(CATEGORY_ID).balanceOf(testAccount),
+            manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount),
             8100e18 + 8100e18 - 4000e18 - 4000e18
         );
     }
@@ -961,7 +935,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         );
 
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
-        CollateralizedBasketToken collateralizedToken = manager.categoryToken(CATEGORY_ID);
+        CollateralizedBasketToken collateralizedToken = manager.getCategoryToken(CATEGORY_ID);
 
         vm.startPrank(testAccount);
         collateralizedToken.approve(address(manager), 8000e18);
@@ -987,9 +961,9 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
         vm.stopPrank();
 
-        (, , , , uint24 averageTA, uint totalCollateralized, , ) = manager.categories(CATEGORY_ID);
-        assertEq(averageTA, newAverageTA);
-        assertEq(totalCollateralized, newTotalCollateralized);
+        DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
+        assertEq(category.averageTA, newAverageTA);
+        assertEq(category.totalCollateralized, newTotalCollateralized);
     }
 
     function testGetBatchesDecollateralizationInfo() public {
@@ -1197,7 +1171,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         vm.expectEmit(true, false, false, false, address(manager));
         emit CollateralizationFeeUpdated(newCollateralizationFee);
         manager.setCollateralizationFee(newCollateralizationFee);
-        assertEq(manager.collateralizationFee(), newCollateralizationFee);
+        assertEq(manager.getCollateralizationFee(), newCollateralizationFee);
     }
 
     function testSetDecollateralizationFee() public {
@@ -1206,7 +1180,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         vm.expectEmit(true, false, false, false, address(manager));
         emit DecollateralizationFeeUpdated(newDecollateralizationFee);
         manager.setDecollateralizationFee(newDecollateralizationFee);
-        assertEq(manager.decollateralizationFee(), newDecollateralizationFee);
+        assertEq(manager.getDecollateralizationFee(), newDecollateralizationFee);
     }
 
     function testSetFeeReceiver() public {
@@ -1215,7 +1189,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         vm.expectEmit(true, false, false, false, address(manager));
         emit FeeReceiverUpdated(newFeeReceiver);
         manager.setFeeReceiver(newFeeReceiver);
-        assertEq(manager.feeReceiver(), newFeeReceiver);
+        assertEq(manager.getFeeReceiver(), newFeeReceiver);
     }
 
     function assertNotEq(address a, address b) private {
