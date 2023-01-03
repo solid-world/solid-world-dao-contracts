@@ -246,6 +246,11 @@ contract EmissionManagerTest is Test {
         emissionManager.setEmissionPerSecond(asset, rewards, emissionsPerSecond);
     }
 
+    function testUpdateCarbonRewardDistribution_failsInputsOfDifferentLengths() public {
+        vm.expectRevert(abi.encodeWithSelector(IEmissionManager.InvalidInput.selector));
+        emissionManager.updateCarbonRewardDistribution(new address[](2), new uint[](1));
+    }
+
     function testUpdateCarbonRewardDistribution() public {
         address[] memory assets = new address[](1);
         assets[0] = vm.addr(2);
