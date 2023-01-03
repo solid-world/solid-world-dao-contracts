@@ -19,6 +19,7 @@ library WeeklyCarbonRewards {
     error InvalidCategoryId(uint categoryId);
     error InvalidInput();
 
+    /// @param _storage Struct containing the current state used or modified by this function
     /// @param _weeklyRewardsMinter The only account allowed to mint weekly carbon rewards
     function setWeeklyRewardsMinter(
         SolidWorldManagerStorage.Storage storage _storage,
@@ -29,6 +30,7 @@ library WeeklyCarbonRewards {
         emit RewardsMinterUpdated(_weeklyRewardsMinter);
     }
 
+    /// @param _storage Struct containing the current state used or modified by this function
     /// @param _rewardsFee The new rewards fee charged on weekly rewards
     function setRewardsFee(SolidWorldManagerStorage.Storage storage _storage, uint16 _rewardsFee)
         external
@@ -38,6 +40,7 @@ library WeeklyCarbonRewards {
         emit RewardsFeeUpdated(_rewardsFee);
     }
 
+    /// @param _storage Struct containing the current state used or modified by this function
     /// @param _categoryIds The categories to which the incentivized assets belong
     /// @return carbonRewards List of carbon rewards getting distributed.
     /// @return rewardAmounts List of carbon reward amounts getting distributed
@@ -77,6 +80,7 @@ library WeeklyCarbonRewards {
         }
     }
 
+    /// @param _storage Struct containing the current state used or modified by this function
     /// @param _categoryIds The categories to which the incentivized assets belong
     /// @param carbonRewards List of carbon rewards to mint
     /// @param rewardAmounts List of carbon reward amounts to mint
@@ -156,6 +160,7 @@ library WeeklyCarbonRewards {
     }
 
     /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
+    /// @param _storage Struct containing the current state used or modified by this function
     /// @param categoryId The source category for the ERC20 rewards
     /// @return rewardAmount carbon reward amount to mint
     /// @return rewardFee fee amount charged by the DAO
