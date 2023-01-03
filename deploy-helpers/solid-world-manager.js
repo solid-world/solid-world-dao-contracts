@@ -10,6 +10,12 @@ async function deploySolidWorldManager(
   ForwardContractBatchToken,
   EmissionManager
 ) {
+  const WeeklyCarbonRewards = await deployments.deploy('WeeklyCarbonRewards', {
+    from: deployer,
+    args: [],
+    log: true
+  })
+
   const CollateralizedBasketTokenDeployer = await deployments.deploy(
     'CollateralizedBasketTokenDeployer',
     {
@@ -23,6 +29,9 @@ async function deploySolidWorldManager(
     from: deployer,
     args: [],
     log: true,
+    libraries: {
+      WeeklyCarbonRewards: WeeklyCarbonRewards.address
+    },
     proxy: {
       owner: contractsOwner,
       proxyContract: 'OpenZeppelinTransparentProxy',
