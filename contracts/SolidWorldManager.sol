@@ -16,6 +16,7 @@ import "./libraries/DomainDataTypes.sol";
 import "./libraries/manager/WeeklyCarbonRewards.sol";
 import "./CollateralizedBasketTokenDeployer.sol";
 import "./SolidWorldManagerStorage.sol";
+import "./interfaces/manager/ICarbonDomainRepository.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -23,6 +24,7 @@ contract SolidWorldManager is
     IERC1155ReceiverUpgradeable,
     ReentrancyGuardUpgradeable,
     IWeeklyCarbonRewardsManager,
+    ICarbonDomainRepository,
     ISolidWorldManagerErrors,
     SolidWorldManagerStorage
 {
@@ -98,6 +100,7 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
+    /// @inheritdoc ICarbonDomainRepository
     function addCategory(
         uint categoryId,
         string calldata tokenName,
@@ -120,6 +123,7 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
+    /// @inheritdoc ICarbonDomainRepository
     function updateCategory(
         uint categoryId,
         uint volumeCoefficient,
@@ -151,6 +155,7 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
+    /// @inheritdoc ICarbonDomainRepository
     function addProject(uint categoryId, uint projectId) external {
         if (!_storage.categoryCreated[categoryId]) {
             revert InvalidCategoryId(categoryId);
@@ -168,6 +173,7 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
+    /// @inheritdoc ICarbonDomainRepository
     function addBatch(DomainDataTypes.Batch calldata batch, uint mintableAmount) external {
         if (!_storage.projectCreated[batch.projectId]) {
             revert InvalidProjectId(batch.projectId);
