@@ -18,6 +18,8 @@ interface IEmissionManager {
     event RewardsControllerUpdated(address indexed newRewardsController);
     event CarbonRewardsManagerUpdated(address indexed newCarbonRewardsManager);
 
+    error InvalidInput();
+
     /// @dev Configure assets to incentivize with an emission of rewards per second until the end of distribution.
     /// @dev Only callable by the emission admin of the given rewards
     /// @param config The assets configuration input, the list of structs contains the following fields:

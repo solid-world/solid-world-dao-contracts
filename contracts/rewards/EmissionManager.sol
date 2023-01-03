@@ -87,11 +87,15 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
         override
         nonReentrant
     {
+        if (assets.length != categoryIds.length) {
+            revert InvalidInput();
+        }
+
         (
             address[] memory carbonRewards,
             uint[] memory rewardAmounts,
             uint[] memory rewardFees
-        ) = _carbonRewardsManager.computeWeeklyCarbonRewards(assets, categoryIds);
+        ) = _carbonRewardsManager.computeWeeklyCarbonRewards(categoryIds);
 
         _rewardsController.updateCarbonRewardDistribution(assets, carbonRewards, rewardAmounts);
 

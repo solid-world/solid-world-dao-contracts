@@ -1,0 +1,209 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.16;
+
+import "../../SolidWorldManagerStorage.sol";
+import "../SolidMath.sol";
+
+library WeeklyCarbonRewards {
+    event WeeklyRewardMinted(address indexed rewardToken, uint indexed rewardAmount);
+    event RewardsFeeUpdated(uint indexed rewardsFee);
+    event RewardsMinterUpdated(address indexed rewardsMinter);
+    event CategoryRebalanced(
+        uint indexed categoryId,
+        uint indexed averageTA,
+        uint indexed totalCollateralized
+    );
+
+    /// @dev Thrown if minting weekly rewards is called by an unauthorized account
+    error UnauthorizedRewardMinting(address account);
+    error InvalidCategoryId(uint categoryId);
+    error InvalidInput();
+
+    /// @param _weeklyRewardsMinter The only account allowed to mint weekly carbon rewards
+    function setWeeklyRewardsMinter(
+        SolidWorldManagerStorage.Storage storage _storage,
+        address _weeklyRewardsMinter
+    ) external {
+        _storage.weeklyRewardsMinter = _weeklyRewardsMinter;
+
+        emit RewardsMinterUpdated(_weeklyRewardsMinter);
+    }
+
+    /// @param _rewardsFee The new rewards fee charged on weekly rewards
+    function setRewardsFee(SolidWorldManagerStorage.Storage storage _storage, uint16 _rewardsFee)
+        external
+    {
+        _storage.rewardsFee = _rewardsFee;
+
+        emit RewardsFeeUpdated(_rewardsFee);
+    }
+
+    /// @param _categoryIds The categories to which the incentivized assets belong
+    /// @return carbonRewards List of carbon rewards getting distributed.
+    /// @return rewardAmounts List of carbon reward amounts getting distributed
+    /// @return rewardFees List of fee amounts charged by the DAO on carbon rewards
+    function computeWeeklyCarbonRewards(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint[] calldata _categoryIds
+    )
+        external
+        view
+        returns (
+            address[] memory carbonRewards,
+            uint[] memory rewardAmounts,
+            uint[] memory rewardFees
+        )
+    {
+        carbonRewards = new address[](_categoryIds.length);
+        rewardAmounts = new uint[](_categoryIds.length);
+        rewardFees = new uint[](_categoryIds.length);
+
+        for (uint i; i < _categoryIds.length; i++) {
+            uint categoryId = _categoryIds[i];
+            if (!_storage.categoryCreated[categoryId]) {
+                revert InvalidCategoryId(categoryId);
+            }
+
+            CollateralizedBasketToken rewardToken = _storage.categoryToken[categoryId];
+            (uint rewardAmount, uint rewardFee) = _computeWeeklyCategoryReward(
+                _storage,
+                categoryId,
+                rewardToken.decimals()
+            );
+
+            carbonRewards[i] = address(rewardToken);
+            rewardAmounts[i] = rewardAmount;
+            rewardFees[i] = rewardFee;
+        }
+    }
+
+    /// @param _categoryIds The categories to which the incentivized assets belong
+    /// @param carbonRewards List of carbon rewards to mint
+    /// @param rewardAmounts List of carbon reward amounts to mint
+    /// @param rewardFees List of fee amounts charged by the DAO on carbon rewards
+    /// @param rewardsVault Account that secures ERC20 rewards
+    function mintWeeklyCarbonRewards(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint[] calldata _categoryIds,
+        address[] calldata carbonRewards,
+        uint[] calldata rewardAmounts,
+        uint[] calldata rewardFees,
+        address rewardsVault
+    ) external {
+        if (
+            _categoryIds.length != carbonRewards.length ||
+            carbonRewards.length != rewardAmounts.length ||
+            rewardAmounts.length != rewardFees.length
+        ) {
+            revert InvalidInput();
+        }
+
+        if (msg.sender != _storage.weeklyRewardsMinter) {
+            revert UnauthorizedRewardMinting(msg.sender);
+        }
+
+        for (uint i; i < carbonRewards.length; i++) {
+            address carbonReward = carbonRewards[i];
+            CollateralizedBasketToken rewardToken = CollateralizedBasketToken(carbonReward);
+            uint rewardAmount = rewardAmounts[i];
+            rewardToken.mint(rewardsVault, rewardAmount);
+            emit WeeklyRewardMinted(carbonReward, rewardAmount);
+
+            rewardToken.mint(_storage.feeReceiver, rewardFees[i]);
+
+            _rebalanceCategory(_storage, _categoryIds[i]);
+        }
+    }
+
+    function _rebalanceCategory(SolidWorldManagerStorage.Storage storage _storage, uint categoryId)
+        internal
+    {
+        uint totalQuantifiedForwardCredits;
+        uint totalCollateralizedForwardCredits;
+
+        uint[] storage projects = _storage.categoryProjects[categoryId];
+        for (uint i; i < projects.length; i++) {
+            uint projectId = projects[i];
+            uint[] storage _batches = _storage.projectBatches[projectId];
+            for (uint j; j < _batches.length; j++) {
+                uint batchId = _batches[j];
+                uint collateralizedForwardCredits = _storage._forwardContractBatch.balanceOf(
+                    address(this),
+                    batchId
+                );
+                if (collateralizedForwardCredits == 0 || _isBatchCertified(_storage, batchId)) {
+                    continue;
+                }
+
+                totalQuantifiedForwardCredits +=
+                    _storage.batches[batchId].batchTA *
+                    collateralizedForwardCredits;
+                totalCollateralizedForwardCredits += collateralizedForwardCredits;
+            }
+        }
+
+        if (totalCollateralizedForwardCredits == 0) {
+            _storage.categories[categoryId].totalCollateralized = 0;
+            emit CategoryRebalanced(categoryId, _storage.categories[categoryId].averageTA, 0);
+            return;
+        }
+
+        uint latestAverageTA = totalQuantifiedForwardCredits / totalCollateralizedForwardCredits;
+        _storage.categories[categoryId].averageTA = uint24(latestAverageTA);
+        _storage.categories[categoryId].totalCollateralized = totalCollateralizedForwardCredits;
+
+        emit CategoryRebalanced(categoryId, latestAverageTA, totalCollateralizedForwardCredits);
+    }
+
+    /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
+    /// @param categoryId The source category for the ERC20 rewards
+    /// @return rewardAmount carbon reward amount to mint
+    /// @return rewardFee fee amount charged by the DAO
+    function _computeWeeklyCategoryReward(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint categoryId,
+        uint rewardDecimals
+    ) internal view returns (uint rewardAmount, uint rewardFee) {
+        uint[] storage projects = _storage.categoryProjects[categoryId];
+        for (uint i; i < projects.length; i++) {
+            uint[] storage batches = _storage.projectBatches[projects[i]];
+            for (uint j; j < batches.length; j++) {
+                (uint netRewardAmount, uint feeAmount) = _computeWeeklyBatchReward(
+                    _storage,
+                    batches[j],
+                    _storage._forwardContractBatch.balanceOf(address(this), batches[j]),
+                    rewardDecimals
+                );
+                rewardAmount += netRewardAmount;
+                rewardFee += feeAmount;
+            }
+        }
+    }
+
+    function _computeWeeklyBatchReward(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint batchId,
+        uint availableCredits,
+        uint rewardDecimals
+    ) internal view returns (uint netRewardAmount, uint feeAmount) {
+        if (availableCredits == 0 || _isBatchCertified(_storage, batchId)) {
+            return (0, 0);
+        }
+
+        (netRewardAmount, feeAmount) = SolidMath.computeWeeklyBatchReward(
+            _storage.batches[batchId].certificationDate,
+            availableCredits,
+            _storage.batches[batchId].batchTA,
+            _storage.rewardsFee,
+            rewardDecimals
+        );
+    }
+
+    function _isBatchCertified(SolidWorldManagerStorage.Storage storage _storage, uint batchId)
+        internal
+        view
+        returns (bool)
+    {
+        return _storage.batches[batchId].certificationDate <= block.timestamp;
+    }
+}
