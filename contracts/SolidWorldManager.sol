@@ -18,6 +18,7 @@ import "./libraries/manager/CarbonDomainRepository.sol";
 import "./CollateralizedBasketTokenDeployer.sol";
 import "./SolidWorldManagerStorage.sol";
 import "./interfaces/manager/ICarbonDomainRepository.sol";
+import "./interfaces/manager/ICollateralizationManager.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -25,6 +26,7 @@ contract SolidWorldManager is
     IERC1155ReceiverUpgradeable,
     ReentrancyGuardUpgradeable,
     IWeeklyCarbonRewardsManager,
+    ICollateralizationManager,
     ICarbonDomainRepository,
     ISolidWorldManagerErrors,
     SolidWorldManagerStorage
@@ -172,12 +174,7 @@ contract SolidWorldManager is
         );
     }
 
-    /// @dev Collateralizes `amountIn` of ERC1155 tokens with id `batchId` for msg.sender
-    /// @dev prior to calling, msg.sender must approve SolidWorldManager to spend its ERC1155 tokens with id `batchId`
-    /// @dev nonReentrant, to avoid possible reentrancy after calling safeTransferFrom
-    /// @param batchId id of the batch
-    /// @param amountIn ERC1155 tokens to collateralize
-    /// @param amountOutMin minimum output amount of ERC20 tokens for transaction to succeed
+    /// @inheritdoc ICollateralizationManager
     function collateralizeBatch(
         uint batchId,
         uint amountIn,
@@ -280,12 +277,7 @@ contract SolidWorldManager is
         _rebalanceCategory(decollateralizedCategoryId);
     }
 
-    /// @dev Simulates collateralization of `amountIn` ERC1155 tokens with id `batchId` for msg.sender
-    /// @param batchId id of the batch
-    /// @param amountIn ERC1155 tokens to collateralize
-    /// @return cbtUserCut ERC20 tokens to be received by msg.sender
-    /// @return cbtDaoCut ERC20 tokens to be received by feeReceiver
-    /// @return cbtForfeited ERC20 tokens forfeited for collateralizing the ERC1155 tokens
+    /// @inheritdoc ICollateralizationManager
     function simulateBatchCollateralization(uint batchId, uint amountIn)
         external
         view
@@ -387,6 +379,7 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
+    /// @inheritdoc ICollateralizationManager
     function setCollateralizationFee(uint16 _collateralizationFee) external {
         _setCollateralizationFee(_collateralizationFee);
     }
