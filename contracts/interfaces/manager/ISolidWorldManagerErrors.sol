@@ -11,6 +11,4 @@ interface ISolidWorldManagerErrors {
 
     error AmountOutLessThanMinimum(uint amountOut, uint minAmountOut);
     error AmountOutTooLow(uint amountOut);
-
-    error BatchCertified(uint batchId);
 }
