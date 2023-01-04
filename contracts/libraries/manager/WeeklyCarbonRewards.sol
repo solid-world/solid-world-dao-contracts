@@ -43,13 +43,13 @@ library WeeklyCarbonRewards {
     }
 
     /// @param _storage Struct containing the current state used or modified by this function
-    /// @param _categoryIds The categories to which the incentivized assets belong
+    /// @param categoryIds The categories to which the incentivized assets belong
     /// @return carbonRewards List of carbon rewards getting distributed.
     /// @return rewardAmounts List of carbon reward amounts getting distributed
     /// @return rewardFees List of fee amounts charged by the DAO on carbon rewards
     function computeWeeklyCarbonRewards(
         SolidWorldManagerStorage.Storage storage _storage,
-        uint[] calldata _categoryIds
+        uint[] calldata categoryIds
     )
         external
         view
@@ -59,12 +59,12 @@ library WeeklyCarbonRewards {
             uint[] memory rewardFees
         )
     {
-        carbonRewards = new address[](_categoryIds.length);
-        rewardAmounts = new uint[](_categoryIds.length);
-        rewardFees = new uint[](_categoryIds.length);
+        carbonRewards = new address[](categoryIds.length);
+        rewardAmounts = new uint[](categoryIds.length);
+        rewardFees = new uint[](categoryIds.length);
 
-        for (uint i; i < _categoryIds.length; i++) {
-            uint categoryId = _categoryIds[i];
+        for (uint i; i < categoryIds.length; i++) {
+            uint categoryId = categoryIds[i];
             if (!_storage.categoryCreated[categoryId]) {
                 revert InvalidCategoryId(categoryId);
             }
@@ -83,21 +83,21 @@ library WeeklyCarbonRewards {
     }
 
     /// @param _storage Struct containing the current state used or modified by this function
-    /// @param _categoryIds The categories to which the incentivized assets belong
+    /// @param categoryIds The categories to which the incentivized assets belong
     /// @param carbonRewards List of carbon rewards to mint
     /// @param rewardAmounts List of carbon reward amounts to mint
     /// @param rewardFees List of fee amounts charged by the DAO on carbon rewards
     /// @param rewardsVault Account that secures ERC20 rewards
     function mintWeeklyCarbonRewards(
         SolidWorldManagerStorage.Storage storage _storage,
-        uint[] calldata _categoryIds,
+        uint[] calldata categoryIds,
         address[] calldata carbonRewards,
         uint[] calldata rewardAmounts,
         uint[] calldata rewardFees,
         address rewardsVault
     ) external {
         if (
-            _categoryIds.length != carbonRewards.length ||
+            categoryIds.length != carbonRewards.length ||
             carbonRewards.length != rewardAmounts.length ||
             rewardAmounts.length != rewardFees.length
         ) {
@@ -117,7 +117,7 @@ library WeeklyCarbonRewards {
 
             rewardToken.mint(_storage.feeReceiver, rewardFees[i]);
 
-            _rebalanceCategory(_storage, _categoryIds[i]);
+            _rebalanceCategory(_storage, categoryIds[i]);
         }
     }
 

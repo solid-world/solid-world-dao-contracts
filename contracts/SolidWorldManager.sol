@@ -62,11 +62,11 @@ contract SolidWorldManager is
     function initialize(
         CollateralizedBasketTokenDeployer collateralizedBasketTokenDeployer,
         ForwardContractBatchToken forwardContractBatch,
-        uint16 _collateralizationFee,
-        uint16 _decollateralizationFee,
-        uint16 _rewardsFee,
-        address _feeReceiver,
-        address _weeklyRewardsMinter
+        uint16 collateralizationFee,
+        uint16 decollateralizationFee,
+        uint16 rewardsFee,
+        address feeReceiver,
+        address weeklyRewardsMinter
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -74,11 +74,11 @@ contract SolidWorldManager is
         _storage._collateralizedBasketTokenDeployer = collateralizedBasketTokenDeployer;
         _storage._forwardContractBatch = forwardContractBatch;
 
-        _storage.setCollateralizationFee(_collateralizationFee);
-        _setDecollateralizationFee(_decollateralizationFee);
-        _storage.setRewardsFee(_rewardsFee);
-        _setFeeReceiver(_feeReceiver);
-        _storage.setWeeklyRewardsMinter(_weeklyRewardsMinter);
+        _storage.setCollateralizationFee(collateralizationFee);
+        _setDecollateralizationFee(decollateralizationFee);
+        _storage.setRewardsFee(rewardsFee);
+        _setFeeReceiver(feeReceiver);
+        _storage.setWeeklyRewardsMinter(weeklyRewardsMinter);
     }
 
     // todo #121: add authorization
@@ -124,12 +124,12 @@ contract SolidWorldManager is
 
     // todo #121: add authorization
     /// @inheritdoc IWeeklyCarbonRewardsManager
-    function setWeeklyRewardsMinter(address _weeklyRewardsMinter) external {
-        _storage.setWeeklyRewardsMinter(_weeklyRewardsMinter);
+    function setWeeklyRewardsMinter(address weeklyRewardsMinter) external {
+        _storage.setWeeklyRewardsMinter(weeklyRewardsMinter);
     }
 
     /// @inheritdoc IWeeklyCarbonRewardsManager
-    function computeWeeklyCarbonRewards(uint[] calldata _categoryIds)
+    function computeWeeklyCarbonRewards(uint[] calldata categoryIds)
         external
         view
         override
@@ -139,19 +139,19 @@ contract SolidWorldManager is
             uint[] memory
         )
     {
-        return _storage.computeWeeklyCarbonRewards(_categoryIds);
+        return _storage.computeWeeklyCarbonRewards(categoryIds);
     }
 
     /// @inheritdoc IWeeklyCarbonRewardsManager
     function mintWeeklyCarbonRewards(
-        uint[] calldata _categoryIds,
+        uint[] calldata categoryIds,
         address[] calldata carbonRewards,
         uint[] calldata rewardAmounts,
         uint[] calldata rewardFees,
         address rewardsVault
     ) external override {
         _storage.mintWeeklyCarbonRewards(
-            _categoryIds,
+            categoryIds,
             carbonRewards,
             rewardAmounts,
             rewardFees,
@@ -190,32 +190,32 @@ contract SolidWorldManager is
     /// @dev nonReentrant (_decollateralizeTokens), to avoid possible reentrancy after calling safeTransferFrom
     /// @dev _batchIds must belong to the same Category
     /// @dev will trigger a rebalance of the Category
-    /// @param _batchIds ids of the batches
+    /// @param batchIds ids of the batches
     /// @param amountsIn ERC20 tokens to decollateralize
     /// @param amountsOutMin minimum output amounts of ERC1155 tokens for transaction to succeed
     function bulkDecollateralizeTokens(
-        uint[] calldata _batchIds,
+        uint[] calldata batchIds,
         uint[] calldata amountsIn,
         uint[] calldata amountsOutMin
     ) external {
-        if (_batchIds.length != amountsIn.length || _batchIds.length != amountsOutMin.length) {
+        if (batchIds.length != amountsIn.length || batchIds.length != amountsOutMin.length) {
             revert InvalidInput();
         }
 
-        for (uint i = 1; i < _batchIds.length; i++) {
-            uint currentBatchCategoryId = _storage.batchCategory[_batchIds[i]];
-            uint previousBatchCategoryId = _storage.batchCategory[_batchIds[i - 1]];
+        for (uint i = 1; i < batchIds.length; i++) {
+            uint currentBatchCategoryId = _storage.batchCategory[batchIds[i]];
+            uint previousBatchCategoryId = _storage.batchCategory[batchIds[i - 1]];
 
             if (currentBatchCategoryId != previousBatchCategoryId) {
                 revert BatchesNotInSameCategory(currentBatchCategoryId, previousBatchCategoryId);
             }
         }
 
-        for (uint i; i < _batchIds.length; i++) {
-            _decollateralizeTokens(_batchIds[i], amountsIn[i], amountsOutMin[i]);
+        for (uint i; i < batchIds.length; i++) {
+            _decollateralizeTokens(batchIds[i], amountsIn[i], amountsOutMin[i]);
         }
 
-        uint decollateralizedCategoryId = _storage.batchCategory[_batchIds[0]];
+        uint decollateralizedCategoryId = _storage.batchCategory[batchIds[0]];
         _rebalanceCategory(decollateralizedCategoryId);
     }
 
@@ -308,19 +308,19 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
-    function setDecollateralizationFee(uint16 _decollateralizationFee) external {
-        _setDecollateralizationFee(_decollateralizationFee);
+    function setDecollateralizationFee(uint16 decollateralizationFee) external {
+        _setDecollateralizationFee(decollateralizationFee);
     }
 
     // todo #121: add authorization
     /// @inheritdoc IWeeklyCarbonRewardsManager
-    function setRewardsFee(uint16 _rewardsFee) external {
-        _storage.setRewardsFee(_rewardsFee);
+    function setRewardsFee(uint16 rewardsFee) external {
+        _storage.setRewardsFee(rewardsFee);
     }
 
     // todo #121: add authorization
-    function setFeeReceiver(address _feeReceiver) external {
-        _setFeeReceiver(_feeReceiver);
+    function setFeeReceiver(address feeReceiver) external {
+        _setFeeReceiver(feeReceiver);
     }
 
     function onERC1155Received(
@@ -348,16 +348,16 @@ contract SolidWorldManager is
         return interfaceId == 0x01ffc9a7 || interfaceId == 0x4e2312e0;
     }
 
-    function _setDecollateralizationFee(uint16 _decollateralizationFee) internal {
-        _storage.decollateralizationFee = _decollateralizationFee;
+    function _setDecollateralizationFee(uint16 decollateralizationFee) internal {
+        _storage.decollateralizationFee = decollateralizationFee;
 
-        emit DecollateralizationFeeUpdated(_decollateralizationFee);
+        emit DecollateralizationFeeUpdated(decollateralizationFee);
     }
 
-    function _setFeeReceiver(address _feeReceiver) internal {
-        _storage.feeReceiver = _feeReceiver;
+    function _setFeeReceiver(address feeReceiver) internal {
+        _storage.feeReceiver = feeReceiver;
 
-        emit FeeReceiverUpdated(_feeReceiver);
+        emit FeeReceiverUpdated(feeReceiver);
     }
 
     function _simulateDecollateralization(uint batchId, uint amountIn)
