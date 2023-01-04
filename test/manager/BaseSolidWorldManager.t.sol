@@ -53,4 +53,11 @@ abstract contract BaseSolidWorldManager is Test {
             weeklyRewardsMinter
         );
     }
+
+    function getTestDecayPerSecond() internal pure returns (uint40 decayPerSecond) {
+        // 5% decay per day quantified per second
+        decayPerSecond = uint40(
+            Math.mulDiv(5, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS, 100 * 1 days)
+        );
+    }
 }

@@ -14,8 +14,10 @@ import "./interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 import "./interfaces/manager/ISolidWorldManagerErrors.sol";
 import "./libraries/DomainDataTypes.sol";
 import "./libraries/manager/WeeklyCarbonRewards.sol";
+import "./libraries/manager/CarbonDomainRepository.sol";
 import "./CollateralizedBasketTokenDeployer.sol";
 import "./SolidWorldManagerStorage.sol";
+import "./interfaces/manager/ICarbonDomainRepository.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -23,10 +25,12 @@ contract SolidWorldManager is
     IERC1155ReceiverUpgradeable,
     ReentrancyGuardUpgradeable,
     IWeeklyCarbonRewardsManager,
+    ICarbonDomainRepository,
     ISolidWorldManagerErrors,
     SolidWorldManagerStorage
 {
     using WeeklyCarbonRewards for SolidWorldManagerStorage.Storage;
+    using CarbonDomainRepository for SolidWorldManagerStorage.Storage;
 
     /// @notice Constant used as input for decollateralization simulation for ordering batches with the same category and vintage
     uint public constant DECOLLATERALIZATION_SIMULATION_INPUT = 1000e18;
@@ -43,20 +47,11 @@ contract SolidWorldManager is
         uint amountOut,
         address indexed tokensOwner
     );
-    event CategoryCreated(uint indexed categoryId);
-    event CategoryUpdated(
-        uint indexed categoryId,
-        uint indexed volumeCoefficient,
-        uint indexed decayPerSecond,
-        uint maxDepreciation
-    );
     event CategoryRebalanced(
         uint indexed categoryId,
         uint indexed averageTA,
         uint indexed totalCollateralized
     );
-    event ProjectCreated(uint indexed projectId);
-    event BatchCreated(uint indexed batchId);
     event FeeReceiverUpdated(address indexed feeReceiver);
     event CollateralizationFeeUpdated(uint indexed collateralizationFee);
     event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
@@ -98,28 +93,18 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
+    /// @inheritdoc ICarbonDomainRepository
     function addCategory(
         uint categoryId,
         string calldata tokenName,
         string calldata tokenSymbol,
         uint24 initialTA
     ) external {
-        if (_storage.categoryCreated[categoryId]) {
-            revert CategoryAlreadyExists(categoryId);
-        }
-
-        _storage.categoryCreated[categoryId] = true;
-        _storage.categoryToken[categoryId] = _storage._collateralizedBasketTokenDeployer.deploy(
-            tokenName,
-            tokenSymbol
-        );
-
-        _storage.categories[categoryId].averageTA = initialTA;
-
-        emit CategoryCreated(categoryId);
+        _storage.addCategory(categoryId, tokenName, tokenSymbol, initialTA);
     }
 
     // todo #121: add authorization
+    /// @inheritdoc ICarbonDomainRepository
     function updateCategory(
         uint categoryId,
         uint volumeCoefficient,
@@ -127,72 +112,25 @@ contract SolidWorldManager is
         uint16 maxDepreciationPerYear,
         uint24 maxDepreciation
     ) external {
-        if (!_storage.categoryCreated[categoryId]) {
-            revert InvalidCategoryId(categoryId);
-        }
-
-        if (volumeCoefficient == 0 || decayPerSecond == 0) {
-            revert InvalidInput();
-        }
-
-        DomainDataTypes.Category storage category = _storage.categories[categoryId];
-        category.lastCollateralizationMomentum = ReactiveTimeAppreciationMath.inferMomentum(
-            category,
+        _storage.updateCategory(
+            categoryId,
             volumeCoefficient,
-            maxDepreciationPerYear
+            decayPerSecond,
+            maxDepreciationPerYear,
+            maxDepreciation
         );
-        category.volumeCoefficient = volumeCoefficient;
-        category.decayPerSecond = decayPerSecond;
-        category.maxDepreciationPerYear = maxDepreciationPerYear;
-        category.maxDepreciation = maxDepreciation;
-        category.lastCollateralizationTimestamp = uint32(block.timestamp);
-
-        emit CategoryUpdated(categoryId, volumeCoefficient, decayPerSecond, maxDepreciation);
     }
 
     // todo #121: add authorization
+    /// @inheritdoc ICarbonDomainRepository
     function addProject(uint categoryId, uint projectId) external {
-        if (!_storage.categoryCreated[categoryId]) {
-            revert InvalidCategoryId(categoryId);
-        }
-
-        if (_storage.projectCreated[projectId]) {
-            revert ProjectAlreadyExists(projectId);
-        }
-
-        _storage.categoryProjects[categoryId].push(projectId);
-        _storage.projectCategory[projectId] = categoryId;
-        _storage.projectCreated[projectId] = true;
-
-        emit ProjectCreated(projectId);
+        _storage.addProject(categoryId, projectId);
     }
 
     // todo #121: add authorization
+    /// @inheritdoc ICarbonDomainRepository
     function addBatch(DomainDataTypes.Batch calldata batch, uint mintableAmount) external {
-        if (!_storage.projectCreated[batch.projectId]) {
-            revert InvalidProjectId(batch.projectId);
-        }
-
-        if (_storage.batchCreated[batch.id]) {
-            revert BatchAlreadyExists(batch.id);
-        }
-
-        if (batch.supplier == address(0)) {
-            revert InvalidBatchSupplier();
-        }
-
-        if (batch.certificationDate <= block.timestamp) {
-            revert BatchCertificationDateInThePast(batch.certificationDate);
-        }
-
-        _storage.batchCreated[batch.id] = true;
-        _storage.batches[batch.id] = batch;
-        _storage.batchIds.push(batch.id);
-        _storage.projectBatches[batch.projectId].push(batch.id);
-        _storage.batchCategory[batch.id] = _storage.projectCategory[batch.projectId];
-        _storage._forwardContractBatch.mint(batch.supplier, batch.id, mintableAmount, "");
-
-        emit BatchCreated(batch.id);
+        _storage.addBatch(batch, mintableAmount);
     }
 
     // todo #121: add authorization
