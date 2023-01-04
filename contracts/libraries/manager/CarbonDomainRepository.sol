@@ -5,6 +5,8 @@ import "../DomainDataTypes.sol";
 import "../ReactiveTimeAppreciationMath.sol";
 import "../../SolidWorldManagerStorage.sol";
 
+/// @notice Handles all CRUD operations for categories, projects, batches
+/// @author Solid World DAO
 library CarbonDomainRepository {
     event CategoryCreated(uint indexed categoryId);
     event CategoryUpdated(

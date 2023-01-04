@@ -4,6 +4,8 @@ pragma solidity ^0.8.16;
 import "../../SolidWorldManagerStorage.sol";
 import "../SolidMath.sol";
 
+/// @notice Computes and mints weekly carbon rewards
+/// @author Solid World DAO
 library WeeklyCarbonRewards {
     event WeeklyRewardMinted(address indexed rewardToken, uint indexed rewardAmount);
     event RewardsFeeUpdated(uint indexed rewardsFee);
