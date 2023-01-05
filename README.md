@@ -17,7 +17,13 @@ cp .env.example .env
 ```shell
 yarn hardhat deploy --network localhost
 ```
-Supported networks: localhost, goerli, polygon.
+
+▶ To verify the contracts on Etherscan run:
+```shell
+yarn hardhat --network <network> etherscan-verify
+yarn hardhat verify --network goerli <SolidWorldManager_Implementation address>
+```
+(the second command is required because there's currently a [bug](https://github.com/wighawag/hardhat-deploy/issues/253) that prevents verification of contracts with linked libraries)
 
 ▶ To deploy a new reward price oracle run:
 ```shell
