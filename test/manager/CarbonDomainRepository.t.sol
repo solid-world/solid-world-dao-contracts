@@ -242,6 +242,106 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         assertEq(manager.forwardContractBatch().balanceOf(testAccount, 7), 10);
     }
 
+    function testFailAddBatchWhenProjectDoesntExist() public {
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
+                batchTA: 1,
+                supplier: testAccount
+            }),
+            10000
+        );
+    }
+
+    function testFailAddBatchWhenBatchAlreadyAdded() public {
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
+                batchTA: 1,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
+                batchTA: 1,
+                supplier: testAccount
+            }),
+            10000
+        );
+    }
+
+    function testFailAddBatchWhenSupplierIsNotDefined() public {
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
+                batchTA: 1,
+                supplier: address(0)
+            }),
+            10000
+        );
+    }
+
+    function testFailAddBatchWhenDueDateIsNow() public {
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE),
+                vintage: 2022,
+                batchTA: 1,
+                supplier: testAccount
+            }),
+            10000
+        );
+    }
+
+    function testFailAddBatchWhenDueDateInThePast() public {
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE - 1),
+                vintage: 2022,
+                batchTA: 1,
+                supplier: testAccount
+            }),
+            10000
+        );
+    }
+
     function assertNotEq(address a, address b) private {
         if (a == b) {
             emit log("Error: a != b not satisfied [address]");

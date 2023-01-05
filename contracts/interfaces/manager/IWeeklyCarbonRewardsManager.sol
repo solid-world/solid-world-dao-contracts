@@ -5,17 +5,17 @@ pragma solidity ^0.8.16;
 /// @notice Computes and mints weekly carbon rewards
 /// @author Solid World DAO
 interface IWeeklyCarbonRewardsManager {
-    /// @param _weeklyRewardsMinter The only account allowed to mint weekly carbon rewards
-    function setWeeklyRewardsMinter(address _weeklyRewardsMinter) external;
+    /// @param weeklyRewardsMinter The only account allowed to mint weekly carbon rewards
+    function setWeeklyRewardsMinter(address weeklyRewardsMinter) external;
 
-    /// @param _rewardsFee The new rewards fee charged on weekly rewards
-    function setRewardsFee(uint16 _rewardsFee) external;
+    /// @param rewardsFee The new rewards fee charged on weekly rewards
+    function setRewardsFee(uint16 rewardsFee) external;
 
-    /// @param _categoryIds The categories to which the incentivized assets belong
+    /// @param categoryIds The categories to which the incentivized assets belong
     /// @return carbonRewards List of carbon rewards getting distributed.
     /// @return rewardAmounts List of carbon reward amounts getting distributed
     /// @return rewardFees List of fee amounts charged by the DAO on carbon rewards
-    function computeWeeklyCarbonRewards(uint[] calldata _categoryIds)
+    function computeWeeklyCarbonRewards(uint[] calldata categoryIds)
         external
         view
         returns (
@@ -24,13 +24,13 @@ interface IWeeklyCarbonRewardsManager {
             uint[] memory rewardFees
         );
 
-    /// @param _categoryIds The categories to which the incentivized assets belong
+    /// @param categoryIds The categories to which the incentivized assets belong
     /// @param carbonRewards List of carbon rewards to mint
     /// @param rewardAmounts List of carbon reward amounts to mint
     /// @param rewardFees List of fee amounts charged by the DAO on carbon rewards
     /// @param rewardsVault Account that secures ERC20 rewards
     function mintWeeklyCarbonRewards(
-        uint[] calldata _categoryIds,
+        uint[] calldata categoryIds,
         address[] calldata carbonRewards,
         uint[] calldata rewardAmounts,
         uint[] calldata rewardFees,
