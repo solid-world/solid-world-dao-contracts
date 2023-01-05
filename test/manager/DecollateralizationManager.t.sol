@@ -3,7 +3,7 @@ pragma solidity ^0.8.16;
 
 import "./BaseSolidWorldManager.t.sol";
 
-contract SolidWorldManagerTest is BaseSolidWorldManager {
+contract DecollateralizationManagerTest is BaseSolidWorldManager {
     uint24 constant TIME_APPRECIATION = 100_000; // 10%
 
     event TokensDecollateralized(
@@ -17,7 +17,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
     function testDecollateralizeTokensWhenInvalidBatchId() public {
         vm.expectRevert(
-            abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidBatchId.selector, 5)
+            abi.encodeWithSelector(DecollateralizationManager.InvalidBatchId.selector, 5)
         );
         manager.decollateralizeTokens(BATCH_ID, 10, 5);
     }
@@ -68,7 +68,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 10000, amountOutMin);
         vm.expectRevert(
-            abi.encodeWithSelector(ISolidWorldManagerErrors.AmountOutTooLow.selector, 0)
+            abi.encodeWithSelector(DecollateralizationManager.AmountOutTooLow.selector, 0)
         );
         manager.decollateralizeTokens(BATCH_ID, 1e17, 0);
         vm.stopPrank();
@@ -101,7 +101,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
         vm.expectRevert(
             abi.encodeWithSelector(
-                ISolidWorldManagerErrors.AmountOutLessThanMinimum.selector,
+                DecollateralizationManager.AmountOutLessThanMinimum.selector,
                 81,
                 10000
             )
@@ -244,16 +244,16 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
         uint[] memory arrayLength1 = new uint[](1);
         uint[] memory arrayLength2 = new uint[](2);
 
-        vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
+        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
         manager.bulkDecollateralizeTokens(arrayLength1, arrayLength2, arrayLength1);
 
-        vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
+        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
         manager.bulkDecollateralizeTokens(arrayLength1, arrayLength1, arrayLength2);
 
-        vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
+        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
         manager.bulkDecollateralizeTokens(arrayLength2, arrayLength1, arrayLength2);
 
-        vm.expectRevert(abi.encodeWithSelector(ISolidWorldManagerErrors.InvalidInput.selector));
+        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
         manager.bulkDecollateralizeTokens(arrayLength2, arrayLength1, arrayLength1);
     }
 
@@ -309,7 +309,7 @@ contract SolidWorldManagerTest is BaseSolidWorldManager {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ISolidWorldManagerErrors.BatchesNotInSameCategory.selector,
+                DecollateralizationManager.BatchesNotInSameCategory.selector,
                 CATEGORY_ID + 1,
                 CATEGORY_ID
             )

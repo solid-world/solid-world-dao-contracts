@@ -34,6 +34,15 @@ async function deploySolidWorldManager(
     }
   )
 
+  const DecollateralizationManager = await deployments.deploy(
+    'DecollateralizationManager',
+    {
+      from: deployer,
+      args: [],
+      log: true
+    }
+  )
+
   const CollateralizedBasketTokenDeployer = await deployments.deploy(
     'CollateralizedBasketTokenDeployer',
     {
@@ -50,7 +59,8 @@ async function deploySolidWorldManager(
     libraries: {
       WeeklyCarbonRewards: WeeklyCarbonRewards.address,
       CarbonDomainRepository: CarbonDomainRepository.address,
-      CollateralizationManager: CollateralizationManager.address
+      CollateralizationManager: CollateralizationManager.address,
+      DecollateralizationManager: DecollateralizationManager.address
     },
     proxy: {
       owner: contractsOwner,
