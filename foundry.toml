@@ -10,5 +10,5 @@ gas_reports = ["*"]
 test = 'test_gas'
 
 [fuzz]
-runs = 1000
+runs = 2500
 max_test_rejects = 0

@@ -16,6 +16,7 @@ library SolidMath {
     uint constant FEE_BASIS_POINTS = 10_000;
 
     error IncorrectDates(uint startDate, uint endDate);
+    error InvalidTADiscount();
 
     /// @dev Computes the number of weeks between two dates
     /// @param startDate start date expressed in seconds
@@ -37,11 +38,11 @@ library SolidMath {
     /// @dev (1 - timeAppreciation) ** weeksUntilCertification
     /// @param timeAppreciation 1% = 10000, 0.0984% = 984
     /// @param certificationDate expected date for project certification
-    /// @return discount in basis points
+    /// @return timeAppreciationDiscount discount in basis points
     function computeTimeAppreciationDiscount(uint timeAppreciation, uint certificationDate)
         internal
         view
-        returns (uint)
+        returns (uint timeAppreciationDiscount)
     {
         uint weeksUntilCertification = weeksBetween(block.timestamp, certificationDate);
         if (weeksUntilCertification == 0) {
@@ -56,12 +57,17 @@ library SolidMath {
         int128 discountRate = ABDKMath64x64.div(discountRatePoints, TIME_APPRECIATION_BASIS_POINTS);
         int128 totalDiscount = ABDKMath64x64.pow(discountRate, (weeksUntilCertification - 1));
 
-        return ABDKMath64x64.mulu(totalDiscount, discountRatePoints);
+        timeAppreciationDiscount = ABDKMath64x64.mulu(totalDiscount, discountRatePoints);
+
+        if (timeAppreciationDiscount == 0) {
+            revert InvalidTADiscount();
+        }
     }
 
     /// @dev Computes the amount of ERC20 tokens to be minted to the stakeholder and DAO,
     /// @dev and the amount forfeited when collateralizing `fcbtAmount` of ERC1155 tokens
     /// @dev cbtUserCut = erc1155 * 10e18 * (1 - fee) * (1 - timeAppreciation) ** weeksUntilCertification
+    /// @dev we assume fcbtAmount is less than type(uint256).max / 1e18
     /// @param certificationDate expected date for project certification. Must not be in the past.
     /// @param fcbtAmount amount of ERC1155 tokens to be collateralized
     /// @param timeAppreciation 1% = 10000, 0.0984% = 984
@@ -107,6 +113,7 @@ library SolidMath {
     /// @dev Computes the amount of ERC1155 tokens redeemable by the stakeholder, amount of ERC20 tokens
     /// @dev charged by the DAO and to be burned when decollateralizing `cbtAmount` of ERC20 tokens
     /// @dev erc1155 = erc20 / 10e18 * (1 - fee) / (1 - timeAppreciation) ** weeksUntilCertification
+    /// @dev we assume cbtAmount is less than type(uint256).max / SolidMath.TIME_APPRECIATION_BASIS_POINTS
     /// @param certificationDate expected date for project certification
     /// @param cbtAmount amount of ERC20 tokens to be decollateralized
     /// @param timeAppreciation 1% = 10000, 0.0984% = 984
