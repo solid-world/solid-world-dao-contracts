@@ -4,6 +4,32 @@ import "forge-std/Test.sol";
 import "../contracts/libraries/DomainDataTypes.sol";
 import "../contracts/libraries/ReactiveTimeAppreciationMath.sol";
 
+/// @notice Dummy wrapper over some ReactiveTimeAppreciationMath functions, such that we can make external calls to them
+/// @notice and use the try/catch syntax
+contract DummyReactiveTimeAppreciationMath {
+    function computeReactiveTA(
+        DomainDataTypes.Category memory categoryState,
+        uint forwardCreditsAmount
+    ) external view returns (uint decayingMomentum, uint reactiveTA) {
+        return ReactiveTimeAppreciationMath.computeReactiveTA(categoryState, forwardCreditsAmount);
+    }
+
+    function inferBatchTA(
+        uint circulatingCBT,
+        uint totalCollateralizedForwardCredits,
+        uint certificationDate,
+        uint cbtDecimals
+    ) external view returns (uint batchTA) {
+        return
+            ReactiveTimeAppreciationMath.inferBatchTA(
+                circulatingCBT,
+                totalCollateralizedForwardCredits,
+                certificationDate,
+                cbtDecimals
+            );
+    }
+}
+
 contract ReactiveTimeAppreciationMathTest is Test {
     uint32 constant CURRENT_DATE = 1666016743;
 
@@ -64,6 +90,20 @@ contract ReactiveTimeAppreciationMathTest is Test {
         assertEq(decayingMomentum5, 0);
     }
 
+    function testComputeDecayingMomentum_fuzz(
+        uint decayPerSecond,
+        uint lastCollateralizationMomentum,
+        uint lastCollateralizationTimestamp
+    ) public {
+        decayPerSecond = bound(decayPerSecond, 0, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS);
+        lastCollateralizationTimestamp = bound(lastCollateralizationTimestamp, 0, CURRENT_DATE);
+        ReactiveTimeAppreciationMath.computeDecayingMomentum(
+            decayPerSecond,
+            lastCollateralizationMomentum,
+            lastCollateralizationTimestamp
+        );
+    }
+
     function testComputeReactiveTA() public {
         uint24 decayPerSecond = uint24(getTestDecayPerSecond());
         uint16 maxDepreciationPerYear = 10; // 1% yearly rate
@@ -118,6 +158,64 @@ contract ReactiveTimeAppreciationMathTest is Test {
         assertEq(reactiveTA2, 1406);
     }
 
+    function testComputeReactiveTA_fuzz(
+        uint volumeCoefficient,
+        uint40 decayPerSecond,
+        uint16 maxDepreciationPerYear,
+        uint24 averageTA,
+        uint32 lastCollateralizationTimestamp,
+        uint lastCollateralizationMomentum,
+        uint forwardCreditsAmount
+    ) public {
+        volumeCoefficient = bound(volumeCoefficient, 10000, type(uint).max / 100);
+        decayPerSecond = uint40(
+            bound(decayPerSecond, 0, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS)
+        );
+        maxDepreciationPerYear = uint16(bound(maxDepreciationPerYear, 0, 999));
+        lastCollateralizationTimestamp = uint32(
+            bound(lastCollateralizationTimestamp, 0, CURRENT_DATE)
+        );
+
+        uint24 maxDepreciation = uint24(
+            ReactiveTimeAppreciationMath.toWeeklyRate(
+                (maxDepreciationPerYear * SolidMath.TIME_APPRECIATION_BASIS_POINTS) / 1000
+            )
+        );
+        averageTA = uint24(bound(averageTA, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1));
+        maxDepreciation = uint24(bound(maxDepreciation, 0, averageTA));
+        lastCollateralizationMomentum = bound(
+            lastCollateralizationMomentum,
+            type(uint).max / 2 + 1,
+            type(uint).max
+        );
+        forwardCreditsAmount = bound(
+            forwardCreditsAmount,
+            0,
+            (type(uint).max - lastCollateralizationMomentum) * 2
+        );
+
+        DomainDataTypes.Category memory categoryState;
+        categoryState.volumeCoefficient = volumeCoefficient;
+        categoryState.decayPerSecond = decayPerSecond;
+        categoryState.maxDepreciationPerYear = maxDepreciationPerYear;
+        categoryState.maxDepreciation = maxDepreciation;
+        categoryState.averageTA = averageTA;
+        categoryState.totalCollateralized = 0;
+        categoryState.lastCollateralizationTimestamp = lastCollateralizationTimestamp;
+        categoryState.lastCollateralizationMomentum = lastCollateralizationMomentum;
+
+        DummyReactiveTimeAppreciationMath dummy = new DummyReactiveTimeAppreciationMath();
+        try dummy.computeReactiveTA(categoryState, forwardCreditsAmount) {} catch (
+            bytes memory reason
+        ) {
+            assertEq(
+                bytes4(keccak256(bytes("ReactiveTAMathBroken(uint256,uint256)"))),
+                bytes4(reason),
+                "Fuzz test failed."
+            );
+        }
+    }
+
     function testComputeReactiveTA_revertsWhenTAOverflows() public {
         DomainDataTypes.Category memory categoryState;
         categoryState.volumeCoefficient = 50000;
@@ -131,8 +229,9 @@ contract ReactiveTimeAppreciationMathTest is Test {
         uint forwardCreditsAmount = 1e18;
         vm.expectRevert(
             abi.encodeWithSelector(
-                ReactiveTimeAppreciationMath.ForwardCreditsInputAmountTooLarge.selector,
-                forwardCreditsAmount
+                ReactiveTimeAppreciationMath.ReactiveTAMathBroken.selector,
+                forwardCreditsAmount,
+                categoryState.lastCollateralizationMomentum
             )
         );
         ReactiveTimeAppreciationMath.computeReactiveTA(categoryState, forwardCreditsAmount);
@@ -172,6 +271,36 @@ contract ReactiveTimeAppreciationMathTest is Test {
         );
 
         assertEq(batchTA, 1600);
+    }
+
+    function testInferBatchTA_fuzz(
+        uint circulatingCBT,
+        uint totalCollateralizedForwardCredits,
+        uint certificationDate
+    ) public {
+        circulatingCBT = bound(circulatingCBT, 1e18, 2**122);
+        totalCollateralizedForwardCredits = bound(
+            totalCollateralizedForwardCredits,
+            1,
+            circulatingCBT / 1e18
+        );
+        certificationDate = bound(certificationDate, 1, type(uint32).max);
+
+        DummyReactiveTimeAppreciationMath dummy = new DummyReactiveTimeAppreciationMath();
+        try
+            dummy.inferBatchTA(
+                circulatingCBT,
+                totalCollateralizedForwardCredits,
+                certificationDate,
+                18
+            )
+        {} catch (bytes memory reason) {
+            assertEq(
+                bytes4(keccak256(bytes("ReactiveTAMathBroken(uint256,uint256)"))),
+                bytes4(reason),
+                "Fuzz test failed."
+            );
+        }
     }
 
     function testComputeInitialMomentum() public {
@@ -222,6 +351,52 @@ contract ReactiveTimeAppreciationMathTest is Test {
         assertEq(adjustedMomentum0, 142500);
         assertEq(adjustedMomentum1, 67500);
         assertEq(adjustedMomentum2, 67500);
+    }
+
+    function testInferMomentum_fuzz(
+        uint volumeCoefficient,
+        uint40 decayPerSecond,
+        uint16 maxDepreciationPerYear,
+        uint24 averageTA,
+        uint32 lastCollateralizationTimestamp,
+        uint lastCollateralizationMomentum,
+        uint newVolumeCoefficient,
+        uint16 newMaxDepreciationPerYear
+    ) public {
+        volumeCoefficient = bound(volumeCoefficient, 0, type(uint256).max / 100);
+        newVolumeCoefficient = bound(newVolumeCoefficient, 0, volumeCoefficient);
+        decayPerSecond = uint40(
+            bound(decayPerSecond, 0, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS)
+        );
+        maxDepreciationPerYear = uint16(bound(maxDepreciationPerYear, 0, 999));
+        newMaxDepreciationPerYear = uint16(bound(newMaxDepreciationPerYear, 0, 999));
+        lastCollateralizationTimestamp = uint32(
+            bound(lastCollateralizationTimestamp, 0, CURRENT_DATE)
+        );
+
+        uint24 maxDepreciation = uint24(
+            ReactiveTimeAppreciationMath.toWeeklyRate(
+                (maxDepreciationPerYear * SolidMath.TIME_APPRECIATION_BASIS_POINTS) / 1000
+            )
+        );
+        averageTA = uint24(bound(averageTA, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1));
+        maxDepreciation = uint24(bound(maxDepreciation, 0, averageTA));
+
+        DomainDataTypes.Category memory categoryState;
+        categoryState.volumeCoefficient = volumeCoefficient;
+        categoryState.decayPerSecond = decayPerSecond;
+        categoryState.maxDepreciationPerYear = maxDepreciationPerYear;
+        categoryState.maxDepreciation = maxDepreciation;
+        categoryState.averageTA = averageTA;
+        categoryState.totalCollateralized = 0;
+        categoryState.lastCollateralizationTimestamp = lastCollateralizationTimestamp;
+        categoryState.lastCollateralizationMomentum = lastCollateralizationMomentum;
+
+        ReactiveTimeAppreciationMath.inferMomentum(
+            categoryState,
+            newVolumeCoefficient,
+            newMaxDepreciationPerYear
+        );
     }
 
     function testToWeeklyRate() public {

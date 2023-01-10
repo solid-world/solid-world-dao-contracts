@@ -13,10 +13,12 @@ library ReactiveTimeAppreciationMath {
     /// @dev Basis points in which the `maxDepreciationPerYear` must be expressed
     uint constant DEPRECIATION_BASIS_POINTS = 10;
 
-    error ForwardCreditsInputAmountTooLarge(uint forwardCreditsAmount);
+    error ReactiveTAMathBroken(uint factor1, uint factor2);
 
     /// @dev Computes a time appreciation value that is reactive to market conditions
     /// @dev The reactive time appreciation starts at averageTA - maxDepreciation and increases with momentum and input amount
+    /// @dev assume categoryState won't be a source of math over/underflow or division by zero errors
+    /// @dev if forwardCreditsAmount is too large, it will cause overflow / ReactiveTAMathBroken error
     /// @param categoryState The current state of the category to compute the time appreciation for
     /// @param forwardCreditsAmount The size of the forward credits to be collateralized
     /// @return decayingMomentum The current decaying momentum of the category
@@ -42,14 +44,20 @@ library ReactiveTimeAppreciationMath {
             categoryState.volumeCoefficient * 100
         );
         if (reactiveFactorAnnually >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
-            revert ForwardCreditsInputAmountTooLarge(forwardCreditsAmount);
+            revert ReactiveTAMathBroken(
+                forwardCreditsAmount,
+                categoryState.lastCollateralizationMomentum
+            );
         }
 
         uint reactiveFactorWeekly = toWeeklyRate(reactiveFactorAnnually);
         reactiveTA = categoryState.averageTA - categoryState.maxDepreciation + reactiveFactorWeekly;
 
         if (reactiveTA >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
-            revert ForwardCreditsInputAmountTooLarge(forwardCreditsAmount);
+            revert ReactiveTAMathBroken(
+                forwardCreditsAmount,
+                categoryState.lastCollateralizationMomentum
+            );
         }
     }
 
@@ -83,8 +91,8 @@ library ReactiveTimeAppreciationMath {
     ///      amount and its certification date
     /// @dev Computes: 1 - (circulatingCBT / totalCollateralizedBatchForwardCredits) ** (1 / weeksTillCertification)
     /// @dev Taking form: 1 - e ** (ln(circulatingCBT / totalCollateralizedBatchForwardCredits) * (1 / weeksTillCertification))
-    /// @param circulatingCBT The circulating CBT amount minted for the batch
-    /// @param totalCollateralizedForwardCredits The total collateralized batch forward credits
+    /// @param circulatingCBT The circulating CBT amount minted for the batch. Assume <= 2**122.
+    /// @param totalCollateralizedForwardCredits The total collateralized batch forward credits. Assume <= circulatingCBT / 1e18.
     /// @param certificationDate The batch certification date
     /// @param cbtDecimals Collateralized basket token number of decimals
     function inferBatchTA(
@@ -117,6 +125,10 @@ library ReactiveTimeAppreciationMath {
             aggregatedWeeklyDiscount,
             SolidMath.TIME_APPRECIATION_BASIS_POINTS
         );
+
+        if (aggregatedWeeklyDiscountPoints >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
+            revert ReactiveTAMathBroken(circulatingCBT, totalCollateralizedForwardCredits);
+        }
 
         batchTA = SolidMath.TIME_APPRECIATION_BASIS_POINTS - aggregatedWeeklyDiscountPoints;
     }

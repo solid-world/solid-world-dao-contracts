@@ -3,6 +3,102 @@ pragma solidity ^0.8.16;
 import "forge-std/Test.sol";
 import "../contracts/libraries/SolidMath.sol";
 
+/// @notice Dummy wrapper over some SolidMath functions, such that we can make external calls to them
+/// @notice and use the try/catch syntax
+contract DummySolidMath {
+    function computeTimeAppreciationDiscount(uint timeAppreciation, uint certificationDate)
+        external
+        view
+        returns (uint)
+    {
+        return SolidMath.computeTimeAppreciationDiscount(timeAppreciation, certificationDate);
+    }
+
+    function computeCollateralizationOutcome(
+        uint certificationDate,
+        uint fcbtAmount,
+        uint timeAppreciation,
+        uint collateralizationFee,
+        uint cbtDecimals
+    )
+        external
+        view
+        returns (
+            uint,
+            uint,
+            uint
+        )
+    {
+        return
+            SolidMath.computeCollateralizationOutcome(
+                certificationDate,
+                fcbtAmount,
+                timeAppreciation,
+                collateralizationFee,
+                cbtDecimals
+            );
+    }
+
+    function computeDecollateralizationOutcome(
+        uint certificationDate,
+        uint cbtAmount,
+        uint timeAppreciation,
+        uint decollateralizationFee,
+        uint cbtDecimals
+    )
+        external
+        view
+        returns (
+            uint,
+            uint,
+            uint
+        )
+    {
+        return
+            SolidMath.computeDecollateralizationOutcome(
+                certificationDate,
+                cbtAmount,
+                timeAppreciation,
+                decollateralizationFee,
+                cbtDecimals
+            );
+    }
+
+    function computeDecollateralizationMinAmountInAndDaoCut(
+        uint certificationDate,
+        uint expectedFcbtAmount,
+        uint timeAppreciation,
+        uint decollateralizationFee,
+        uint cbtDecimals
+    ) external view returns (uint minAmountIn, uint minCbtDaoCut) {
+        return
+            SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
+                certificationDate,
+                expectedFcbtAmount,
+                timeAppreciation,
+                decollateralizationFee,
+                cbtDecimals
+            );
+    }
+
+    function computeWeeklyBatchReward(
+        uint certificationDate,
+        uint availableCredits,
+        uint timeAppreciation,
+        uint rewardsFee,
+        uint decimals
+    ) external view returns (uint netRewardAmount, uint feeAmount) {
+        return
+            SolidMath.computeWeeklyBatchReward(
+                certificationDate,
+                availableCredits,
+                timeAppreciation,
+                rewardsFee,
+                decimals
+            );
+    }
+}
+
 contract SolidMathTest is Test {
     uint constant COLLATERALIZATION_FEE = 200; // 2%
     uint constant DECOLLATERALIZATION_FEE = 500; // 5%
@@ -84,6 +180,21 @@ contract SolidMathTest is Test {
         assertEq(actual, expected);
     }
 
+    function testComputeTimeAppreciationDiscount_fuzz(uint timeAppreciation, uint certificationDate)
+        public
+    {
+        timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
+        certificationDate = bound(certificationDate, CURRENT_DATE, CURRENT_DATE + 50 * ONE_YEAR);
+
+        DummySolidMath dummy = new DummySolidMath();
+
+        try dummy.computeTimeAppreciationDiscount(timeAppreciation, certificationDate) {} catch (
+            bytes memory reason
+        ) {
+            assertEq(SolidMath.InvalidTADiscount.selector, bytes4(reason), "Fuzz test failed.");
+        }
+    }
+
     function testCollateralizationOutcome_oneWeek() public {
         (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = SolidMath
             .computeCollateralizationOutcome(
@@ -162,6 +273,33 @@ contract SolidMathTest is Test {
         assertApproxEqAbs(cbtForfeited, 5756290000000000000000, 4900000000000000);
     }
 
+    function testCollateralizationOutcome_fuzz(
+        uint timeAppreciation,
+        uint certificationDate,
+        uint inputAmount
+    ) public {
+        timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
+        certificationDate = bound(
+            certificationDate,
+            CURRENT_DATE + 1,
+            CURRENT_DATE + 50 * ONE_YEAR
+        );
+        inputAmount = bound(inputAmount, 0, type(uint256).max / 1e18);
+
+        DummySolidMath dummy = new DummySolidMath();
+        try
+            dummy.computeCollateralizationOutcome(
+                certificationDate,
+                inputAmount,
+                timeAppreciation,
+                COLLATERALIZATION_FEE,
+                18
+            )
+        {} catch (bytes memory reason) {
+            assertEq(SolidMath.InvalidTADiscount.selector, bytes4(reason), "Fuzz test failed.");
+        }
+    }
+
     function testDecollateralizationOutcome_oneWeek() public {
         (uint cbtUserCut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
             .computeDecollateralizationOutcome(
@@ -205,6 +343,33 @@ contract SolidMathTest is Test {
         assertEq(amountOut, 2184);
         assertEq(cbtDaoCut, 50e18);
         assertEq(cbtToBurn, 950e18);
+    }
+
+    function testDecollateralizationOutcome_fuzz(
+        uint timeAppreciation,
+        uint certificationDate,
+        uint inputAmount
+    ) public {
+        timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
+        certificationDate = bound(certificationDate, 1, CURRENT_DATE + 50 * ONE_YEAR);
+        inputAmount = bound(
+            inputAmount,
+            0,
+            type(uint256).max / SolidMath.TIME_APPRECIATION_BASIS_POINTS
+        );
+
+        DummySolidMath dummy = new DummySolidMath();
+        try
+            dummy.computeDecollateralizationOutcome(
+                certificationDate,
+                inputAmount,
+                timeAppreciation,
+                DECOLLATERALIZATION_FEE,
+                18
+            )
+        {} catch (bytes memory reason) {
+            assertEq(SolidMath.InvalidTADiscount.selector, bytes4(reason), "Fuzz test failed.");
+        }
     }
 
     function testComputeDecollateralizationMinAmountInAndDaoCut_oneYear() public {
@@ -283,36 +448,47 @@ contract SolidMathTest is Test {
 
     function testComputeDecollateralizationMinAmountInAndDaoCut_tenYears_fuzz(
         uint expectedFcbtAmount,
-        uint timeToCertificationDate,
+        uint certificationDate,
         uint timeAppreciation,
         uint decollateralizationFee
     ) public {
-        expectedFcbtAmount = bound(expectedFcbtAmount, 1, 1e15);
-        timeToCertificationDate = bound(timeToCertificationDate, 1, 20 * ONE_YEAR);
-        timeAppreciation = bound(timeAppreciation, 1, 4273); // max 20% annual
-        decollateralizationFee = bound(decollateralizationFee, 1, 5000); // max 50% fee
+        expectedFcbtAmount = bound(
+            expectedFcbtAmount,
+            0,
+            type(uint256).max / 1e18 / SolidMath.FEE_BASIS_POINTS
+        );
+        certificationDate = bound(certificationDate, CURRENT_DATE, CURRENT_DATE + 50 * ONE_YEAR);
+        timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
+        decollateralizationFee = bound(decollateralizationFee, 1, 9900); // max 99% fee
 
-        uint certificationDate = block.timestamp + timeToCertificationDate;
+        DummySolidMath dummy = new DummySolidMath();
 
-        (uint minAmountIn, uint minCbtDaoCut) = SolidMath
-            .computeDecollateralizationMinAmountInAndDaoCut(
+        try
+            dummy.computeDecollateralizationMinAmountInAndDaoCut(
                 certificationDate,
                 expectedFcbtAmount,
                 timeAppreciation,
                 decollateralizationFee,
                 18
-            );
-
-        (uint amountOut, uint cbtDaoCut, ) = SolidMath.computeDecollateralizationOutcome(
-            certificationDate,
-            minAmountIn,
-            timeAppreciation,
-            decollateralizationFee,
-            18
-        );
-
-        assertEq(amountOut, expectedFcbtAmount);
-        assertEq(minCbtDaoCut, cbtDaoCut);
+            )
+        returns (uint minAmountIn, uint minCbtDaoCut) {
+            try
+                dummy.computeDecollateralizationOutcome(
+                    certificationDate,
+                    minAmountIn,
+                    timeAppreciation,
+                    decollateralizationFee,
+                    18
+                )
+            returns (uint amountOut, uint cbtDaoCut, uint) {
+                assertEq(amountOut, expectedFcbtAmount);
+                assertEq(minCbtDaoCut, cbtDaoCut);
+            } catch (bytes memory reason) {
+                assertEq(SolidMath.InvalidTADiscount.selector, bytes4(reason), "Fuzz test failed.");
+            }
+        } catch (bytes memory reason) {
+            assertEq(SolidMath.InvalidTADiscount.selector, bytes4(reason), "Fuzz test failed.");
+        }
     }
 
     function testComputeWeeklyBatchReward_batchIsCertified() public {
@@ -365,6 +541,33 @@ contract SolidMathTest is Test {
 
         assertApproxEqAbs(rewardAmount, 10.1927249229e18, 256500000000);
         assertApproxEqAbs(feeAmount, 0.5364592065e18, 13500000000);
+    }
+
+    function testComputeWeeklyBatchReward_fuzz(
+        uint timeAppreciation,
+        uint certificationDate,
+        uint availableCredits
+    ) public {
+        timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
+        certificationDate = bound(certificationDate, 1, CURRENT_DATE + 50 * ONE_YEAR);
+        availableCredits = bound(
+            availableCredits,
+            0,
+            type(uint256).max / 1e18 / SolidMath.FEE_BASIS_POINTS
+        );
+
+        DummySolidMath dummy = new DummySolidMath();
+        try
+            dummy.computeWeeklyBatchReward(
+                certificationDate,
+                availableCredits,
+                timeAppreciation,
+                REWARDS_FEE,
+                18
+            )
+        {} catch (bytes memory reason) {
+            assertEq(SolidMath.InvalidTADiscount.selector, bytes4(reason), "Fuzz test failed.");
+        }
     }
 
     function testFailComputeCollateralizationOutcome_ifCertificationDateIsInThePast() public view {
