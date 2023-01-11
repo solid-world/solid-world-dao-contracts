@@ -11,6 +11,8 @@ library SolidMath {
     /// @dev 100% = 1_000_000; 1% = 10_000; 0.0984% = 984
     uint constant TIME_APPRECIATION_BASIS_POINTS = 1_000_000;
 
+    uint constant DAYS_IN_YEAR = 365;
+
     /// @dev Basis points used to express various DAO fees
     /// @dev 100% = 10_000; 0.01% = 1
     uint constant FEE_BASIS_POINTS = 10_000;
@@ -34,39 +36,59 @@ library SolidMath {
         return (endDate - startDate) / 1 weeks;
     }
 
+    /// @dev Computes the number of years between two dates. E.g. 6.54321 years.
+    /// @param startDate start date expressed in seconds
+    /// @param endDate end date expressed in seconds
+    /// @return number of years between the two dates. Returns 0 if result is negative
+    function yearsBetween(uint startDate, uint endDate) internal pure returns (int128) {
+        if (startDate == 0 || endDate == 0) {
+            revert IncorrectDates(startDate, endDate);
+        }
+
+        if (endDate <= startDate) {
+            return 0;
+        }
+
+        return toYears(endDate - startDate);
+    }
+
     /// @dev Computes discount for given `timeAppreciation` and project `certificationDate`
-    /// @dev (1 - timeAppreciation) ** weeksUntilCertification
+    /// @dev Computes: (1 - timeAppreciation) ** yearsTillCertification
+    /// @dev Taking form: e ** (ln(1 - timeAppreciation) * yearsTillCertification)
     /// @param timeAppreciation 1% = 10000, 0.0984% = 984
     /// @param certificationDate expected date for project certification
-    /// @return timeAppreciationDiscount discount in basis points
+    /// @return timeAppreciationDiscountPoints discount in basis points
     function computeTimeAppreciationDiscount(uint timeAppreciation, uint certificationDate)
         internal
         view
-        returns (uint timeAppreciationDiscount)
+        returns (uint timeAppreciationDiscountPoints)
     {
-        uint weeksUntilCertification = weeksBetween(block.timestamp, certificationDate);
-        if (weeksUntilCertification == 0) {
+        int128 yearsTillCertification = yearsBetween(block.timestamp, certificationDate);
+        if (yearsTillCertification == 0) {
             return TIME_APPRECIATION_BASIS_POINTS;
         }
 
-        if (weeksUntilCertification == 1) {
-            return TIME_APPRECIATION_BASIS_POINTS - timeAppreciation;
-        }
+        int128 discount = ABDKMath64x64.div(
+            TIME_APPRECIATION_BASIS_POINTS - timeAppreciation,
+            TIME_APPRECIATION_BASIS_POINTS
+        );
+        int128 discountLN = ABDKMath64x64.ln(discount);
+        int128 timeAppreciationDiscount = ABDKMath64x64.exp(
+            ABDKMath64x64.mul(discountLN, yearsTillCertification)
+        );
+        timeAppreciationDiscountPoints = ABDKMath64x64.mulu(
+            timeAppreciationDiscount,
+            SolidMath.TIME_APPRECIATION_BASIS_POINTS
+        );
 
-        uint discountRatePoints = TIME_APPRECIATION_BASIS_POINTS - timeAppreciation;
-        int128 discountRate = ABDKMath64x64.div(discountRatePoints, TIME_APPRECIATION_BASIS_POINTS);
-        int128 totalDiscount = ABDKMath64x64.pow(discountRate, (weeksUntilCertification - 1));
-
-        timeAppreciationDiscount = ABDKMath64x64.mulu(totalDiscount, discountRatePoints);
-
-        if (timeAppreciationDiscount == 0) {
+        if (timeAppreciationDiscountPoints == 0) {
             revert InvalidTADiscount();
         }
     }
 
     /// @dev Computes the amount of ERC20 tokens to be minted to the stakeholder and DAO,
     /// @dev and the amount forfeited when collateralizing `fcbtAmount` of ERC1155 tokens
-    /// @dev cbtUserCut = erc1155 * 10e18 * (1 - fee) * (1 - timeAppreciation) ** weeksUntilCertification
+    /// @dev cbtUserCut = erc1155 * 10e18 * (1 - fee) * (1 - timeAppreciation) ** yearsTillCertification
     /// @dev we assume fcbtAmount is less than type(uint256).max / 1e18
     /// @param certificationDate expected date for project certification. Must not be in the past.
     /// @param fcbtAmount amount of ERC1155 tokens to be collateralized
@@ -112,7 +134,7 @@ library SolidMath {
 
     /// @dev Computes the amount of ERC1155 tokens redeemable by the stakeholder, amount of ERC20 tokens
     /// @dev charged by the DAO and to be burned when decollateralizing `cbtAmount` of ERC20 tokens
-    /// @dev erc1155 = erc20 / 10e18 * (1 - fee) / (1 - timeAppreciation) ** weeksUntilCertification
+    /// @dev erc1155 = erc20 / 10e18 * (1 - fee) / (1 - timeAppreciation) ** yearsTillCertification
     /// @dev we assume cbtAmount is less than type(uint256).max / SolidMath.TIME_APPRECIATION_BASIS_POINTS
     /// @param certificationDate expected date for project certification
     /// @param cbtAmount amount of ERC20 tokens to be decollateralized
@@ -191,7 +213,6 @@ library SolidMath {
     }
 
     /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
-    /// @dev erc1155 * 10e18 * timeApn * (1 - timeApn) ** weeks
     /// @param certificationDate expected date for project certification
     /// @param availableCredits amount of ERC1155 tokens backing the reward
     /// @param timeAppreciation 1% = 10000, 0.0984% = 984
@@ -223,5 +244,16 @@ library SolidMath {
 
         feeAmount = Math.mulDiv(grossRewardAmount, rewardsFee, FEE_BASIS_POINTS);
         netRewardAmount = grossRewardAmount - feeAmount;
+    }
+
+    function toYears(uint seconds_) internal pure returns (int128) {
+        uint weeks_ = seconds_ / 1 weeks;
+        if (weeks_ == 0) {
+            return 0;
+        }
+
+        uint days_ = weeks_ * 7;
+
+        return ABDKMath64x64.div(days_, DAYS_IN_YEAR);
     }
 }
