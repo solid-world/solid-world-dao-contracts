@@ -106,14 +106,12 @@ contract ReactiveTimeAppreciationMathTest is Test {
 
     function testComputeReactiveTA() public {
         uint24 decayPerSecond = uint24(getTestDecayPerSecond());
-        uint16 maxDepreciationPerYear = 10; // 1% yearly rate
-        uint24 maxDepreciation = 193; // 1% yearly rate
-        uint24 averageTA = 1599; // 8% yearly rate
+        uint16 maxDepreciation = 10; // 1% yearly rate
+        uint24 averageTA = 80000; // 8% yearly rate
 
         DomainDataTypes.Category[] memory categoryStates = new DomainDataTypes.Category[](2);
         categoryStates[0].volumeCoefficient = 50000;
         categoryStates[0].decayPerSecond = decayPerSecond;
-        categoryStates[0].maxDepreciationPerYear = maxDepreciationPerYear;
         categoryStates[0].maxDepreciation = maxDepreciation;
         categoryStates[0].averageTA = averageTA;
         categoryStates[0].totalCollateralized = 0;
@@ -122,7 +120,6 @@ contract ReactiveTimeAppreciationMathTest is Test {
 
         categoryStates[1].volumeCoefficient = 50000;
         categoryStates[1].decayPerSecond = decayPerSecond;
-        categoryStates[1].maxDepreciationPerYear = maxDepreciationPerYear;
         categoryStates[1].maxDepreciation = maxDepreciation;
         categoryStates[1].averageTA = averageTA;
         categoryStates[1].totalCollateralized = 0;
@@ -145,23 +142,23 @@ contract ReactiveTimeAppreciationMathTest is Test {
         assertEq(decayingMomentum0, 0);
         // 7.1% yearly rate
         // js result: 1425.4519410847877
-        assertEq(reactiveTA0, 1426);
+        assertEq(reactiveTA0, 71000);
 
         assertEq(decayingMomentum1, 30000);
         // 7.7% yearly rate
         // js result: 1541.06903645157
-        assertEq(reactiveTA1, 1541);
+        assertEq(reactiveTA1, 77000);
 
         assertEq(decayingMomentum2, 0);
         // 7% yearly rate
         // js result: 1406.2486641728267
-        assertEq(reactiveTA2, 1406);
+        assertEq(reactiveTA2, 70000);
     }
 
     function testComputeReactiveTA_fuzz(
         uint volumeCoefficient,
         uint40 decayPerSecond,
-        uint16 maxDepreciationPerYear,
+        uint16 maxDepreciation,
         uint24 averageTA,
         uint32 lastCollateralizationTimestamp,
         uint lastCollateralizationMomentum,
@@ -171,18 +168,12 @@ contract ReactiveTimeAppreciationMathTest is Test {
         decayPerSecond = uint40(
             bound(decayPerSecond, 0, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS)
         );
-        maxDepreciationPerYear = uint16(bound(maxDepreciationPerYear, 0, 999));
         lastCollateralizationTimestamp = uint32(
             bound(lastCollateralizationTimestamp, 0, CURRENT_DATE)
         );
 
-        uint24 maxDepreciation = uint24(
-            ReactiveTimeAppreciationMath.toWeeklyRate(
-                (maxDepreciationPerYear * SolidMath.TIME_APPRECIATION_BASIS_POINTS) / 1000
-            )
-        );
         averageTA = uint24(bound(averageTA, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1));
-        maxDepreciation = uint24(bound(maxDepreciation, 0, averageTA));
+        maxDepreciation = uint16(bound(maxDepreciation, 0, averageTA / 1000));
         lastCollateralizationMomentum = bound(
             lastCollateralizationMomentum,
             type(uint).max / 2 + 1,
@@ -197,7 +188,6 @@ contract ReactiveTimeAppreciationMathTest is Test {
         DomainDataTypes.Category memory categoryState;
         categoryState.volumeCoefficient = volumeCoefficient;
         categoryState.decayPerSecond = decayPerSecond;
-        categoryState.maxDepreciationPerYear = maxDepreciationPerYear;
         categoryState.maxDepreciation = maxDepreciation;
         categoryState.averageTA = averageTA;
         categoryState.totalCollateralized = 0;
@@ -305,11 +295,11 @@ contract ReactiveTimeAppreciationMathTest is Test {
 
     function testComputeInitialMomentum() public {
         uint volumeCoefficient = 50000;
-        uint maxDepreciationPerYear = 10; // 1% yearly rate
+        uint maxDepreciation = 10; // 1% yearly rate
 
         uint initialMomentum = ReactiveTimeAppreciationMath.computeInitialMomentum(
             volumeCoefficient,
-            maxDepreciationPerYear
+            maxDepreciation
         );
 
         assertEq(initialMomentum, 50000);
@@ -319,33 +309,32 @@ contract ReactiveTimeAppreciationMathTest is Test {
         DomainDataTypes.Category memory category;
         category.volumeCoefficient = 50000;
         category.decayPerSecond = uint40(getTestDecayPerSecond());
-        category.maxDepreciationPerYear = 10; // 1% yearly rate
-        category.maxDepreciation = 193; // 1% yearly rate
+        category.maxDepreciation = 10; // 1% yearly rate
         category.averageTA = 1599; // 8% yearly rate
         category.totalCollateralized = 0;
         category.lastCollateralizationTimestamp = CURRENT_DATE;
         category.lastCollateralizationMomentum = 50000;
 
         uint newVolumeCoefficient = 75000;
-        uint newMaxDepreciationPerYear0 = 20; // 2% yearly rate
-        uint newMaxDepreciationPerYear1 = 10; // 1% yearly rate
-        uint newMaxDepreciationPerYear2 = 5; // 0.5% yearly rate
+        uint newMaxDepreciation0 = 20; // 2% yearly rate
+        uint newMaxDepreciation1 = 10; // 1% yearly rate
+        uint newMaxDepreciation2 = 5; // 0.5% yearly rate
 
         vm.warp(CURRENT_DATE + 2 days);
         uint adjustedMomentum0 = ReactiveTimeAppreciationMath.computeAdjustedMomentum(
             category,
             newVolumeCoefficient,
-            newMaxDepreciationPerYear0
+            newMaxDepreciation0
         );
         uint adjustedMomentum1 = ReactiveTimeAppreciationMath.computeAdjustedMomentum(
             category,
             newVolumeCoefficient,
-            newMaxDepreciationPerYear1
+            newMaxDepreciation1
         );
         uint adjustedMomentum2 = ReactiveTimeAppreciationMath.computeAdjustedMomentum(
             category,
             newVolumeCoefficient,
-            newMaxDepreciationPerYear2
+            newMaxDepreciation2
         );
 
         assertEq(adjustedMomentum0, 142500);
@@ -356,36 +345,29 @@ contract ReactiveTimeAppreciationMathTest is Test {
     function testInferMomentum_fuzz(
         uint volumeCoefficient,
         uint40 decayPerSecond,
-        uint16 maxDepreciationPerYear,
+        uint16 maxDepreciation,
         uint24 averageTA,
         uint32 lastCollateralizationTimestamp,
         uint lastCollateralizationMomentum,
         uint newVolumeCoefficient,
-        uint16 newMaxDepreciationPerYear
+        uint16 newMaxDepreciation
     ) public {
         volumeCoefficient = bound(volumeCoefficient, 0, type(uint256).max / 100);
         newVolumeCoefficient = bound(newVolumeCoefficient, 0, volumeCoefficient);
         decayPerSecond = uint40(
             bound(decayPerSecond, 0, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS)
         );
-        maxDepreciationPerYear = uint16(bound(maxDepreciationPerYear, 0, 999));
-        newMaxDepreciationPerYear = uint16(bound(newMaxDepreciationPerYear, 0, 999));
         lastCollateralizationTimestamp = uint32(
             bound(lastCollateralizationTimestamp, 0, CURRENT_DATE)
         );
 
-        uint24 maxDepreciation = uint24(
-            ReactiveTimeAppreciationMath.toWeeklyRate(
-                (maxDepreciationPerYear * SolidMath.TIME_APPRECIATION_BASIS_POINTS) / 1000
-            )
-        );
         averageTA = uint24(bound(averageTA, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1));
-        maxDepreciation = uint24(bound(maxDepreciation, 0, averageTA));
+        maxDepreciation = uint16(bound(maxDepreciation, 0, averageTA / 1000));
+        newMaxDepreciation = uint16(bound(newMaxDepreciation, 0, averageTA / 1000));
 
         DomainDataTypes.Category memory categoryState;
         categoryState.volumeCoefficient = volumeCoefficient;
         categoryState.decayPerSecond = decayPerSecond;
-        categoryState.maxDepreciationPerYear = maxDepreciationPerYear;
         categoryState.maxDepreciation = maxDepreciation;
         categoryState.averageTA = averageTA;
         categoryState.totalCollateralized = 0;
@@ -395,7 +377,7 @@ contract ReactiveTimeAppreciationMathTest is Test {
         ReactiveTimeAppreciationMath.inferMomentum(
             categoryState,
             newVolumeCoefficient,
-            newMaxDepreciationPerYear
+            newMaxDepreciation
         );
     }
 

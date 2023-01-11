@@ -10,7 +10,7 @@ library ReactiveTimeAppreciationMath {
     /// @dev Basis points in which the `decayPerSecond` must be expressed
     uint constant DECAY_BASIS_POINTS = 100_000_000_000;
 
-    /// @dev Basis points in which the `maxDepreciationPerYear` must be expressed
+    /// @dev Basis points in which the `maxDepreciation` must be expressed
     uint constant DEPRECIATION_BASIS_POINTS = 10;
 
     error ReactiveTAMathBroken(uint factor1, uint factor2);
@@ -136,31 +136,31 @@ library ReactiveTimeAppreciationMath {
     /// @dev Determines the momentum for the specified Category based on current state and the new params
     /// @param category The category to compute the momentum for
     /// @param newVolumeCoefficient The new volume coefficient of the category
-    /// @param newMaxDepreciationPerYear The new max depreciation per year of the category
+    /// @param newMaxDepreciation The new max depreciation for the category. Quantified per year.
     function inferMomentum(
         DomainDataTypes.Category memory category,
         uint newVolumeCoefficient,
-        uint newMaxDepreciationPerYear
+        uint newMaxDepreciation
     ) internal view returns (uint) {
         if (category.volumeCoefficient == 0 || category.decayPerSecond == 0) {
-            return computeInitialMomentum(newVolumeCoefficient, newMaxDepreciationPerYear);
+            return computeInitialMomentum(newVolumeCoefficient, newMaxDepreciation);
         }
 
-        return computeAdjustedMomentum(category, newVolumeCoefficient, newMaxDepreciationPerYear);
+        return computeAdjustedMomentum(category, newVolumeCoefficient, newMaxDepreciation);
     }
 
     /// @dev Computes the initial value of momentum with the specified parameters
     /// @param volumeCoefficient The volume coefficient of the category
-    /// @param maxDepreciationPerYear how much the reactive TA can drop from the averageTA value, quantified per year
+    /// @param maxDepreciation how much the reactive TA can drop from the averageTA value, quantified per year
     /// @return initialMomentum The initial momentum value
-    function computeInitialMomentum(uint volumeCoefficient, uint maxDepreciationPerYear)
+    function computeInitialMomentum(uint volumeCoefficient, uint maxDepreciation)
         internal
         pure
         returns (uint initialMomentum)
     {
         initialMomentum = Math.mulDiv(
             volumeCoefficient,
-            maxDepreciationPerYear,
+            maxDepreciation,
             DEPRECIATION_BASIS_POINTS
         );
     }
@@ -168,12 +168,12 @@ library ReactiveTimeAppreciationMath {
     /// @dev Computes the adjusted value of momentum for a category when category update event occurs
     /// @param category The category to compute the adjusted momentum for
     /// @param newVolumeCoefficient The new volume coefficient of the category
-    /// @param newMaxDepreciationPerYear The new max depreciation per year of the category
+    /// @param newMaxDepreciation The new max depreciation for the category. Quantified per year.
     /// @return adjustedMomentum The adjusted momentum value
     function computeAdjustedMomentum(
         DomainDataTypes.Category memory category,
         uint newVolumeCoefficient,
-        uint newMaxDepreciationPerYear
+        uint newMaxDepreciation
     ) internal view returns (uint adjustedMomentum) {
         adjustedMomentum = computeDecayingMomentum(
             category.decayPerSecond,
@@ -187,8 +187,7 @@ library ReactiveTimeAppreciationMath {
             category.volumeCoefficient
         );
 
-        int depreciationDiff = int(newMaxDepreciationPerYear) -
-            int(uint(category.maxDepreciationPerYear));
+        int depreciationDiff = int(newMaxDepreciation) - int(uint(category.maxDepreciation));
         if (depreciationDiff > 0) {
             adjustedMomentum += Math.mulDiv(
                 newVolumeCoefficient,

@@ -86,7 +86,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         cbt.approve(address(manager), type(uint).max);
         vm.stopPrank();
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10, 193); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
 
         DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
         assertEq(category.averageTA, INITIAL_CATEGORY_TA);
@@ -137,7 +137,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             0
         );
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 20, 387); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 20); // 5% decay per day
 
         (, uint reactiveTAAfterUpdate0) = ReactiveTimeAppreciationMath.computeReactiveTA(
             manager.getCategory(CATEGORY_ID),
@@ -152,7 +152,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             0
         );
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 0, 0); // 0% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 0); // 0% decay per day
 
         (, uint reactiveTAAfterUpdate1) = ReactiveTimeAppreciationMath.computeReactiveTA(
             manager.getCategory(CATEGORY_ID),
@@ -187,7 +187,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         cbt.approve(address(manager), type(uint).max);
         vm.stopPrank();
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10, 193); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
 
         vm.warp(CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
@@ -239,7 +239,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         cbt.approve(address(manager), type(uint).max);
         vm.stopPrank();
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10, 193); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
 
         vm.warp(CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
@@ -295,7 +295,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         cbt.approve(address(manager), type(uint).max);
         vm.stopPrank();
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10, 193); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
 
         vm.warp(CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
@@ -343,7 +343,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         cbt.approve(address(manager), type(uint).max);
         vm.stopPrank();
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10, 193); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
 
         vm.warp(CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);

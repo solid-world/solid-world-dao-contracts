@@ -75,16 +75,9 @@ contract SolidWorldManager is
         uint categoryId,
         uint volumeCoefficient,
         uint40 decayPerSecond,
-        uint16 maxDepreciationPerYear,
-        uint24 maxDepreciation
+        uint16 maxDepreciation
     ) external {
-        _storage.updateCategory(
-            categoryId,
-            volumeCoefficient,
-            decayPerSecond,
-            maxDepreciationPerYear,
-            maxDepreciation
-        );
+        _storage.updateCategory(categoryId, volumeCoefficient, decayPerSecond, maxDepreciation);
     }
 
     // todo #121: add authorization

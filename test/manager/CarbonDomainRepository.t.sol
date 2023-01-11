@@ -35,14 +35,14 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         vm.expectRevert(
             abi.encodeWithSelector(CarbonDomainRepository.InvalidCategoryId.selector, CATEGORY_ID)
         );
-        manager.updateCategory(CATEGORY_ID, 0, 0, 0, 0);
+        manager.updateCategory(CATEGORY_ID, 0, 0, 0);
     }
 
     function testUpdateCategory_failsForInvalidInput() public {
         manager.addCategory(CATEGORY_ID, "", "", INITIAL_CATEGORY_TA);
 
         vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidInput.selector));
-        manager.updateCategory(CATEGORY_ID, 0, 0, 0, 0);
+        manager.updateCategory(CATEGORY_ID, 0, 0, 0);
     }
 
     function testUpdateCategory() public {
@@ -50,8 +50,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
 
         uint volumeCoefficientInput0 = 50000;
         uint40 decayPerSecondInput0 = getTestDecayPerSecond();
-        uint16 maxDepreciationPerYearInput0 = 10; // 1% yearly rate
-        uint24 maxDepreciationInput0 = 193;
+        uint16 maxDepreciationInput0 = 10; // 1% yearly rate
 
         vm.warp(CURRENT_DATE + 2 days);
         vm.expectEmit(true, true, true, true, address(manager));
@@ -65,7 +64,6 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
             CATEGORY_ID,
             volumeCoefficientInput0,
             decayPerSecondInput0,
-            maxDepreciationPerYearInput0,
             maxDepreciationInput0
         );
 
@@ -73,15 +71,13 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
 
         assertEq(category0.volumeCoefficient, volumeCoefficientInput0);
         assertEq(category0.decayPerSecond, decayPerSecondInput0);
-        assertEq(category0.maxDepreciationPerYear, maxDepreciationPerYearInput0);
         assertEq(category0.maxDepreciation, maxDepreciationInput0);
         assertEq(category0.lastCollateralizationTimestamp, CURRENT_DATE + 2 days);
         assertEq(category0.lastCollateralizationMomentum, 50000);
 
         uint volumeCoefficientInput1 = 75000;
         uint40 decayPerSecondInput1 = getTestDecayPerSecond();
-        uint16 maxDepreciationPerYearInput1 = 20; // 2% yearly rate
-        uint24 maxDepreciationInput1 = 388;
+        uint16 maxDepreciationInput1 = 20; // 2% yearly rate
 
         vm.warp(CURRENT_DATE + 4 days);
         vm.expectEmit(true, true, true, true, address(manager));
@@ -95,7 +91,6 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
             CATEGORY_ID,
             volumeCoefficientInput1,
             decayPerSecondInput1,
-            maxDepreciationPerYearInput1,
             maxDepreciationInput1
         );
 
@@ -103,7 +98,6 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
 
         assertEq(category1.volumeCoefficient, volumeCoefficientInput1);
         assertEq(category1.decayPerSecond, decayPerSecondInput1);
-        assertEq(category1.maxDepreciationPerYear, maxDepreciationPerYearInput1);
         assertEq(category1.maxDepreciation, maxDepreciationInput1);
         assertEq(category1.lastCollateralizationTimestamp, CURRENT_DATE + 4 days);
         assertEq(category1.lastCollateralizationMomentum, 142500); // 90% * 50000 * 75000 / 50000 + 75000 = 142500
