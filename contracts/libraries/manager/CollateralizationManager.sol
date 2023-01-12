@@ -12,9 +12,9 @@ import "../../SolidWorldManagerStorage.sol";
 library CollateralizationManager {
     event BatchCollateralized(
         uint indexed batchId,
+        address indexed batchSupplier,
         uint amountIn,
-        uint amountOut,
-        address indexed batchSupplier
+        uint amountOut
     );
     event CategoryRebalanced(
         uint indexed categoryId,
@@ -101,7 +101,7 @@ library CollateralizationManager {
             ""
         );
 
-        emit BatchCollateralized(batchId, amountIn, cbtUserCut, msg.sender);
+        emit BatchCollateralized(batchId, msg.sender, amountIn, cbtUserCut);
     }
 
     /// @dev Simulates collateralization of `amountIn` ERC1155 tokens with id `batchId` for msg.sender

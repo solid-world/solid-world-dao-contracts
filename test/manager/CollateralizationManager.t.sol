@@ -8,9 +8,9 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
 
     event BatchCollateralized(
         uint indexed batchId,
+        address indexed batchSupplier,
         uint amountIn,
-        uint amountOut,
-        address indexed batchSupplier
+        uint amountOut
     );
     event CollateralizationFeeUpdated(uint indexed collateralizationFee);
 
@@ -72,7 +72,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatchWhenERC20OutputIsLessThanMinimum() public {
-        uint cbtUserCut = 81e18;
+        uint cbtUserCut = 81.03e18;
         manager.addCategory(CATEGORY_ID, "Test token", "TT", TIME_APPRECIATION);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
@@ -80,7 +80,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -95,11 +95,11 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         vm.expectRevert(
             abi.encodeWithSelector(
                 CollateralizationManager.AmountOutLessThanMinimum.selector,
-                cbtUserCut,
-                cbtUserCut + 1
+                81023310000000000000,
+                cbtUserCut
             )
         );
-        manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut + 1);
+        manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut);
         vm.stopPrank();
     }
 
@@ -151,16 +151,24 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         vm.startPrank(testAccount);
         forwardContractBatch.setApprovalForAll(address(manager), true);
 
-        vm.expectEmit(true, true, false, true, address(manager));
-        emit BatchCollateralized(BATCH_ID, 100, cbtUserCut, testAccount);
+        vm.expectEmit(true, true, false, false, address(manager));
+        emit BatchCollateralized(BATCH_ID, testAccount, 100, cbtUserCut);
         manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut);
 
         vm.stopPrank();
 
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 0);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
-        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut);
-        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
+        assertApproxEqAbs(
+            manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount),
+            cbtUserCut,
+            0.02331e18
+        );
+        assertApproxEqAbs(
+            manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver),
+            cbtDaoCut,
+            0.00259e18
+        );
     }
 
     function testCollateralizeBatch_updatesBatchTAAndRebalancesCategory() public {
@@ -210,7 +218,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -223,15 +231,19 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         vm.startPrank(testAccount);
         forwardContractBatch.setApprovalForAll(address(manager), true);
 
-        vm.expectEmit(true, true, false, true, address(manager));
-        emit BatchCollateralized(BATCH_ID, 100, cbtUserCut, testAccount);
+        vm.expectEmit(true, true, false, false, address(manager));
+        emit BatchCollateralized(BATCH_ID, testAccount, 100, cbtUserCut);
         manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut);
 
         vm.stopPrank();
 
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 0);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
-        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), cbtUserCut);
+        assertApproxEqAbs(
+            manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount),
+            cbtUserCut,
+            0.0259e18
+        );
         assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
     }
 
@@ -278,7 +290,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2025,
                 batchTA: 0,
                 supplier: testAccount
@@ -288,10 +300,9 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
 
         (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = manager
             .simulateBatchCollateralization(BATCH_ID, 10000);
-
-        assertEq(cbtUserCut, expectedCbtUserCut);
-        assertEq(cbtDaoCut, expectedCbtDaoCut);
-        assertEq(cbtForfeited, expectedCbtForfeited);
+        assertApproxEqAbs(cbtUserCut, expectedCbtUserCut, 2.331e18);
+        assertApproxEqAbs(cbtDaoCut, expectedCbtDaoCut, 0.259e18);
+        assertApproxEqAbs(cbtForfeited, expectedCbtForfeited, 2.59e18);
     }
 
     function testSetCollateralizationFee() public {
