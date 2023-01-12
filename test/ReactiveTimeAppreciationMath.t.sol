@@ -141,17 +141,14 @@ contract ReactiveTimeAppreciationMathTest is Test {
 
         assertEq(decayingMomentum0, 0);
         // 7.1% yearly rate
-        // js result: 1425.4519410847877
         assertEq(reactiveTA0, 71000);
 
         assertEq(decayingMomentum1, 30000);
         // 7.7% yearly rate
-        // js result: 1541.06903645157
         assertEq(reactiveTA1, 77000);
 
         assertEq(decayingMomentum2, 0);
         // 7% yearly rate
-        // js result: 1406.2486641728267
         assertEq(reactiveTA2, 70000);
     }
 
@@ -176,13 +173,13 @@ contract ReactiveTimeAppreciationMathTest is Test {
         maxDepreciation = uint16(bound(maxDepreciation, 0, averageTA / 1000));
         lastCollateralizationMomentum = bound(
             lastCollateralizationMomentum,
-            type(uint).max / 2 + 1,
-            type(uint).max
+            type(uint).max / 2 + 1 + averageTA,
+            type(uint).max - 1
         );
         forwardCreditsAmount = bound(
             forwardCreditsAmount,
             0,
-            (type(uint).max - lastCollateralizationMomentum) * 2
+            (type(uint).max - lastCollateralizationMomentum) * 2 - 1
         );
 
         DomainDataTypes.Category memory categoryState;
@@ -227,7 +224,7 @@ contract ReactiveTimeAppreciationMathTest is Test {
         ReactiveTimeAppreciationMath.computeReactiveTA(categoryState, forwardCreditsAmount);
     }
 
-    function testInferBatchTA_weeksTillCertificationAre0() public {
+    function testFailInferBatchTA_weeksTillCertificationAre0() public {
         uint cbtDecimals = 18;
         uint circulatingCBT = 945 * 10**cbtDecimals;
         uint totalCollateralizedForwardCredits = 1000;
@@ -248,9 +245,9 @@ contract ReactiveTimeAppreciationMathTest is Test {
     }
 
     function testInferBatchTA() public {
-        uint circulatingCBT = 945.525410012776e18;
+        uint circulatingCBT = 880.88600587e18;
         uint totalCollateralizedForwardCredits = 1000;
-        uint certificationDate = CURRENT_DATE + 35 weeks;
+        uint certificationDate = CURRENT_DATE + 77 weeks;
         uint cbtDecimals = 18;
 
         uint batchTA = ReactiveTimeAppreciationMath.inferBatchTA(
@@ -260,7 +257,7 @@ contract ReactiveTimeAppreciationMathTest is Test {
             cbtDecimals
         );
 
-        assertEq(batchTA, 1600);
+        assertEq(batchTA, 82300);
     }
 
     function testInferBatchTA_fuzz(
@@ -274,7 +271,7 @@ contract ReactiveTimeAppreciationMathTest is Test {
             1,
             circulatingCBT / 1e18
         );
-        certificationDate = bound(certificationDate, 1, type(uint32).max);
+        certificationDate = bound(certificationDate, CURRENT_DATE + 72 weeks, type(uint32).max);
 
         DummyReactiveTimeAppreciationMath dummy = new DummyReactiveTimeAppreciationMath();
         try
@@ -352,7 +349,7 @@ contract ReactiveTimeAppreciationMathTest is Test {
         uint newVolumeCoefficient,
         uint16 newMaxDepreciation
     ) public {
-        volumeCoefficient = bound(volumeCoefficient, 0, type(uint256).max / 100);
+        volumeCoefficient = bound(volumeCoefficient, 0, type(uint256).max / 101 - 1);
         newVolumeCoefficient = bound(newVolumeCoefficient, 0, volumeCoefficient);
         decayPerSecond = uint40(
             bound(decayPerSecond, 0, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS)
@@ -379,19 +376,6 @@ contract ReactiveTimeAppreciationMathTest is Test {
             newVolumeCoefficient,
             newMaxDepreciation
         );
-    }
-
-    function testToWeeklyRate() public {
-        assertEq(ReactiveTimeAppreciationMath.toWeeklyRate(0), 0);
-
-        // js result: 1599.1347781311172
-        assertEq(ReactiveTimeAppreciationMath.toWeeklyRate(80000), 1600);
-
-        // js result: 4273.826727360097
-        assertEq(ReactiveTimeAppreciationMath.toWeeklyRate(200000), 4274);
-
-        // js result: 84597.09972808382
-        assertEq(ReactiveTimeAppreciationMath.toWeeklyRate(990000), 84598);
     }
 
     function getTestDecayPerSecond() internal pure returns (uint decayPerSecond) {

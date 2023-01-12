@@ -231,15 +231,16 @@ library SolidMath {
             return (0, 0);
         }
 
-        uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
+        uint oldDiscount = computeTimeAppreciationDiscount(
             timeAppreciation,
-            certificationDate
+            certificationDate + 1 weeks
         );
+        uint newDiscount = computeTimeAppreciationDiscount(timeAppreciation, certificationDate);
 
         uint grossRewardAmount = Math.mulDiv(
-            availableCredits * timeAppreciation * timeAppreciationDiscount,
+            availableCredits * (newDiscount - oldDiscount),
             10**decimals,
-            TIME_APPRECIATION_BASIS_POINTS**2
+            TIME_APPRECIATION_BASIS_POINTS
         );
 
         feeAmount = Math.mulDiv(grossRewardAmount, rewardsFee, FEE_BASIS_POINTS);

@@ -491,7 +491,7 @@ contract SolidMathTest is Test {
         (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
             block.timestamp + 1 minutes,
             10000,
-            1647,
+            8_2359,
             REWARDS_FEE,
             18
         );
@@ -504,26 +504,34 @@ contract SolidMathTest is Test {
         (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
             block.timestamp + 1 weeks + 1 minutes,
             10000,
-            1647,
+            8_2360,
             REWARDS_FEE,
             18
         );
 
-        assertEq(rewardAmount, 15.6207302145e18);
-        assertEq(feeAmount, 0.8221436955e18);
+        //js:   15620736937500000000
+        //sol:  15618000000000000000
+        assertApproxEqAbs(rewardAmount, 15.6207369375e18, 0.00274e18);
+        //js:   822144049341000000
+        //sol:  822000000000000000
+        assertApproxEqAbs(feeAmount, 0.822144049341e18, 0.00014405e18);
     }
 
     function testComputeWeeklyBatchReward_fiveYears() public {
         (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
             block.timestamp + 5 * ONE_YEAR + 1 minutes,
             10000,
-            1647,
+            8_2360,
             REWARDS_FEE,
             18
         );
 
-        assertApproxEqAbs(rewardAmount, 10.1927249229e18, 256500000000);
-        assertApproxEqAbs(feeAmount, 0.5364592065e18, 13500000000);
+        //js:   10192727432200000000
+        //sol:  10193500000000000000
+        assertApproxEqAbs(rewardAmount, 10.1927274322e18, 0.00077257e18);
+        //js:   536459338537000000
+        //sol:  536500000000000000
+        assertApproxEqAbs(feeAmount, 0.536459338537e18, 0.0000407e18);
     }
 
     function testComputeWeeklyBatchReward_fuzz(

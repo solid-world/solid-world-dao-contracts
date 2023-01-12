@@ -192,14 +192,16 @@ library CollateralizationManager {
             cbtDecimals
         );
 
-        batch.batchTA = uint24(
-            ReactiveTimeAppreciationMath.inferBatchTA(
-                circulatingCBT + toBeMintedCBT,
-                collateralizedForwardCredits + toBeCollateralizedForwardCredits,
-                batch.certificationDate,
-                cbtDecimals
-            )
-        );
+        if (SolidMath.yearsBetween(block.timestamp, batch.certificationDate) != 0) {
+            batch.batchTA = uint24(
+                ReactiveTimeAppreciationMath.inferBatchTA(
+                    circulatingCBT + toBeMintedCBT,
+                    collateralizedForwardCredits + toBeCollateralizedForwardCredits,
+                    batch.certificationDate,
+                    cbtDecimals
+                )
+            );
+        }
     }
 
     function _rebalanceCategory(
