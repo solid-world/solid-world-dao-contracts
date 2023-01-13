@@ -89,14 +89,14 @@ contract RewardScenarios is Test {
             CATEGORY_ID,
             "Mangrove Collateralized Basket Token",
             "MCBT",
-            1647
+            82360
         );
         mangroveRewardToken = address(solidWorldManager.getCategoryToken(CATEGORY_ID));
         solidWorldManager.addCategory(
             CATEGORY_ID + 1,
             "Reforestation Collateralized Basket Token",
             "RCBT",
-            1647
+            82360
         );
         reforestationRewardToken = address(solidWorldManager.getCategoryToken(CATEGORY_ID + 1));
 
@@ -207,7 +207,7 @@ contract RewardScenarios is Test {
         vm.prank(user1);
         solidStaking.stake(assetMangrove, 5000e18); // updates index
 
-        vm.warp(CURRENT_DATE + 5 days);
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 2 days);
         CollateralizedBasketToken(usdcToken).mint(rewardsVault, 30 days * 1e18); // $1 per second, for a month
         address[] memory rewards = new address[](1);
         rewards[0] = usdcToken;
@@ -215,7 +215,8 @@ contract RewardScenarios is Test {
         newEmissionsPerSecond[0] = 1e18; // $1 per second
         emissionManager.setEmissionPerSecond(assetMangrove, rewards, newEmissionsPerSecond);
 
-        vm.warp(CURRENT_DATE + 11 days); // accrued all carbon rewards and distribution ended + accrued 6 days of usdc rewards
+        // accrued all carbon rewards and distribution ended + accrued 6 days of usdc rewards
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 8 days);
 
         address[] memory incentivizedAssets = new address[](1);
         incentivizedAssets[0] = assetMangrove;
@@ -243,24 +244,30 @@ contract RewardScenarios is Test {
         assertApproxEqAbs(unclaimedAmounts1[0], (mangroveEmissionPerSecond / 2) * 6 days, DELTA);
         assertEq(unclaimedAmounts1[2], (1e18 / 2) * 6 days);
 
+        uint balanceBeforeClaimingRewards0 = CollateralizedBasketToken(mangroveRewardToken)
+            .balanceOf(user0);
+        uint balanceBeforeClaimingRewards1 = CollateralizedBasketToken(mangroveRewardToken)
+            .balanceOf(user1);
         vm.prank(user0);
         rewardsController.claimAllRewardsToSelf(incentivizedAssets);
         assertEq(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0),
-            4130.352e18 + 12391.056e18 + unclaimedAmounts0[0]
+            balanceBeforeClaimingRewards0 + unclaimedAmounts0[0]
         );
 
         vm.prank(user1);
         rewardsController.claimAllRewardsToSelf(incentivizedAssets);
         assertEq(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user1),
-            4130.352e18 + 12391.056e18 + unclaimedAmounts1[0]
+            balanceBeforeClaimingRewards1 + unclaimedAmounts1[0]
         );
     }
 
     function testUserRewardsAreCorrectlyAccountedWhenClaimingMultipleTimesAndModifyingStakeDuringDistributionPeriod()
         public
     {
+        uint mangroveBalanceBeforeClaimingRewards = CollateralizedBasketToken(mangroveRewardToken)
+            .balanceOf(user0);
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END);
 
         address[] memory assets = new address[](1);
@@ -311,20 +318,17 @@ contract RewardScenarios is Test {
         vm.prank(user1);
         rewardsController.claimAllRewardsToSelf(assets);
 
-        assertApproxEqAbs(
+        assertEq(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0),
-            4130.352e18 +
-                12391.056e18 +
+            mangroveBalanceBeforeClaimingRewards +
                 unclaimedAmounts0[0] +
                 unclaimedAmounts1[0] +
                 unclaimedAmounts2[0] *
-                2,
-            2500 // 0.0000000000000025 difference, probably coming from exponential math
+                2
         );
         assertApproxEqAbs(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user1),
-            4130.352e18 +
-                12391.056e18 +
+            mangroveBalanceBeforeClaimingRewards +
                 (mangroveEmissionPerSecond / 2) *
                 2 days +
                 ((mangroveEmissionPerSecond * 2) / 3) *
