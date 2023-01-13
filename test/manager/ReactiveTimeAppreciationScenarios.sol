@@ -12,7 +12,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 52 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -57,7 +57,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
 
         DomainDataTypes.Category memory category0 = manager.getCategory(CATEGORY_ID);
 
-        assertApproxEqAbs(category0.averageTA, INITIAL_CATEGORY_TA, 1);
+        assertEq(category0.averageTA, INITIAL_CATEGORY_TA);
         assertEq(category0.totalCollateralized, 4000);
         assertEq(category0.lastCollateralizationMomentum, 1000);
     }
@@ -70,7 +70,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 52 weeks + 5 days),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR + 5 days),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -103,32 +103,29 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         assertEq(category0.averageTA, INITIAL_CATEGORY_TA);
 
         vm.prank(testAccount);
-        manager.collateralizeBatch(BATCH_ID, 10000, 8218.6e18);
+        manager.collateralizeBatch(BATCH_ID, 10000, 8214.5e18);
 
         DomainDataTypes.Batch memory batch1 = manager.getBatch(BATCH_ID);
-        assertApproxEqAbs(batch1.batchTA, 1696, 1);
+        assertApproxEqAbs(batch1.batchTA, 85000, 1);
 
         DomainDataTypes.Category memory category1 = manager.getCategory(CATEGORY_ID);
-        assertApproxEqAbs(category1.averageTA, 1696, 1);
+        assertEq(category1.averageTA, 85000);
 
         vm.prank(testAccount);
-        manager.collateralizeBatch(BATCH_ID, 20000, 16104.5e18);
+        manager.collateralizeBatch(BATCH_ID, 20000, 16070e18);
 
         DomainDataTypes.Batch memory batch2 = manager.getBatch(BATCH_ID);
-        assertApproxEqAbs(batch2.batchTA, 1947, 1);
+        assertApproxEqAbs(batch2.batchTA, 97857, 2);
 
         DomainDataTypes.Category memory category2 = manager.getCategory(CATEGORY_ID);
-        assertApproxEqAbs(category2.averageTA, 1948, 1);
+        assertApproxEqAbs(category2.averageTA, 97857, 1);
 
         uint userERC20Balance = cbt.balanceOf(testAccount);
         uint feesERC20 = cbt.balanceOf(feeReceiver);
         uint mintedERC20 = userERC20Balance + feesERC20;
         uint rewards = _computeRewards();
 
-        assertApproxEqAbs(mintedERC20 + rewards, 5000e18 + 10000e18 + 20000e18, 4.74e18);
-        /// 35000 - 34995 = 5
-        /// 5 / 35000 = 0.0001428571429 ~ 0.0143% error for 3 collateralizations, batch is 1 year from certification
-        /// 5 carbon credits are lost in the math operations and rounding
+        assertApproxEqAbs(mintedERC20 + rewards, 5000e18 + 10000e18 + 20000e18, 0.065e18);
 
         vm.warp(CURRENT_DATE + 5 days);
 
@@ -144,7 +141,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             0
         );
 
-        assertApproxEqAbs(reactiveTABeforeUpdate0, reactiveTAAfterUpdate0, 7); // 0.27% error
+        assertEq(reactiveTABeforeUpdate0, reactiveTAAfterUpdate0);
 
         vm.warp(CURRENT_DATE + 100 days);
         (, uint reactiveTABeforeUpdate1) = ReactiveTimeAppreciationMath.computeReactiveTA(
@@ -159,8 +156,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             0
         );
 
-        assertEq(reactiveTABeforeUpdate1, 1561);
-        assertEq(reactiveTAAfterUpdate1, 1948); // values matching py implementation
+        assertEq(reactiveTABeforeUpdate1, 77857);
+        assertEq(reactiveTAAfterUpdate1, 97857); // values matching py implementation
     }
 
     function testReactiveTAOutcomes_updatedCategoryParams_batch7YearFromCertification() public {
@@ -171,7 +168,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 7 * 52 weeks + 5 days),
+                certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -207,10 +204,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         uint mintedERC20 = userERC20Balance + feesERC20;
         uint rewards = _computeRewards();
 
-        assertApproxEqAbs(mintedERC20 + rewards, 5000e18 + 10000e18 + 20000e18, 28.3368e18);
-        /// 35000 - 34971.66 = 28.34
-        /// 28.34 / 35000 = 0.0008097142857 ~ 0.081% error for 3 collateralizations, batch is 7 years from certification
-        /// 29 carbon credits are lost in the math operations and rounding
+        assertApproxEqAbs(mintedERC20 + rewards, 5000e18 + 10000e18 + 20000e18, 0.11e18);
     }
 
     function testReactiveTAOutcomes_updatedCategoryParams_batch7YearFromCertification_moreCollateralizationOps()
@@ -223,7 +217,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 7 * 52 weeks + 5 days),
+                certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -261,10 +255,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         uint mintedERC20 = userERC20Balance + feesERC20;
         uint rewards = _computeRewards();
 
-        assertApproxEqAbs(mintedERC20 + rewards, 50000e18, 50.45e18);
-        /// 50000 - 49949.55 = 50.45
-        /// 50.45 / 50000 = 0.001009 ~ 0.1% error for 5 collateralizations, batch is 7 years from certification
-        /// 51 carbon credits are lost in the math operations and rounding
+        assertApproxEqAbs(mintedERC20 + rewards, 50000e18, 0.425e18);
     }
 
     function testReactiveTAOutcomes_updatedCategoryParams_5Batches_7YearsFromCertification_1CollateralizationPerBatch()
@@ -278,7 +269,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID,
-                    certificationDate: uint32(CURRENT_DATE + 7 * 52 weeks + 5 days),
+                    certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                     vintage: 2022,
                     batchTA: 0,
                     supplier: testAccount
@@ -309,10 +300,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         uint mintedERC20 = userERC20Balance + feesERC20;
         uint rewards = _computeRewards();
 
-        assertApproxEqAbs(mintedERC20 + rewards, 50000e18, 64e18);
-        /// 50000 - 49936.23 = 63.77
-        /// 63,77 / 50000 = 0.0012754 ~ 0.13% error for 5 batches, 5 collateralizations, batch is 7 years from certification
-        /// 64 carbon credits are lost in the math operations and rounding
+        assertEq(mintedERC20 + rewards, 50000e18);
     }
 
     function testReactiveTAOutcomes_updatedCategoryParams_5Batches_7YearsFromCertification_5CollateralizationOps()
@@ -326,7 +314,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID,
-                    certificationDate: uint32(CURRENT_DATE + 7 * 52 weeks + 5 days),
+                    certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                     vintage: 2022,
                     batchTA: 0,
                     supplier: testAccount
@@ -361,21 +349,19 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         uint mintedERC20 = userERC20Balance + feesERC20;
         uint rewards = _computeRewards();
 
-        assertApproxEqAbs(mintedERC20 + rewards, 250000e18, 1335e18);
-        /// 250000 - 248665.1 = 1334.9
-        /// 1334.9 / 250000 = 0.0053396 ~ 0.53% error for 5 batches, 25 collateralizations, batch is 7 years from certification
-        /// 1335 carbon credits are lost in the math operations and rounding
+        assertApproxEqAbs(mintedERC20 + rewards, 250000e18, 0.965e18);
     }
 
     function _computeRewards() internal returns (uint rewards) {
+        vm.warp(CURRENT_DATE + 5 days + 1);
         uint[] memory categories = new uint[](1);
         categories[0] = CATEGORY_ID;
-        for (uint i = 1; i <= 52 * 7 + 1; i++) {
+        for (uint i = 1; i <= 52 * 7 + 2; i++) {
             (, uint[] memory rewardAmounts, uint[] memory rewardFees) = manager
                 .computeWeeklyCarbonRewards(categories);
             rewards += rewardAmounts[0];
             rewards += rewardFees[0];
-            vm.warp(CURRENT_DATE + 5 days + i * 1 weeks);
+            vm.warp(CURRENT_DATE + 5 days + 1 + i * 1 weeks);
         }
     }
 }
