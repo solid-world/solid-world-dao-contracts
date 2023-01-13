@@ -389,7 +389,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -402,7 +402,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount

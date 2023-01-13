@@ -270,6 +270,10 @@ library DecollateralizationManager {
             revert InvalidBatchId(batchId);
         }
 
+        if (amountIn == 0) {
+            revert InvalidInput();
+        }
+
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(
             _storage,
             batchId
@@ -284,7 +288,7 @@ library DecollateralizationManager {
                 collateralizedToken.decimals()
             );
 
-        if (amountOut <= 0) {
+        if (amountOut == 0) {
             revert AmountOutTooLow(amountOut);
         }
 

@@ -26,6 +26,7 @@ library CollateralizationManager {
     error InvalidBatchId(uint batchId);
     error BatchCertified(uint batchId);
     error InvalidInput();
+    error CannotCollateralizeTheWeekBeforeCertification();
     error AmountOutLessThanMinimum(uint amountOut, uint minAmountOut);
 
     /// @dev Collateralizes `amountIn` of ERC1155 tokens with id `batchId` for msg.sender
@@ -40,16 +41,21 @@ library CollateralizationManager {
         uint amountIn,
         uint amountOutMin
     ) external {
+        if (amountIn == 0) {
+            revert InvalidInput();
+        }
+
         if (!_storage.batchCreated[batchId]) {
             revert InvalidBatchId(batchId);
         }
 
-        if (_storage.batches[batchId].certificationDate <= block.timestamp) {
+        uint32 certificationDate = _storage.batches[batchId].certificationDate;
+        if (certificationDate <= block.timestamp) {
             revert BatchCertified(batchId);
         }
 
-        if (amountIn == 0) {
-            revert InvalidInput();
+        if (SolidMath.yearsBetween(block.timestamp, certificationDate) == 0) {
+            revert CannotCollateralizeTheWeekBeforeCertification();
         }
 
         (uint decayingMomentum, uint reactiveTA) = ReactiveTimeAppreciationMath.computeReactiveTA(
@@ -63,7 +69,7 @@ library CollateralizationManager {
         );
 
         (uint cbtUserCut, uint cbtDaoCut, ) = SolidMath.computeCollateralizationOutcome(
-            _storage.batches[batchId].certificationDate,
+            certificationDate,
             amountIn,
             reactiveTA,
             _storage.collateralizationFee,
@@ -192,16 +198,14 @@ library CollateralizationManager {
             cbtDecimals
         );
 
-        if (SolidMath.yearsBetween(block.timestamp, batch.certificationDate) != 0) {
-            batch.batchTA = uint24(
-                ReactiveTimeAppreciationMath.inferBatchTA(
-                    circulatingCBT + toBeMintedCBT,
-                    collateralizedForwardCredits + toBeCollateralizedForwardCredits,
-                    batch.certificationDate,
-                    cbtDecimals
-                )
-            );
-        }
+        batch.batchTA = uint24(
+            ReactiveTimeAppreciationMath.inferBatchTA(
+                circulatingCBT + toBeMintedCBT,
+                collateralizedForwardCredits + toBeCollateralizedForwardCredits,
+                batch.certificationDate,
+                cbtDecimals
+            )
+        );
     }
 
     function _rebalanceCategory(
