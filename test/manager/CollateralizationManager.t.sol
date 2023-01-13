@@ -18,7 +18,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         vm.expectRevert(
             abi.encodeWithSelector(CollateralizationManager.InvalidBatchId.selector, 1)
         );
-        manager.collateralizeBatch(CATEGORY_ID, 0, 0);
+        manager.collateralizeBatch(CATEGORY_ID, 1, 0);
     }
 
     function testCollateralizeBatch_whenCollateralizing0() public {
@@ -54,7 +54,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 12),
+                certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -68,6 +68,35 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         forwardContractBatch.setApprovalForAll(address(manager), true);
         vm.expectRevert(abi.encodePacked("ERC1155: insufficient balance for transfer"));
         manager.collateralizeBatch(BATCH_ID, 1000, 1000);
+        vm.stopPrank();
+    }
+
+    function testCollateralizeBatch_theWeekBeforeCertification() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", 1);
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + 1 weeks - 1),
+                vintage: 2022,
+                batchTA: 0,
+                supplier: testAccount
+            }),
+            100
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+
+        vm.startPrank(testAccount);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CollateralizationManager.CannotCollateralizeTheWeekBeforeCertification.selector
+            )
+        );
+        manager.collateralizeBatch(BATCH_ID, 100, 0);
         vm.stopPrank();
     }
 

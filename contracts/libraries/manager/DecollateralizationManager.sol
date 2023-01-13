@@ -15,9 +15,9 @@ library DecollateralizationManager {
 
     event TokensDecollateralized(
         uint indexed batchId,
+        address indexed tokensOwner,
         uint amountIn,
-        uint amountOut,
-        address indexed tokensOwner
+        uint amountOut
     );
     event CategoryRebalanced(
         uint indexed categoryId,
@@ -312,7 +312,7 @@ library DecollateralizationManager {
             ""
         );
 
-        emit TokensDecollateralized(batchId, amountIn, amountOut, msg.sender);
+        emit TokensDecollateralized(batchId, msg.sender, amountIn, amountOut);
     }
 
     function _getCollateralizedTokenForBatchId(
