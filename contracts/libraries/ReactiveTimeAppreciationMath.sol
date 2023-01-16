@@ -85,7 +85,6 @@ library ReactiveTimeAppreciationMath {
     /// @dev Derives what the time appreciation should be for a batch based on ERC20 in circulation, underlying ERC1155
     ///      amount and its certification date
     /// @dev Computes: 1 - (circulatingCBT / totalCollateralizedBatchForwardCredits) ** (1 / yearsTillCertification)
-    /// @dev Taking form: 1 - 2 ** (log_2(circulatingCBT / totalCollateralizedBatchForwardCredits) * (1 / yearsTillCertification))
     /// @param circulatingCBT The circulating CBT amount minted for the batch. Assume <= 2**122.
     /// @param totalCollateralizedForwardCredits The total collateralized batch forward credits. Assume <= circulatingCBT / 1e18.
     /// @param certificationDate The batch certification date
@@ -101,14 +100,13 @@ library ReactiveTimeAppreciationMath {
         int128 yearsTillCertification = SolidMath.yearsBetween(block.timestamp, certificationDate);
         assert(yearsTillCertification != 0);
 
-        int128 yearsTillCertificationInverse = ABDKMath64x64.inv(yearsTillCertification);
         int128 aggregateDiscount = ABDKMath64x64.div(
             circulatingCBT,
             totalCollateralizedForwardCredits * 10**cbtDecimals
         );
-        int128 aggregateDiscountLog2 = ABDKMath64x64.log_2(aggregateDiscount);
-        int128 aggregatedYearlyDiscount = ABDKMath64x64.exp_2(
-            ABDKMath64x64.mul(aggregateDiscountLog2, yearsTillCertificationInverse)
+        int128 aggregatedYearlyDiscount = ABDKMath64x64.pow(
+            aggregateDiscount,
+            ABDKMath64x64.inv(yearsTillCertification)
         );
         uint aggregatedYearlyDiscountPoints = ABDKMath64x64.mulu(
             aggregatedYearlyDiscount,

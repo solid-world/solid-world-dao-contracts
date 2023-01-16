@@ -319,4 +319,13 @@ library ABDKMath64x64 {
             return int128(result);
         }
     }
+
+    /// Raises x to the power of y.
+    /// @dev Based on the formula: x^y = 2^{log_2{x} * y}
+    /// @param x signed 64.64-bit fixed point number
+    /// @param y signed 64.64-bit fixed point number
+    /// @return signed 64.64-bit fixed point number
+    function pow(int128 x, int128 y) internal pure returns (int128) {
+        return exp_2(mul(log_2(x), y));
+    }
 }
