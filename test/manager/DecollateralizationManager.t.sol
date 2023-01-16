@@ -15,6 +15,11 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     event FeeReceiverUpdated(address indexed feeReceiver);
     event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
 
+    function testDecollateralizeTokens_inputAmountIs0() public {
+        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
+        manager.decollateralizeTokens(BATCH_ID, 0, 0);
+    }
+
     function testDecollateralizeTokensWhenInvalidBatchId() public {
         vm.expectRevert(
             abi.encodeWithSelector(DecollateralizationManager.InvalidBatchId.selector, 5)
@@ -322,6 +327,59 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 CATEGORY_ID
             )
         );
+        manager.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
+        vm.stopPrank();
+    }
+
+    function testBulkDecollateralizeTokens_inputAmountIs0() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", TIME_APPRECIATION);
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
+                vintage: 2022,
+                batchTA: 0,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID + 1,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
+                vintage: 2022,
+                batchTA: 0,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+        CollateralizedBasketToken collateralizedToken = manager.getCategoryToken(CATEGORY_ID);
+
+        vm.startPrank(testAccount);
+        collateralizedToken.approve(address(manager), 8000e18);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        manager.collateralizeBatch(BATCH_ID, 10000, 8100e18);
+        manager.collateralizeBatch(BATCH_ID + 1, 10000, 8100e18);
+
+        uint[] memory batchIds = new uint[](2);
+        batchIds[0] = BATCH_ID;
+        batchIds[1] = BATCH_ID + 1;
+        uint[] memory amountsIn = new uint[](2);
+        amountsIn[0] = 4000e18;
+        amountsIn[1] = 0;
+        uint[] memory amountsOutMin = new uint[](2);
+        amountsOutMin[0] = 3998;
+        amountsOutMin[1] = 0;
+
+        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
         manager.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
         vm.stopPrank();
     }

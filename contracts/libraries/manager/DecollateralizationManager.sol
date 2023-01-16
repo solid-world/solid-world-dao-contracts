@@ -266,12 +266,12 @@ library DecollateralizationManager {
         uint amountIn,
         uint amountOutMin
     ) internal {
-        if (!_storage.batchCreated[batchId]) {
-            revert InvalidBatchId(batchId);
-        }
-
         if (amountIn == 0) {
             revert InvalidInput();
+        }
+
+        if (!_storage.batchCreated[batchId]) {
+            revert InvalidBatchId(batchId);
         }
 
         CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(

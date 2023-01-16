@@ -276,6 +276,11 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
     }
 
+    function testSimulateBatchCollateralization_inputAmountIs0() public {
+        vm.expectRevert(abi.encodeWithSelector(CollateralizationManager.InvalidInput.selector));
+        manager.simulateBatchCollateralization(BATCH_ID, 0);
+    }
+
     function testSimulateBatchCollateralizationWhenBatchIdIsInvalid() public {
         vm.expectRevert(
             abi.encodeWithSelector(CollateralizationManager.InvalidBatchId.selector, 5)
@@ -305,6 +310,49 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
             abi.encodeWithSelector(CollateralizationManager.BatchCertified.selector, 5)
         );
         manager.simulateBatchCollateralization(BATCH_ID, 10000);
+    }
+
+    function testSimulateBatchCollateralization_weekBeforeCertification() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", TIME_APPRECIATION);
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + 1 weeks - 1),
+                vintage: 2025,
+                batchTA: 0,
+                supplier: testAccount
+            }),
+            10000
+        );
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID + 1,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + 1),
+                vintage: 2025,
+                batchTA: 0,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CollateralizationManager.CannotCollateralizeTheWeekBeforeCertification.selector
+            )
+        );
+        manager.simulateBatchCollateralization(BATCH_ID, 10000);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CollateralizationManager.CannotCollateralizeTheWeekBeforeCertification.selector
+            )
+        );
+        manager.simulateBatchCollateralization(BATCH_ID + 1, 10000);
     }
 
     function testSimulateBatchCollateralization() public {

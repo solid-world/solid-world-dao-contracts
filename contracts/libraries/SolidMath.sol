@@ -20,38 +20,6 @@ library SolidMath {
     error IncorrectDates(uint startDate, uint endDate);
     error InvalidTADiscount();
 
-    /// @dev Computes the number of weeks between two dates
-    /// @param startDate start date expressed in seconds
-    /// @param endDate end date expressed in seconds
-    /// @return number of weeks between the two dates. Returns 0 if result is negative
-    function weeksBetween(uint startDate, uint endDate) internal pure returns (uint) {
-        if (startDate == 0 || endDate == 0) {
-            revert IncorrectDates(startDate, endDate);
-        }
-
-        if (endDate <= startDate) {
-            return 0;
-        }
-
-        return (endDate - startDate) / 1 weeks;
-    }
-
-    /// @dev Computes the number of years between two dates. E.g. 6.54321 years.
-    /// @param startDate start date expressed in seconds
-    /// @param endDate end date expressed in seconds
-    /// @return number of years between the two dates. Returns 0 if result is negative
-    function yearsBetween(uint startDate, uint endDate) internal pure returns (int128) {
-        if (startDate == 0 || endDate == 0) {
-            revert IncorrectDates(startDate, endDate);
-        }
-
-        if (endDate <= startDate) {
-            return 0;
-        }
-
-        return toYears(endDate - startDate);
-    }
-
     /// @dev Computes discount for given `timeAppreciation` and project `certificationDate`
     /// @dev Computes: (1 - timeAppreciation) ** yearsTillCertification
     /// @dev Taking form: e ** (ln(1 - timeAppreciation) * yearsTillCertification)
@@ -245,6 +213,22 @@ library SolidMath {
 
         feeAmount = Math.mulDiv(grossRewardAmount, rewardsFee, FEE_BASIS_POINTS);
         netRewardAmount = grossRewardAmount - feeAmount;
+    }
+
+    /// @dev Computes the number of years between two dates. E.g. 6.54321 years.
+    /// @param startDate start date expressed in seconds
+    /// @param endDate end date expressed in seconds
+    /// @return number of years between the two dates. Returns 0 if result is negative
+    function yearsBetween(uint startDate, uint endDate) internal pure returns (int128) {
+        if (startDate == 0 || endDate == 0) {
+            revert IncorrectDates(startDate, endDate);
+        }
+
+        if (endDate <= startDate) {
+            return 0;
+        }
+
+        return toYears(endDate - startDate);
     }
 
     function toYears(uint seconds_) internal pure returns (int128) {

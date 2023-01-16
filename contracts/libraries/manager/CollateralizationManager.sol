@@ -130,16 +130,21 @@ library CollateralizationManager {
             uint cbtForfeited
         )
     {
+        if (amountIn == 0) {
+            revert InvalidInput();
+        }
+
         if (!_storage.batchCreated[batchId]) {
             revert InvalidBatchId(batchId);
         }
 
-        if (_storage.batches[batchId].certificationDate <= block.timestamp) {
+        uint32 certificationDate = _storage.batches[batchId].certificationDate;
+        if (certificationDate <= block.timestamp) {
             revert BatchCertified(batchId);
         }
 
-        if (amountIn == 0) {
-            revert InvalidInput();
+        if (SolidMath.yearsBetween(block.timestamp, certificationDate) == 0) {
+            revert CannotCollateralizeTheWeekBeforeCertification();
         }
 
         DomainDataTypes.Category storage category = _storage.categories[
@@ -153,7 +158,7 @@ library CollateralizationManager {
         (, uint reactiveTA) = ReactiveTimeAppreciationMath.computeReactiveTA(category, amountIn);
 
         (cbtUserCut, cbtDaoCut, cbtForfeited) = SolidMath.computeCollateralizationOutcome(
-            _storage.batches[batchId].certificationDate,
+            certificationDate,
             amountIn,
             reactiveTA,
             _storage.collateralizationFee,

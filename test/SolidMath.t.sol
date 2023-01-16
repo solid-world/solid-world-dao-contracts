@@ -111,36 +111,6 @@ contract SolidMathTest is Test {
         vm.label(vm.addr(1), "Dummy account 1");
     }
 
-    function testWeeksBetween_endDateIsBeforeStartDate() public {
-        uint endDate = CURRENT_DATE - 3 weeks;
-
-        uint weeksBetween = SolidMath.weeksBetween(CURRENT_DATE, endDate);
-        assertEq(weeksBetween, 0);
-    }
-
-    function testWeeksBetween_invalidDates() public {
-        vm.expectRevert(abi.encodeWithSelector(SolidMath.IncorrectDates.selector, 0, CURRENT_DATE));
-        SolidMath.weeksBetween(0, CURRENT_DATE);
-    }
-
-    function testWeeksBetweenExactTimeDifference() public {
-        uint endDate = CURRENT_DATE + 3 weeks;
-
-        uint actual = SolidMath.weeksBetween(CURRENT_DATE, endDate);
-        uint expected = 3;
-
-        assertEq(actual, expected);
-    }
-
-    function testWeeksBetweenRoughTimeDifference() public {
-        uint endDate = CURRENT_DATE + 4 weeks - 1 seconds;
-
-        uint actual = SolidMath.weeksBetween(CURRENT_DATE, endDate);
-        uint expected = 3;
-
-        assertEq(actual, expected);
-    }
-
     function testComputeTimeAppreciationDiscountSingleWeek() public {
         uint timeAppreciation = 80_000; // 8%
         uint certificationDate = block.timestamp + 1 weeks;

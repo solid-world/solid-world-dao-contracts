@@ -45,7 +45,7 @@ library ReactiveTimeAppreciationMath {
         );
         reactiveTA =
             categoryState.averageTA -
-            depreciationToTA(categoryState.maxDepreciation) +
+            taQuantifiedDepreciation(categoryState.maxDepreciation) +
             reactiveFactor;
 
         if (reactiveTA >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
@@ -186,7 +186,8 @@ library ReactiveTimeAppreciationMath {
         }
     }
 
-    function depreciationToTA(uint16 depreciation) internal pure returns (uint) {
+    /// @return the depreciation expressed in terms of TA basis points
+    function taQuantifiedDepreciation(uint16 depreciation) internal pure returns (uint) {
         return
             (depreciation * SolidMath.TIME_APPRECIATION_BASIS_POINTS) /
             DEPRECIATION_BASIS_POINTS /
