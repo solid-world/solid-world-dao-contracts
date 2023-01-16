@@ -27,7 +27,7 @@ task('deploy-erc20', 'Deploys a ERC-20 token')
           actualOwner
         )
 
-        console.log([tokenSymbol, tokenAddr].join())
+        console.log(tokenAddr)
       }
     }
   )
