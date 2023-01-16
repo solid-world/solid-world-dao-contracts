@@ -27,7 +27,6 @@ node_modules
 /artifacts
 /cache
 /deployments/localhost
-/deployments/foundry
 
 # Foundry outputs and cache
 /out

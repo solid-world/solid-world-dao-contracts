@@ -93,5 +93,5 @@ task('deploy-reward-oracle', 'Deploys a reward price oracle contract')
   )
 
 function isLocalhost(networkName) {
-  return ['localhost', 'foundry'].includes(networkName)
+  return ['localhost'].includes(networkName)
 }
