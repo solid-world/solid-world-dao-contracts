@@ -352,6 +352,112 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         assertApproxEqAbs(mintedERC20 + rewards, 250000e18, 0.965e18);
     }
 
+    function testReactiveTAOutcomes_updatedCategoryParams_5Batches_7YearsFromCertif_5CollatOps_rewardsEqualForfeitedAmounts()
+        public
+    {
+        manager.addCategory(CATEGORY_ID, "", "", INITIAL_CATEGORY_TA); // 8% per year
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        for (uint i; i < 5; i++) {
+            manager.addBatch(
+                DomainDataTypes.Batch({
+                    id: BATCH_ID + i,
+                    status: 0,
+                    projectId: PROJECT_ID,
+                    certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
+                    vintage: 2022,
+                    batchTA: 0,
+                    supplier: testAccount
+                }),
+                50000
+            );
+        }
+
+        CollateralizedBasketToken cbt = manager.getCategoryToken(CATEGORY_ID);
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+
+        vm.startPrank(testAccount);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        cbt.approve(address(manager), type(uint).max);
+        vm.stopPrank();
+
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
+
+        vm.warp(CURRENT_DATE + 5 days);
+        uint[] memory cbtUserCut = new uint[](5);
+        uint[] memory cbtDaoCut = new uint[](5);
+        uint[] memory cbtForfeited = new uint[](5);
+        vm.startPrank(testAccount);
+        for (uint i; i < 5; i++) {
+            uint[] memory _cbtUserCut = new uint[](5);
+            uint[] memory _cbtDaoCut = new uint[](5);
+            uint[] memory _cbtForfeited = new uint[](5);
+
+            (_cbtUserCut[0], _cbtDaoCut[0], _cbtForfeited[0]) = manager
+                .simulateBatchCollateralization(BATCH_ID + i, 5000);
+            manager.collateralizeBatch(BATCH_ID + i, 5000, 0);
+
+            (_cbtUserCut[1], _cbtDaoCut[1], _cbtForfeited[1]) = manager
+                .simulateBatchCollateralization(BATCH_ID + i, 10000);
+            manager.collateralizeBatch(BATCH_ID + i, 10000, 0);
+
+            (_cbtUserCut[2], _cbtDaoCut[2], _cbtForfeited[2]) = manager
+                .simulateBatchCollateralization(BATCH_ID + i, 20000);
+            manager.collateralizeBatch(BATCH_ID + i, 20000, 0);
+
+            (_cbtUserCut[3], _cbtDaoCut[3], _cbtForfeited[3]) = manager
+                .simulateBatchCollateralization(BATCH_ID + i, 10000);
+            manager.collateralizeBatch(BATCH_ID + i, 10000, 0);
+
+            (_cbtUserCut[4], _cbtDaoCut[4], _cbtForfeited[4]) = manager
+                .simulateBatchCollateralization(BATCH_ID + i, 5000);
+            manager.collateralizeBatch(BATCH_ID + i, 5000, 0);
+
+            cbtUserCut[i] =
+                _cbtUserCut[0] +
+                _cbtUserCut[1] +
+                _cbtUserCut[2] +
+                _cbtUserCut[3] +
+                _cbtUserCut[4];
+            cbtDaoCut[i] =
+                _cbtDaoCut[0] +
+                _cbtDaoCut[1] +
+                _cbtDaoCut[2] +
+                _cbtDaoCut[3] +
+                _cbtDaoCut[4];
+            cbtForfeited[i] =
+                _cbtForfeited[0] +
+                _cbtForfeited[1] +
+                _cbtForfeited[2] +
+                _cbtForfeited[3] +
+                _cbtForfeited[4];
+        }
+        vm.stopPrank();
+
+        uint userERC20Balance = cbt.balanceOf(testAccount);
+        uint feesERC20 = cbt.balanceOf(feeReceiver);
+        uint rewards = _computeRewards();
+        uint cbtUserCutTotal = cbtUserCut[0] +
+            cbtUserCut[1] +
+            cbtUserCut[2] +
+            cbtUserCut[3] +
+            cbtUserCut[4];
+        uint cbtDaoCutTotal = cbtDaoCut[0] +
+            cbtDaoCut[1] +
+            cbtDaoCut[2] +
+            cbtDaoCut[3] +
+            cbtDaoCut[4];
+        uint cbtForfeitedTotal = cbtForfeited[0] +
+            cbtForfeited[1] +
+            cbtForfeited[2] +
+            cbtForfeited[3] +
+            cbtForfeited[4];
+
+        assertEq(cbtUserCutTotal, userERC20Balance);
+        assertEq(cbtDaoCutTotal, feesERC20);
+        assertEq(cbtUserCutTotal + cbtDaoCutTotal + cbtForfeitedTotal, 250000e18);
+        assertApproxEqAbs(cbtForfeitedTotal, rewards, 0.965e18);
+    }
+
     function _computeRewards() internal returns (uint rewards) {
         vm.warp(CURRENT_DATE + 5 days + 1);
         uint[] memory categories = new uint[](1);
