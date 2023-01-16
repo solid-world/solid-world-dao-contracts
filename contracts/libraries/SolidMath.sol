@@ -22,7 +22,7 @@ library SolidMath {
 
     /// @dev Computes discount for given `timeAppreciation` and project `certificationDate`
     /// @dev Computes: (1 - timeAppreciation) ** yearsTillCertification
-    /// @dev Taking form: e ** (ln(1 - timeAppreciation) * yearsTillCertification)
+    /// @dev Taking form: 2 ** (log_2(1 - timeAppreciation) * yearsTillCertification)
     /// @param timeAppreciation 1% = 10000, 0.0984% = 984
     /// @param certificationDate expected date for project certification
     /// @return timeAppreciationDiscountPoints discount in basis points
@@ -40,9 +40,9 @@ library SolidMath {
             TIME_APPRECIATION_BASIS_POINTS - timeAppreciation,
             TIME_APPRECIATION_BASIS_POINTS
         );
-        int128 discountLN = ABDKMath64x64.ln(discount);
-        int128 timeAppreciationDiscount = ABDKMath64x64.exp(
-            ABDKMath64x64.mul(discountLN, yearsTillCertification)
+        int128 discountLog2 = ABDKMath64x64.log_2(discount);
+        int128 timeAppreciationDiscount = ABDKMath64x64.exp_2(
+            ABDKMath64x64.mul(discountLog2, yearsTillCertification)
         );
         timeAppreciationDiscountPoints = ABDKMath64x64.mulu(
             timeAppreciationDiscount,

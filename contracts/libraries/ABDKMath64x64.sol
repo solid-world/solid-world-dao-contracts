@@ -73,104 +73,6 @@ library ABDKMath64x64 {
         }
     }
 
-    /// Calculate x^y assuming 0^0 is 1, where x is signed 64.64 fixed point number
-    /// and y is unsigned 256-bit integer number.  Revert on overflow.
-    /// @param x signed 64.64-bit fixed point number
-    /// @param y uint256 value
-    /// @return signed 64.64-bit fixed point number
-    function pow(int128 x, uint256 y) internal pure returns (int128) {
-        unchecked {
-            bool negative = x < 0 && y & 1 == 1;
-
-            uint256 absX = uint128(x < 0 ? -x : x);
-            uint256 absResult;
-            absResult = 0x100000000000000000000000000000000;
-
-            if (absX <= 0x10000000000000000) {
-                absX <<= 63;
-                while (y != 0) {
-                    if (y & 0x1 != 0) {
-                        absResult = (absResult * absX) >> 127;
-                    }
-                    absX = (absX * absX) >> 127;
-
-                    if (y & 0x2 != 0) {
-                        absResult = (absResult * absX) >> 127;
-                    }
-                    absX = (absX * absX) >> 127;
-
-                    if (y & 0x4 != 0) {
-                        absResult = (absResult * absX) >> 127;
-                    }
-                    absX = (absX * absX) >> 127;
-
-                    if (y & 0x8 != 0) {
-                        absResult = (absResult * absX) >> 127;
-                    }
-                    absX = (absX * absX) >> 127;
-
-                    y >>= 4;
-                }
-
-                absResult >>= 64;
-            } else {
-                uint256 absXShift = 63;
-                if (absX < 0x1000000000000000000000000) {
-                    absX <<= 32;
-                    absXShift -= 32;
-                }
-                if (absX < 0x10000000000000000000000000000) {
-                    absX <<= 16;
-                    absXShift -= 16;
-                }
-                if (absX < 0x1000000000000000000000000000000) {
-                    absX <<= 8;
-                    absXShift -= 8;
-                }
-                if (absX < 0x10000000000000000000000000000000) {
-                    absX <<= 4;
-                    absXShift -= 4;
-                }
-                if (absX < 0x40000000000000000000000000000000) {
-                    absX <<= 2;
-                    absXShift -= 2;
-                }
-                if (absX < 0x80000000000000000000000000000000) {
-                    absX <<= 1;
-                    absXShift -= 1;
-                }
-
-                uint256 resultShift = 0;
-                while (y != 0) {
-                    require(absXShift < 64);
-
-                    if (y & 0x1 != 0) {
-                        absResult = (absResult * absX) >> 127;
-                        resultShift += absXShift;
-                        if (absResult > 0x100000000000000000000000000000000) {
-                            absResult >>= 1;
-                            resultShift += 1;
-                        }
-                    }
-                    absX = (absX * absX) >> 127;
-                    absXShift <<= 1;
-                    if (absX >= 0x100000000000000000000000000000000) {
-                        absX >>= 1;
-                        absXShift += 1;
-                    }
-
-                    y >>= 1;
-                }
-
-                require(resultShift < 64);
-                absResult >>= 64 - resultShift;
-            }
-            int256 result = negative ? -int256(absResult) : int256(absResult);
-            require(result >= MIN_64x64 && result <= MAX_64x64);
-            return int128(result);
-        }
-    }
-
     /// Calculate x / y rounding towards zero, where x and y are unsigned 256-bit
     /// integer numbers.  Revert on overflow or when y is zero.
     /// @param x unsigned 256-bit integer number
@@ -244,19 +146,6 @@ library ABDKMath64x64 {
 
             require(result <= 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
             return uint128(result);
-        }
-    }
-
-    /// Calculate natural exponent of x.  Revert on overflow.
-    /// @param x signed 64.64-bit fixed point number
-    /// @return signed 64.64-bit fixed point number
-    function exp(int128 x) internal pure returns (int128) {
-        unchecked {
-            require(x < 0x400000000000000000); // Overflow
-
-            if (x < -0x400000000000000000) return 0; // Underflow
-
-            return exp_2(int128((int256(x) * 0x171547652B82FE1777D0FFDA0D23A7D12) >> 128));
         }
     }
 
@@ -368,20 +257,6 @@ library ABDKMath64x64 {
             require(result <= uint256(int256(MAX_64x64)));
 
             return int128(int256(result));
-        }
-    }
-
-    /// Calculate natural logarithm of x.  Revert if x <= 0.
-    /// @param x signed 64.64-bit fixed point number
-    /// @return signed 64.64-bit fixed point number
-    function ln(int128 x) internal pure returns (int128) {
-        unchecked {
-            require(x > 0);
-
-            return
-                int128(
-                    int256((uint256(int256(log_2(x))) * 0xB17217F7D1CF79ABC9E3B39803F2F6AF) >> 128)
-                );
         }
     }
 
