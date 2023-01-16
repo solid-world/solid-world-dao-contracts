@@ -44,10 +44,10 @@ OPTIONS:
 ▶ Deploying ERC-20 tokens with hardhat
 
 ```shell
-yarn hardhat deploy-erc20 --network foundry --quantity 3 --owner 0xabcde
+yarn hardhat deploy-erc20 --network localhost --quantity 3 --owner 0xabcde
 ```
 
-This command deploys 3 ERC-20 tokens on the Foundry network, owned by the address 0xabcde.
+This command deploys 3 ERC-20 tokens on the localhost network, owned by the address 0xabcde.
 
 - `--quantity` flag specifies the number of tokens to deploy (Default: 1)
 - `--owner` flag specifies the owner of the tokens (Default: OWNER_ADDRESS)
