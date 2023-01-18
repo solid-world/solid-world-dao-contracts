@@ -46,7 +46,7 @@ library WeeklyCarbonRewards {
     /// @param categoryIds The categories to which the incentivized assets belong
     /// @return carbonRewards List of carbon rewards getting distributed.
     /// @return rewardAmounts List of carbon reward amounts getting distributed
-    /// @return rewardFees List of fee amounts charged by the DAO on carbon rewards
+    /// @return rewardFeeAmounts List of fee amounts charged by the DAO on carbon rewards
     function computeWeeklyCarbonRewards(
         SolidWorldManagerStorage.Storage storage _storage,
         uint[] calldata categoryIds
@@ -56,13 +56,14 @@ library WeeklyCarbonRewards {
         returns (
             address[] memory carbonRewards,
             uint[] memory rewardAmounts,
-            uint[] memory rewardFees
+            uint[] memory rewardFeeAmounts
         )
     {
         carbonRewards = new address[](categoryIds.length);
         rewardAmounts = new uint[](categoryIds.length);
-        rewardFees = new uint[](categoryIds.length);
+        rewardFeeAmounts = new uint[](categoryIds.length);
 
+        uint rewardsFee = _storage.rewardsFee;
         for (uint i; i < categoryIds.length; i++) {
             uint categoryId = categoryIds[i];
             if (!_storage.categoryCreated[categoryId]) {
@@ -70,15 +71,16 @@ library WeeklyCarbonRewards {
             }
 
             CollateralizedBasketToken rewardToken = _storage.categoryToken[categoryId];
-            (uint rewardAmount, uint rewardFee) = _computeWeeklyCategoryReward(
+            (uint rewardAmount, uint rewardFeeAmount) = _computeWeeklyCategoryReward(
                 _storage,
                 categoryId,
+                rewardsFee,
                 rewardToken.decimals()
             );
 
             carbonRewards[i] = address(rewardToken);
             rewardAmounts[i] = rewardAmount;
-            rewardFees[i] = rewardFee;
+            rewardFeeAmounts[i] = rewardFeeAmount;
         }
     }
 
@@ -164,25 +166,33 @@ library WeeklyCarbonRewards {
     /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
     /// @param _storage Struct containing the current state used or modified by this function
     /// @param categoryId The source category for the ERC20 rewards
+    /// @param rewardsFee The fee charged by the DAO on ERC20 rewards
+    /// @param rewardDecimals The number of decimals of the ERC20 reward
     /// @return rewardAmount carbon reward amount to mint
-    /// @return rewardFee fee amount charged by the DAO
+    /// @return rewardFeeAmount fee amount charged by the DAO
     function _computeWeeklyCategoryReward(
         SolidWorldManagerStorage.Storage storage _storage,
         uint categoryId,
+        uint rewardsFee,
         uint rewardDecimals
-    ) internal view returns (uint rewardAmount, uint rewardFee) {
+    ) internal view returns (uint rewardAmount, uint rewardFeeAmount) {
         uint[] storage projects = _storage.categoryProjects[categoryId];
         for (uint i; i < projects.length; i++) {
             uint[] storage batches = _storage.projectBatches[projects[i]];
-            for (uint j; j < batches.length; j++) {
+            for (uint j; j < batches.length; ) {
+                uint batchId = batches[j];
                 (uint netRewardAmount, uint feeAmount) = _computeWeeklyBatchReward(
                     _storage,
-                    batches[j],
-                    _storage._forwardContractBatch.balanceOf(address(this), batches[j]),
+                    batchId,
+                    _storage._forwardContractBatch.balanceOf(address(this), batchId),
+                    rewardsFee,
                     rewardDecimals
                 );
                 rewardAmount += netRewardAmount;
-                rewardFee += feeAmount;
+                rewardFeeAmount += feeAmount;
+                unchecked {
+                    j++;
+                }
             }
         }
     }
@@ -191,6 +201,7 @@ library WeeklyCarbonRewards {
         SolidWorldManagerStorage.Storage storage _storage,
         uint batchId,
         uint availableCredits,
+        uint rewardsFee,
         uint rewardDecimals
     ) internal view returns (uint netRewardAmount, uint feeAmount) {
         if (availableCredits == 0 || _isBatchCertified(_storage, batchId)) {
@@ -201,7 +212,7 @@ library WeeklyCarbonRewards {
             _storage.batches[batchId].certificationDate,
             availableCredits,
             _storage.batches[batchId].batchTA,
-            _storage.rewardsFee,
+            rewardsFee,
             rewardDecimals
         );
     }

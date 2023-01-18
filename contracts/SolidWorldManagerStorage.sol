@@ -96,10 +96,6 @@ abstract contract SolidWorldManagerStorage {
         return _storage.batchCategory[batchId];
     }
 
-    function getProjectBatches(uint projectId) external view returns (uint[] memory) {
-        return _storage.projectBatches[projectId];
-    }
-
     function getBatchId(uint index) external view returns (uint) {
         return _storage.batchIds[index];
     }

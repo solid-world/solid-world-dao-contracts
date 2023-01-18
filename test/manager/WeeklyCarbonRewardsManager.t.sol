@@ -42,15 +42,15 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     projectId: PROJECT_ID + (i % 2),
                     certificationDate: uint32(CURRENT_DATE + 1 minutes),
                     vintage: 2022,
-                    batchTA: 1647,
+                    batchTA: 10_0000,
                     supplier: address(manager)
                 }),
                 10000
             );
         }
 
-        uint expectedBatchWeeklyRewardAmount = 15.6465e18;
-        uint expectedRewardFeeAmount = 0.8235e18;
+        uint expectedBatchWeeklyRewardAmount = 19.1764e18;
+        uint expectedRewardFeeAmount = 1.0092e18;
 
         uint[] memory categoryIds = new uint[](2);
         categoryIds[0] = CATEGORY_ID;
@@ -72,11 +72,11 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         assertEq(carbonRewards[0], address(rewardToken0));
         assertEq(carbonRewards[1], address(rewardToken1));
 
-        assertEq(rewardAmounts[0], expectedBatchWeeklyRewardAmount * 2);
-        assertEq(rewardAmounts[1], expectedBatchWeeklyRewardAmount * 3);
+        assertApproxEqAbs(rewardAmounts[0], expectedBatchWeeklyRewardAmount * 2, 0.0082e18);
+        assertApproxEqAbs(rewardAmounts[1], expectedBatchWeeklyRewardAmount * 3, 0.0123e18);
 
-        assertEq(rewardFees[0], expectedRewardFeeAmount * 2);
-        assertEq(rewardFees[1], expectedRewardFeeAmount * 3);
+        assertApproxEqAbs(rewardFees[0], expectedRewardFeeAmount * 2, 0.0006e18);
+        assertApproxEqAbs(rewardFees[1], expectedRewardFeeAmount * 3, 0.0009e18);
     }
 
     function testComputeWeeklyCarbonRewards_certifiedBatchesAreSkipped() public {
@@ -90,9 +90,9 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
-                    certificationDate: uint32(CURRENT_DATE + 7 weeks),
+                    certificationDate: uint32(CURRENT_DATE + 7 weeks + ONE_YEAR),
                     vintage: 2022,
-                    batchTA: 1647,
+                    batchTA: 10_0000,
                     supplier: address(manager)
                 }),
                 10000
@@ -101,12 +101,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
 
         manager.addBatch(
             DomainDataTypes.Batch({
-                id: BATCH_ID + 6,
+                id: 11,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 minutes),
+                certificationDate: uint32(CURRENT_DATE + 1 minutes + ONE_YEAR),
                 vintage: 2022,
-                batchTA: 1647,
+                batchTA: 10_0000,
                 supplier: address(manager)
             }),
             10000
@@ -114,22 +114,22 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
 
         manager.addBatch(
             DomainDataTypes.Batch({
-                id: BATCH_ID + 7,
+                id: 12,
                 status: 0,
                 projectId: PROJECT_ID + 1,
-                certificationDate: uint32(CURRENT_DATE + 2 weeks),
+                certificationDate: uint32(CURRENT_DATE + 2 weeks + ONE_YEAR),
                 vintage: 2022,
-                batchTA: 1647,
+                batchTA: 10_0000,
                 supplier: address(manager)
             }),
             10000
         );
 
         // Batches 11 and 12 are certified
-        vm.warp(CURRENT_DATE + 6 weeks + 6 days);
+        vm.warp(CURRENT_DATE + 6 weeks + 6 days + ONE_YEAR);
 
-        uint expectedBatchWeeklyRewardAmount = 15.6465e18;
-        uint expectedRewardFeeAmount = 0.8235e18;
+        uint expectedBatchWeeklyRewardAmount = 19.1764e18;
+        uint expectedRewardFeeAmount = 1.0092e18;
 
         uint[] memory categoryIds = new uint[](2);
         categoryIds[0] = CATEGORY_ID;
@@ -151,14 +151,14 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         assertEq(carbonRewards[0], address(rewardToken0));
         assertEq(carbonRewards[1], address(rewardToken1));
 
-        assertEq(rewardAmounts[0], expectedBatchWeeklyRewardAmount * 2);
-        assertEq(rewardAmounts[1], expectedBatchWeeklyRewardAmount * 3);
+        assertApproxEqAbs(rewardAmounts[0], expectedBatchWeeklyRewardAmount * 2, 0.0082e18);
+        assertApproxEqAbs(rewardAmounts[1], expectedBatchWeeklyRewardAmount * 3, 0.0123e18);
 
-        assertEq(rewardFees[0], expectedRewardFeeAmount * 2);
-        assertEq(rewardFees[1], expectedRewardFeeAmount * 3);
+        assertApproxEqAbs(rewardFees[0], expectedRewardFeeAmount * 2, 0.0006e18);
+        assertApproxEqAbs(rewardFees[1], expectedRewardFeeAmount * 3, 0.0009e18);
 
         // All batches are certified
-        vm.warp(CURRENT_DATE + 7 weeks + 1 minutes);
+        vm.warp(CURRENT_DATE + 7 weeks + 1 minutes + ONE_YEAR);
 
         (
             address[] memory carbonRewardsCertified,

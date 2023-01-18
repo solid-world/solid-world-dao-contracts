@@ -15,9 +15,9 @@ library DecollateralizationManager {
 
     event TokensDecollateralized(
         uint indexed batchId,
+        address indexed tokensOwner,
         uint amountIn,
-        uint amountOut,
-        address indexed tokensOwner
+        uint amountOut
     );
     event CategoryRebalanced(
         uint indexed categoryId,
@@ -266,6 +266,10 @@ library DecollateralizationManager {
         uint amountIn,
         uint amountOutMin
     ) internal {
+        if (amountIn == 0) {
+            revert InvalidInput();
+        }
+
         if (!_storage.batchCreated[batchId]) {
             revert InvalidBatchId(batchId);
         }
@@ -284,7 +288,7 @@ library DecollateralizationManager {
                 collateralizedToken.decimals()
             );
 
-        if (amountOut <= 0) {
+        if (amountOut == 0) {
             revert AmountOutTooLow(amountOut);
         }
 
@@ -308,7 +312,7 @@ library DecollateralizationManager {
             ""
         );
 
-        emit TokensDecollateralized(batchId, amountIn, amountOut, msg.sender);
+        emit TokensDecollateralized(batchId, msg.sender, amountIn, amountOut);
     }
 
     function _getCollateralizedTokenForBatchId(

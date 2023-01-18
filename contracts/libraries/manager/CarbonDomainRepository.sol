@@ -58,15 +58,13 @@ library CarbonDomainRepository {
     /// @param categoryId The category ID to be updated
     /// @param volumeCoefficient The new volume coefficient for the category
     /// @param decayPerSecond The new decay per second for the category
-    /// @param maxDepreciationPerYear The new max depreciation per year for the category
-    /// @param maxDepreciation The new max depreciation per week for the category
+    /// @param maxDepreciation The new max depreciation for the category. Quantified per year.
     function updateCategory(
         SolidWorldManagerStorage.Storage storage _storage,
         uint categoryId,
         uint volumeCoefficient,
         uint40 decayPerSecond,
-        uint16 maxDepreciationPerYear,
-        uint24 maxDepreciation
+        uint16 maxDepreciation
     ) external {
         if (!_storage.categoryCreated[categoryId]) {
             revert InvalidCategoryId(categoryId);
@@ -80,11 +78,10 @@ library CarbonDomainRepository {
         category.lastCollateralizationMomentum = ReactiveTimeAppreciationMath.inferMomentum(
             category,
             volumeCoefficient,
-            maxDepreciationPerYear
+            maxDepreciation
         );
         category.volumeCoefficient = volumeCoefficient;
         category.decayPerSecond = decayPerSecond;
-        category.maxDepreciationPerYear = maxDepreciationPerYear;
         category.maxDepreciation = maxDepreciation;
         category.lastCollateralizationTimestamp = uint32(block.timestamp);
 

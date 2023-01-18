@@ -59,109 +59,41 @@ contract CarbonRewardDistributionGasTest is GasTest {
         );
     }
 
-    function testGas_updateCarbonRewardDistribution_100Batches_5YearsFromCertification_3Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(100, 5, 3);
+    function testGas_updateCarbonRewardDistribution_100Batches_3Rewards() public {
+        _testGas_updateCarbonRewardDistribution(100, 3);
     }
 
-    function testGas_updateCarbonRewardDistribution_100Batches_10YearsFromCertification_3Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(100, 10, 3);
+    function testGas_updateCarbonRewardDistribution_100Batches_15Rewards() public {
+        _testGas_updateCarbonRewardDistribution(100, 15);
     }
 
-    function testGas_updateCarbonRewardDistribution_100Batches_5YearsFromCertification_15Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(100, 5, 15);
+    function testGas_updateCarbonRewardDistribution_500Batches_3Rewards() public {
+        _testGas_updateCarbonRewardDistribution(500, 3);
     }
 
-    function testGas_updateCarbonRewardDistribution_100Batches_10YearsFromCertification_15Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(100, 10, 15);
+    function testGas_updateCarbonRewardDistribution_500Batches_15Rewards() public {
+        _testGas_updateCarbonRewardDistribution(500, 15);
     }
 
-    function testGas_updateCarbonRewardDistribution_500Batches_5YearsFromCertification_3Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(500, 5, 3);
+    function testGas_updateCarbonRewardDistribution_1000Batches_3Rewards() public {
+        _testGas_updateCarbonRewardDistribution(1000, 3);
     }
 
-    function testGas_updateCarbonRewardDistribution_500Batches_10YearsFromCertification_3Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(500, 10, 3);
+    function testGas_updateCarbonRewardDistribution_1000Batches_15Rewards() public {
+        _testGas_updateCarbonRewardDistribution(1000, 15);
     }
 
-    function testGas_updateCarbonRewardDistribution_500Batches_5YearsFromCertification_15Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(500, 5, 15);
+    function testGas_updateCarbonRewardDistribution_5000Batches_3Rewards() public {
+        _testGas_updateCarbonRewardDistribution(5000, 3);
     }
 
-    function testGas_updateCarbonRewardDistribution_500Batches_10YearsFromCertification_15Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(500, 10, 15);
+    function testGas_updateCarbonRewardDistribution_5000Batches_15Rewards() public {
+        _testGas_updateCarbonRewardDistribution(5000, 15);
     }
 
-    function testGas_updateCarbonRewardDistribution_1000Batches_5YearsFromCertification_3Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(1000, 5, 3);
-    }
-
-    function testGas_updateCarbonRewardDistribution_1000Batches_10YearsFromCertification_3Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(1000, 10, 3);
-    }
-
-    function testGas_updateCarbonRewardDistribution_1000Batches_5YearsFromCertification_15Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(1000, 5, 15);
-    }
-
-    function testGas_updateCarbonRewardDistribution_1000Batches_10YearsFromCertification_15Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(1000, 10, 15);
-    }
-
-    function testGas_updateCarbonRewardDistribution_5000Batches_5YearsFromCertification_3Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(5000, 5, 3);
-    }
-
-    function testGas_updateCarbonRewardDistribution_5000Batches_10YearsFromCertification_3Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(5000, 10, 3);
-    }
-
-    function testGas_updateCarbonRewardDistribution_5000Batches_5YearsFromCertification_15Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(5000, 5, 15);
-    }
-
-    function testGas_updateCarbonRewardDistribution_5000Batches_10YearsFromCertification_15Rewards()
-        public
-    {
-        _testGas_updateCarbonRewardDistribution(5000, 10, 15);
-    }
-
-    function _testGas_updateCarbonRewardDistribution(
-        uint batches,
-        uint yearsFromCertification,
-        uint rewards
-    ) internal {
+    function _testGas_updateCarbonRewardDistribution(uint batches, uint rewards) internal {
         for (uint i = 0; i < rewards; i++) {
-            manager.addCategory(CATEGORY_ID + i, "", "", 1647);
+            manager.addCategory(CATEGORY_ID + i, "", "", 82360);
             manager.addProject(CATEGORY_ID + i, PROJECT_ID + i);
         }
 
@@ -171,7 +103,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % rewards),
-                    certificationDate: uint32(CURRENT_DATE + ONE_YEAR * yearsFromCertification),
+                    certificationDate: uint32(CURRENT_DATE + ONE_YEAR * 10),
                     vintage: 2022,
                     batchTA: 0,
                     supplier: address(manager)
@@ -208,9 +140,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
             abi.encodePacked(
                 "updateCarbonRewardDistribution_",
                 vm.toString(batches),
-                "Batches_",
-                vm.toString(yearsFromCertification),
-                "yearsFromCertification_",
+                "batches_",
                 vm.toString(rewards),
                 "rewards"
             )

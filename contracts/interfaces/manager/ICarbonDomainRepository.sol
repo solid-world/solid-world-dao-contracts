@@ -20,14 +20,12 @@ interface ICarbonDomainRepository {
     /// @param categoryId The category ID to be updated
     /// @param volumeCoefficient The new volume coefficient for the category
     /// @param decayPerSecond The new decay per second for the category
-    /// @param maxDepreciationPerYear The new max depreciation per year for the category
-    /// @param maxDepreciation The new max depreciation per week for the category
+    /// @param maxDepreciation The new max depreciation for the category. Quantified per year.
     function updateCategory(
         uint categoryId,
         uint volumeCoefficient,
         uint40 decayPerSecond,
-        uint16 maxDepreciationPerYear,
-        uint24 maxDepreciation
+        uint16 maxDepreciation
     ) external;
 
     /// @param categoryId The category ID to which the project belongs

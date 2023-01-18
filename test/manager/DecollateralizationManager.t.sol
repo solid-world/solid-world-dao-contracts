@@ -8,12 +8,17 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
 
     event TokensDecollateralized(
         uint indexed batchId,
+        address indexed tokensOwner,
         uint amountIn,
-        uint amountOut,
-        address indexed tokensOwner
+        uint amountOut
     );
     event FeeReceiverUpdated(address indexed feeReceiver);
     event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
+
+    function testDecollateralizeTokens_inputAmountIs0() public {
+        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
+        manager.decollateralizeTokens(BATCH_ID, 0, 0);
+    }
 
     function testDecollateralizeTokensWhenInvalidBatchId() public {
         vm.expectRevert(
@@ -84,7 +89,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -102,7 +107,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         vm.expectRevert(
             abi.encodeWithSelector(
                 DecollateralizationManager.AmountOutLessThanMinimum.selector,
-                81,
+                80,
                 10000
             )
         );
@@ -121,7 +126,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -137,15 +142,15 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
 
-        vm.warp(CURRENT_DATE + 1 weeks);
+        vm.warp(CURRENT_DATE + ONE_YEAR);
 
         uint expectedAmountDecollateralized = (8100 / 10) * 9; // 90%
-        vm.expectEmit(true, true, true, true, address(manager));
+        vm.expectEmit(true, true, false, false, address(manager));
         emit TokensDecollateralized(
             BATCH_ID,
+            testAccount,
             cbtUserCut,
-            expectedAmountDecollateralized,
-            testAccount
+            expectedAmountDecollateralized
         );
         manager.decollateralizeTokens(BATCH_ID, cbtUserCut, expectedAmountDecollateralized);
 
@@ -159,12 +164,16 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
             forwardContractBatch.balanceOf(address(manager), BATCH_ID),
             10000 - expectedAmountDecollateralized
         );
-        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), 0);
-        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut + 810e18);
+        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), 2.331e18);
+        assertApproxEqAbs(
+            manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver),
+            cbtDaoCut + 810e18,
+            0.26e18
+        );
     }
 
     function testDecollateralizeTokensBurnsERC20AndReceivesERC1155() public {
-        uint cbtUserCut = 8100e18;
+        uint cbtUserCut = 8102.331e18;
         uint cbtDaoCut = 900e18;
 
         manager.addCategory(CATEGORY_ID, "Test token", "TT", TIME_APPRECIATION);
@@ -174,7 +183,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -190,8 +199,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
 
-        vm.expectEmit(true, true, true, true, address(manager));
-        emit TokensDecollateralized(BATCH_ID, cbtUserCut, 8100, testAccount);
+        vm.expectEmit(true, true, false, false, address(manager));
+        emit TokensDecollateralized(BATCH_ID, testAccount, cbtUserCut, 8099);
         manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 8100);
 
         vm.stopPrank();
@@ -199,7 +208,11 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 8100);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 10000 - 8100);
         assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), 0);
-        assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut + 810e18);
+        assertApproxEqAbs(
+            manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver),
+            cbtDaoCut + 810.2331e18,
+            0.259e18
+        );
     }
 
     function testDecollateralizeTokens_triggersCategoryRebalance() public {
@@ -212,7 +225,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -228,16 +241,16 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
 
-        vm.expectEmit(true, true, true, true, address(manager));
-        emit TokensDecollateralized(BATCH_ID, cbtUserCut, 8100, testAccount);
+        vm.expectEmit(true, true, false, false, address(manager));
+        emit TokensDecollateralized(BATCH_ID, testAccount, cbtUserCut, 8097);
         vm.expectEmit(true, true, true, false, address(manager));
-        emit CategoryRebalanced(CATEGORY_ID, TIME_APPRECIATION, 10000 - 8100);
-        manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 8100);
+        emit CategoryRebalanced(CATEGORY_ID, TIME_APPRECIATION, 10000 - 8097);
+        manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 8097);
         vm.stopPrank();
 
         DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
         assertEq(category.averageTA, TIME_APPRECIATION);
-        assertEq(category.totalCollateralized, 10000 - 8100);
+        assertEq(category.totalCollateralized, 10000 - 8097);
     }
 
     function testBulkDecollateralizeTokensWhenInvalidInput() public {
@@ -267,7 +280,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -280,7 +293,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID + 1,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -318,7 +331,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         vm.stopPrank();
     }
 
-    function testBulkDecollateralizeTokens_verifyTokenBalances() public {
+    function testBulkDecollateralizeTokens_inputAmountIs0() public {
         manager.addCategory(CATEGORY_ID, "Test token", "TT", TIME_APPRECIATION);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
@@ -326,7 +339,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -339,7 +352,60 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
+                vintage: 2022,
+                batchTA: 0,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+        CollateralizedBasketToken collateralizedToken = manager.getCategoryToken(CATEGORY_ID);
+
+        vm.startPrank(testAccount);
+        collateralizedToken.approve(address(manager), 8000e18);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+        manager.collateralizeBatch(BATCH_ID, 10000, 8100e18);
+        manager.collateralizeBatch(BATCH_ID + 1, 10000, 8100e18);
+
+        uint[] memory batchIds = new uint[](2);
+        batchIds[0] = BATCH_ID;
+        batchIds[1] = BATCH_ID + 1;
+        uint[] memory amountsIn = new uint[](2);
+        amountsIn[0] = 4000e18;
+        amountsIn[1] = 0;
+        uint[] memory amountsOutMin = new uint[](2);
+        amountsOutMin[0] = 3998;
+        amountsOutMin[1] = 0;
+
+        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
+        manager.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
+        vm.stopPrank();
+    }
+
+    function testBulkDecollateralizeTokens_verifyTokenBalances() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", TIME_APPRECIATION);
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
+                vintage: 2022,
+                batchTA: 0,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID + 1,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -363,21 +429,21 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         amountsIn[0] = 4000e18;
         amountsIn[1] = 4000e18;
         uint[] memory amountsOutMin = new uint[](2);
-        amountsOutMin[0] = 4000;
-        amountsOutMin[1] = 4000;
+        amountsOutMin[0] = 3998;
+        amountsOutMin[1] = 3998;
 
         manager.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
         vm.stopPrank();
 
-        assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 4000);
-        assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID + 1), 4000);
+        assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 3998);
+        assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID + 1), 3998);
 
-        assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 10000 - 4000);
-        assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID + 1), 10000 - 4000);
+        assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 10000 - 3998);
+        assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID + 1), 10000 - 3998);
 
         assertEq(
             manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount),
-            8100e18 + 8100e18 - 4000e18 - 4000e18
+            8102.331e18 + 8102.331e18 - 4000e18 - 4000e18
         );
     }
 
@@ -389,7 +455,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -402,7 +468,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -426,10 +492,10 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         amountsIn[0] = 4000e18;
         amountsIn[1] = 4000e18;
         uint[] memory amountsOutMin = new uint[](2);
-        amountsOutMin[0] = 4000;
-        amountsOutMin[1] = 4000;
+        amountsOutMin[0] = 3998;
+        amountsOutMin[1] = 3998;
 
-        uint newTotalCollateralized = 2 * (10000 - 4000);
+        uint newTotalCollateralized = 2 * (10000 - 3998);
         uint newAverageTA = TIME_APPRECIATION;
 
         vm.expectEmit(true, true, true, false, address(manager));
@@ -452,7 +518,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -465,7 +531,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -478,7 +544,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 2,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2023,
                 batchTA: 0,
                 supplier: testAccount
@@ -491,7 +557,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 3,
                 status: 0,
                 projectId: PROJECT_ID + 1,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -504,7 +570,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 4,
                 status: 0,
                 projectId: PROJECT_ID,
-                certificationDate: uint32(CURRENT_DATE + 1 weeks),
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount
@@ -530,15 +596,15 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(info.length, 3);
         assertEq(info[0].batchId, BATCH_ID);
         assertEq(info[0].availableBatchTokens, 5000);
-        assertEq(info[0].amountOut, 1000);
+        assertEq(info[0].amountOut, 999);
 
         assertEq(info[1].batchId, BATCH_ID + 1);
         assertEq(info[1].availableBatchTokens, 5100);
-        assertEq(info[1].amountOut, 1000);
+        assertEq(info[1].amountOut, 999);
 
         assertEq(info[2].batchId, BATCH_ID + 4);
         assertEq(info[2].availableBatchTokens, 5400);
-        assertEq(info[2].amountOut, 1000);
+        assertEq(info[2].amountOut, 999);
     }
 
     function testSetDecollateralizationFee() public {

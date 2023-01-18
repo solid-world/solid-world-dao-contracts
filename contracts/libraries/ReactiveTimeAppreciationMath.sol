@@ -10,7 +10,7 @@ library ReactiveTimeAppreciationMath {
     /// @dev Basis points in which the `decayPerSecond` must be expressed
     uint constant DECAY_BASIS_POINTS = 100_000_000_000;
 
-    /// @dev Basis points in which the `maxDepreciationPerYear` must be expressed
+    /// @dev Basis points in which the `maxDepreciation` must be expressed
     uint constant DEPRECIATION_BASIS_POINTS = 10;
 
     error ReactiveTAMathBroken(uint factor1, uint factor2);
@@ -38,20 +38,15 @@ library ReactiveTimeAppreciationMath {
         );
 
         uint volume = decayingMomentum + forwardCreditsAmount / 2;
-        uint reactiveFactorAnnually = Math.mulDiv(
+        uint reactiveFactor = Math.mulDiv(
             volume,
             SolidMath.TIME_APPRECIATION_BASIS_POINTS,
             categoryState.volumeCoefficient * 100
         );
-        if (reactiveFactorAnnually >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
-            revert ReactiveTAMathBroken(
-                forwardCreditsAmount,
-                categoryState.lastCollateralizationMomentum
-            );
-        }
-
-        uint reactiveFactorWeekly = toWeeklyRate(reactiveFactorAnnually);
-        reactiveTA = categoryState.averageTA - categoryState.maxDepreciation + reactiveFactorWeekly;
+        reactiveTA =
+            categoryState.averageTA -
+            taQuantifiedDepreciation(categoryState.maxDepreciation) +
+            reactiveFactor;
 
         if (reactiveTA >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
             revert ReactiveTAMathBroken(
@@ -89,8 +84,7 @@ library ReactiveTimeAppreciationMath {
 
     /// @dev Derives what the time appreciation should be for a batch based on ERC20 in circulation, underlying ERC1155
     ///      amount and its certification date
-    /// @dev Computes: 1 - (circulatingCBT / totalCollateralizedBatchForwardCredits) ** (1 / weeksTillCertification)
-    /// @dev Taking form: 1 - e ** (ln(circulatingCBT / totalCollateralizedBatchForwardCredits) * (1 / weeksTillCertification))
+    /// @dev Computes: 1 - (circulatingCBT / totalCollateralizedBatchForwardCredits) ** (1 / yearsTillCertification)
     /// @param circulatingCBT The circulating CBT amount minted for the batch. Assume <= 2**122.
     /// @param totalCollateralizedForwardCredits The total collateralized batch forward credits. Assume <= circulatingCBT / 1e18.
     /// @param certificationDate The batch certification date
@@ -103,64 +97,57 @@ library ReactiveTimeAppreciationMath {
     ) internal view returns (uint batchTA) {
         assert(circulatingCBT != 0 && totalCollateralizedForwardCredits != 0);
 
-        uint weeksTillCertification = SolidMath.weeksBetween(block.timestamp, certificationDate);
+        int128 yearsTillCertification = SolidMath.yearsBetween(block.timestamp, certificationDate);
+        assert(yearsTillCertification != 0);
 
-        if (weeksTillCertification == 0) {
-            return 0;
-        }
-
-        int128 weeksTillCertificationInverse = ABDKMath64x64.inv(
-            ABDKMath64x64.fromUInt(weeksTillCertification)
-        );
         int128 aggregateDiscount = ABDKMath64x64.div(
             circulatingCBT,
             totalCollateralizedForwardCredits * 10**cbtDecimals
         );
-
-        int128 aggregateDiscountLN = ABDKMath64x64.ln(aggregateDiscount);
-        int128 aggregatedWeeklyDiscount = ABDKMath64x64.exp(
-            ABDKMath64x64.mul(aggregateDiscountLN, weeksTillCertificationInverse)
+        int128 aggregatedYearlyDiscount = ABDKMath64x64.pow(
+            aggregateDiscount,
+            ABDKMath64x64.inv(yearsTillCertification)
         );
-        uint aggregatedWeeklyDiscountPoints = ABDKMath64x64.mulu(
-            aggregatedWeeklyDiscount,
+        uint aggregatedYearlyDiscountPoints = ABDKMath64x64.mulu(
+            aggregatedYearlyDiscount,
             SolidMath.TIME_APPRECIATION_BASIS_POINTS
         );
 
-        if (aggregatedWeeklyDiscountPoints >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
+        if (aggregatedYearlyDiscountPoints >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
             revert ReactiveTAMathBroken(circulatingCBT, totalCollateralizedForwardCredits);
         }
 
-        batchTA = SolidMath.TIME_APPRECIATION_BASIS_POINTS - aggregatedWeeklyDiscountPoints;
+        batchTA = SolidMath.TIME_APPRECIATION_BASIS_POINTS - aggregatedYearlyDiscountPoints;
     }
 
     /// @dev Determines the momentum for the specified Category based on current state and the new params
     /// @param category The category to compute the momentum for
     /// @param newVolumeCoefficient The new volume coefficient of the category
-    /// @param newMaxDepreciationPerYear The new max depreciation per year of the category
+    /// @param newMaxDepreciation The new max depreciation for the category. Quantified per year.
     function inferMomentum(
         DomainDataTypes.Category memory category,
         uint newVolumeCoefficient,
-        uint newMaxDepreciationPerYear
+        uint newMaxDepreciation
     ) internal view returns (uint) {
         if (category.volumeCoefficient == 0 || category.decayPerSecond == 0) {
-            return computeInitialMomentum(newVolumeCoefficient, newMaxDepreciationPerYear);
+            return computeInitialMomentum(newVolumeCoefficient, newMaxDepreciation);
         }
 
-        return computeAdjustedMomentum(category, newVolumeCoefficient, newMaxDepreciationPerYear);
+        return computeAdjustedMomentum(category, newVolumeCoefficient, newMaxDepreciation);
     }
 
     /// @dev Computes the initial value of momentum with the specified parameters
     /// @param volumeCoefficient The volume coefficient of the category
-    /// @param maxDepreciationPerYear how much the reactive TA can drop from the averageTA value, quantified per year
+    /// @param maxDepreciation how much the reactive TA can drop from the averageTA value, quantified per year
     /// @return initialMomentum The initial momentum value
-    function computeInitialMomentum(uint volumeCoefficient, uint maxDepreciationPerYear)
+    function computeInitialMomentum(uint volumeCoefficient, uint maxDepreciation)
         internal
         pure
         returns (uint initialMomentum)
     {
         initialMomentum = Math.mulDiv(
             volumeCoefficient,
-            maxDepreciationPerYear,
+            maxDepreciation,
             DEPRECIATION_BASIS_POINTS
         );
     }
@@ -168,12 +155,12 @@ library ReactiveTimeAppreciationMath {
     /// @dev Computes the adjusted value of momentum for a category when category update event occurs
     /// @param category The category to compute the adjusted momentum for
     /// @param newVolumeCoefficient The new volume coefficient of the category
-    /// @param newMaxDepreciationPerYear The new max depreciation per year of the category
+    /// @param newMaxDepreciation The new max depreciation for the category. Quantified per year.
     /// @return adjustedMomentum The adjusted momentum value
     function computeAdjustedMomentum(
         DomainDataTypes.Category memory category,
         uint newVolumeCoefficient,
-        uint newMaxDepreciationPerYear
+        uint newMaxDepreciation
     ) internal view returns (uint adjustedMomentum) {
         adjustedMomentum = computeDecayingMomentum(
             category.decayPerSecond,
@@ -187,8 +174,7 @@ library ReactiveTimeAppreciationMath {
             category.volumeCoefficient
         );
 
-        int depreciationDiff = int(newMaxDepreciationPerYear) -
-            int(uint(category.maxDepreciationPerYear));
+        int depreciationDiff = int(newMaxDepreciation) - int(uint(category.maxDepreciation));
         if (depreciationDiff > 0) {
             adjustedMomentum += Math.mulDiv(
                 newVolumeCoefficient,
@@ -198,32 +184,11 @@ library ReactiveTimeAppreciationMath {
         }
     }
 
-    /// @dev Converts a rate quantified per year to a rate quantified per week
-    /// @dev Computes: 1 - (1 - annualRate) ** (1/52.1)
-    /// @dev Taking form: 1 - e ** (ln(1 - annualRate) * (1/52.1))
-    /// @param annualRate 1% = 10000, 0.0984% = 984
-    /// @return weeklyRate the rate quantified per week
-    function toWeeklyRate(uint annualRate) internal pure returns (uint weeklyRate) {
-        uint annualDiscountPoints = SolidMath.TIME_APPRECIATION_BASIS_POINTS - annualRate;
-        int128 annualDiscount = ABDKMath64x64.div(
-            annualDiscountPoints,
-            SolidMath.TIME_APPRECIATION_BASIS_POINTS
-        );
-
-        int128 annualDiscountLN = ABDKMath64x64.ln(annualDiscount);
-        int128 weeksInYearInverse = ABDKMath64x64.inv(weeksInYear());
-        int128 weeklyDiscount = ABDKMath64x64.exp(
-            ABDKMath64x64.mul(annualDiscountLN, weeksInYearInverse)
-        );
-        uint weeklyDiscountPoints = ABDKMath64x64.mulu(
-            weeklyDiscount,
-            SolidMath.TIME_APPRECIATION_BASIS_POINTS
-        );
-
-        weeklyRate = SolidMath.TIME_APPRECIATION_BASIS_POINTS - weeklyDiscountPoints;
-    }
-
-    function weeksInYear() internal pure returns (int128) {
-        return ABDKMath64x64.div(521, 10);
+    /// @return the depreciation expressed in terms of TA basis points
+    function taQuantifiedDepreciation(uint16 depreciation) internal pure returns (uint) {
+        return
+            (depreciation * SolidMath.TIME_APPRECIATION_BASIS_POINTS) /
+            DEPRECIATION_BASIS_POINTS /
+            100;
     }
 }

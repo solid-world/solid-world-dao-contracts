@@ -26,8 +26,7 @@ library DomainDataTypes {
     /// The higher, the more you have to input to raise the TA.
     /// @param decayPerSecond controls how fast the built momentum drops over time.
     /// The bigger, the faster the momentum drops.
-    /// @param maxDepreciationPerYear controls how much the reactive TA can drop from the averageTA value. Quantified per year.
-    /// @param maxDepreciation controls how much the reactive TA can drop from the averageTA value. Quantified per week.
+    /// @param maxDepreciation controls how much the reactive TA can drop from the averageTA value. Quantified per year.
     /// @param averageTA is the average time appreciation of the category.
     /// @param totalCollateralized is the total amount of collateralized tokens for this category.
     /// @param lastCollateralizationTimestamp the timestamp of the last collateralization.
@@ -35,8 +34,7 @@ library DomainDataTypes {
     struct Category {
         uint volumeCoefficient;
         uint40 decayPerSecond;
-        uint16 maxDepreciationPerYear;
-        uint24 maxDepreciation;
+        uint16 maxDepreciation;
         uint24 averageTA;
         uint totalCollateralized;
         uint32 lastCollateralizationTimestamp;
