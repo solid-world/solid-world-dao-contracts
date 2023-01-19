@@ -229,7 +229,8 @@ library DecollateralizationManager {
                 );
                 if (
                     collateralizedForwardCredits == 0 ||
-                    _storage.batches[batchId].certificationDate <= block.timestamp
+                    _storage.batches[batchId].certificationDate <= block.timestamp ||
+                    !_storage.batches[batchId].isAccumulating
                 ) {
                     continue;
                 }

@@ -139,7 +139,11 @@ library WeeklyCarbonRewards {
                     address(this),
                     batchId
                 );
-                if (collateralizedForwardCredits == 0 || _isBatchCertified(_storage, batchId)) {
+                if (
+                    collateralizedForwardCredits == 0 ||
+                    _isBatchCertified(_storage, batchId) ||
+                    !_storage.batches[batchId].isAccumulating
+                ) {
                     continue;
                 }
 
@@ -204,7 +208,11 @@ library WeeklyCarbonRewards {
         uint rewardsFee,
         uint rewardDecimals
     ) internal view returns (uint netRewardAmount, uint feeAmount) {
-        if (availableCredits == 0 || _isBatchCertified(_storage, batchId)) {
+        if (
+            availableCredits == 0 ||
+            _isBatchCertified(_storage, batchId) ||
+            !_storage.batches[batchId].isAccumulating
+        ) {
             return (0, 0);
         }
 
