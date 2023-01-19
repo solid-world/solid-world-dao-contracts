@@ -241,6 +241,33 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         assertEq(manager.forwardContractBatch().balanceOf(testAccount, 7), 10);
     }
 
+    function testSetBatchAccumulating() public {
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE + 12),
+                vintage: 2022,
+                batchTA: 1,
+                supplier: testAccount,
+                isAccumulating: false
+            }),
+            10
+        );
+
+        assertEq(manager.getBatch(7).isAccumulating, true);
+
+        manager.setBatchAccumulating(7, false);
+        assertEq(manager.getBatch(7).isAccumulating, false);
+
+        vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchId.selector, 17));
+        manager.setBatchAccumulating(17, false);
+    }
+
     function testFailAddBatchWhenProjectDoesntExist() public {
         manager.addBatch(
             DomainDataTypes.Batch({
