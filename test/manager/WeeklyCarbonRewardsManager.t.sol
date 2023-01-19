@@ -7,6 +7,29 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     event RewardsFeeUpdated(uint indexed rewardsFee);
     event RewardsMinterUpdated(address indexed rewardsMinter);
 
+    function testMintWeeklyCarbonRewards_failsIfManagerIsPaused() public {
+        manager.pause();
+
+        vm.expectRevert(abi.encodeWithSelector(Pausable.Paused.selector));
+        manager.mintWeeklyCarbonRewards(
+            new uint[](1),
+            new address[](2),
+            new uint[](1),
+            new uint[](1),
+            testAccount
+        );
+
+        manager.unpause();
+        vm.prank(weeklyRewardsMinter);
+        manager.mintWeeklyCarbonRewards(
+            new uint[](0),
+            new address[](0),
+            new uint[](0),
+            new uint[](0),
+            testAccount
+        );
+    }
+
     function testMintWeeklyCarbonRewards_failsInputsOfDifferentLengths() public {
         vm.expectRevert(abi.encodeWithSelector(WeeklyCarbonRewards.InvalidInput.selector));
         manager.mintWeeklyCarbonRewards(
