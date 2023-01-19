@@ -45,7 +45,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             100
         );
@@ -67,7 +68,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -99,7 +101,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -136,7 +139,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -193,7 +197,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -235,7 +240,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -297,7 +303,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -310,7 +317,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -356,7 +364,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -369,7 +378,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -409,7 +419,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -422,7 +433,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -472,7 +484,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -485,7 +498,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -535,7 +549,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -548,7 +563,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -561,7 +577,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2023,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -574,7 +591,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -587,7 +605,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );

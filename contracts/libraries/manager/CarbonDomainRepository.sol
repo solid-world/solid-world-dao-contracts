@@ -137,6 +137,7 @@ library CarbonDomainRepository {
 
         _storage.batchCreated[batch.id] = true;
         _storage.batches[batch.id] = batch;
+        _storage.batches[batch.id].isAccumulating = true;
         _storage.batchIds.push(batch.id);
         _storage.projectBatches[batch.projectId].push(batch.id);
         _storage.batchCategory[batch.id] = _storage.projectCategory[batch.projectId];

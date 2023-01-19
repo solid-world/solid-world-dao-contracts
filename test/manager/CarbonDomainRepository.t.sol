@@ -158,7 +158,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10
         );
@@ -174,6 +175,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         assertEq(batch.vintage, 2022);
         assertEq(batch.batchTA, 1);
         assertEq(batch.supplier, testAccount);
+        assertEq(batch.isAccumulating, true);
         assertEq(manager.getBatchId(0), batchId);
     }
 
@@ -191,7 +193,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10
         );
@@ -204,7 +207,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 24),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             20
         );
@@ -228,7 +232,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10
         );
@@ -245,7 +250,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -263,7 +269,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -276,7 +283,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -294,7 +302,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: address(0)
+                supplier: address(0),
+                isAccumulating: false
             }),
             10000
         );
@@ -312,7 +321,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -330,7 +340,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE - 1),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );

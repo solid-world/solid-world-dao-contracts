@@ -115,7 +115,8 @@ contract RewardScenarios is Test {
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
                     batchTA: 0,
-                    supplier: i % 2 == 0 ? user0 : user1
+                    supplier: i % 2 == 0 ? user0 : user1,
+                    isAccumulating: false
                 }),
                 10000 * (i + 1)
             );
@@ -127,7 +128,8 @@ contract RewardScenarios is Test {
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
                     batchTA: 0,
-                    supplier: i % 2 == 0 ? user1 : user0
+                    supplier: i % 2 == 0 ? user1 : user0,
+                    isAccumulating: false
                 }),
                 10000 * (i + 1)
             );

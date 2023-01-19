@@ -15,7 +15,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             50000
         );
@@ -73,7 +74,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR + 5 days),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             50000
         );
@@ -171,7 +173,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             50000
         );
@@ -220,7 +223,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             50000
         );
@@ -272,7 +276,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                     certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                     vintage: 2022,
                     batchTA: 0,
-                    supplier: testAccount
+                    supplier: testAccount,
+                    isAccumulating: false
                 }),
                 50000
             );
@@ -317,7 +322,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                     certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                     vintage: 2022,
                     batchTA: 0,
-                    supplier: testAccount
+                    supplier: testAccount,
+                    isAccumulating: false
                 }),
                 50000
             );
@@ -366,7 +372,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                     certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                     vintage: 2022,
                     batchTA: 0,
-                    supplier: testAccount
+                    supplier: testAccount,
+                    isAccumulating: false
                 }),
                 50000
             );
