@@ -374,6 +374,70 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         );
     }
 
+    function testSetBatchCertificationDate_failsForNonExistingBatch() public {
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE + 52 weeks),
+                vintage: 2022,
+                batchTA: 0,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchId.selector, 17));
+        manager.setBatchCertificationDate(17, uint32(CURRENT_DATE + 53 weeks));
+    }
+
+    function testSetBatchCertificationDate_failsForCertificationDateLaterThanCurrent() public {
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE + 52 weeks),
+                vintage: 2022,
+                batchTA: 0,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidInput.selector));
+        manager.setBatchCertificationDate(7, uint32(CURRENT_DATE + 53 weeks));
+    }
+
+    function testSetBatchCertificationDate() public {
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(3, 5);
+
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE + 52 weeks),
+                vintage: 2022,
+                batchTA: 0,
+                supplier: testAccount
+            }),
+            10000
+        );
+
+        manager.setBatchCertificationDate(7, uint32(CURRENT_DATE + 51 weeks));
+
+        assertEq(manager.getBatch(7).certificationDate, uint32(CURRENT_DATE + 51 weeks));
+    }
+
     function assertNotEq(address a, address b) private {
         if (a == b) {
             emit log("Error: a != b not satisfied [address]");
