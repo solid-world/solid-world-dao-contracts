@@ -51,7 +51,8 @@ abstract contract BaseSolidWorldManager is Test {
             DECOLLATERALIZATION_FEE,
             REWARDS_FEE,
             feeReceiver,
-            weeklyRewardsMinter
+            weeklyRewardsMinter,
+            address(this)
         );
     }
 

@@ -82,7 +82,8 @@ contract RewardScenarios is Test {
             DECOLLATERALIZATION_FEE,
             REWARDS_FEE,
             feeReceiver,
-            address(emissionManager)
+            address(emissionManager),
+            address(this)
         );
 
         solidWorldManager.addCategory(

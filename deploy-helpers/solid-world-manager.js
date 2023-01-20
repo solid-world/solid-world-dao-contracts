@@ -75,7 +75,8 @@ async function deploySolidWorldManager(
             INITIAL_DECOLLATERALIZATION_FEE,
             INITIAL_REWARDS_FEE,
             deployer,
-            EmissionManager
+            EmissionManager,
+            contractsOwner
           ]
         }
       }
