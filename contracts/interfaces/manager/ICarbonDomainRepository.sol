@@ -39,4 +39,9 @@ interface ICarbonDomainRepository {
     /// @param batchId The batch ID
     /// @param isAccumulating The new isAccumulating value for the batch
     function setBatchAccumulating(uint batchId, bool isAccumulating) external;
+
+    /// @notice The certification date can only be set sooner than the current certification date
+    /// @param batchId The batch ID to be updated
+    /// @param certificationDate The new certification date for the batch
+    function setBatchCertificationDate(uint batchId, uint32 certificationDate) external;
 }
