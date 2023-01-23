@@ -22,6 +22,7 @@ library CarbonDomainRepository {
     error InvalidCategoryId(uint categoryId);
     error ProjectAlreadyExists(uint projectId);
     error InvalidProjectId(uint projectId);
+    error InvalidBatchId(uint batchId);
     error BatchAlreadyExists(uint batchId);
     error InvalidBatchSupplier();
     error BatchCertificationDateInThePast(uint32 dueDate);
@@ -137,11 +138,27 @@ library CarbonDomainRepository {
 
         _storage.batchCreated[batch.id] = true;
         _storage.batches[batch.id] = batch;
+        _storage.batches[batch.id].isAccumulating = true;
         _storage.batchIds.push(batch.id);
         _storage.projectBatches[batch.projectId].push(batch.id);
         _storage.batchCategory[batch.id] = _storage.projectCategory[batch.projectId];
         _storage._forwardContractBatch.mint(batch.supplier, batch.id, mintableAmount, "");
 
         emit BatchCreated(batch.id);
+    }
+
+    /// @param _storage Struct containing the current state used or modified by this function
+    /// @param batchId The batch ID
+    /// @param isAccumulating The new isAccumulating value for the batch
+    function setBatchAccumulating(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint batchId,
+        bool isAccumulating
+    ) external {
+        if (!_storage.batchCreated[batchId]) {
+            revert InvalidBatchId(batchId);
+        }
+
+        _storage.batches[batchId].isAccumulating = isAccumulating;
     }
 }

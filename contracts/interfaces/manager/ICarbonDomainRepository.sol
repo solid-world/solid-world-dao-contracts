@@ -35,4 +35,8 @@ interface ICarbonDomainRepository {
     /// @param batch Struct containing all the data for the batch
     /// @param mintableAmount The amount of ERC1155 tokens to be minted to the batch supplier
     function addBatch(DomainDataTypes.Batch calldata batch, uint mintableAmount) external;
+
+    /// @param batchId The batch ID
+    /// @param isAccumulating The new isAccumulating value for the batch
+    function setBatchAccumulating(uint batchId, bool isAccumulating) external;
 }

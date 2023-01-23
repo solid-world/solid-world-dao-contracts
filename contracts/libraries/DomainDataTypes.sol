@@ -10,7 +10,8 @@ library DomainDataTypes {
     /// @param vintage The year an emission reduction occurred or the offset was issued. The older the vintage, the cheaper the price per credit.
     /// @param status Status for the batch (ex. CAN_BE_DEPOSITED | IS_ACCUMULATING | READY_FOR_DELIVERY etc.)
     /// @param batchTA Coefficient that affects on how many collateralized basket tokens (ERC-20) may be minted / ton
-    ///                   depending on market conditions. Forward is worth less than spot.
+    /// depending on market conditions. Forward is worth less than spot.
+    /// @param isAccumulating if true, the batch accepts deposits
     struct Batch {
         uint id;
         uint projectId;
@@ -19,6 +20,7 @@ library DomainDataTypes {
         uint16 vintage;
         uint8 status;
         uint24 batchTA;
+        bool isAccumulating;
     }
 
     /// @notice Structure that holds state of a category of forward carbon credits. Used for computing collateralization.

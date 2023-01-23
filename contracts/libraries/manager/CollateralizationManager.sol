@@ -50,7 +50,7 @@ library CollateralizationManager {
         }
 
         uint32 certificationDate = _storage.batches[batchId].certificationDate;
-        if (certificationDate <= block.timestamp) {
+        if (certificationDate <= block.timestamp || !_storage.batches[batchId].isAccumulating) {
             revert BatchCertified(batchId);
         }
 
@@ -139,7 +139,7 @@ library CollateralizationManager {
         }
 
         uint32 certificationDate = _storage.batches[batchId].certificationDate;
-        if (certificationDate <= block.timestamp) {
+        if (certificationDate <= block.timestamp || !_storage.batches[batchId].isAccumulating) {
             revert BatchCertified(batchId);
         }
 

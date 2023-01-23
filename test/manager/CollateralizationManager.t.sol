@@ -39,7 +39,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             100
         );
@@ -64,7 +65,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             100
         );
@@ -89,7 +91,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 1 weeks - 1),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             100
         );
@@ -119,7 +122,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             100
         );
@@ -150,7 +154,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             100
         );
@@ -177,7 +182,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             100
         );
@@ -218,7 +224,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             100
         );
@@ -257,7 +264,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             100
         );
@@ -283,6 +291,38 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
     }
 
+    function testCollateralizeBatchWorks_failsIfBatchIsNotAccumulating() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", TIME_APPRECIATION);
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
+                vintage: 2022,
+                batchTA: 0,
+                supplier: testAccount,
+                isAccumulating: false
+            }),
+            100
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+
+        vm.startPrank(testAccount);
+        forwardContractBatch.setApprovalForAll(address(manager), true);
+
+        manager.setBatchAccumulating(BATCH_ID, false);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(CollateralizationManager.BatchCertified.selector, BATCH_ID)
+        );
+        manager.collateralizeBatch(BATCH_ID, 100, 0);
+
+        vm.stopPrank();
+    }
+
     function testSimulateBatchCollateralization_inputAmountIs0() public {
         vm.expectRevert(abi.encodeWithSelector(CollateralizationManager.InvalidInput.selector));
         manager.simulateBatchCollateralization(BATCH_ID, 0);
@@ -306,7 +346,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2025,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -330,7 +371,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 1 weeks - 1),
                 vintage: 2025,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -342,7 +384,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 1),
                 vintage: 2025,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -377,7 +420,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2025,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -387,6 +431,31 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         assertApproxEqAbs(cbtUserCut, expectedCbtUserCut, 2.331e18);
         assertApproxEqAbs(cbtDaoCut, expectedCbtDaoCut, 0.259e18);
         assertApproxEqAbs(cbtForfeited, expectedCbtForfeited, 2.59e18);
+    }
+
+    function testSimulateBatchCollateralization_failsIfBatchIsNotAccumulating() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", TIME_APPRECIATION);
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
+                vintage: 2025,
+                batchTA: 0,
+                supplier: testAccount,
+                isAccumulating: false
+            }),
+            10000
+        );
+
+        manager.setBatchAccumulating(BATCH_ID, false);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(CollateralizationManager.BatchCertified.selector, BATCH_ID)
+        );
+        manager.simulateBatchCollateralization(BATCH_ID, 10000);
     }
 
     function testSetCollateralizationFee() public {
