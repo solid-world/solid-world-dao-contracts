@@ -101,6 +101,12 @@ contract SolidWorldManager is
     }
 
     // todo #121: add authorization
+    /// @inheritdoc ICarbonDomainRepository
+    function setBatchCertificationDate(uint batchId, uint32 certificationDate) external {
+        _storage.setBatchCertificationDate(batchId, certificationDate);
+    }
+
+    // todo #121: add authorization
     /// @inheritdoc IWeeklyCarbonRewardsManager
     function setWeeklyRewardsMinter(address weeklyRewardsMinter) external {
         _storage.setWeeklyRewardsMinter(weeklyRewardsMinter);

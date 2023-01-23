@@ -106,7 +106,8 @@ contract CarbonRewardDistributionGasTest is GasTest {
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR * 10),
                     vintage: 2022,
                     batchTA: 0,
-                    supplier: address(manager)
+                    supplier: address(manager),
+                    isAccumulating: false
                 }),
                 10000
             );

@@ -161,4 +161,24 @@ library CarbonDomainRepository {
 
         _storage.batches[batchId].isAccumulating = isAccumulating;
     }
+
+    /// @param _storage Struct containing the current state used or modified by this function
+    /// @param batchId The batch ID
+    /// @param certificationDate The new certification date for the batch.
+    /// Can only be set sooner than the current certification date.
+    function setBatchCertificationDate(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint batchId,
+        uint32 certificationDate
+    ) external {
+        if (!_storage.batchCreated[batchId]) {
+            revert InvalidBatchId(batchId);
+        }
+
+        if (certificationDate >= _storage.batches[batchId].certificationDate) {
+            revert InvalidInput();
+        }
+
+        _storage.batches[batchId].certificationDate = certificationDate;
+    }
 }
