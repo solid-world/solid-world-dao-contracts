@@ -386,7 +386,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 52 weeks),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -407,7 +408,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 52 weeks),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -428,7 +430,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 52 weeks),
                 vintage: 2022,
                 batchTA: 0,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
