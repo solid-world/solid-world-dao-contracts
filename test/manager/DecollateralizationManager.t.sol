@@ -20,6 +20,13 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         manager.decollateralizeTokens(BATCH_ID, 0, 0);
     }
 
+    function testDecollateralizeTokens_failsIfManagerIsPaused() public {
+        manager.pause();
+
+        vm.expectRevert(abi.encodeWithSelector(Pausable.Paused.selector));
+        manager.decollateralizeTokens(BATCH_ID, 0, 0);
+    }
+
     function testDecollateralizeTokensWhenInvalidBatchId() public {
         vm.expectRevert(
             abi.encodeWithSelector(DecollateralizationManager.InvalidBatchId.selector, 5)
@@ -251,6 +258,13 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
         assertEq(category.averageTA, TIME_APPRECIATION);
         assertEq(category.totalCollateralized, 10000 - 8097);
+    }
+
+    function testBulkDecollateralizeTokens_failsIfManagerIsPaused() public {
+        manager.pause();
+
+        vm.expectRevert(abi.encodeWithSelector(Pausable.Paused.selector));
+        manager.bulkDecollateralizeTokens(new uint[](1), new uint[](1), new uint[](2));
     }
 
     function testBulkDecollateralizeTokensWhenInvalidInput() public {

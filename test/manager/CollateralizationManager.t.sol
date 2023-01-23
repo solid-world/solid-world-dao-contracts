@@ -21,6 +21,13 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         manager.collateralizeBatch(CATEGORY_ID, 1, 0);
     }
 
+    function testCollateralizeBatch_failsIfManagerIsPaused() public {
+        manager.pause();
+
+        vm.expectRevert(abi.encodeWithSelector(Pausable.Paused.selector));
+        manager.collateralizeBatch(CATEGORY_ID, 1, 0);
+    }
+
     function testCollateralizeBatch_whenCollateralizing0() public {
         manager.addCategory(CATEGORY_ID, "Test token", "TT", 1);
         manager.addProject(CATEGORY_ID, PROJECT_ID);

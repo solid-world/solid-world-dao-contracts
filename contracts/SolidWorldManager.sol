@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
+import "./Pausable.sol";
 import "./ForwardContractBatchToken.sol";
 import "./CollateralizedBasketTokenDeployer.sol";
 import "./SolidWorldManagerStorage.sol";
@@ -23,6 +24,7 @@ contract SolidWorldManager is
     OwnableUpgradeable,
     IERC1155ReceiverUpgradeable,
     ReentrancyGuardUpgradeable,
+    Pausable,
     IWeeklyCarbonRewardsManager,
     ICollateralizationManager,
     IDecollateralizationManager,
@@ -102,7 +104,6 @@ contract SolidWorldManager is
     function computeWeeklyCarbonRewards(uint[] calldata categoryIds)
         external
         view
-        override
         returns (
             address[] memory,
             uint[] memory,
@@ -119,7 +120,7 @@ contract SolidWorldManager is
         uint[] calldata rewardAmounts,
         uint[] calldata rewardFees,
         address rewardsVault
-    ) external override {
+    ) external whenNotPaused {
         _storage.mintWeeklyCarbonRewards(
             categoryIds,
             carbonRewards,
@@ -134,7 +135,7 @@ contract SolidWorldManager is
         uint batchId,
         uint amountIn,
         uint amountOutMin
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         _storage.collateralizeBatch(batchId, amountIn, amountOutMin);
     }
 
@@ -143,7 +144,7 @@ contract SolidWorldManager is
         uint batchId,
         uint amountIn,
         uint amountOutMin
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         _storage.decollateralizeTokens(batchId, amountIn, amountOutMin);
     }
 
@@ -152,7 +153,7 @@ contract SolidWorldManager is
         uint[] calldata batchIds,
         uint[] calldata amountsIn,
         uint[] calldata amountsOutMin
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         _storage.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
     }
 
@@ -189,6 +190,18 @@ contract SolidWorldManager is
         returns (DomainDataTypes.TokenDecollateralizationInfo[] memory)
     {
         return _storage.getBatchesDecollateralizationInfo(projectId, vintage);
+    }
+
+    // todo #121: add authorization
+    /// @inheritdoc Pausable
+    function pause() public override {
+        super.pause();
+    }
+
+    // todo #121: add authorization
+    /// @inheritdoc Pausable
+    function unpause() public override {
+        super.unpause();
     }
 
     // todo #121: add authorization
