@@ -8,8 +8,8 @@ const { ethers } = require('ethers')
 require('./tasks')
 
 const {
-  POLYGONSCAN_API_KEY = '',
-  ETHERSCAN_API_KEY = '',
+  POLYGONSCAN_KEY = '',
+  ETHERSCAN_KEY = '',
   INFURA_KEY = '',
   DEPLOYER_PRIVATE_KEY,
   DEPLOYER_JSON,
@@ -45,25 +45,35 @@ module.exports = {
     ]
   },
   networks: {
-    rinkeby: {
-      url: 'https://rinkeby.infura.io/v3/' + INFURA_KEY,
-      gas: 10000000
-    },
     goerli: {
       url: 'https://goerli.infura.io/v3/' + INFURA_KEY,
-      gas: 10000000
-    },
-    ropsten: {
-      url: 'https://ropsten.infura.io/v3/' + INFURA_KEY,
-      gas: 10000000
+      gas: 10000000,
+      verify: {
+        etherscan: {
+          apiKey: ETHERSCAN_KEY,
+          apiUrl: 'https://api-goerli.etherscan.io/'
+        }
+      }
     },
     mumbai: {
       url: 'https://polygon-mumbai.infura.io/v3/' + INFURA_KEY,
-      timeout: 100000
+      timeout: 100000,
+      verify: {
+        etherscan: {
+          apiKey: POLYGONSCAN_KEY,
+          apiUrl: 'https://api-testnet.polygonscan.com/'
+        }
+      }
     },
     polygon: {
       url: 'https://polygon-mainnet.infura.io/v3/' + INFURA_KEY,
-      timeout: 100000
+      timeout: 100000,
+      verify: {
+        etherscan: {
+          apiKey: POLYGONSCAN_KEY,
+          apiUrl: 'https://api.polygonscan.com/'
+        }
+      }
     },
     localhost: {
       url: 'http://127.0.0.1:8545',
@@ -72,11 +82,9 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      rinkeby: ETHERSCAN_API_KEY,
-      goerli: ETHERSCAN_API_KEY,
-      ropsten: ETHERSCAN_API_KEY,
-      polygonMumbai: POLYGONSCAN_API_KEY,
-      polygon: POLYGONSCAN_API_KEY
+      goerli: ETHERSCAN_KEY,
+      polygonMumbai: POLYGONSCAN_KEY,
+      polygon: POLYGONSCAN_KEY
     }
   },
   namedAccounts: {
