@@ -60,4 +60,50 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
 
         vm.stopPrank();
     }
+
+    function testERC1155TransfersToManager() public {
+        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + 3 weeks),
+                vintage: 2025,
+                batchTA: 0,
+                supplier: testAccount,
+                isAccumulating: false
+            }),
+            10000
+        );
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: BATCH_ID + 1,
+                status: 0,
+                projectId: PROJECT_ID,
+                certificationDate: uint32(CURRENT_DATE + 3 weeks),
+                vintage: 2025,
+                batchTA: 0,
+                supplier: testAccount,
+                isAccumulating: false
+            }),
+            10000
+        );
+
+        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
+        vm.startPrank(testAccount);
+        vm.expectRevert(abi.encodePacked("ERC1155: ERC1155Receiver rejected tokens"));
+        forwardContractBatch.safeTransferFrom(testAccount, address(manager), BATCH_ID, 1, "");
+
+        uint[] memory ids = new uint[](2);
+        ids[0] = BATCH_ID;
+        ids[1] = BATCH_ID + 1;
+        uint[] memory amounts = new uint[](2);
+        amounts[0] = 1;
+        amounts[1] = 1;
+
+        vm.expectRevert(abi.encodePacked("ERC1155: ERC1155Receiver rejected tokens"));
+        forwardContractBatch.safeBatchTransferFrom(testAccount, address(manager), ids, amounts, "");
+    }
 }
