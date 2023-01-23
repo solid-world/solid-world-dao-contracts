@@ -315,9 +315,11 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         forwardContractBatch.setApprovalForAll(address(manager), true);
         manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
         manager.collateralizeBatch(BATCH_ID + 1, 10000, 0);
+        vm.stopPrank();
 
         manager.setBatchAccumulating(BATCH_ID + 1, false);
 
+        vm.startPrank(testAccount);
         vm.expectEmit(true, true, false, false, address(manager));
         emit TokensDecollateralized(BATCH_ID, testAccount, cbtUserCut, 8097);
         vm.expectEmit(true, true, true, false, address(manager));
@@ -649,8 +651,10 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         manager.collateralizeBatch(BATCH_ID, 10000, 8100e18);
         manager.collateralizeBatch(BATCH_ID + 1, 10000, 8100e18);
         manager.collateralizeBatch(BATCH_ID + 2, 10000, 0);
+        vm.stopPrank();
 
         manager.setBatchAccumulating(BATCH_ID + 2, false);
+        vm.startPrank(testAccount);
 
         uint[] memory batchIds = new uint[](2);
         batchIds[0] = BATCH_ID;

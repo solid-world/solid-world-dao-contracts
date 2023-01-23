@@ -96,15 +96,13 @@ contract SolidWorldManager is
         _storage.addBatch(batch, mintableAmount);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc ICarbonDomainRepository
-    function setBatchAccumulating(uint batchId, bool isAccumulating) external {
+    function setBatchAccumulating(uint batchId, bool isAccumulating) external onlyOwner {
         _storage.setBatchAccumulating(batchId, isAccumulating);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc ICarbonDomainRepository
-    function setBatchCertificationDate(uint batchId, uint32 certificationDate) external {
+    function setBatchCertificationDate(uint batchId, uint32 certificationDate) external onlyOwner {
         _storage.setBatchCertificationDate(batchId, certificationDate);
     }
 
@@ -205,15 +203,13 @@ contract SolidWorldManager is
         return _storage.getBatchesDecollateralizationInfo(projectId, vintage);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc Pausable
-    function pause() public override {
+    function pause() public override onlyOwner {
         super.pause();
     }
 
-    // todo #121: add authorization
     /// @inheritdoc Pausable
-    function unpause() public override {
+    function unpause() public override onlyOwner {
         super.unpause();
     }
 

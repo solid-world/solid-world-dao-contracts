@@ -25,7 +25,8 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
-                supplier: testAccount
+                supplier: testAccount,
+                isAccumulating: false
             }),
             10000
         );
@@ -44,6 +45,18 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
 
         vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
         manager.setFeeReceiver(vm.addr(1234));
+
+        vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
+        manager.pause();
+
+        vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
+        manager.unpause();
+
+        vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
+        manager.setBatchAccumulating(1, true);
+
+        vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
+        manager.setBatchCertificationDate(1, 1);
 
         vm.stopPrank();
     }
