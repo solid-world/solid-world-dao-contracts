@@ -45,7 +45,8 @@ contract CarbonRewardDistributionGasTest is GasTest {
             1000,
             1000,
             feeReceiver,
-            address(emissionManager)
+            address(emissionManager),
+            address(this)
         );
 
         rewardsController.setup(address(staking), rewardsVault, address(emissionManager));

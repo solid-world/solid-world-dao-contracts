@@ -308,12 +308,11 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
             100
         );
 
+        manager.setBatchAccumulating(BATCH_ID, false);
         ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
 
         vm.startPrank(testAccount);
         forwardContractBatch.setApprovalForAll(address(manager), true);
-
-        manager.setBatchAccumulating(BATCH_ID, false);
 
         vm.expectRevert(
             abi.encodeWithSelector(CollateralizationManager.BatchCertified.selector, BATCH_ID)

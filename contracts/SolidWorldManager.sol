@@ -45,10 +45,13 @@ contract SolidWorldManager is
         uint16 decollateralizationFee,
         uint16 rewardsFee,
         address feeReceiver,
-        address weeklyRewardsMinter
+        address weeklyRewardsMinter,
+        address owner
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
+
+        transferOwnership(owner);
 
         _storage._collateralizedBasketTokenDeployer = collateralizedBasketTokenDeployer;
         _storage._forwardContractBatch = forwardContractBatch;
@@ -60,55 +63,51 @@ contract SolidWorldManager is
         _storage.setWeeklyRewardsMinter(weeklyRewardsMinter);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc ICarbonDomainRepository
     function addCategory(
         uint categoryId,
         string calldata tokenName,
         string calldata tokenSymbol,
         uint24 initialTA
-    ) external {
+    ) external onlyOwner {
         _storage.addCategory(categoryId, tokenName, tokenSymbol, initialTA);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc ICarbonDomainRepository
     function updateCategory(
         uint categoryId,
         uint volumeCoefficient,
         uint40 decayPerSecond,
         uint16 maxDepreciation
-    ) external {
+    ) external onlyOwner {
         _storage.updateCategory(categoryId, volumeCoefficient, decayPerSecond, maxDepreciation);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc ICarbonDomainRepository
-    function addProject(uint categoryId, uint projectId) external {
+    function addProject(uint categoryId, uint projectId) external onlyOwner {
         _storage.addProject(categoryId, projectId);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc ICarbonDomainRepository
-    function addBatch(DomainDataTypes.Batch calldata batch, uint mintableAmount) external {
+    function addBatch(DomainDataTypes.Batch calldata batch, uint mintableAmount)
+        external
+        onlyOwner
+    {
         _storage.addBatch(batch, mintableAmount);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc ICarbonDomainRepository
-    function setBatchAccumulating(uint batchId, bool isAccumulating) external {
+    function setBatchAccumulating(uint batchId, bool isAccumulating) external onlyOwner {
         _storage.setBatchAccumulating(batchId, isAccumulating);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc ICarbonDomainRepository
-    function setBatchCertificationDate(uint batchId, uint32 certificationDate) external {
+    function setBatchCertificationDate(uint batchId, uint32 certificationDate) external onlyOwner {
         _storage.setBatchCertificationDate(batchId, certificationDate);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc IWeeklyCarbonRewardsManager
-    function setWeeklyRewardsMinter(address weeklyRewardsMinter) external {
+    function setWeeklyRewardsMinter(address weeklyRewardsMinter) external onlyOwner {
         _storage.setWeeklyRewardsMinter(weeklyRewardsMinter);
     }
 
@@ -204,38 +203,32 @@ contract SolidWorldManager is
         return _storage.getBatchesDecollateralizationInfo(projectId, vintage);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc Pausable
-    function pause() public override {
+    function pause() public override onlyOwner {
         super.pause();
     }
 
-    // todo #121: add authorization
     /// @inheritdoc Pausable
-    function unpause() public override {
+    function unpause() public override onlyOwner {
         super.unpause();
     }
 
-    // todo #121: add authorization
     /// @inheritdoc ICollateralizationManager
-    function setCollateralizationFee(uint16 collateralizationFee) external {
+    function setCollateralizationFee(uint16 collateralizationFee) external onlyOwner {
         _storage.setCollateralizationFee(collateralizationFee);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc IDecollateralizationManager
-    function setDecollateralizationFee(uint16 decollateralizationFee) external {
+    function setDecollateralizationFee(uint16 decollateralizationFee) external onlyOwner {
         _storage.setDecollateralizationFee(decollateralizationFee);
     }
 
-    // todo #121: add authorization
     /// @inheritdoc IWeeklyCarbonRewardsManager
-    function setRewardsFee(uint16 rewardsFee) external {
+    function setRewardsFee(uint16 rewardsFee) external onlyOwner {
         _storage.setRewardsFee(rewardsFee);
     }
 
-    // todo #121: add authorization
-    function setFeeReceiver(address feeReceiver) external {
+    function setFeeReceiver(address feeReceiver) external onlyOwner {
         _setFeeReceiver(feeReceiver);
     }
 
