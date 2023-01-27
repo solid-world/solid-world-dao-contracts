@@ -22,12 +22,12 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -70,12 +70,12 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 3 weeks),
                 vintage: 2025,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -84,12 +84,12 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 3 weeks),
                 vintage: 2025,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );

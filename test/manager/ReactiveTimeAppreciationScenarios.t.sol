@@ -12,12 +12,12 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             50000
         );
@@ -72,12 +72,12 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR + 5 days),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             50000
         );
@@ -172,12 +172,12 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             50000
         );
@@ -223,12 +223,12 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             50000
         );
@@ -277,12 +277,12 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID,
+                    collateralizedCredits: 0,
                     certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                     vintage: 2022,
                     batchTA: 0,
                     supplier: testAccount,
-                    isAccumulating: false,
-                    collateralizedCredits: 0
+                    isAccumulating: false
                 }),
                 50000
             );
@@ -324,12 +324,12 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID,
+                    collateralizedCredits: 0,
                     certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                     vintage: 2022,
                     batchTA: 0,
                     supplier: testAccount,
-                    isAccumulating: false,
-                    collateralizedCredits: 0
+                    isAccumulating: false
                 }),
                 50000
             );
@@ -375,12 +375,12 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID,
+                    collateralizedCredits: 0,
                     certificationDate: uint32(CURRENT_DATE + 7 * ONE_YEAR + 5 days),
                     vintage: 2022,
                     batchTA: 0,
                     supplier: testAccount,
-                    isAccumulating: false,
-                    collateralizedCredits: 0
+                    isAccumulating: false
                 }),
                 50000
             );

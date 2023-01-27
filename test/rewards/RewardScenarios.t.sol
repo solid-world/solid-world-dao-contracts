@@ -113,12 +113,12 @@ contract RewardScenarios is Test {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
+                    collateralizedCredits: 0,
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
                     batchTA: 0,
                     supplier: i % 2 == 0 ? user0 : user1,
-                    isAccumulating: false,
-                    collateralizedCredits: 0
+                    isAccumulating: false
                 }),
                 10000 * (i + 1)
             );
@@ -127,12 +127,12 @@ contract RewardScenarios is Test {
                     id: BATCH_ID + i + 4,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
+                    collateralizedCredits: 0,
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
                     batchTA: 0,
                     supplier: i % 2 == 0 ? user1 : user0,
-                    isAccumulating: false,
-                    collateralizedCredits: 0
+                    isAccumulating: false
                 }),
                 10000 * (i + 1)
             );

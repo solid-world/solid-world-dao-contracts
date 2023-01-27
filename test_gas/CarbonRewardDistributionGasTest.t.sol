@@ -104,12 +104,12 @@ contract CarbonRewardDistributionGasTest is GasTest {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % rewards),
+                    collateralizedCredits: 10000,
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR * 10),
                     vintage: 2022,
                     batchTA: 0,
                     supplier: vm.addr(13),
-                    isAccumulating: false,
-                    collateralizedCredits: 10000
+                    isAccumulating: false
                 }),
                 10000
             );

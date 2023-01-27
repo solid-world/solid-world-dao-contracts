@@ -63,12 +63,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
+                    collateralizedCredits: 10000,
                     certificationDate: uint32(CURRENT_DATE + 1 minutes),
                     vintage: 2022,
                     batchTA: 10_0000,
                     supplier: testAccount,
-                    isAccumulating: false,
-                    collateralizedCredits: 10000
+                    isAccumulating: false
                 }),
                 10000
             );
@@ -115,12 +115,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
+                    collateralizedCredits: 10000,
                     certificationDate: uint32(CURRENT_DATE + 7 weeks + ONE_YEAR),
                     vintage: 2022,
                     batchTA: 10_0000,
                     supplier: testAccount,
-                    isAccumulating: false,
-                    collateralizedCredits: 10000
+                    isAccumulating: false
                 }),
                 10000
             );
@@ -131,12 +131,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 id: 11,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 10000,
                 certificationDate: uint32(CURRENT_DATE + 1 minutes + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 10_0000,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 10000
+                isAccumulating: false
             }),
             10000
         );
@@ -146,12 +146,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 id: 12,
                 status: 0,
                 projectId: PROJECT_ID + 1,
+                collateralizedCredits: 10000,
                 certificationDate: uint32(CURRENT_DATE + 2 weeks + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 10_0000,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 10000
+                isAccumulating: false
             }),
             10000
         );
@@ -224,12 +224,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     id: BATCH_ID + i,
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
+                    collateralizedCredits: 10000 * ((i % 2) + 1),
                     certificationDate: uint32(CURRENT_DATE + 7 weeks),
                     vintage: 2022,
                     batchTA: uint24(1647 + (i * 100)), // 1747, 1847, 1947, 2047, 2147
                     supplier: testAccount,
-                    isAccumulating: false,
-                    collateralizedCredits: 10000 * ((i % 2) + 1)
+                    isAccumulating: false
                 }),
                 10000 * ((i % 2) + 1)
             );
@@ -239,12 +239,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 6,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 1000000,
                 certificationDate: uint32(CURRENT_DATE + 3 weeks), // should be skipped
                 vintage: 2022,
                 batchTA: uint24(9999),
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 1000000
+                isAccumulating: false
             }),
             1000000
         );
@@ -253,12 +253,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 7,
                 status: 0,
                 projectId: PROJECT_ID + 2,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 7 weeks),
                 vintage: 2022,
                 batchTA: 1647,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             0
         );

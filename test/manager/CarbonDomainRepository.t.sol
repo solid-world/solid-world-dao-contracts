@@ -155,12 +155,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: batchId,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10
         );
@@ -191,12 +191,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10
         );
@@ -206,12 +206,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 11,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 24),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             20
         );
@@ -232,12 +232,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10
         );
@@ -254,12 +254,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10
         );
@@ -279,12 +279,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -299,12 +299,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -314,12 +314,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -334,12 +334,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: address(0),
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -354,12 +354,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -374,12 +374,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE - 1),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -397,12 +397,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE - 1),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: address(0),
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -415,12 +415,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE - 1),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: address(manager),
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -435,12 +435,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 52 weeks),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -458,12 +458,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 52 weeks),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
@@ -481,12 +481,12 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 52 weeks),
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false,
-                collateralizedCredits: 0
+                isAccumulating: false
             }),
             10000
         );
