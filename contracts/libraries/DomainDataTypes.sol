@@ -12,6 +12,7 @@ library DomainDataTypes {
     /// @param batchTA Coefficient that affects on how many collateralized basket tokens (ERC-20) may be minted / ton
     /// depending on market conditions. Forward is worth less than spot.
     /// @param isAccumulating if true, the batch accepts deposits
+    /// @param collateralizedCredits Amount of forward credits that have been provided as collateral for getting collateralized basket tokens (ERC-20)
     struct Batch {
         uint id;
         uint projectId;
@@ -21,6 +22,7 @@ library DomainDataTypes {
         uint8 status;
         uint24 batchTA;
         bool isAccumulating;
+        uint collateralizedCredits;
     }
 
     /// @notice Structure that holds state of a category of forward carbon credits. Used for computing collateralization.

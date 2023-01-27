@@ -40,7 +40,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             100
         );
@@ -66,7 +67,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             100
         );
@@ -92,7 +94,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             100
         );
@@ -123,7 +126,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             100
         );
@@ -155,7 +159,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             100
         );
@@ -183,7 +188,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             100
         );
@@ -225,7 +231,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             100
         );
@@ -265,7 +272,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             100
         );
@@ -303,7 +311,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             100
         );
@@ -346,7 +355,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2025,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -371,7 +381,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2025,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -384,7 +395,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2025,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -420,7 +432,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2025,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -444,7 +457,8 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 vintage: 2025,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );

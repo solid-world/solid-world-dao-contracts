@@ -26,7 +26,8 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -73,7 +74,8 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
                 vintage: 2025,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -86,7 +88,8 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
                 vintage: 2025,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );

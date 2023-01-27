@@ -67,7 +67,8 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     vintage: 2022,
                     batchTA: 10_0000,
                     supplier: address(manager),
-                    isAccumulating: false
+                    isAccumulating: false,
+                    collateralizedCredits: 0
                 }),
                 10000
             );
@@ -118,7 +119,8 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     vintage: 2022,
                     batchTA: 10_0000,
                     supplier: address(manager),
-                    isAccumulating: false
+                    isAccumulating: false,
+                    collateralizedCredits: 0
                 }),
                 10000
             );
@@ -133,7 +135,8 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 10_0000,
                 supplier: address(manager),
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -147,7 +150,8 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 10_0000,
                 supplier: address(manager),
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -224,7 +228,8 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     vintage: 2022,
                     batchTA: uint24(1647 + (i * 100)), // 1747, 1847, 1947, 2047, 2147
                     supplier: address(manager),
-                    isAccumulating: false
+                    isAccumulating: false,
+                    collateralizedCredits: 0
                 }),
                 10000 * ((i % 2) + 1)
             );
@@ -238,7 +243,8 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: uint24(9999),
                 supplier: address(manager),
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             1000000
         );
@@ -251,7 +257,8 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1647,
                 supplier: address(manager),
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             0
         );

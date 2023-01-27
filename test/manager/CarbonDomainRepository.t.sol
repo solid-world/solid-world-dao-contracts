@@ -159,7 +159,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10
         );
@@ -194,7 +195,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10
         );
@@ -208,7 +210,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             20
         );
@@ -233,7 +236,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10
         );
@@ -254,7 +258,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10
         );
@@ -278,7 +283,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -297,7 +303,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -311,7 +318,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -330,7 +338,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: address(0),
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -349,7 +358,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -368,7 +378,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -387,7 +398,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -409,7 +421,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );
@@ -431,7 +444,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             10000
         );

@@ -16,7 +16,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             50000
         );
@@ -75,7 +76,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             50000
         );
@@ -174,7 +176,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             50000
         );
@@ -224,7 +227,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 vintage: 2022,
                 batchTA: 0,
                 supplier: testAccount,
-                isAccumulating: false
+                isAccumulating: false,
+                collateralizedCredits: 0
             }),
             50000
         );
@@ -277,7 +281,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                     vintage: 2022,
                     batchTA: 0,
                     supplier: testAccount,
-                    isAccumulating: false
+                    isAccumulating: false,
+                    collateralizedCredits: 0
                 }),
                 50000
             );
@@ -323,7 +328,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                     vintage: 2022,
                     batchTA: 0,
                     supplier: testAccount,
-                    isAccumulating: false
+                    isAccumulating: false,
+                    collateralizedCredits: 0
                 }),
                 50000
             );
@@ -373,7 +379,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                     vintage: 2022,
                     batchTA: 0,
                     supplier: testAccount,
-                    isAccumulating: false
+                    isAccumulating: false,
+                    collateralizedCredits: 0
                 }),
                 50000
             );

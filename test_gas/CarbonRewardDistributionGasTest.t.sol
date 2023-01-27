@@ -108,7 +108,8 @@ contract CarbonRewardDistributionGasTest is GasTest {
                     vintage: 2022,
                     batchTA: 0,
                     supplier: address(manager),
-                    isAccumulating: false
+                    isAccumulating: false,
+                    collateralizedCredits: 0
                 }),
                 10000
             );
