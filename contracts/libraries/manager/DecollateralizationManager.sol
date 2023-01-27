@@ -134,11 +134,6 @@ library DecollateralizationManager {
                 continue;
             }
 
-            uint availableCredits = _storage._forwardContractBatch.balanceOf(
-                address(this),
-                batchId
-            );
-
             (uint amountOut, uint minAmountIn, uint minCbtDaoCut) = _simulateDecollateralization(
                 _storage,
                 batchId,
@@ -147,7 +142,7 @@ library DecollateralizationManager {
 
             allInfos[infoCount] = DomainDataTypes.TokenDecollateralizationInfo(
                 batchId,
-                availableCredits,
+                _storage.batches[batchId].collateralizedCredits,
                 amountOut,
                 minAmountIn,
                 minCbtDaoCut
@@ -223,10 +218,7 @@ library DecollateralizationManager {
             uint[] storage _batches = _storage.projectBatches[projectId];
             for (uint j; j < _batches.length; j++) {
                 uint batchId = _batches[j];
-                uint collateralizedForwardCredits = _storage._forwardContractBatch.balanceOf(
-                    address(this),
-                    batchId
-                );
+                uint collateralizedForwardCredits = _storage.batches[batchId].collateralizedCredits;
                 if (
                     collateralizedForwardCredits == 0 ||
                     _storage.batches[batchId].certificationDate <= block.timestamp ||

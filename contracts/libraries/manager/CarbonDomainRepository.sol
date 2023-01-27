@@ -128,7 +128,7 @@ library CarbonDomainRepository {
             revert BatchAlreadyExists(batch.id);
         }
 
-        if (batch.supplier == address(0)) {
+        if (batch.supplier == address(0) || batch.supplier == address(this)) {
             revert InvalidBatchSupplier();
         }
 

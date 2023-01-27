@@ -385,6 +385,47 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         );
     }
 
+    function testAddBatch_failsForInvalidSupplier() public {
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(3, 5);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchSupplier.selector)
+        );
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE - 1),
+                vintage: 2022,
+                batchTA: 1,
+                supplier: address(0),
+                isAccumulating: false,
+                collateralizedCredits: 0
+            }),
+            10000
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchSupplier.selector)
+        );
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                certificationDate: uint32(CURRENT_DATE - 1),
+                vintage: 2022,
+                batchTA: 1,
+                supplier: address(manager),
+                isAccumulating: false,
+                collateralizedCredits: 0
+            }),
+            10000
+        );
+    }
+
     function testSetBatchCertificationDate_failsForNonExistingBatch() public {
         manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);

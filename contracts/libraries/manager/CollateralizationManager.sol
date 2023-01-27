@@ -196,10 +196,7 @@ library CollateralizationManager {
         uint cbtDecimals
     ) internal {
         DomainDataTypes.Batch storage batch = _storage.batches[batchId];
-        uint collateralizedForwardCredits = _storage._forwardContractBatch.balanceOf(
-            address(this),
-            batch.id
-        );
+        uint collateralizedForwardCredits = _storage.batches[batchId].collateralizedCredits;
         if (collateralizedForwardCredits == 0) {
             batch.batchTA = uint24(reactiveTA);
             return;

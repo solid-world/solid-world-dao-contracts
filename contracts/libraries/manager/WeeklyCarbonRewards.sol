@@ -135,10 +135,7 @@ library WeeklyCarbonRewards {
             uint[] storage _batches = _storage.projectBatches[projectId];
             for (uint j; j < _batches.length; j++) {
                 uint batchId = _batches[j];
-                uint collateralizedForwardCredits = _storage._forwardContractBatch.balanceOf(
-                    address(this),
-                    batchId
-                );
+                uint collateralizedForwardCredits = _storage.batches[batchId].collateralizedCredits;
                 if (
                     collateralizedForwardCredits == 0 ||
                     _isBatchCertified(_storage, batchId) ||
@@ -188,7 +185,7 @@ library WeeklyCarbonRewards {
                 (uint netRewardAmount, uint feeAmount) = _computeWeeklyBatchReward(
                     _storage,
                     batchId,
-                    _storage._forwardContractBatch.balanceOf(address(this), batchId),
+                    _storage.batches[batchId].collateralizedCredits,
                     rewardsFee,
                     rewardDecimals
                 );
