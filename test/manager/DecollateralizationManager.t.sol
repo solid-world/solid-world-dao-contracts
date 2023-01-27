@@ -125,6 +125,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
             )
         );
         manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 10000);
+        assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 10000);
         vm.stopPrank();
     }
 
@@ -179,6 +180,10 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
             forwardContractBatch.balanceOf(address(manager), BATCH_ID),
             10000 - expectedAmountDecollateralized
         );
+        assertEq(
+            manager.getBatch(BATCH_ID).collateralizedCredits,
+            10000 - expectedAmountDecollateralized
+        );
         assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), 2.331e18);
         assertApproxEqAbs(
             manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver),
@@ -224,6 +229,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
 
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 8100);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 10000 - 8100);
+        assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 10000 - 8100);
         assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), 0);
         assertApproxEqAbs(
             manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver),
@@ -338,6 +344,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
         assertEq(category.averageTA, TIME_APPRECIATION);
         assertEq(category.totalCollateralized, 10000 - 8097);
+        assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 10000 - 8097);
+        assertEq(manager.getBatch(BATCH_ID + 1).collateralizedCredits, 10000);
     }
 
     function testBulkDecollateralizeTokensWhenInvalidInput() public {
@@ -538,7 +546,9 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID + 1), 3998);
 
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 10000 - 3998);
+        assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 10000 - 3998);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID + 1), 10000 - 3998);
+        assertEq(manager.getBatch(BATCH_ID + 1).collateralizedCredits, 10000 - 3998);
 
         assertEq(
             manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount),
