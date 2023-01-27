@@ -275,10 +275,7 @@ library DecollateralizationManager {
             revert InvalidBatchId(batchId);
         }
 
-        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(
-            _storage,
-            batchId
-        );
+        CollateralizedBasketToken cbt = _getCollateralizedTokenForBatchId(_storage, batchId);
 
         (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
             .computeDecollateralizationOutcome(
@@ -286,7 +283,7 @@ library DecollateralizationManager {
                 amountIn,
                 _storage.batches[batchId].batchTA,
                 _storage.decollateralizationFee,
-                collateralizedToken.decimals()
+                cbt.decimals()
             );
 
         if (amountOut == 0) {
@@ -297,23 +294,31 @@ library DecollateralizationManager {
             revert AmountOutLessThanMinimum(amountOut, amountOutMin);
         }
 
-        collateralizedToken.burnFrom(msg.sender, cbtToBurn);
-        GPv2SafeERC20.safeTransferFrom(
-            collateralizedToken,
-            msg.sender,
-            _storage.feeReceiver,
-            cbtDaoCut
-        );
+        _performDecollateralization(_storage, cbt, batchId, amountOut, cbtToBurn, cbtDaoCut);
+
+        emit TokensDecollateralized(batchId, msg.sender, amountIn, amountOut);
+    }
+
+    function _performDecollateralization(
+        SolidWorldManagerStorage.Storage storage _storage,
+        CollateralizedBasketToken cbt,
+        uint batchId,
+        uint releasedCredits,
+        uint cbtToBurn,
+        uint cbtDaoCut
+    ) internal {
+        cbt.burnFrom(msg.sender, cbtToBurn);
+        GPv2SafeERC20.safeTransferFrom(cbt, msg.sender, _storage.feeReceiver, cbtDaoCut);
 
         _storage._forwardContractBatch.safeTransferFrom(
             address(this),
             msg.sender,
             batchId,
-            amountOut,
+            releasedCredits,
             ""
         );
 
-        emit TokensDecollateralized(batchId, msg.sender, amountIn, amountOut);
+        _storage.batches[batchId].collateralizedCredits -= releasedCredits;
     }
 
     function _getCollateralizedTokenForBatchId(

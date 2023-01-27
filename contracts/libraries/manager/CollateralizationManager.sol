@@ -63,17 +63,14 @@ library CollateralizationManager {
             amountIn
         );
 
-        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(
-            _storage,
-            batchId
-        );
+        CollateralizedBasketToken cbt = _getCollateralizedTokenForBatchId(_storage, batchId);
 
         (uint cbtUserCut, uint cbtDaoCut, ) = SolidMath.computeCollateralizationOutcome(
             certificationDate,
             amountIn,
             reactiveTA,
             _storage.collateralizationFee,
-            collateralizedToken.decimals()
+            cbt.decimals()
         );
 
         if (cbtUserCut < amountOutMin) {
@@ -86,7 +83,7 @@ library CollateralizationManager {
             reactiveTA,
             amountIn,
             cbtUserCut + cbtDaoCut,
-            collateralizedToken.decimals()
+            cbt.decimals()
         );
         _rebalanceCategory(
             _storage,
@@ -96,18 +93,31 @@ library CollateralizationManager {
             decayingMomentum
         );
 
-        collateralizedToken.mint(msg.sender, cbtUserCut);
-        collateralizedToken.mint(_storage.feeReceiver, cbtDaoCut);
+        _performCollateralization(_storage, cbt, batchId, amountIn, cbtUserCut, cbtDaoCut);
+
+        emit BatchCollateralized(batchId, msg.sender, amountIn, cbtUserCut);
+    }
+
+    function _performCollateralization(
+        SolidWorldManagerStorage.Storage storage _storage,
+        CollateralizedBasketToken cbt,
+        uint batchId,
+        uint collateralizedCredits,
+        uint cbtUserCut,
+        uint cbtDaoCut
+    ) internal {
+        cbt.mint(msg.sender, cbtUserCut);
+        cbt.mint(_storage.feeReceiver, cbtDaoCut);
 
         _storage._forwardContractBatch.safeTransferFrom(
             msg.sender,
             address(this),
             batchId,
-            amountIn,
+            collateralizedCredits,
             ""
         );
 
-        emit BatchCollateralized(batchId, msg.sender, amountIn, cbtUserCut);
+        _storage.batches[batchId].collateralizedCredits += collateralizedCredits;
     }
 
     /// @dev Simulates collateralization of `amountIn` ERC1155 tokens with id `batchId` for msg.sender
