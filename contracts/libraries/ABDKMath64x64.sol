@@ -17,28 +17,6 @@ library ABDKMath64x64 {
     /// Maximum value signed 64.64-bit fixed point number may have.
     int128 private constant MAX_64x64 = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 
-    /// Convert unsigned 256-bit integer number into signed 64.64-bit fixed point
-    /// number.  Revert on overflow.
-    /// @param x unsigned 256-bit integer number
-    /// @return signed 64.64-bit fixed point number
-    function fromUInt(uint256 x) internal pure returns (int128) {
-        unchecked {
-            require(x <= 0x7FFFFFFFFFFFFFFF);
-            return int128(int256(x << 64));
-        }
-    }
-
-    /// Convert signed 64.64 fixed point number into unsigned 64-bit integer
-    /// number rounding down.  Revert on underflow.
-    /// @param x signed 64.64-bit fixed point number
-    /// @return unsigned 64-bit integer number
-    function toUInt(int128 x) internal pure returns (uint64) {
-        unchecked {
-            require(x >= 0);
-            return uint64(uint128(x >> 64));
-        }
-    }
-
     /// Calculate x * y rounding down. Revert on overflow.
     /// @param x signed 64.64-bit fixed point number
     /// @param y signed 64.64-bit fixed point number
