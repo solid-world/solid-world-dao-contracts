@@ -155,6 +155,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: batchId,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
@@ -190,6 +191,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
@@ -204,6 +206,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 11,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 24),
                 vintage: 2022,
                 batchTA: 1,
@@ -229,6 +232,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
@@ -250,6 +254,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
@@ -274,6 +279,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
@@ -293,6 +299,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
@@ -307,6 +314,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
@@ -326,6 +334,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
@@ -345,6 +354,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE),
                 vintage: 2022,
                 batchTA: 1,
@@ -364,10 +374,52 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE - 1),
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
+                isAccumulating: false
+            }),
+            10000
+        );
+    }
+
+    function testAddBatch_failsForInvalidSupplier() public {
+        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
+        manager.addProject(3, 5);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchSupplier.selector)
+        );
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                collateralizedCredits: 0,
+                certificationDate: uint32(CURRENT_DATE - 1),
+                vintage: 2022,
+                batchTA: 1,
+                supplier: address(0),
+                isAccumulating: false
+            }),
+            10000
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchSupplier.selector)
+        );
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: 7,
+                status: 0,
+                projectId: 5,
+                collateralizedCredits: 0,
+                certificationDate: uint32(CURRENT_DATE - 1),
+                vintage: 2022,
+                batchTA: 1,
+                supplier: address(manager),
                 isAccumulating: false
             }),
             10000
@@ -383,6 +435,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 52 weeks),
                 vintage: 2022,
                 batchTA: 0,
@@ -405,6 +458,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 52 weeks),
                 vintage: 2022,
                 batchTA: 0,
@@ -427,6 +481,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 id: 7,
                 status: 0,
                 projectId: 5,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 52 weeks),
                 vintage: 2022,
                 batchTA: 0,

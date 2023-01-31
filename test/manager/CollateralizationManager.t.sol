@@ -36,6 +36,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 0,
@@ -62,6 +63,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
                 batchTA: 0,
@@ -88,6 +90,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks - 1),
                 vintage: 2022,
                 batchTA: 0,
@@ -119,6 +122,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -151,6 +155,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
                 batchTA: 0,
@@ -179,6 +184,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -201,6 +207,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
 
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 0);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
+        assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 100);
         assertApproxEqAbs(
             manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount),
             cbtUserCut,
@@ -221,6 +228,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
                 batchTA: 0,
@@ -261,6 +269,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -283,6 +292,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
 
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 0);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 100);
+        assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 100);
         assertApproxEqAbs(
             manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount),
             cbtUserCut,
@@ -291,7 +301,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver), cbtDaoCut);
     }
 
-    function testCollateralizeBatchWorks_failsIfBatchIsNotAccumulating() public {
+    function testCollateralizeBatch_failsIfBatchIsNotAccumulating() public {
         manager.addCategory(CATEGORY_ID, "Test token", "TT", TIME_APPRECIATION);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
         manager.addBatch(
@@ -299,6 +309,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -342,6 +353,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2025,
                 batchTA: 0,
@@ -367,6 +379,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks - 1),
                 vintage: 2025,
                 batchTA: 0,
@@ -380,6 +393,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 1),
                 vintage: 2025,
                 batchTA: 0,
@@ -416,6 +430,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2025,
                 batchTA: 0,
@@ -440,6 +455,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2025,
                 batchTA: 0,

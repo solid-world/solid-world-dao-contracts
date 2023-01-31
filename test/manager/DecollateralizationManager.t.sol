@@ -42,6 +42,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 12),
                 vintage: 2022,
                 batchTA: 1,
@@ -65,6 +66,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + 1 weeks),
                 vintage: 2022,
                 batchTA: 0,
@@ -98,6 +100,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -122,6 +125,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
             )
         );
         manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 10000);
+        assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 10000);
         vm.stopPrank();
     }
 
@@ -136,6 +140,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -175,6 +180,10 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
             forwardContractBatch.balanceOf(address(manager), BATCH_ID),
             10000 - expectedAmountDecollateralized
         );
+        assertEq(
+            manager.getBatch(BATCH_ID).collateralizedCredits,
+            10000 - expectedAmountDecollateralized
+        );
         assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), 2.331e18);
         assertApproxEqAbs(
             manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver),
@@ -194,6 +203,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -219,6 +229,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
 
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), 8100);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 10000 - 8100);
+        assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 10000 - 8100);
         assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), 0);
         assertApproxEqAbs(
             manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver),
@@ -237,6 +248,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -285,6 +297,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -298,6 +311,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 99999,
@@ -330,6 +344,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
         assertEq(category.averageTA, TIME_APPRECIATION);
         assertEq(category.totalCollateralized, 10000 - 8097);
+        assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 10000 - 8097);
+        assertEq(manager.getBatch(BATCH_ID + 1).collateralizedCredits, 10000);
     }
 
     function testBulkDecollateralizeTokensWhenInvalidInput() public {
@@ -359,6 +375,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -373,6 +390,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID + 1,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -420,6 +438,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -434,6 +453,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -475,6 +495,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -489,6 +510,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -524,7 +546,9 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID + 1), 3998);
 
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID), 10000 - 3998);
+        assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 10000 - 3998);
         assertEq(forwardContractBatch.balanceOf(address(manager), BATCH_ID + 1), 10000 - 3998);
+        assertEq(manager.getBatch(BATCH_ID + 1).collateralizedCredits, 10000 - 3998);
 
         assertEq(
             manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount),
@@ -540,6 +564,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -554,6 +579,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -605,6 +631,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -619,6 +646,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -633,6 +661,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 2,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 99999,
@@ -689,6 +718,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -703,6 +733,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 1,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -717,6 +748,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 2,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2023,
                 batchTA: 0,
@@ -731,6 +763,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 3,
                 status: 0,
                 projectId: PROJECT_ID + 1,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,
@@ -745,6 +778,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 id: BATCH_ID + 4,
                 status: 0,
                 projectId: PROJECT_ID,
+                collateralizedCredits: 0,
                 certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                 vintage: 2022,
                 batchTA: 0,

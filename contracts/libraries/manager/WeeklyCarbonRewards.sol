@@ -129,28 +129,31 @@ library WeeklyCarbonRewards {
         uint totalQuantifiedForwardCredits;
         uint totalCollateralizedForwardCredits;
 
-        uint[] storage projects = _storage.categoryProjects[categoryId];
-        for (uint i; i < projects.length; i++) {
-            uint projectId = projects[i];
-            uint[] storage _batches = _storage.projectBatches[projectId];
-            for (uint j; j < _batches.length; j++) {
-                uint batchId = _batches[j];
-                uint collateralizedForwardCredits = _storage._forwardContractBatch.balanceOf(
-                    address(this),
-                    batchId
-                );
+        uint[] storage projectIds = _storage.categoryProjects[categoryId];
+        for (uint i; i < projectIds.length; i++) {
+            uint projectId = projectIds[i];
+            uint[] storage batchIds = _storage.projectBatches[projectId];
+            uint numOfBatches = batchIds.length;
+            for (uint j; j < numOfBatches; ) {
+                DomainDataTypes.Batch storage batch = _storage.batches[batchIds[j]];
+                uint collateralizedForwardCredits = batch.collateralizedCredits;
                 if (
                     collateralizedForwardCredits == 0 ||
-                    _isBatchCertified(_storage, batchId) ||
-                    !_storage.batches[batchId].isAccumulating
+                    _isBatchCertified(_storage, batch.id) ||
+                    !batch.isAccumulating
                 ) {
+                    unchecked {
+                        j++;
+                    }
                     continue;
                 }
 
-                totalQuantifiedForwardCredits +=
-                    _storage.batches[batchId].batchTA *
-                    collateralizedForwardCredits;
+                totalQuantifiedForwardCredits += batch.batchTA * collateralizedForwardCredits;
                 totalCollateralizedForwardCredits += collateralizedForwardCredits;
+
+                unchecked {
+                    j++;
+                }
             }
         }
 
@@ -182,21 +185,39 @@ library WeeklyCarbonRewards {
     ) internal view returns (uint rewardAmount, uint rewardFeeAmount) {
         uint[] storage projects = _storage.categoryProjects[categoryId];
         for (uint i; i < projects.length; i++) {
-            uint[] storage batches = _storage.projectBatches[projects[i]];
-            for (uint j; j < batches.length; ) {
-                uint batchId = batches[j];
-                (uint netRewardAmount, uint feeAmount) = _computeWeeklyBatchReward(
-                    _storage,
-                    batchId,
-                    _storage._forwardContractBatch.balanceOf(address(this), batchId),
-                    rewardsFee,
-                    rewardDecimals
-                );
-                rewardAmount += netRewardAmount;
-                rewardFeeAmount += feeAmount;
-                unchecked {
-                    j++;
-                }
+            uint[] storage batchIds = _storage.projectBatches[projects[i]];
+            (uint batchesRewardAmount, uint batchesRewardFeeAmount) = _computeWeeklyBatchesReward(
+                _storage,
+                batchIds,
+                rewardsFee,
+                rewardDecimals
+            );
+
+            rewardAmount += batchesRewardAmount;
+            rewardFeeAmount += batchesRewardFeeAmount;
+        }
+    }
+
+    function _computeWeeklyBatchesReward(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint[] storage batchIds,
+        uint rewardsFee,
+        uint rewardDecimals
+    ) internal view returns (uint rewardAmount, uint rewardFeeAmount) {
+        uint numOfBatches = batchIds.length;
+        for (uint i; i < numOfBatches; ) {
+            uint batchId = batchIds[i];
+            (uint netRewardAmount, uint feeAmount) = _computeWeeklyBatchReward(
+                _storage,
+                batchId,
+                _storage.batches[batchId].collateralizedCredits,
+                rewardsFee,
+                rewardDecimals
+            );
+            rewardAmount += netRewardAmount;
+            rewardFeeAmount += feeAmount;
+            unchecked {
+                i++;
             }
         }
     }

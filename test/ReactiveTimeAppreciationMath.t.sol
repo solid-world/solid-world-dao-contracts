@@ -174,12 +174,12 @@ contract ReactiveTimeAppreciationMathTest is Test {
         lastCollateralizationMomentum = bound(
             lastCollateralizationMomentum,
             type(uint).max / 2 + 1 + averageTA,
-            type(uint).max - 1
+            type(uint).max - 1 - averageTA
         );
         forwardCreditsAmount = bound(
             forwardCreditsAmount,
             0,
-            (type(uint).max - lastCollateralizationMomentum) * 2 - 1
+            (type(uint).max - lastCollateralizationMomentum - averageTA) * 2 - 1
         );
 
         DomainDataTypes.Category memory categoryState;
@@ -361,6 +361,15 @@ contract ReactiveTimeAppreciationMathTest is Test {
         averageTA = uint24(bound(averageTA, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1));
         maxDepreciation = uint16(bound(maxDepreciation, 0, averageTA / 1000));
         newMaxDepreciation = uint16(bound(newMaxDepreciation, 0, averageTA / 1000));
+
+        int depreciationDiff = int16(newMaxDepreciation) - int16(maxDepreciation);
+        if (depreciationDiff > 0) {
+            lastCollateralizationMomentum = bound(
+                lastCollateralizationMomentum,
+                0,
+                type(uint256).max - Math.mulDiv(newVolumeCoefficient, uint(depreciationDiff), 10)
+            );
+        }
 
         DomainDataTypes.Category memory categoryState;
         categoryState.volumeCoefficient = volumeCoefficient;

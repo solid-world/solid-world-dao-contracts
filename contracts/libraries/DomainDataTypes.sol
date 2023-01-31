@@ -5,6 +5,7 @@ library DomainDataTypes {
     /// @notice Structure that holds necessary information for minting collateralized basket tokens (ERC-20).
     /// @param id ID of the batch in the database
     /// @param projectId Project ID this batch belongs to
+    /// @param collateralizedCredits Amount of forward credits that have been provided as collateral for getting collateralized basket tokens (ERC-20)
     /// @param supplier Address who receives forward contract batch tokens (ERC-1155)
     /// @param certificationDate When the batch is about to be delivered; affects on how many collateralized basket tokens (ERC-20) may be minted
     /// @param vintage The year an emission reduction occurred or the offset was issued. The older the vintage, the cheaper the price per credit.
@@ -15,6 +16,7 @@ library DomainDataTypes {
     struct Batch {
         uint id;
         uint projectId;
+        uint collateralizedCredits;
         address supplier;
         uint32 certificationDate;
         uint16 vintage;
