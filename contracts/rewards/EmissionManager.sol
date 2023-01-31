@@ -17,7 +17,6 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
 
     IWeeklyCarbonRewardsManager internal _carbonRewardsManager;
     IRewardsController internal _rewardsController;
-    address internal carbonRewardAdmin;
 
     modifier onlyEmissionAdmin(address reward) {
         if (_emissionAdmins[reward] != msg.sender) {
