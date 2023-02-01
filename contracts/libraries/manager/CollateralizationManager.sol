@@ -109,6 +109,8 @@ library CollateralizationManager {
         cbt.mint(msg.sender, cbtUserCut);
         cbt.mint(_storage.feeReceiver, cbtDaoCut);
 
+        _storage.batches[batchId].collateralizedCredits += collateralizedCredits;
+
         _storage._forwardContractBatch.safeTransferFrom(
             msg.sender,
             address(this),
@@ -116,8 +118,6 @@ library CollateralizationManager {
             collateralizedCredits,
             ""
         );
-
-        _storage.batches[batchId].collateralizedCredits += collateralizedCredits;
     }
 
     /// @dev Simulates collateralization of `amountIn` ERC1155 tokens with id `batchId` for msg.sender

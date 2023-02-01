@@ -302,6 +302,8 @@ library DecollateralizationManager {
         cbt.burnFrom(msg.sender, cbtToBurn);
         GPv2SafeERC20.safeTransferFrom(cbt, msg.sender, _storage.feeReceiver, cbtDaoCut);
 
+        _storage.batches[batchId].collateralizedCredits -= releasedCredits;
+
         _storage._forwardContractBatch.safeTransferFrom(
             address(this),
             msg.sender,
@@ -309,8 +311,6 @@ library DecollateralizationManager {
             releasedCredits,
             ""
         );
-
-        _storage.batches[batchId].collateralizedCredits -= releasedCredits;
     }
 
     function _getCollateralizedTokenForBatchId(
