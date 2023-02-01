@@ -91,6 +91,7 @@ contract SolidWorldManager is
     /// @inheritdoc ICarbonDomainRepository
     function addBatch(DomainDataTypes.Batch calldata batch, uint mintableAmount)
         external
+        nonReentrant
         onlyOwner
     {
         _storage.addBatch(batch, mintableAmount);
