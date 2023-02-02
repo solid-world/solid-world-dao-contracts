@@ -1,13 +1,13 @@
 pragma solidity ^0.8.16;
 
-import "forge-std/Test.sol";
+import "../BaseTest.sol";
 import "../../contracts/interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 import "../../contracts/interfaces/rewards/IRewardsController.sol";
 import "../../contracts/rewards/EmissionManager.sol";
 import "../../contracts/SolidWorldManager.sol";
 import "../../contracts/rewards/RewardsController.sol";
 
-contract EmissionManagerTest is Test {
+contract EmissionManagerTest is BaseTest {
     uint32 constant CURRENT_DATE = 1666016743;
 
     event EmissionAdminUpdated(
@@ -296,7 +296,7 @@ contract EmissionManagerTest is Test {
         address claimer = vm.addr(115);
         address user = vm.addr(116);
 
-        vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
+        _expectRevertWithMessage("Ownable: caller is not the owner");
         vm.prank(notOwner);
         emissionManager.setClaimer(user, claimer);
     }
@@ -319,7 +319,7 @@ contract EmissionManagerTest is Test {
         address notOwner = vm.addr(119);
         address newEmissionManager = vm.addr(115);
 
-        vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
+        _expectRevertWithMessage("Ownable: caller is not the owner");
         vm.prank(notOwner);
         emissionManager.setEmissionManager(newEmissionManager);
     }
@@ -345,7 +345,7 @@ contract EmissionManagerTest is Test {
         address emissionAdmin = vm.addr(115);
         address reward = vm.addr(116);
 
-        vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
+        _expectRevertWithMessage("Ownable: caller is not the owner");
         vm.prank(notOwner);
         emissionManager.setEmissionAdmin(reward, emissionAdmin);
     }
@@ -366,7 +366,7 @@ contract EmissionManagerTest is Test {
         address notOwner = vm.addr(119);
         address newController = vm.addr(115);
 
-        vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
+        _expectRevertWithMessage("Ownable: caller is not the owner");
         vm.prank(notOwner);
         emissionManager.setRewardsController(newController);
     }
@@ -386,7 +386,7 @@ contract EmissionManagerTest is Test {
         address notOwner = vm.addr(119);
         address newCarbonRewardsManager = vm.addr(115);
 
-        vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
+        _expectRevertWithMessage("Ownable: caller is not the owner");
         vm.prank(notOwner);
         emissionManager.setCarbonRewardsManager(newCarbonRewardsManager);
     }

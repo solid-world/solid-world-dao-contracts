@@ -90,7 +90,7 @@ contract ReentrancyTest is BaseSolidWorldManager {
 
         manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(CATEGORY_ID, PROJECT_ID);
-        vm.expectRevert(abi.encodePacked("ReentrancyGuard: reentrant call"));
+        _expectRevertWithMessage("ReentrancyGuard: reentrant call");
         manager.addBatch(
             DomainDataTypes.Batch({
                 id: BATCH_ID,
@@ -132,7 +132,7 @@ contract ReentrancyTest is BaseSolidWorldManager {
 
         manager.collateralizeBatch(BATCH_ID, 10, 0);
 
-        vm.expectRevert(abi.encodePacked("ReentrancyGuard: reentrant call"));
+        _expectRevertWithMessage("ReentrancyGuard: reentrant call");
         manager.decollateralizeTokens(BATCH_ID, 3e18, 0);
 
         vm.stopPrank();
@@ -170,7 +170,7 @@ contract ReentrancyTest is BaseSolidWorldManager {
         uint[] memory amountsOutMin = new uint[](1);
         amountsOutMin[0] = 0;
 
-        vm.expectRevert(abi.encodePacked("ReentrancyGuard: reentrant call"));
+        _expectRevertWithMessage("ReentrancyGuard: reentrant call");
         manager.bulkDecollateralizeTokens(batchIds, amounts, amountsOutMin);
 
         vm.stopPrank();

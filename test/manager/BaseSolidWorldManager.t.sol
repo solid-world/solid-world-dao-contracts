@@ -1,11 +1,9 @@
 pragma solidity ^0.8.0;
 
-import "forge-std/Test.sol";
-import "forge-std/console.sol";
-
+import "../BaseTest.sol";
 import "../../contracts/SolidWorldManager.sol";
 
-abstract contract BaseSolidWorldManager is Test {
+abstract contract BaseSolidWorldManager is BaseTest {
     event CategoryRebalanced(
         uint indexed categoryId,
         uint indexed averageTA,

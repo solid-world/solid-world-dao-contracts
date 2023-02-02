@@ -38,7 +38,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         _addBatchWithDependencies(CURRENT_DATE + 12, 100);
 
         vm.prank(testAccount);
-        vm.expectRevert(abi.encodePacked("ERC20: burn amount exceeds balance"));
+        _expectRevertWithMessage("ERC20: burn amount exceeds balance");
         manager.decollateralizeTokens(BATCH_ID, 1000e18, 500);
     }
 
@@ -48,7 +48,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         vm.startPrank(testAccount);
         manager.getCategoryToken(CATEGORY_ID).approve(address(manager), 0);
 
-        vm.expectRevert(abi.encodePacked("ERC20: insufficient allowance"));
+        _expectRevertWithMessage("ERC20: insufficient allowance");
         manager.decollateralizeTokens(BATCH_ID, 1000e18, 500);
     }
 

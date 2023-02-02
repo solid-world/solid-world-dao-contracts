@@ -40,7 +40,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         _addBatchWithDependencies(CURRENT_DATE + 1 weeks, 100);
 
         vm.prank(testAccount);
-        vm.expectRevert(abi.encodePacked("ERC1155: insufficient balance for transfer"));
+        _expectRevertWithMessage("ERC1155: insufficient balance for transfer");
         manager.collateralizeBatch(BATCH_ID, 1000, 1000);
     }
 
