@@ -387,81 +387,11 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
             PROJECT_ID + 1,
             TIME_APPRECIATION
         );
-
-        manager.addBatch(
-            DomainDataTypes.Batch({
-                id: BATCH_ID,
-                status: 0,
-                projectId: PROJECT_ID,
-                collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
-                vintage: 2022,
-                batchTA: 0,
-                supplier: testAccount,
-                isAccumulating: false
-            }),
-            10000
-        );
-
-        manager.addBatch(
-            DomainDataTypes.Batch({
-                id: BATCH_ID + 1,
-                status: 0,
-                projectId: PROJECT_ID,
-                collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
-                vintage: 2022,
-                batchTA: 0,
-                supplier: testAccount,
-                isAccumulating: false
-            }),
-            10000
-        );
-
-        manager.addBatch(
-            DomainDataTypes.Batch({
-                id: BATCH_ID + 2,
-                status: 0,
-                projectId: PROJECT_ID,
-                collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
-                vintage: 2023,
-                batchTA: 0,
-                supplier: testAccount,
-                isAccumulating: false
-            }),
-            10000
-        );
-
-        manager.addBatch(
-            DomainDataTypes.Batch({
-                id: BATCH_ID + 3,
-                status: 0,
-                projectId: PROJECT_ID + 1,
-                collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
-                vintage: 2022,
-                batchTA: 0,
-                supplier: testAccount,
-                isAccumulating: false
-            }),
-            10000
-        );
-
-        manager.addBatch(
-            DomainDataTypes.Batch({
-                id: BATCH_ID + 4,
-                status: 0,
-                projectId: PROJECT_ID,
-                collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
-                vintage: 2022,
-                batchTA: 0,
-                supplier: testAccount,
-                isAccumulating: false
-            }),
-            10000
-        );
+        _addBatchWithVintageToProject(BATCH_ID, PROJECT_ID, 2022);
+        _addBatchWithVintageToProject(BATCH_ID + 1, PROJECT_ID, 2022);
+        _addBatchWithVintageToProject(BATCH_ID + 2, PROJECT_ID, 2023);
+        _addBatchWithVintageToProject(BATCH_ID + 3, PROJECT_ID + 1, 2022);
+        _addBatchWithVintageToProject(BATCH_ID + 4, PROJECT_ID, 2022);
 
         vm.startPrank(testAccount);
 
@@ -504,6 +434,27 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         _expectEmitFeeReceiverUpdated(newFeeReceiver);
         manager.setFeeReceiver(newFeeReceiver);
         assertEq(manager.getFeeReceiver(), newFeeReceiver);
+    }
+
+    function _addBatchWithVintageToProject(
+        uint batchId,
+        uint projectId,
+        uint vintage
+    ) internal {
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: batchId,
+                status: 0,
+                projectId: projectId,
+                collateralizedCredits: 0,
+                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
+                vintage: uint16(vintage),
+                batchTA: 0,
+                supplier: testAccount,
+                isAccumulating: false
+            }),
+            10000
+        );
     }
 
     function _expectEmitTokensDecollateralized(

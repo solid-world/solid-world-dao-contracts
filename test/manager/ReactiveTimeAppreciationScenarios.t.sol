@@ -7,40 +7,26 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     function testReactiveTAOutcomes_initialCategoryParams() public {
         _addBatchWithDependencies(CURRENT_DATE + ONE_YEAR, 50000);
 
-        vm.prank(testAccount);
+        vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 1000, 828e18); // you lose 8% from TA and then 10% from fee
-
-        DomainDataTypes.Batch memory batch0 = manager.getBatch(BATCH_ID);
-        assertEq(batch0.batchTA, INITIAL_CATEGORY_TA);
+        _assertBatchTaEqualsExactlyInitialCategoryTa();
 
         (uint decollateralizationAmountOut, , ) = manager.simulateDecollateralization(
             BATCH_ID,
             1000e18
         );
-
         assertEq(decollateralizationAmountOut, 978); // you lose 10% from fee and gain 1/0.92 from TA
 
-        vm.prank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 1000, 828e18);
+        _assertBatchTaEqualsApproxInitialCategoryTa();
 
-        DomainDataTypes.Batch memory batch1 = manager.getBatch(BATCH_ID);
-        // probably not precision loss, but just rounding happening in exponentiation math
-        assertApproxEqAbs(batch1.batchTA, INITIAL_CATEGORY_TA, 1);
-
-        vm.prank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 1000, 828e18);
+        _assertBatchTaEqualsApproxInitialCategoryTa();
 
-        DomainDataTypes.Batch memory batch2 = manager.getBatch(BATCH_ID);
-        assertApproxEqAbs(batch2.batchTA, INITIAL_CATEGORY_TA, 1);
-
-        vm.prank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 1000, 828e18);
-
-        DomainDataTypes.Batch memory batch3 = manager.getBatch(BATCH_ID);
-        assertApproxEqAbs(batch3.batchTA, INITIAL_CATEGORY_TA, 1);
+        _assertBatchTaEqualsApproxInitialCategoryTa();
 
         DomainDataTypes.Category memory category0 = manager.getCategory(CATEGORY_ID);
-
         assertEq(category0.averageTA, INITIAL_CATEGORY_TA);
         assertEq(category0.totalCollateralized, 4000);
         assertEq(category0.lastCollateralizationMomentum, 1000);
@@ -57,15 +43,13 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         assertEq(category.lastCollateralizationMomentum, 10000);
 
         vm.warp(CURRENT_DATE + 5 days);
-        vm.prank(testAccount);
+        vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 5000, 4140e18);
 
-        DomainDataTypes.Batch memory batch0 = manager.getBatch(BATCH_ID);
-        assertEq(batch0.batchTA, INITIAL_CATEGORY_TA);
+        _assertBatchTaEqualsExactlyInitialCategoryTa();
         DomainDataTypes.Category memory category0 = manager.getCategory(CATEGORY_ID);
         assertEq(category0.averageTA, INITIAL_CATEGORY_TA);
 
-        vm.prank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 10000, 8214.5e18);
 
         DomainDataTypes.Batch memory batch1 = manager.getBatch(BATCH_ID);
@@ -74,8 +58,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         DomainDataTypes.Category memory category1 = manager.getCategory(CATEGORY_ID);
         assertEq(category1.averageTA, 85000);
 
-        vm.prank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 20000, 16070e18);
+        vm.stopPrank();
 
         DomainDataTypes.Batch memory batch2 = manager.getBatch(BATCH_ID);
         assertApproxEqAbs(batch2.batchTA, 97857, 2);
@@ -133,8 +117,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 5000, 0);
 
-        DomainDataTypes.Batch memory batch0 = manager.getBatch(BATCH_ID);
-        assertEq(batch0.batchTA, INITIAL_CATEGORY_TA);
+        _assertBatchTaEqualsExactlyInitialCategoryTa();
         DomainDataTypes.Category memory category0 = manager.getCategory(CATEGORY_ID);
         assertEq(category0.averageTA, INITIAL_CATEGORY_TA);
 
@@ -162,8 +145,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 5000, 0);
 
-        DomainDataTypes.Batch memory batch0 = manager.getBatch(BATCH_ID);
-        assertEq(batch0.batchTA, INITIAL_CATEGORY_TA);
+        _assertBatchTaEqualsExactlyInitialCategoryTa();
         DomainDataTypes.Category memory category0 = manager.getCategory(CATEGORY_ID);
         assertEq(category0.averageTA, INITIAL_CATEGORY_TA);
 
@@ -323,6 +305,18 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         assertEq(cbtDaoCutTotal, feesERC20);
         assertEq(cbtUserCutTotal + cbtDaoCutTotal + cbtForfeitedTotal, 250000e18);
         assertApproxEqAbs(cbtForfeitedTotal, rewards, 0.965e18);
+    }
+
+    function _assertBatchTaEqualsExactlyInitialCategoryTa() internal {
+        DomainDataTypes.Batch memory batch = manager.getBatch(BATCH_ID);
+        assertEq(batch.batchTA, INITIAL_CATEGORY_TA);
+    }
+
+    function _assertBatchTaEqualsApproxInitialCategoryTa() internal {
+        DomainDataTypes.Batch memory batch = manager.getBatch(BATCH_ID);
+
+        // probably just rounding happening in exponentiation math
+        assertApproxEqAbs(batch.batchTA, INITIAL_CATEGORY_TA, 1);
     }
 
     function _computeRewards() internal returns (uint rewards) {
