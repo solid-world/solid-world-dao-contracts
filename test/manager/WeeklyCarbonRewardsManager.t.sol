@@ -53,10 +53,13 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testComputeWeeklyCarbonRewards_allBatchesUsed() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addProject(CATEGORY_ID, PROJECT_ID);
-        manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
+        _addCategoryAndProjectWithApprovedSpending();
+        _addCategoryAndProjectWithApprovedSpending(
+            CATEGORY_ID + 1,
+            PROJECT_ID + 1,
+            INITIAL_CATEGORY_TA
+        );
+
         for (uint i = 1; i < 6; i++) {
             manager.addBatch(
                 DomainDataTypes.Batch({
@@ -105,10 +108,13 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testComputeWeeklyCarbonRewards_certifiedBatchesAreSkipped() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addProject(CATEGORY_ID, PROJECT_ID);
-        manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
+        _addCategoryAndProjectWithApprovedSpending();
+        _addCategoryAndProjectWithApprovedSpending(
+            CATEGORY_ID + 1,
+            PROJECT_ID + 1,
+            INITIAL_CATEGORY_TA
+        );
+
         for (uint i = 1; i < 6; i++) {
             manager.addBatch(
                 DomainDataTypes.Batch({
@@ -212,12 +218,17 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testMintWeeklyCarbonRewards_allBatchesUsed() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addCategory(CATEGORY_ID + 2, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addProject(CATEGORY_ID, PROJECT_ID);
-        manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
-        manager.addProject(CATEGORY_ID + 2, PROJECT_ID + 2);
+        _addCategoryAndProjectWithApprovedSpending();
+        _addCategoryAndProjectWithApprovedSpending(
+            CATEGORY_ID + 1,
+            PROJECT_ID + 1,
+            INITIAL_CATEGORY_TA
+        );
+        _addCategoryAndProjectWithApprovedSpending(
+            CATEGORY_ID + 2,
+            PROJECT_ID + 2,
+            INITIAL_CATEGORY_TA
+        );
         for (uint i = 1; i < 6; i++) {
             manager.addBatch(
                 DomainDataTypes.Batch({
@@ -293,13 +304,9 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         feeAmounts[1] = feeAmount1;
         feeAmounts[2] = feeAmount2;
 
-        vm.expectEmit(true, true, false, true, address(manager));
-        emit WeeklyRewardMinted(address(rewardToken0), mintAmount0);
-        vm.expectEmit(true, true, false, true, address(manager));
-        emit WeeklyRewardMinted(address(rewardToken1), mintAmount1);
-        vm.expectEmit(true, true, false, true, address(manager));
-        emit WeeklyRewardMinted(address(rewardToken2), mintAmount2);
-
+        _expectEmitWeeklyRewardMinted(address(rewardToken0), mintAmount0);
+        _expectEmitWeeklyRewardMinted(address(rewardToken1), mintAmount1);
+        _expectEmitWeeklyRewardMinted(address(rewardToken2), mintAmount2);
         vm.prank(weeklyRewardsMinter);
         manager.mintWeeklyCarbonRewards(
             categoryIds,
@@ -309,12 +316,9 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
             rewardsVault
         );
 
-        vm.expectEmit(true, true, true, false, address(manager));
-        emit CategoryRebalanced(CATEGORY_ID, uint24(1947), 20000);
-        vm.expectEmit(true, true, true, false, address(manager));
-        emit CategoryRebalanced(CATEGORY_ID + 1, 1947, 60000);
-        vm.expectEmit(true, true, true, false, address(manager));
-        emit CategoryRebalanced(CATEGORY_ID + 2, INITIAL_CATEGORY_TA, 0);
+        _expectEmitCategoryRebalanced(CATEGORY_ID, uint24(1947), 20000);
+        _expectEmitCategoryRebalanced(CATEGORY_ID + 1, 1947, 60000);
+        _expectEmitCategoryRebalanced(CATEGORY_ID + 2, INITIAL_CATEGORY_TA, 0);
         vm.prank(weeklyRewardsMinter);
         manager.mintWeeklyCarbonRewards(
             categoryIds,
@@ -376,5 +380,19 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         emit RewardsMinterUpdated(newWeeklyRewardsMinter);
         manager.setWeeklyRewardsMinter(newWeeklyRewardsMinter);
         assertEq(manager.getWeeklyRewardsMinter(), newWeeklyRewardsMinter);
+    }
+
+    function _expectEmitCategoryRebalanced(
+        uint categoryId,
+        uint newAverageTA,
+        uint newTotalCollateralized
+    ) internal {
+        vm.expectEmit(true, true, true, false, address(manager));
+        emit CategoryRebalanced(categoryId, newAverageTA, newTotalCollateralized);
+    }
+
+    function _expectEmitWeeklyRewardMinted(address rewardToken, uint amount) internal {
+        vm.expectEmit(true, true, false, true, address(manager));
+        emit WeeklyRewardMinted(rewardToken, amount);
     }
 }

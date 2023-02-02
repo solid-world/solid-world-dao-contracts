@@ -20,11 +20,10 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         DomainDataTypes.Category memory categoryStart = manager.getCategory(CATEGORY_ID);
         assertEq(categoryStart.averageTA, 0);
 
-        vm.expectEmit(true, false, false, false, address(manager));
-        emit CategoryCreated(CATEGORY_ID);
+        _expectEmitCategoryCreated();
         manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
 
-        assertNotEq(address(manager.getCategoryToken(CATEGORY_ID)), address(0));
+        assertFalse(address(manager.getCategoryToken(CATEGORY_ID)) == address(0));
         assertEq(manager.isCategoryCreated(CATEGORY_ID), true);
 
         DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
@@ -49,12 +48,11 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         manager.addCategory(CATEGORY_ID, "", "", INITIAL_CATEGORY_TA);
 
         uint volumeCoefficientInput0 = 50000;
-        uint40 decayPerSecondInput0 = getTestDecayPerSecond();
+        uint40 decayPerSecondInput0 = _getTestDecayPerSecond();
         uint16 maxDepreciationInput0 = 10; // 1% yearly rate
 
         vm.warp(CURRENT_DATE + 2 days);
-        vm.expectEmit(true, true, true, true, address(manager));
-        emit CategoryUpdated(
+        _expectEmitCategoryUpdated(
             CATEGORY_ID,
             volumeCoefficientInput0,
             decayPerSecondInput0,
@@ -76,12 +74,11 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         assertEq(category0.lastCollateralizationMomentum, 50000);
 
         uint volumeCoefficientInput1 = 75000;
-        uint40 decayPerSecondInput1 = getTestDecayPerSecond();
+        uint40 decayPerSecondInput1 = _getTestDecayPerSecond();
         uint16 maxDepreciationInput1 = 20; // 2% yearly rate
 
         vm.warp(CURRENT_DATE + 4 days);
-        vm.expectEmit(true, true, true, true, address(manager));
-        emit CategoryUpdated(
+        _expectEmitCategoryUpdated(
             CATEGORY_ID,
             volumeCoefficientInput1,
             decayPerSecondInput1,
@@ -111,8 +108,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
 
         manager.addCategory(categoryId, "Test token", "TT", INITIAL_CATEGORY_TA);
 
-        vm.expectEmit(true, false, false, false, address(manager));
-        emit ProjectCreated(projectId);
+        _expectEmitProjectCreated(projectId);
         manager.addProject(categoryId, projectId);
 
         assertEq(manager.isProjectCreated(projectId), true);
@@ -148,8 +144,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
 
         assertEq(manager.isBatchCreated(batchId), false);
 
-        vm.expectEmit(true, false, false, false, address(manager));
-        emit BatchCreated(batchId);
+        _expectEmitBatchCreated(batchId);
         manager.addBatch(
             DomainDataTypes.Batch({
                 id: batchId,
@@ -427,81 +422,49 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
     }
 
     function testSetBatchCertificationDate_failsForNonExistingBatch() public {
-        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addProject(3, 5);
-
-        manager.addBatch(
-            DomainDataTypes.Batch({
-                id: 7,
-                status: 0,
-                projectId: 5,
-                collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 52 weeks),
-                vintage: 2022,
-                batchTA: 0,
-                supplier: testAccount,
-                isAccumulating: false
-            }),
-            10000
-        );
+        _addBatchWithDependencies(CURRENT_DATE + 52 weeks, 10000);
 
         vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchId.selector, 17));
         manager.setBatchCertificationDate(17, uint32(CURRENT_DATE + 53 weeks));
     }
 
     function testSetBatchCertificationDate_failsForCertificationDateLaterThanCurrent() public {
-        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addProject(3, 5);
-
-        manager.addBatch(
-            DomainDataTypes.Batch({
-                id: 7,
-                status: 0,
-                projectId: 5,
-                collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 52 weeks),
-                vintage: 2022,
-                batchTA: 0,
-                supplier: testAccount,
-                isAccumulating: false
-            }),
-            10000
-        );
+        _addBatchWithDependencies(CURRENT_DATE + 52 weeks, 10000);
 
         vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidInput.selector));
-        manager.setBatchCertificationDate(7, uint32(CURRENT_DATE + 53 weeks));
+        manager.setBatchCertificationDate(BATCH_ID, uint32(CURRENT_DATE + 53 weeks));
     }
 
     function testSetBatchCertificationDate() public {
-        manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addProject(3, 5);
+        _addBatchWithDependencies(CURRENT_DATE + 52 weeks, 10000);
 
-        manager.addBatch(
-            DomainDataTypes.Batch({
-                id: 7,
-                status: 0,
-                projectId: 5,
-                collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 52 weeks),
-                vintage: 2022,
-                batchTA: 0,
-                supplier: testAccount,
-                isAccumulating: false
-            }),
-            10000
-        );
+        manager.setBatchCertificationDate(BATCH_ID, uint32(CURRENT_DATE + 51 weeks));
 
-        manager.setBatchCertificationDate(7, uint32(CURRENT_DATE + 51 weeks));
-
-        assertEq(manager.getBatch(7).certificationDate, uint32(CURRENT_DATE + 51 weeks));
+        assertEq(manager.getBatch(BATCH_ID).certificationDate, uint32(CURRENT_DATE + 51 weeks));
     }
 
-    function assertNotEq(address a, address b) private {
-        if (a == b) {
-            emit log("Error: a != b not satisfied [address]");
-            emit log_named_address("  Expected", b);
-            emit log_named_address("    Actual", a);
-            fail();
-        }
+    function _expectEmitCategoryCreated() internal {
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit CategoryCreated(CATEGORY_ID);
+    }
+
+    function _expectEmitCategoryUpdated(
+        uint categoryId,
+        uint volumeCoefficient,
+        uint decayPerSecond,
+        uint maxDepreciation
+    ) internal {
+        vm.expectEmit(true, true, true, true, address(manager));
+        emit CategoryUpdated(categoryId, volumeCoefficient, decayPerSecond, maxDepreciation);
+    }
+
+    function _expectEmitProjectCreated(uint projectId) internal {
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit ProjectCreated(projectId);
+    }
+
+    function _expectEmitBatchCreated(uint batchId) internal {
+        vm.expectEmit(true, false, false, false, address(manager));
+        emit BatchCreated(batchId);
     }
 }

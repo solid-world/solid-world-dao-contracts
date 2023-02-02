@@ -86,7 +86,6 @@ contract Attacker2 is IERC1155Receiver {
 
 contract ReentrancyTest is BaseSolidWorldManager {
     function testAddBatchReentrancy() public {
-        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
         Attacker1 attacker = new Attacker1(forwardContractBatch);
 
         manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
@@ -109,11 +108,9 @@ contract ReentrancyTest is BaseSolidWorldManager {
     }
 
     function testDecollateralizeTokensReentrancy() public {
-        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
         Attacker2 attacker = new Attacker2(forwardContractBatch);
 
-        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        _addCategoryAndProjectWithApprovedSpending();
         manager.addBatch(
             DomainDataTypes.Batch({
                 id: BATCH_ID,
@@ -142,11 +139,9 @@ contract ReentrancyTest is BaseSolidWorldManager {
     }
 
     function testBulkDecollateralizeTokensReentrancy() public {
-        ForwardContractBatchToken forwardContractBatch = manager.forwardContractBatch();
         Attacker2 attacker = new Attacker2(forwardContractBatch);
 
-        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addProject(CATEGORY_ID, PROJECT_ID);
+        _addCategoryAndProjectWithApprovedSpending();
         manager.addBatch(
             DomainDataTypes.Batch({
                 id: BATCH_ID,
