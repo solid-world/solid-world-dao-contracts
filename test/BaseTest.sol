@@ -17,4 +17,45 @@ abstract contract BaseTest is Test {
             fail();
         }
     }
+
+    function _toArray(address _address) internal pure returns (address[] memory array) {
+        array = new address[](1);
+        array[0] = _address;
+    }
+
+    function _toArray(address _address0, address _address1)
+        internal
+        pure
+        returns (address[] memory array)
+    {
+        array = new address[](2);
+        array[0] = _address0;
+        array[1] = _address1;
+    }
+
+    function _toArray(uint _number) internal pure returns (uint[] memory array) {
+        array = new uint[](1);
+        array[0] = _number;
+    }
+
+    function _toArray(uint _number0, uint _number1) internal pure returns (uint[] memory array) {
+        array = new uint[](2);
+        array[0] = _number0;
+        array[1] = _number1;
+    }
+
+    function _toArrayUint88(uint88 _number) internal pure returns (uint88[] memory array) {
+        array = new uint88[](1);
+        array[0] = _number;
+    }
+
+    function _toArrayUint88(uint88 _number0, uint88 _number1)
+        internal
+        pure
+        returns (uint88[] memory array)
+    {
+        array = new uint88[](2);
+        array[0] = _number0;
+        array[1] = _number1;
+    }
 }
