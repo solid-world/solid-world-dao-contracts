@@ -440,7 +440,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         uint batchId,
         uint projectId,
         uint vintage
-    ) internal {
+    ) private {
         manager.addBatch(
             DomainDataTypes.Batch({
                 id: batchId,
@@ -462,7 +462,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         address tokensOwner,
         uint amountIn,
         uint amountOut
-    ) internal {
+    ) private {
         vm.expectEmit(true, true, false, false, address(manager));
         emit TokensDecollateralized(batchId, tokensOwner, amountIn, amountOut);
     }
@@ -471,17 +471,17 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         uint categoryId,
         uint newAverageTA,
         uint newTotalCollateralized
-    ) internal {
+    ) private {
         vm.expectEmit(true, true, true, false, address(manager));
         emit CategoryRebalanced(categoryId, newAverageTA, newTotalCollateralized);
     }
 
-    function _expectEmitDecollateralizationFeeUpdated(uint16 newDecollateralizationFee) internal {
+    function _expectEmitDecollateralizationFeeUpdated(uint16 newDecollateralizationFee) private {
         vm.expectEmit(true, false, false, false, address(manager));
         emit DecollateralizationFeeUpdated(newDecollateralizationFee);
     }
 
-    function _expectEmitFeeReceiverUpdated(address newFeeReceiver) internal {
+    function _expectEmitFeeReceiverUpdated(address newFeeReceiver) private {
         vm.expectEmit(true, false, false, false, address(manager));
         emit FeeReceiverUpdated(newFeeReceiver);
     }

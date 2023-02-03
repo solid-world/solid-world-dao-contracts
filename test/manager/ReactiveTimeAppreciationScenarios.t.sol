@@ -307,19 +307,19 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         assertApproxEqAbs(cbtForfeitedTotal, rewards, 0.965e18);
     }
 
-    function _assertBatchTaEqualsExactlyInitialCategoryTa() internal {
+    function _assertBatchTaEqualsExactlyInitialCategoryTa() private {
         DomainDataTypes.Batch memory batch = manager.getBatch(BATCH_ID);
         assertEq(batch.batchTA, INITIAL_CATEGORY_TA);
     }
 
-    function _assertBatchTaEqualsApproxInitialCategoryTa() internal {
+    function _assertBatchTaEqualsApproxInitialCategoryTa() private {
         DomainDataTypes.Batch memory batch = manager.getBatch(BATCH_ID);
 
         // probably just rounding happening in exponentiation math
         assertApproxEqAbs(batch.batchTA, INITIAL_CATEGORY_TA, 1);
     }
 
-    function _computeRewards() internal returns (uint rewards) {
+    function _computeRewards() private returns (uint rewards) {
         vm.warp(CURRENT_DATE + 5 days + 1);
         uint[] memory categories = new uint[](1);
         categories[0] = CATEGORY_ID;

@@ -386,12 +386,12 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         uint categoryId,
         uint newAverageTA,
         uint newTotalCollateralized
-    ) internal {
+    ) private {
         vm.expectEmit(true, true, true, false, address(manager));
         emit CategoryRebalanced(categoryId, newAverageTA, newTotalCollateralized);
     }
 
-    function _expectEmitWeeklyRewardMinted(address rewardToken, uint amount) internal {
+    function _expectEmitWeeklyRewardMinted(address rewardToken, uint amount) private {
         vm.expectEmit(true, true, false, true, address(manager));
         emit WeeklyRewardMinted(rewardToken, amount);
     }

@@ -443,7 +443,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         assertEq(manager.getBatch(BATCH_ID).certificationDate, uint32(CURRENT_DATE + 51 weeks));
     }
 
-    function _expectEmitCategoryCreated() internal {
+    function _expectEmitCategoryCreated() private {
         vm.expectEmit(true, false, false, false, address(manager));
         emit CategoryCreated(CATEGORY_ID);
     }
@@ -453,17 +453,17 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         uint volumeCoefficient,
         uint decayPerSecond,
         uint maxDepreciation
-    ) internal {
+    ) private {
         vm.expectEmit(true, true, true, true, address(manager));
         emit CategoryUpdated(categoryId, volumeCoefficient, decayPerSecond, maxDepreciation);
     }
 
-    function _expectEmitProjectCreated(uint projectId) internal {
+    function _expectEmitProjectCreated(uint projectId) private {
         vm.expectEmit(true, false, false, false, address(manager));
         emit ProjectCreated(projectId);
     }
 
-    function _expectEmitBatchCreated(uint batchId) internal {
+    function _expectEmitBatchCreated(uint batchId) private {
         vm.expectEmit(true, false, false, false, address(manager));
         emit BatchCreated(batchId);
     }

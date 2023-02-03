@@ -236,7 +236,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         uint categoryId,
         uint averageTA,
         uint totalCollateralized
-    ) internal {
+    ) private {
         vm.expectEmit(true, true, true, false, address(manager));
         emit CategoryRebalanced(categoryId, averageTA, totalCollateralized);
     }
@@ -246,12 +246,12 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         address user,
         uint amount,
         uint cbtUserCut
-    ) internal {
+    ) private {
         vm.expectEmit(true, true, false, false, address(manager));
         emit BatchCollateralized(batchId, user, amount, cbtUserCut);
     }
 
-    function _expectEmitFeeUpdated(uint16 newCollateralizationFee) internal {
+    function _expectEmitFeeUpdated(uint16 newCollateralizationFee) private {
         vm.expectEmit(true, false, false, false, address(manager));
         emit CollateralizationFeeUpdated(newCollateralizationFee);
     }
