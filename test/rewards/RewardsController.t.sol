@@ -10,30 +10,26 @@ contract RewardsControllerTest is BaseRewardsControllerTest {
     }
 
     function testConfigureAssets_failsForInvalidAssetDecimals() public {
-        RewardsDataTypes.DistributionConfig[]
-            memory config = _makeTestDistributionConfig_invalidAssetDecimals();
-
-        _expectRevert_InvalidAssetDecimals(config[1].asset);
+        _mockInvalidAssetDecimals();
+        _expectRevert_InvalidAssetDecimals(testConfig[1].asset);
         vm.prank(emissionManager);
-        rewardsController.configureAssets(config);
+        _configureAssets();
     }
 
     function testConfigureAssets() public {
-        RewardsDataTypes.DistributionConfig[]
-            memory config = _makeTestDistributionConfig_validAssetDecimals();
-
-        _expectEmitAssetConfigUpdated(config[0].asset, config[0].reward);
-        _expectEmitAssetConfigUpdated(config[1].asset, config[1].reward);
+        _mockValidAssetDecimals();
+        _expectEmitAssetConfigUpdated(testConfig[0].asset, testConfig[0].reward);
+        _expectEmitAssetConfigUpdated(testConfig[1].asset, testConfig[1].reward);
         vm.prank(emissionManager);
-        rewardsController.configureAssets(config);
+        _configureAssets();
 
         assertEq(
-            rewardsController.getRewardOracle(config[0].reward),
-            address(config[0].rewardOracle)
+            rewardsController.getRewardOracle(testConfig[0].reward),
+            address(testConfig[0].rewardOracle)
         );
         assertEq(
-            rewardsController.getRewardOracle(config[1].reward),
-            address(config[1].rewardOracle)
+            rewardsController.getRewardOracle(testConfig[1].reward),
+            address(testConfig[1].rewardOracle)
         );
     }
 
@@ -185,5 +181,14 @@ contract RewardsControllerTest is BaseRewardsControllerTest {
 
         vm.prank(solidStakingViewActions);
         rewardsController.claimAllRewardsOnBehalf(assets, onBehalfOf, to);
+    }
+
+    /// @notice copying from storage to memory is not supported ootb
+    function _configureAssets() private {
+        RewardsDataTypes.DistributionConfig[]
+            memory config = new RewardsDataTypes.DistributionConfig[](2);
+        config[0] = testConfig[0];
+        config[1] = testConfig[1];
+        rewardsController.configureAssets(config);
     }
 }

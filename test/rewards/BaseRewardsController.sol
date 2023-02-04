@@ -22,6 +22,7 @@ abstract contract BaseRewardsControllerTest is BaseTest {
 
     uint32 constant CURRENT_DATE = 1666016743;
 
+    RewardsDataTypes.DistributionConfig[2] testConfig;
     IRewardsController rewardsController;
     address solidStakingViewActions;
     address rewardsVault;
@@ -47,6 +48,8 @@ abstract contract BaseRewardsControllerTest is BaseTest {
             emissionManager
         );
 
+        _createTestDistributionConfig();
+        _mockDistributionConfigOrdinaryCalls();
         _labelAccounts();
     }
 
@@ -125,91 +128,67 @@ abstract contract BaseRewardsControllerTest is BaseTest {
         );
     }
 
-    function _makeTestDistributionConfig_invalidAssetDecimals()
-        internal
-        returns (RewardsDataTypes.DistributionConfig[] memory config)
-    {
-        config = _makeTestDistributionConfig();
-        _mockDistributionConfig_invalidAssetDecimals(config);
+    function _createTestDistributionConfig() private {
+        testConfig[0].reward = vm.addr(4);
+        testConfig[0].asset = vm.addr(5);
+        testConfig[0].emissionPerSecond = 100;
+        testConfig[0].distributionEnd = CURRENT_DATE;
+        testConfig[0].rewardOracle = IEACAggregatorProxy(vm.addr(6));
+
+        testConfig[1].reward = vm.addr(7);
+        testConfig[1].asset = vm.addr(8);
+        testConfig[1].emissionPerSecond = 200;
+        testConfig[1].distributionEnd = CURRENT_DATE;
+        testConfig[1].rewardOracle = IEACAggregatorProxy(vm.addr(9));
     }
 
-    function _makeTestDistributionConfig_validAssetDecimals()
-        internal
-        returns (RewardsDataTypes.DistributionConfig[] memory config)
-    {
-        config = _makeTestDistributionConfig();
-        _mockDistributionConfig_validAssetDecimals(config);
-    }
-
-    function _makeTestDistributionConfig()
-        private
-        returns (RewardsDataTypes.DistributionConfig[] memory config)
-    {
-        config = new RewardsDataTypes.DistributionConfig[](2);
-        config[0].reward = vm.addr(4);
-        config[0].asset = vm.addr(5);
-        config[0].emissionPerSecond = 100;
-        config[0].distributionEnd = CURRENT_DATE;
-        config[0].rewardOracle = IEACAggregatorProxy(vm.addr(6));
-
-        config[1].reward = vm.addr(7);
-        config[1].asset = vm.addr(8);
-        config[1].emissionPerSecond = 200;
-        config[1].distributionEnd = CURRENT_DATE;
-        config[1].rewardOracle = IEACAggregatorProxy(vm.addr(9));
-    }
-
-    function _mockDistributionConfig_invalidAssetDecimals(
-        RewardsDataTypes.DistributionConfig[] memory config
-    ) private {
-        _mockDistributionConfigOrdinaryCalls(config);
-
+    function _mockInvalidAssetDecimals() internal {
         uint8 invalidDecimals = 0;
         vm.mockCall(
-            config[1].asset,
+            testConfig[1].asset,
             abi.encodeWithSelector(IERC20Metadata.decimals.selector),
             abi.encode(invalidDecimals)
         );
     }
 
-    function _mockDistributionConfig_validAssetDecimals(
-        RewardsDataTypes.DistributionConfig[] memory config
-    ) private {
-        _mockDistributionConfigOrdinaryCalls(config);
-
+    function _mockValidAssetDecimals() internal {
         uint8 validDecimals = 18;
         vm.mockCall(
-            config[1].asset,
+            testConfig[1].asset,
             abi.encodeWithSelector(IERC20Metadata.decimals.selector),
             abi.encode(validDecimals)
         );
     }
 
-    function _mockDistributionConfigOrdinaryCalls(
-        RewardsDataTypes.DistributionConfig[] memory config
-    ) private {
+    function _mockDistributionConfigOrdinaryCalls() private {
         vm.mockCall(
             solidStakingViewActions,
-            abi.encodeWithSelector(ISolidStakingViewActions.totalStaked.selector, config[0].asset),
+            abi.encodeWithSelector(
+                ISolidStakingViewActions.totalStaked.selector,
+                testConfig[0].asset
+            ),
             abi.encode(1000)
         );
         vm.mockCall(
             solidStakingViewActions,
-            abi.encodeWithSelector(ISolidStakingViewActions.totalStaked.selector, config[1].asset),
+            abi.encodeWithSelector(
+                ISolidStakingViewActions.totalStaked.selector,
+                testConfig[1].asset
+            ),
             abi.encode(2000)
         );
         vm.mockCall(
-            address(config[0].rewardOracle),
+            address(testConfig[0].rewardOracle),
             abi.encodeWithSelector(IEACAggregatorProxy.latestAnswer.selector),
             abi.encode(15)
         );
         vm.mockCall(
-            address(config[1].rewardOracle),
+            address(testConfig[1].rewardOracle),
             abi.encodeWithSelector(IEACAggregatorProxy.latestAnswer.selector),
             abi.encode(15)
         );
         vm.mockCall(
-            config[0].asset,
+            testConfig[0].asset,
             abi.encodeWithSelector(IERC20Metadata.decimals.selector),
             abi.encode(18)
         );
