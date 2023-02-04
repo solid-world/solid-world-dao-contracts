@@ -159,4 +159,8 @@ abstract contract BaseSolidWorldManager is BaseTest {
             Math.mulDiv(5, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS, 100 * 1 days)
         );
     }
+
+    function _expectRevert_Paused() internal {
+        vm.expectRevert(abi.encodeWithSelector(Pausable.Paused.selector));
+    }
 }

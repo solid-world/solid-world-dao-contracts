@@ -31,16 +31,14 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
     }
 
     function testUpdateCategory_failsForInvalidCategoryId() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(CarbonDomainRepository.InvalidCategoryId.selector, CATEGORY_ID)
-        );
+        _expectRevert_InvalidCategoryId(CATEGORY_ID);
         manager.updateCategory(CATEGORY_ID, 0, 0, 0);
     }
 
     function testUpdateCategory_failsForInvalidInput() public {
         manager.addCategory(CATEGORY_ID, "", "", INITIAL_CATEGORY_TA);
 
-        vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.updateCategory(CATEGORY_ID, 0, 0, 0);
     }
 
@@ -264,7 +262,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         manager.setBatchAccumulating(7, false);
         assertEq(manager.getBatch(7).isAccumulating, false);
 
-        vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchId.selector, 17));
+        _expectRevert_InvalidBatchId(17);
         manager.setBatchAccumulating(17, false);
     }
 
@@ -384,9 +382,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         manager.addCategory(3, "Test token", "TT", INITIAL_CATEGORY_TA);
         manager.addProject(3, 5);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchSupplier.selector)
-        );
+        _expectRevert_InvalidBatchSupplier();
         manager.addBatch(
             DomainDataTypes.Batch({
                 id: 7,
@@ -402,9 +398,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
             10000
         );
 
-        vm.expectRevert(
-            abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchSupplier.selector)
-        );
+        _expectRevert_InvalidBatchSupplier();
         manager.addBatch(
             DomainDataTypes.Batch({
                 id: 7,
@@ -424,14 +418,14 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
     function testSetBatchCertificationDate_failsForNonExistingBatch() public {
         _addBatchWithDependencies(CURRENT_DATE + 52 weeks, 10000);
 
-        vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchId.selector, 17));
+        _expectRevert_InvalidBatchId(17);
         manager.setBatchCertificationDate(17, uint32(CURRENT_DATE + 53 weeks));
     }
 
     function testSetBatchCertificationDate_failsForCertificationDateLaterThanCurrent() public {
         _addBatchWithDependencies(CURRENT_DATE + 52 weeks, 10000);
 
-        vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.setBatchCertificationDate(BATCH_ID, uint32(CURRENT_DATE + 53 weeks));
     }
 
@@ -466,5 +460,27 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
     function _expectEmitBatchCreated(uint batchId) private {
         vm.expectEmit(true, false, false, false, address(manager));
         emit BatchCreated(batchId);
+    }
+
+    function _expectRevert_InvalidCategoryId(uint categoryId) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(CarbonDomainRepository.InvalidCategoryId.selector, categoryId)
+        );
+    }
+
+    function _expectRevert_InvalidBatchId(uint batchId) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchId.selector, batchId)
+        );
+    }
+
+    function _expectRevert_InvalidInput() private {
+        vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidInput.selector));
+    }
+
+    function _expectRevert_InvalidBatchSupplier() private {
+        vm.expectRevert(
+            abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchSupplier.selector)
+        );
     }
 }

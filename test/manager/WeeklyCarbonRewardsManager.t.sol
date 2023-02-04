@@ -10,7 +10,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     function testMintWeeklyCarbonRewards_failsIfManagerIsPaused() public {
         manager.pause();
 
-        vm.expectRevert(abi.encodeWithSelector(Pausable.Paused.selector));
+        _expectRevert_Paused();
         manager.mintWeeklyCarbonRewards(
             new uint[](1),
             new address[](2),
@@ -31,7 +31,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testMintWeeklyCarbonRewards_failsInputsOfDifferentLengths() public {
-        vm.expectRevert(abi.encodeWithSelector(WeeklyCarbonRewards.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.mintWeeklyCarbonRewards(
             new uint[](2),
             new address[](2),
@@ -46,9 +46,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         categoryIds[0] = CATEGORY_ID + 777;
         categoryIds[1] = CATEGORY_ID;
 
-        vm.expectRevert(
-            abi.encodeWithSelector(WeeklyCarbonRewards.InvalidCategoryId.selector, categoryIds[0])
-        );
+        _expectRevert_InvalidCategoryId(categoryIds[0]);
         manager.computeWeeklyCarbonRewards(categoryIds);
     }
 
@@ -349,12 +347,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testMintWeeklyCarbonRewards_failsIfNotCalledByWeeklyRewardsMinter() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                WeeklyCarbonRewards.UnauthorizedRewardMinting.selector,
-                address(this)
-            )
-        );
+        _expectRevert_UnauthorizedRewardMinting();
         manager.mintWeeklyCarbonRewards(
             new uint[](0),
             new address[](0),
@@ -394,5 +387,24 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     function _expectEmitWeeklyRewardMinted(address rewardToken, uint amount) private {
         vm.expectEmit(true, true, false, true, address(manager));
         emit WeeklyRewardMinted(rewardToken, amount);
+    }
+
+    function _expectRevert_InvalidInput() private {
+        vm.expectRevert(abi.encodeWithSelector(WeeklyCarbonRewards.InvalidInput.selector));
+    }
+
+    function _expectRevert_InvalidCategoryId(uint categoryId) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(WeeklyCarbonRewards.InvalidCategoryId.selector, categoryId)
+        );
+    }
+
+    function _expectRevert_UnauthorizedRewardMinting() private {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                WeeklyCarbonRewards.UnauthorizedRewardMinting.selector,
+                address(this)
+            )
+        );
     }
 }

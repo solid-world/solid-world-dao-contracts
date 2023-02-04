@@ -16,21 +16,19 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
 
     function testDecollateralizeTokens_inputAmountIs0() public {
-        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.decollateralizeTokens(BATCH_ID, 0, 0);
     }
 
     function testDecollateralizeTokens_failsIfManagerIsPaused() public {
         manager.pause();
 
-        vm.expectRevert(abi.encodeWithSelector(Pausable.Paused.selector));
+        _expectRevert_Paused();
         manager.decollateralizeTokens(BATCH_ID, 0, 0);
     }
 
     function testDecollateralizeTokensWhenInvalidBatchId() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(DecollateralizationManager.InvalidBatchId.selector, 5)
-        );
+        _expectRevert_InvalidBatchId(BATCH_ID);
         manager.decollateralizeTokens(BATCH_ID, 10, 5);
     }
 
@@ -59,9 +57,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
 
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 10000, amountOutMin);
-        vm.expectRevert(
-            abi.encodeWithSelector(DecollateralizationManager.AmountOutTooLow.selector, 0)
-        );
+        _expectRevert_AmountOutTooLow(0);
         manager.decollateralizeTokens(BATCH_ID, 1e17, 0);
     }
 
@@ -72,13 +68,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
 
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DecollateralizationManager.AmountOutLessThanMinimum.selector,
-                80,
-                10000
-            )
-        );
+        _expectRevert_AmountOutLessThanMinimum(80, 10000);
         manager.decollateralizeTokens(BATCH_ID, cbtUserCut, 10000);
         assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 10000);
     }
@@ -171,7 +161,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     function testBulkDecollateralizeTokens_failsIfManagerIsPaused() public {
         manager.pause();
 
-        vm.expectRevert(abi.encodeWithSelector(Pausable.Paused.selector));
+        _expectRevert_Paused();
         manager.bulkDecollateralizeTokens(new uint[](1), new uint[](1), new uint[](2));
     }
 
@@ -207,16 +197,16 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         uint[] memory arrayLength1 = new uint[](1);
         uint[] memory arrayLength2 = new uint[](2);
 
-        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.bulkDecollateralizeTokens(arrayLength1, arrayLength2, arrayLength1);
 
-        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.bulkDecollateralizeTokens(arrayLength1, arrayLength1, arrayLength2);
 
-        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.bulkDecollateralizeTokens(arrayLength2, arrayLength1, arrayLength2);
 
-        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.bulkDecollateralizeTokens(arrayLength2, arrayLength1, arrayLength1);
     }
 
@@ -245,13 +235,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         amountsOutMin[0] = 4000;
         amountsOutMin[1] = 4000;
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DecollateralizationManager.BatchesNotInSameCategory.selector,
-                CATEGORY_ID + 1,
-                CATEGORY_ID
-            )
-        );
+        _expectRevert_BatchesNotInSameCategory(CATEGORY_ID + 1, CATEGORY_ID);
         manager.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
     }
 
@@ -273,7 +257,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         amountsOutMin[0] = 3998;
         amountsOutMin[1] = 0;
 
-        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.bulkDecollateralizeTokens(batchIds, amountsIn, amountsOutMin);
     }
 
@@ -484,5 +468,41 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     function _expectEmitFeeReceiverUpdated(address newFeeReceiver) private {
         vm.expectEmit(true, false, false, false, address(manager));
         emit FeeReceiverUpdated(newFeeReceiver);
+    }
+
+    function _expectRevert_InvalidInput() private {
+        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidInput.selector));
+    }
+
+    function _expectRevert_InvalidBatchId(uint batchId) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(DecollateralizationManager.InvalidBatchId.selector, batchId)
+        );
+    }
+
+    function _expectRevert_AmountOutTooLow(uint amount) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(DecollateralizationManager.AmountOutTooLow.selector, amount)
+        );
+    }
+
+    function _expectRevert_AmountOutLessThanMinimum(uint amountOut, uint amountOutMin) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DecollateralizationManager.AmountOutLessThanMinimum.selector,
+                amountOut,
+                amountOutMin
+            )
+        );
+    }
+
+    function _expectRevert_BatchesNotInSameCategory(uint categoryId1, uint categoryId2) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DecollateralizationManager.BatchesNotInSameCategory.selector,
+                categoryId1,
+                categoryId2
+            )
+        );
     }
 }

@@ -15,16 +15,14 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     event CollateralizationFeeUpdated(uint indexed collateralizationFee);
 
     function testCollateralizeBatchWhenInvalidBatchId() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(CollateralizationManager.InvalidBatchId.selector, 1)
-        );
+        _expectRevert_InvalidBatchId(1);
         manager.collateralizeBatch(CATEGORY_ID, 1, 0);
     }
 
     function testCollateralizeBatch_failsIfManagerIsPaused() public {
         manager.pause();
 
-        vm.expectRevert(abi.encodeWithSelector(Pausable.Paused.selector));
+        _expectRevert_Paused();
         manager.collateralizeBatch(CATEGORY_ID, 1, 0);
     }
 
@@ -32,7 +30,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         _addBatchWithDependencies(CURRENT_DATE + 12, 100);
 
         vm.prank(testAccount);
-        vm.expectRevert(abi.encodeWithSelector(CollateralizationManager.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.collateralizeBatch(BATCH_ID, 0, 0);
     }
 
@@ -48,11 +46,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         _addBatchWithDependencies(CURRENT_DATE + 1 weeks - 1, 100);
 
         vm.prank(testAccount);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                CollateralizationManager.CannotCollateralizeTheWeekBeforeCertification.selector
-            )
-        );
+        _expectRevert_CannotCollateralizeTheWeekBeforeCertification();
         manager.collateralizeBatch(BATCH_ID, 100, 0);
     }
 
@@ -61,13 +55,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
 
         uint cbtUserCut = 81.03e18;
         vm.prank(testAccount);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                CollateralizationManager.AmountOutLessThanMinimum.selector,
-                81023310000000000000,
-                cbtUserCut
-            )
-        );
+        _expectRevert_AmountOutLessThanMinimum(81023310000000000000, cbtUserCut);
         manager.collateralizeBatch(BATCH_ID, 100, cbtUserCut);
     }
 
@@ -76,9 +64,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
 
         vm.warp(CURRENT_DATE + 1 weeks);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(CollateralizationManager.BatchCertified.selector, 5)
-        );
+        _expectRevert_BatchCertified(BATCH_ID);
         manager.collateralizeBatch(BATCH_ID, 100, 81e18);
     }
 
@@ -151,21 +137,17 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         manager.setBatchAccumulating(BATCH_ID, false);
 
         vm.prank(testAccount);
-        vm.expectRevert(
-            abi.encodeWithSelector(CollateralizationManager.BatchCertified.selector, BATCH_ID)
-        );
+        _expectRevert_BatchCertified(BATCH_ID);
         manager.collateralizeBatch(BATCH_ID, 100, 0);
     }
 
     function testSimulateBatchCollateralization_inputAmountIs0() public {
-        vm.expectRevert(abi.encodeWithSelector(CollateralizationManager.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.simulateBatchCollateralization(BATCH_ID, 0);
     }
 
     function testSimulateBatchCollateralizationWhenBatchIdIsInvalid() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(CollateralizationManager.InvalidBatchId.selector, 5)
-        );
+        _expectRevert_InvalidBatchId(BATCH_ID);
         manager.simulateBatchCollateralization(BATCH_ID, 10000);
     }
 
@@ -174,9 +156,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
 
         vm.warp(CURRENT_DATE + 1 weeks);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(CollateralizationManager.BatchCertified.selector, 5)
-        );
+        _expectRevert_BatchCertified(BATCH_ID);
         manager.simulateBatchCollateralization(BATCH_ID, 10000);
     }
 
@@ -184,18 +164,10 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + 1 weeks - 1, 10000);
         _addBatch(BATCH_ID + 1, CURRENT_DATE + 1, 10000);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                CollateralizationManager.CannotCollateralizeTheWeekBeforeCertification.selector
-            )
-        );
+        _expectRevert_CannotCollateralizeTheWeekBeforeCertification();
         manager.simulateBatchCollateralization(BATCH_ID, 10000);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                CollateralizationManager.CannotCollateralizeTheWeekBeforeCertification.selector
-            )
-        );
+        _expectRevert_CannotCollateralizeTheWeekBeforeCertification();
         manager.simulateBatchCollateralization(BATCH_ID + 1, 10000);
     }
 
@@ -218,9 +190,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
 
         manager.setBatchAccumulating(BATCH_ID, false);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(CollateralizationManager.BatchCertified.selector, BATCH_ID)
-        );
+        _expectRevert_BatchCertified(BATCH_ID);
         manager.simulateBatchCollateralization(BATCH_ID, 10000);
     }
 
@@ -254,5 +224,39 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     function _expectEmitFeeUpdated(uint16 newCollateralizationFee) private {
         vm.expectEmit(true, false, false, false, address(manager));
         emit CollateralizationFeeUpdated(newCollateralizationFee);
+    }
+
+    function _expectRevert_InvalidBatchId(uint batchId) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(CollateralizationManager.InvalidBatchId.selector, batchId)
+        );
+    }
+
+    function _expectRevert_InvalidInput() private {
+        vm.expectRevert(abi.encodeWithSelector(CollateralizationManager.InvalidInput.selector));
+    }
+
+    function _expectRevert_CannotCollateralizeTheWeekBeforeCertification() private {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CollateralizationManager.CannotCollateralizeTheWeekBeforeCertification.selector
+            )
+        );
+    }
+
+    function _expectRevert_AmountOutLessThanMinimum(uint amountOut, uint minAmountOut) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CollateralizationManager.AmountOutLessThanMinimum.selector,
+                amountOut,
+                minAmountOut
+            )
+        );
+    }
+
+    function _expectRevert_BatchCertified(uint batchId) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(CollateralizationManager.BatchCertified.selector, batchId)
+        );
     }
 }
