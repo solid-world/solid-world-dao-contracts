@@ -8,7 +8,7 @@ contract EmissionManagerTest is BaseEmissionManagerTest {
         assertEq(emissionManager.getCarbonRewardsManager(), carbonRewardsManager);
         assertEq(address(emissionManager.getRewardsController()), controller);
 
-        vm.expectRevert(abi.encodeWithSelector(PostConstruct.AlreadyInitialized.selector));
+        _expectRevert_AlreadyInitialized();
         emissionManager.setup(carbonRewardsManager, controller, owner);
     }
 
@@ -28,13 +28,7 @@ contract EmissionManagerTest is BaseEmissionManagerTest {
         vm.prank(owner);
         emissionManager.setEmissionAdmin(config[1].reward, vm.addr(777));
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IEmissionManager.NotEmissionAdmin.selector,
-                emissionAdmin,
-                config[1].reward
-            )
-        );
+        _expectRevert_NotEmissionAdmin(emissionAdmin, config[1].reward);
         vm.prank(emissionAdmin);
         emissionManager.configureAssets(config);
     }
@@ -43,13 +37,7 @@ contract EmissionManagerTest is BaseEmissionManagerTest {
         address reward = vm.addr(113);
         IEACAggregatorProxy rewardOracle = IEACAggregatorProxy(vm.addr(115));
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IEmissionManager.NotEmissionAdmin.selector,
-                emissionAdmin,
-                reward
-            )
-        );
+        _expectRevert_NotEmissionAdmin(emissionAdmin, reward);
         vm.prank(emissionAdmin);
         emissionManager.setRewardOracle(reward, rewardOracle);
     }
@@ -71,13 +59,7 @@ contract EmissionManagerTest is BaseEmissionManagerTest {
         address asset = vm.addr(114);
         uint32 distributionEnd = 1000;
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IEmissionManager.NotEmissionAdmin.selector,
-                emissionAdmin,
-                reward
-            )
-        );
+        _expectRevert_NotEmissionAdmin(emissionAdmin, reward);
         vm.prank(emissionAdmin);
         emissionManager.setDistributionEnd(asset, reward, distributionEnd);
     }
@@ -105,13 +87,7 @@ contract EmissionManagerTest is BaseEmissionManagerTest {
         vm.prank(owner);
         emissionManager.setEmissionAdmin(rewards[1], vm.addr(777));
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IEmissionManager.NotEmissionAdmin.selector,
-                emissionAdmin,
-                rewards[1]
-            )
-        );
+        _expectRevert_NotEmissionAdmin(emissionAdmin, rewards[1]);
         vm.prank(emissionAdmin);
         emissionManager.setEmissionPerSecond(asset, rewards, emissionsPerSecond);
     }
@@ -129,7 +105,7 @@ contract EmissionManagerTest is BaseEmissionManagerTest {
     }
 
     function testUpdateCarbonRewardDistribution_failsInputsOfDifferentLengths() public {
-        vm.expectRevert(abi.encodeWithSelector(IEmissionManager.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         emissionManager.updateCarbonRewardDistribution(new address[](2), new uint[](1));
     }
 

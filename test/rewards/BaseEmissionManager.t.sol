@@ -233,4 +233,18 @@ abstract contract BaseEmissionManagerTest is BaseTest {
             )
         );
     }
+
+    function _expectRevert_NotEmissionAdmin(address sender, address reward) internal {
+        vm.expectRevert(
+            abi.encodeWithSelector(IEmissionManager.NotEmissionAdmin.selector, sender, reward)
+        );
+    }
+
+    function _expectRevert_AlreadyInitialized() internal {
+        vm.expectRevert(abi.encodeWithSelector(PostConstruct.AlreadyInitialized.selector));
+    }
+
+    function _expectRevert_InvalidInput() internal {
+        vm.expectRevert(abi.encodeWithSelector(IEmissionManager.InvalidInput.selector));
+    }
 }
