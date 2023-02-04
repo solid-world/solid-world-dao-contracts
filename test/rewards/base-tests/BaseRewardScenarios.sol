@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "../BaseTest.sol";
-import "../../contracts/rewards/RewardsController.sol";
-import "../../contracts/SolidStaking.sol";
-import "../../contracts/rewards/EmissionManager.sol";
-import "../../contracts/SolidWorldManager.sol";
+import "../../BaseTest.sol";
+import "../../../contracts/rewards/RewardsController.sol";
+import "../../../contracts/SolidStaking.sol";
+import "../../../contracts/rewards/EmissionManager.sol";
+import "../../../contracts/SolidWorldManager.sol";
 
-contract BaseRewardScenariosTest is BaseTest {
+abstract contract BaseRewardScenariosTest is BaseTest {
     uint constant CATEGORY_ID = 1;
     uint constant PROJECT_ID = 3;
     uint constant BATCH_ID = 5;

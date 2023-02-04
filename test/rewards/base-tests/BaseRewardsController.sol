@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "../BaseTest.sol";
-import "../../contracts/interfaces/rewards/IRewardsController.sol";
-import "../../contracts/rewards/RewardsController.sol";
+import "../../BaseTest.sol";
+import "../../../contracts/interfaces/rewards/IRewardsController.sol";
+import "../../../contracts/rewards/RewardsController.sol";
 
 abstract contract BaseRewardsControllerTest is BaseTest {
     event AssetConfigUpdated(

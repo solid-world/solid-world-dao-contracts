@@ -1,6 +1,6 @@
 pragma solidity ^0.8.16;
 
-import "./BaseEmissionManager.t.sol";
+import "./base-tests/BaseEmissionManager.t.sol";
 
 contract EmissionManagerTest is BaseEmissionManagerTest {
     function testRecurrentSetup() public {

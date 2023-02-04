@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import "./BaseRewardScenarios.sol";
+import "./base-tests/BaseRewardScenarios.sol";
 
 contract RewardScenarios is BaseRewardScenariosTest {
     function testUpdateCarbonRewardDistribution_failsIfCalledBeforeInitialDistributionEnd() public {

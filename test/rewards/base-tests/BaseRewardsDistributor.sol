@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "../BaseTest.sol";
-import "../../contracts/interfaces/rewards/IRewardsDistributor.sol";
-import "../../contracts/rewards/RewardsController.sol";
-import "../../contracts/CollateralizedBasketToken.sol";
+import "../../BaseTest.sol";
+import "../../../contracts/interfaces/rewards/IRewardsDistributor.sol";
+import "../../../contracts/rewards/RewardsController.sol";
+import "../../../contracts/CollateralizedBasketToken.sol";
 
 abstract contract BaseRewardsDistributor is BaseTest {
     event Accrued(

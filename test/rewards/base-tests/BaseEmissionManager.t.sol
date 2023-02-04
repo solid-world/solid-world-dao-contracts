@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "../BaseTest.sol";
-import "../../contracts/interfaces/manager/IWeeklyCarbonRewardsManager.sol";
-import "../../contracts/interfaces/rewards/IRewardsController.sol";
-import "../../contracts/rewards/EmissionManager.sol";
-import "../../contracts/SolidWorldManager.sol";
-import "../../contracts/rewards/RewardsController.sol";
+import "../../BaseTest.sol";
+import "../../../contracts/interfaces/manager/IWeeklyCarbonRewardsManager.sol";
+import "../../../contracts/interfaces/rewards/IRewardsController.sol";
+import "../../../contracts/rewards/EmissionManager.sol";
+import "../../../contracts/SolidWorldManager.sol";
+import "../../../contracts/rewards/RewardsController.sol";
 
 abstract contract BaseEmissionManagerTest is BaseTest {
     uint32 constant CURRENT_DATE = 1666016743;

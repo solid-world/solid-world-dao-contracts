@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import "./BaseRewardsController.sol";
+import "./base-tests/BaseRewardsController.sol";
 
 contract RewardsControllerTest is BaseRewardsControllerTest {
     function testConfigureAssets_failsIfNotEmissionManager() public {

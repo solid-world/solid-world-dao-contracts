@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import "./BaseRewardsDistributor.sol";
+import "./base-tests/BaseRewardsDistributor.sol";
 
 contract RewardsDistributorTest is BaseRewardsDistributor {
     function testInitialConfiguration() public {
