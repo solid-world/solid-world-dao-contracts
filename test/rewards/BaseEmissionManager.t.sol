@@ -36,6 +36,7 @@ abstract contract BaseEmissionManagerTest is BaseTest {
         emissionAdmin = vm.addr(119);
         emissionManager = new EmissionManager();
 
+        _mockRewardsController();
         _setupEmissionManager();
         _labelAccounts();
     }
@@ -70,7 +71,7 @@ abstract contract BaseEmissionManagerTest is BaseTest {
         emit EmissionAdminUpdated(reward, address(0), emissionAdmin);
     }
 
-    function _mockRewardsController() internal {
+    function _mockRewardsController() private {
         vm.mockCall(
             controller,
             abi.encodeWithSelector(IRewardsController.getRewardsVault.selector),
@@ -156,7 +157,6 @@ abstract contract BaseEmissionManagerTest is BaseTest {
         address[] memory rewards,
         uint88[] memory emissionsPerSecond
     ) internal {
-        _mockRewardsController();
         vm.expectCall(
             controller,
             abi.encodeCall(
@@ -171,7 +171,6 @@ abstract contract BaseEmissionManagerTest is BaseTest {
         address reward,
         uint32 distributionEnd
     ) internal {
-        _mockRewardsController();
         vm.expectCall(
             controller,
             abi.encodeCall(IRewardsDistributor.setDistributionEnd, (asset, reward, distributionEnd))
@@ -182,7 +181,6 @@ abstract contract BaseEmissionManagerTest is BaseTest {
         address reward,
         IEACAggregatorProxy rewardOracle
     ) internal {
-        _mockRewardsController();
         vm.expectCall(
             controller,
             abi.encodeCall(IRewardsController.setRewardOracle, (reward, rewardOracle))
@@ -192,19 +190,16 @@ abstract contract BaseEmissionManagerTest is BaseTest {
     function _expectConfigureAssetsIsCalledOnRewardsController(
         RewardsDataTypes.DistributionConfig[] memory config
     ) internal {
-        _mockRewardsController();
         vm.expectCall(controller, abi.encodeCall(IRewardsController.configureAssets, config));
     }
 
     function _expectSetClaimerIsCalledOnRewardsController(address user, address claimer) internal {
-        _mockRewardsController();
         vm.expectCall(controller, abi.encodeCall(IRewardsController.setClaimer, (user, claimer)));
     }
 
     function _expectSetEmissionManagerIsCalledOnRewardsController(address newEmissionManager)
         internal
     {
-        _mockRewardsController();
         vm.expectCall(
             controller,
             abi.encodeCall(IRewardsDistributor.setEmissionManager, newEmissionManager)
@@ -218,7 +213,6 @@ abstract contract BaseEmissionManagerTest is BaseTest {
         uint[] memory rewardAmounts,
         uint[] memory feeAmounts
     ) internal {
-        _mockRewardsController();
         vm.mockCall(
             carbonRewardsManager,
             abi.encodeWithSelector(IWeeklyCarbonRewardsManager.computeWeeklyCarbonRewards.selector),
