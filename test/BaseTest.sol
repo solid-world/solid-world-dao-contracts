@@ -44,18 +44,18 @@ abstract contract BaseTest is Test {
         array[1] = _number1;
     }
 
-    function _toArrayUint88(uint88 _number) internal pure returns (uint88[] memory array) {
+    function _toArrayUint88(uint _number) internal pure returns (uint88[] memory array) {
         array = new uint88[](1);
-        array[0] = _number;
+        array[0] = uint88(_number);
     }
 
-    function _toArrayUint88(uint88 _number0, uint88 _number1)
+    function _toArrayUint88(uint _number0, uint _number1)
         internal
         pure
         returns (uint88[] memory array)
     {
         array = new uint88[](2);
-        array[0] = _number0;
-        array[1] = _number1;
+        array[0] = uint88(_number0);
+        array[1] = uint88(_number1);
     }
 }
