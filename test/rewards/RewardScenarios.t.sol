@@ -1,17 +1,12 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "./base-tests/BaseRewardScenarios.sol";
 
 contract RewardScenarios is BaseRewardScenariosTest {
     function testUpdateCarbonRewardDistribution_failsIfCalledBeforeInitialDistributionEnd() public {
-        address[] memory assets = new address[](2);
-        uint[] memory categoryIds = new uint[](2);
-
-        assets[0] = assetMangrove;
-        assets[1] = assetReforestation;
-
-        categoryIds[0] = CATEGORY_ID;
-        categoryIds[1] = CATEGORY_ID + 1;
+        address[] memory assets = _toArray(assetMangrove, assetReforestation);
+        uint[] memory categoryIds = _toArray(MANGROVE_CATEGORY_ID, REFORESTATION_CATEGORY_ID);
 
         _expectRevert_UpdateDistributionNotApplicable(assetMangrove, mangroveRewardToken);
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);
@@ -25,15 +20,8 @@ contract RewardScenarios is BaseRewardScenariosTest {
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END);
 
-        address[] memory assets = new address[](2);
-        uint[] memory categoryIds = new uint[](2);
-
-        assets[0] = assetMangrove;
-        assets[1] = assetReforestation;
-
-        categoryIds[0] = CATEGORY_ID;
-        categoryIds[1] = CATEGORY_ID + 1;
-
+        address[] memory assets = _toArray(assetMangrove, assetReforestation);
+        uint[] memory categoryIds = _toArray(MANGROVE_CATEGORY_ID, REFORESTATION_CATEGORY_ID);
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);
 
         (
@@ -53,17 +41,16 @@ contract RewardScenarios is BaseRewardScenariosTest {
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 2 days);
         CollateralizedBasketToken(usdcToken).mint(rewardsVault, 30 days * 1e18); // $1 per second, for a month
-        address[] memory rewards = new address[](1);
-        rewards[0] = usdcToken;
-        uint88[] memory newEmissionsPerSecond = new uint88[](1);
-        newEmissionsPerSecond[0] = 1e18; // $1 per second
-        emissionManager.setEmissionPerSecond(assetMangrove, rewards, newEmissionsPerSecond);
+        emissionManager.setEmissionPerSecond(
+            assetMangrove,
+            _toArray(usdcToken),
+            _toArrayUint88(1e18)
+        );
 
         // accrued all carbon rewards and distribution ended + accrued 6 days of usdc rewards
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 8 days);
 
-        address[] memory incentivizedAssets = new address[](1);
-        incentivizedAssets[0] = assetMangrove;
+        address[] memory incentivizedAssets = _toArray(assetMangrove);
         (address[] memory rewardsList0, uint[] memory unclaimedAmounts0) = rewardsController
             .getAllUnclaimedRewardAmountsForUserAndAssets(incentivizedAssets, user0);
         assertEq(rewardsList0.length, 3);
@@ -114,10 +101,8 @@ contract RewardScenarios is BaseRewardScenariosTest {
             .balanceOf(user0);
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END);
 
-        address[] memory assets = new address[](1);
-        uint[] memory categoryIds = new uint[](1);
-        assets[0] = assetMangrove;
-        categoryIds[0] = CATEGORY_ID;
+        address[] memory assets = _toArray(assetMangrove);
+        uint[] memory categoryIds = _toArray(MANGROVE_CATEGORY_ID);
 
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);
         (, uint mangroveEmissionPerSecond, , ) = rewardsController.getRewardDistribution(
@@ -193,24 +178,17 @@ contract RewardScenarios is BaseRewardScenariosTest {
     function testRewardsAccountingWorksAcrossMoreWeeksAndRegardlessOfTheUpdateFunctionBeingCalledWithDelay()
         public
     {
+        uint mangroveBalanceBeforeClaimingRewards = CollateralizedBasketToken(mangroveRewardToken)
+            .balanceOf(user0);
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END);
 
-        address[] memory assets = new address[](1);
-        address[] memory rewards = new address[](1);
-        uint[] memory categoryIds = new uint[](1);
-        uint[] memory rewardAmounts = new uint[](1);
-        uint[] memory feeAmounts = new uint[](1);
-        assets[0] = assetMangrove;
-        rewards[0] = mangroveRewardToken;
-        categoryIds[0] = CATEGORY_ID;
-        rewardAmounts[0] = 25e18;
-        feeAmounts[0] = 5e18;
+        address[] memory assets = _toArray(assetMangrove);
+        uint[] memory categoryIds = _toArray(MANGROVE_CATEGORY_ID);
+        address[] memory rewards = _toArray(mangroveRewardToken);
+        uint[] memory rewardAmounts = _toArray(25e18);
+        uint[] memory feeAmounts = _toArray(5e18);
 
-        vm.mockCall(
-            address(solidWorldManager),
-            abi.encodeWithSelector(IWeeklyCarbonRewardsManager.computeWeeklyCarbonRewards.selector),
-            abi.encode(rewards, rewardAmounts, feeAmounts)
-        );
+        _mockComputeWeeklyCarbonRewards(rewards, rewardAmounts, feeAmounts);
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);
 
         vm.prank(user0);
@@ -225,7 +203,7 @@ contract RewardScenarios is BaseRewardScenariosTest {
 
         assertApproxEqAbs(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0),
-            4130.352e18 + 12391.056e18 + 25e18 * 2,
+            mangroveBalanceBeforeClaimingRewards + rewardAmounts[0] * 2,
             DELTA
         );
 

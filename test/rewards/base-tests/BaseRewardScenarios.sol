@@ -8,8 +8,10 @@ import "../../../contracts/rewards/EmissionManager.sol";
 import "../../../contracts/SolidWorldManager.sol";
 
 abstract contract BaseRewardScenariosTest is BaseTest {
-    uint constant CATEGORY_ID = 1;
-    uint constant PROJECT_ID = 3;
+    uint constant MANGROVE_CATEGORY_ID = 1;
+    uint constant REFORESTATION_CATEGORY_ID = 2;
+    uint constant MANGROVE_PROJECT_ID = 3;
+    uint constant REFORESTATION_PROJECT_ID = 4;
     uint constant BATCH_ID = 5;
 
     uint16 constant COLLATERALIZATION_FEE = 1000; // 10%
@@ -18,8 +20,11 @@ abstract contract BaseRewardScenariosTest is BaseTest {
 
     uint32 constant CURRENT_DATE = 1666016743;
     uint32 constant INITIAL_CARBON_DISTRIBUTION_END = CURRENT_DATE + 3 days;
-    uint32 constant INITIAL_USDC_DISTRIBUTION_END = CURRENT_DATE + 5 days + 30 days;
+    uint32 constant USDC_DISTRIBUTION_DELAY = 5 days;
+    uint32 constant INITIAL_USDC_DISTRIBUTION_END =
+        CURRENT_DATE + USDC_DISTRIBUTION_DELAY + 30 days;
     uint32 constant ONE_YEAR = 52 weeks;
+    uint24 constant INITIAL_CATEGORY_TA = 82360;
 
     uint constant DELTA = 1e6; // 0.000000000001 precision
 
@@ -27,6 +32,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
     SolidStaking solidStaking;
     EmissionManager emissionManager;
     SolidWorldManager solidWorldManager;
+    ForwardContractBatchToken forwardContractBatch;
 
     address rewardsVault;
     address feeReceiver;
@@ -46,23 +52,35 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         solidStaking = new SolidStaking();
         emissionManager = new EmissionManager();
         solidWorldManager = new SolidWorldManager();
+        forwardContractBatch = new ForwardContractBatchToken("");
         rewardsVault = vm.addr(1);
         feeReceiver = vm.addr(2);
         user0 = vm.addr(4);
         user1 = vm.addr(5);
         rewardOracle = vm.addr(6);
-
-        vm.mockCall(
-            address(rewardOracle),
-            abi.encodeWithSelector(IEACAggregatorProxy.latestAnswer.selector),
-            abi.encode(1)
-        );
-
         usdcToken = address(new CollateralizedBasketToken("USDC", "USDC"));
         assetMangrove = address(new CollateralizedBasketToken("Mangrove hypervisor", "MH"));
         assetReforestation = address(
             new CollateralizedBasketToken("Reforestation hypervisor", "RH")
         );
+
+        _initializeContracts();
+
+        _loadCarbonRepository();
+        _configureEmissionAdmin();
+        _rewardsVaultApprovesRewardsController();
+        _usersApproveSolidStaking();
+        _usersApproveSolidWorldManager();
+        _usersCollateralizeForwards();
+        _configureStakableAssets();
+        _usersBecomeLiquidityProviders();
+        _configureRewardDistribution();
+
+        _labelAccounts();
+    }
+
+    function _initializeContracts() private {
+        _initializeForwardContractBatch();
 
         rewardsController.setup(address(solidStaking), rewardsVault, address(emissionManager));
         solidStaking.setup(rewardsController, address(this));
@@ -71,12 +89,8 @@ abstract contract BaseRewardScenariosTest is BaseTest {
             address(rewardsController),
             address(this)
         );
-
-        ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
-        forwardContractBatch.transferOwnership(address(solidWorldManager));
-        CollateralizedBasketTokenDeployer collateralizedBasketTokenDeployer = new CollateralizedBasketTokenDeployer();
         solidWorldManager.initialize(
-            collateralizedBasketTokenDeployer,
+            new CollateralizedBasketTokenDeployer(),
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,
@@ -85,34 +99,78 @@ abstract contract BaseRewardScenariosTest is BaseTest {
             address(emissionManager),
             address(this)
         );
+    }
 
-        solidWorldManager.addCategory(
-            CATEGORY_ID,
-            "Mangrove Collateralized Basket Token",
-            "MCBT",
-            82360
-        );
-        mangroveRewardToken = address(solidWorldManager.getCategoryToken(CATEGORY_ID));
-        solidWorldManager.addCategory(
-            CATEGORY_ID + 1,
-            "Reforestation Collateralized Basket Token",
-            "RCBT",
-            82360
-        );
-        reforestationRewardToken = address(solidWorldManager.getCategoryToken(CATEGORY_ID + 1));
+    function _initializeForwardContractBatch() private {
+        forwardContractBatch.transferOwnership(address(solidWorldManager));
+    }
 
+    function _mockRewardOracle() private {
+        vm.mockCall(
+            address(rewardOracle),
+            abi.encodeWithSelector(IEACAggregatorProxy.latestAnswer.selector),
+            abi.encode(1)
+        );
+    }
+
+    function _labelAccounts() private {
+        vm.label(address(rewardsController), "RewardsController");
+        vm.label(address(solidStaking), "SolidStaking");
+        vm.label(address(emissionManager), "EmissionManager");
+        vm.label(address(solidWorldManager), "SolidWorldManager");
+        vm.label(address(forwardContractBatch), "ForwardContractBatch");
+        vm.label(rewardsVault, "RewardsVault");
+        vm.label(feeReceiver, "FeeReceiver");
+        vm.label(user0, "User0");
+        vm.label(user1, "User1");
+        vm.label(assetMangrove, "AssetMangrove");
+        vm.label(assetReforestation, "AssetReforestation");
+        vm.label(mangroveRewardToken, "MangroveRewardToken");
+        vm.label(reforestationRewardToken, "ReforestationRewardToken");
+        vm.label(usdcToken, "UsdcToken");
+        vm.label(rewardOracle, "RewardOracle");
+    }
+
+    function _configureEmissionAdmin() private {
         emissionManager.setEmissionAdmin(mangroveRewardToken, address(this));
         emissionManager.setEmissionAdmin(reforestationRewardToken, address(this));
         emissionManager.setEmissionAdmin(usdcToken, address(this));
+    }
 
-        solidWorldManager.addProject(CATEGORY_ID, PROJECT_ID);
-        solidWorldManager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
-        for (uint i = 0; i < 4; i++) {
+    function _initializeMangroveCategoryAndRewardToken() private {
+        solidWorldManager.addCategory(
+            MANGROVE_CATEGORY_ID,
+            "Mangrove Collateralized Basket Token",
+            "MCBT",
+            INITIAL_CATEGORY_TA
+        );
+        mangroveRewardToken = address(solidWorldManager.getCategoryToken(MANGROVE_CATEGORY_ID));
+    }
+
+    function _initializeReforestationCategoryAndRewardToken() private {
+        solidWorldManager.addCategory(
+            REFORESTATION_CATEGORY_ID,
+            "Reforestation Collateralized Basket Token",
+            "RCBT",
+            INITIAL_CATEGORY_TA
+        );
+        reforestationRewardToken = address(
+            solidWorldManager.getCategoryToken(REFORESTATION_CATEGORY_ID)
+        );
+    }
+
+    function _addProjectForEachCategory() private {
+        solidWorldManager.addProject(MANGROVE_CATEGORY_ID, MANGROVE_PROJECT_ID);
+        solidWorldManager.addProject(REFORESTATION_CATEGORY_ID, REFORESTATION_PROJECT_ID);
+    }
+
+    function _addBatches() private {
+        for (uint i; i < 4; i++) {
             solidWorldManager.addBatch(
                 DomainDataTypes.Batch({
                     id: BATCH_ID + i,
                     status: 0,
-                    projectId: PROJECT_ID + (i % 2),
+                    projectId: i % 2 == 0 ? MANGROVE_PROJECT_ID : REFORESTATION_PROJECT_ID,
                     collateralizedCredits: 0,
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
@@ -126,7 +184,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
                 DomainDataTypes.Batch({
                     id: BATCH_ID + i + 4,
                     status: 0,
-                    projectId: PROJECT_ID + (i % 2),
+                    projectId: i % 2 == 0 ? MANGROVE_PROJECT_ID : REFORESTATION_PROJECT_ID,
                     collateralizedCredits: 0,
                     certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
                     vintage: 2023,
@@ -137,27 +195,23 @@ abstract contract BaseRewardScenariosTest is BaseTest {
                 10000 * (i + 1)
             );
         }
-
-        _rewardsVaultApprovesRewardsController();
-        _usersApproveSolidStaking();
-        _usersCollateralizeForwards(forwardContractBatch);
-        _usersBecomeLiquidityProviders();
-        _initialConfigurationCarbonRewards();
-        _initialConfigurationUSDCRewards();
-
-        vm.label(rewardsVault, "rewardsVault");
-        vm.label(feeReceiver, "feeReceiver");
-        vm.label(user0, "user0");
-        vm.label(user1, "user1");
-        vm.label(assetMangrove, "assetMangrove");
-        vm.label(assetReforestation, "assetReforestation");
-        vm.label(mangroveRewardToken, "mangroveRewardToken");
-        vm.label(reforestationRewardToken, "reforestationRewardToken");
-        vm.label(usdcToken, "usdcToken");
-        vm.label(rewardOracle, "rewardOracle");
     }
 
-    function _initialConfigurationCarbonRewards() internal {
+    function _loadCarbonRepository() private {
+        _initializeMangroveCategoryAndRewardToken();
+        _initializeReforestationCategoryAndRewardToken();
+        _addProjectForEachCategory();
+        _addBatches();
+    }
+
+    function _configureRewardDistribution() private {
+        _mockRewardOracle();
+
+        _initialConfigurationCarbonRewards();
+        _initialConfigurationUSDCRewards();
+    }
+
+    function _initialConfigurationCarbonRewards() private {
         RewardsDataTypes.DistributionConfig[]
             memory carbonConfig = new RewardsDataTypes.DistributionConfig[](2);
         carbonConfig[0].asset = assetMangrove;
@@ -175,8 +229,8 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         emissionManager.configureAssets(carbonConfig);
     }
 
-    function _initialConfigurationUSDCRewards() internal {
-        vm.warp(CURRENT_DATE + 5 days);
+    function _initialConfigurationUSDCRewards() private {
+        vm.warp(CURRENT_DATE + USDC_DISTRIBUTION_DELAY);
 
         RewardsDataTypes.DistributionConfig[]
             memory usdcConfig = new RewardsDataTypes.DistributionConfig[](2);
@@ -197,7 +251,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         vm.warp(CURRENT_DATE);
     }
 
-    function _rewardsVaultApprovesRewardsController() internal {
+    function _rewardsVaultApprovesRewardsController() private {
         vm.startPrank(rewardsVault);
         CollateralizedBasketToken(mangroveRewardToken).approve(
             address(rewardsController),
@@ -211,7 +265,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         vm.stopPrank();
     }
 
-    function _usersApproveSolidStaking() internal {
+    function _usersApproveSolidStaking() private {
         vm.startPrank(user0);
         CollateralizedBasketToken(assetMangrove).approve(address(solidStaking), type(uint256).max);
         CollateralizedBasketToken(assetReforestation).approve(
@@ -229,9 +283,16 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         vm.stopPrank();
     }
 
-    function _usersCollateralizeForwards(ForwardContractBatchToken forwardContractBatch) internal {
-        vm.startPrank(user0);
+    function _usersApproveSolidWorldManager() private {
+        vm.prank(user0);
         forwardContractBatch.setApprovalForAll(address(solidWorldManager), true);
+
+        vm.prank(user1);
+        forwardContractBatch.setApprovalForAll(address(solidWorldManager), true);
+    }
+
+    function _usersCollateralizeForwards() private {
+        vm.startPrank(user0);
         solidWorldManager.collateralizeBatch(BATCH_ID, 5000, 4130.352e18); // mangrove
         solidWorldManager.collateralizeBatch(BATCH_ID + 5, 10000, 8260.704e18); // reforestation
         solidWorldManager.collateralizeBatch(BATCH_ID + 2, 15000, 12391.056e18); // mangrove
@@ -239,7 +300,6 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         vm.stopPrank();
 
         vm.startPrank(user1);
-        forwardContractBatch.setApprovalForAll(address(solidWorldManager), true);
         solidWorldManager.collateralizeBatch(BATCH_ID + 4, 5000, 4130.352e18); // mangrove
         solidWorldManager.collateralizeBatch(BATCH_ID + 1, 10000, 8260.704e18); // reforestation
         solidWorldManager.collateralizeBatch(BATCH_ID + 6, 15000, 12391.056e18); // mangrove
@@ -247,11 +307,15 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         vm.stopPrank();
     }
 
-    function _usersBecomeLiquidityProviders() internal {
+    function _configureStakableAssets() private {
         solidStaking.addToken(assetMangrove);
         solidStaking.addToken(assetReforestation);
+    }
+
+    function _usersBecomeLiquidityProviders() private {
         CollateralizedBasketToken(assetMangrove).mint(user0, 16500e18);
         CollateralizedBasketToken(assetReforestation).mint(user0, 24500e18);
+
         CollateralizedBasketToken(assetMangrove).mint(user1, 16500e18);
         CollateralizedBasketToken(assetReforestation).mint(user1, 24500e18);
     }
@@ -263,6 +327,18 @@ abstract contract BaseRewardScenariosTest is BaseTest {
                 asset,
                 reward
             )
+        );
+    }
+
+    function _mockComputeWeeklyCarbonRewards(
+        address[] memory rewards,
+        uint[] memory rewardAmounts,
+        uint[] memory feeAmounts
+    ) internal {
+        vm.mockCall(
+            address(solidWorldManager),
+            abi.encodeWithSelector(IWeeklyCarbonRewardsManager.computeWeeklyCarbonRewards.selector),
+            abi.encode(rewards, rewardAmounts, feeAmounts)
         );
     }
 }
