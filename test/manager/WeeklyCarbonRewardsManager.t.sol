@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "./BaseSolidWorldManager.t.sol";
@@ -10,7 +11,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     function testMintWeeklyCarbonRewards_failsIfManagerIsPaused() public {
         manager.pause();
 
-        vm.expectRevert(abi.encodeWithSelector(Pausable.Paused.selector));
+        _expectRevert_Paused();
         manager.mintWeeklyCarbonRewards(
             new uint[](1),
             new address[](2),
@@ -31,7 +32,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testMintWeeklyCarbonRewards_failsInputsOfDifferentLengths() public {
-        vm.expectRevert(abi.encodeWithSelector(WeeklyCarbonRewards.InvalidInput.selector));
+        _expectRevert_InvalidInput();
         manager.mintWeeklyCarbonRewards(
             new uint[](2),
             new address[](2),
@@ -46,17 +47,18 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         categoryIds[0] = CATEGORY_ID + 777;
         categoryIds[1] = CATEGORY_ID;
 
-        vm.expectRevert(
-            abi.encodeWithSelector(WeeklyCarbonRewards.InvalidCategoryId.selector, categoryIds[0])
-        );
+        _expectRevert_InvalidCategoryId(categoryIds[0]);
         manager.computeWeeklyCarbonRewards(categoryIds);
     }
 
     function testComputeWeeklyCarbonRewards_allBatchesUsed() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addProject(CATEGORY_ID, PROJECT_ID);
-        manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
+        _addCategoryAndProjectWithApprovedSpending();
+        _addCategoryAndProjectWithApprovedSpending(
+            CATEGORY_ID + 1,
+            PROJECT_ID + 1,
+            INITIAL_CATEGORY_TA
+        );
+
         for (uint i = 1; i < 6; i++) {
             manager.addBatch(
                 DomainDataTypes.Batch({
@@ -105,10 +107,13 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testComputeWeeklyCarbonRewards_certifiedBatchesAreSkipped() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addProject(CATEGORY_ID, PROJECT_ID);
-        manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
+        _addCategoryAndProjectWithApprovedSpending();
+        _addCategoryAndProjectWithApprovedSpending(
+            CATEGORY_ID + 1,
+            PROJECT_ID + 1,
+            INITIAL_CATEGORY_TA
+        );
+
         for (uint i = 1; i < 6; i++) {
             manager.addBatch(
                 DomainDataTypes.Batch({
@@ -212,12 +217,17 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testMintWeeklyCarbonRewards_allBatchesUsed() public {
-        manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addCategory(CATEGORY_ID + 1, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addCategory(CATEGORY_ID + 2, "Test token", "TT", INITIAL_CATEGORY_TA);
-        manager.addProject(CATEGORY_ID, PROJECT_ID);
-        manager.addProject(CATEGORY_ID + 1, PROJECT_ID + 1);
-        manager.addProject(CATEGORY_ID + 2, PROJECT_ID + 2);
+        _addCategoryAndProjectWithApprovedSpending();
+        _addCategoryAndProjectWithApprovedSpending(
+            CATEGORY_ID + 1,
+            PROJECT_ID + 1,
+            INITIAL_CATEGORY_TA
+        );
+        _addCategoryAndProjectWithApprovedSpending(
+            CATEGORY_ID + 2,
+            PROJECT_ID + 2,
+            INITIAL_CATEGORY_TA
+        );
         for (uint i = 1; i < 6; i++) {
             manager.addBatch(
                 DomainDataTypes.Batch({
@@ -293,13 +303,9 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         feeAmounts[1] = feeAmount1;
         feeAmounts[2] = feeAmount2;
 
-        vm.expectEmit(true, true, false, true, address(manager));
-        emit WeeklyRewardMinted(address(rewardToken0), mintAmount0);
-        vm.expectEmit(true, true, false, true, address(manager));
-        emit WeeklyRewardMinted(address(rewardToken1), mintAmount1);
-        vm.expectEmit(true, true, false, true, address(manager));
-        emit WeeklyRewardMinted(address(rewardToken2), mintAmount2);
-
+        _expectEmitWeeklyRewardMinted(address(rewardToken0), mintAmount0);
+        _expectEmitWeeklyRewardMinted(address(rewardToken1), mintAmount1);
+        _expectEmitWeeklyRewardMinted(address(rewardToken2), mintAmount2);
         vm.prank(weeklyRewardsMinter);
         manager.mintWeeklyCarbonRewards(
             categoryIds,
@@ -309,12 +315,9 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
             rewardsVault
         );
 
-        vm.expectEmit(true, true, true, false, address(manager));
-        emit CategoryRebalanced(CATEGORY_ID, uint24(1947), 20000);
-        vm.expectEmit(true, true, true, false, address(manager));
-        emit CategoryRebalanced(CATEGORY_ID + 1, 1947, 60000);
-        vm.expectEmit(true, true, true, false, address(manager));
-        emit CategoryRebalanced(CATEGORY_ID + 2, INITIAL_CATEGORY_TA, 0);
+        _expectEmitCategoryRebalanced(CATEGORY_ID, uint24(1947), 20000);
+        _expectEmitCategoryRebalanced(CATEGORY_ID + 1, 1947, 60000);
+        _expectEmitCategoryRebalanced(CATEGORY_ID + 2, INITIAL_CATEGORY_TA, 0);
         vm.prank(weeklyRewardsMinter);
         manager.mintWeeklyCarbonRewards(
             categoryIds,
@@ -345,12 +348,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     }
 
     function testMintWeeklyCarbonRewards_failsIfNotCalledByWeeklyRewardsMinter() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                WeeklyCarbonRewards.UnauthorizedRewardMinting.selector,
-                address(this)
-            )
-        );
+        _expectRevert_UnauthorizedRewardMinting();
         manager.mintWeeklyCarbonRewards(
             new uint[](0),
             new address[](0),
@@ -376,5 +374,38 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         emit RewardsMinterUpdated(newWeeklyRewardsMinter);
         manager.setWeeklyRewardsMinter(newWeeklyRewardsMinter);
         assertEq(manager.getWeeklyRewardsMinter(), newWeeklyRewardsMinter);
+    }
+
+    function _expectEmitCategoryRebalanced(
+        uint categoryId,
+        uint newAverageTA,
+        uint newTotalCollateralized
+    ) private {
+        vm.expectEmit(true, true, true, false, address(manager));
+        emit CategoryRebalanced(categoryId, newAverageTA, newTotalCollateralized);
+    }
+
+    function _expectEmitWeeklyRewardMinted(address rewardToken, uint amount) private {
+        vm.expectEmit(true, true, false, true, address(manager));
+        emit WeeklyRewardMinted(rewardToken, amount);
+    }
+
+    function _expectRevert_InvalidInput() private {
+        vm.expectRevert(abi.encodeWithSelector(WeeklyCarbonRewards.InvalidInput.selector));
+    }
+
+    function _expectRevert_InvalidCategoryId(uint categoryId) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(WeeklyCarbonRewards.InvalidCategoryId.selector, categoryId)
+        );
+    }
+
+    function _expectRevert_UnauthorizedRewardMinting() private {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                WeeklyCarbonRewards.UnauthorizedRewardMinting.selector,
+                address(this)
+            )
+        );
     }
 }

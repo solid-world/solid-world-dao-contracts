@@ -27,7 +27,7 @@ library DecollateralizationManager {
     event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
 
     error InvalidInput();
-    error BatchesNotInSameCategory(uint batchId1, uint batchId2);
+    error BatchesNotInSameCategory(uint categoryId1, uint categoryId2);
     error InvalidBatchId(uint batchId);
     error AmountOutLessThanMinimum(uint amountOut, uint minAmountOut);
     error AmountOutTooLow(uint amountOut);
