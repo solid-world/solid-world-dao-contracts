@@ -23,7 +23,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         _expectEmitCategoryCreated();
         manager.addCategory(CATEGORY_ID, "Test token", "TT", INITIAL_CATEGORY_TA);
 
-        assertFalse(address(manager.getCategoryToken(CATEGORY_ID)) == address(0));
+        assertNotEq(address(manager.getCategoryToken(CATEGORY_ID)), address(0));
         assertEq(manager.isCategoryCreated(CATEGORY_ID), true);
 
         DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
