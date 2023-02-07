@@ -75,6 +75,16 @@ module.exports = {
         }
       }
     },
+    polygon_stage: {
+      url: 'https://polygon-mainnet.infura.io/v3/' + INFURA_KEY,
+      timeout: 100000,
+      verify: {
+        etherscan: {
+          apiKey: POLYGONSCAN_KEY,
+          apiUrl: 'https://api.polygonscan.com/'
+        }
+      }
+    },
     localhost: {
       url: 'http://127.0.0.1:8545',
       timeout: 10000
