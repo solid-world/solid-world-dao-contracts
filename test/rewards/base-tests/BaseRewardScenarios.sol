@@ -23,7 +23,6 @@ abstract contract BaseRewardScenariosTest is BaseTest {
     uint32 constant USDC_DISTRIBUTION_DELAY = 5 days;
     uint32 constant INITIAL_USDC_DISTRIBUTION_END =
         CURRENT_DATE + USDC_DISTRIBUTION_DELAY + 30 days;
-    uint32 constant ONE_YEAR = 52 weeks;
     uint24 constant INITIAL_CATEGORY_TA = 82360;
 
     uint constant DELTA = 1e6; // 0.000000000001 precision

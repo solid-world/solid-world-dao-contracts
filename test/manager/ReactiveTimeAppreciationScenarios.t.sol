@@ -109,7 +109,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     }
 
     function testReactiveTAOutcomes_updatedCategoryParams_batch7YearFromCertification() public {
-        _addBatchWithDependencies(CURRENT_DATE + 7 * ONE_YEAR + 5 days, 50000);
+        _addBatchWithDependencies(CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
 
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
 
@@ -137,7 +137,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     function testReactiveTAOutcomes_updatedCategoryParams_batch7YearFromCertification_moreCollateralizationOps()
         public
     {
-        _addBatchWithDependencies(CURRENT_DATE + 7 * ONE_YEAR + 5 days, 50000);
+        _addBatchWithDependencies(CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
 
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
 
@@ -169,7 +169,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     {
         _addCategoryAndProjectWithApprovedSpending();
         for (uint i; i < 5; i++) {
-            _addBatch(BATCH_ID + i, CURRENT_DATE + 7 * ONE_YEAR + 5 days, 50000);
+            _addBatch(BATCH_ID + i, CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
@@ -195,7 +195,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     {
         _addCategoryAndProjectWithApprovedSpending();
         for (uint i; i < 5; i++) {
-            _addBatch(BATCH_ID + i, CURRENT_DATE + 7 * ONE_YEAR + 5 days, 50000);
+            _addBatch(BATCH_ID + i, CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
@@ -225,7 +225,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     {
         _addCategoryAndProjectWithApprovedSpending();
         for (uint i; i < 5; i++) {
-            _addBatch(BATCH_ID + i, CURRENT_DATE + 7 * ONE_YEAR + 5 days, 50000);
+            _addBatch(BATCH_ID + i, CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day

@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
 abstract contract BaseTest is Test {
+    uint constant ONE_YEAR = 52 weeks;
+
     function _expectRevertWithMessage(string memory message) internal {
         vm.expectRevert(abi.encodePacked(message));
     }
@@ -20,6 +22,10 @@ abstract contract BaseTest is Test {
             emit log_named_address("    Actual", a);
             fail();
         }
+    }
+
+    function _yearsToSeconds(uint _years) internal pure returns (uint) {
+        return _years * ONE_YEAR;
     }
 
     function _toArray(address _address) internal pure returns (address[] memory array) {
