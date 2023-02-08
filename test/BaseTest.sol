@@ -9,6 +9,10 @@ abstract contract BaseTest is Test {
         vm.expectRevert(abi.encodePacked(message));
     }
 
+    function _expectRevert_ArithmeticError() internal {
+        vm.expectRevert(stdError.arithmeticError);
+    }
+
     function assertNotEq(address a, address b) internal {
         if (a == b) {
             emit log("Error: a != b not satisfied [address]");
