@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-import "forge-std/Test.sol";
+import "./BaseTest.sol";
 import "../contracts/libraries/DomainDataTypes.sol";
 import "../contracts/libraries/ReactiveTimeAppreciationMath.sol";
 
@@ -32,7 +32,7 @@ contract DummyReactiveTimeAppreciationMath {
     }
 }
 
-contract ReactiveTimeAppreciationMathTest is Test {
+contract ReactiveTimeAppreciationMathTest is BaseTest {
     uint32 constant CURRENT_DATE = 1666016743;
 
     function setUp() public {
@@ -226,8 +226,7 @@ contract ReactiveTimeAppreciationMathTest is Test {
     }
 
     function testFailInferBatchTA_weeksTillCertificationAre0() public {
-        uint cbtDecimals = 18;
-        uint circulatingCBT = 945 * 10**cbtDecimals;
+        uint circulatingCBT = 945 * 10**PRESET_DECIMALS;
         uint totalCollateralizedForwardCredits = 1000;
         uint certificationDate = CURRENT_DATE;
 
@@ -235,27 +234,26 @@ contract ReactiveTimeAppreciationMathTest is Test {
             circulatingCBT,
             totalCollateralizedForwardCredits,
             certificationDate,
-            cbtDecimals
+            PRESET_DECIMALS
         );
 
         assertEq(batchTA, 0);
     }
 
     function testFailInferBatchTA_invalidInputs() public view {
-        ReactiveTimeAppreciationMath.inferBatchTA(0, 0, CURRENT_DATE, 18);
+        ReactiveTimeAppreciationMath.inferBatchTA(0, 0, CURRENT_DATE, PRESET_DECIMALS);
     }
 
     function testInferBatchTA() public {
         uint circulatingCBT = 880.88600587e18;
         uint totalCollateralizedForwardCredits = 1000;
         uint certificationDate = CURRENT_DATE + 77 weeks;
-        uint cbtDecimals = 18;
 
         uint batchTA = ReactiveTimeAppreciationMath.inferBatchTA(
             circulatingCBT,
             totalCollateralizedForwardCredits,
             certificationDate,
-            cbtDecimals
+            PRESET_DECIMALS
         );
 
         assertEq(batchTA, 82300);
@@ -276,7 +274,12 @@ contract ReactiveTimeAppreciationMathTest is Test {
 
         DummyReactiveTimeAppreciationMath dummy = new DummyReactiveTimeAppreciationMath();
         try
-            dummy.inferBatchTA(circulatingCBT, totalCollateralizedForwardCredits, certificationDate, 18)
+            dummy.inferBatchTA(
+                circulatingCBT,
+                totalCollateralizedForwardCredits,
+                certificationDate,
+                PRESET_DECIMALS
+            )
         {} catch (bytes memory reason) {
             assertEq(
                 bytes4(keccak256(bytes("ReactiveTAMathBroken(uint256,uint256)"))),

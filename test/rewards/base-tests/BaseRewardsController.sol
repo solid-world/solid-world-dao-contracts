@@ -142,11 +142,10 @@ abstract contract BaseRewardsControllerTest is BaseTest {
     }
 
     function _mockValidAssetDecimals() internal {
-        uint8 validDecimals = 18;
         vm.mockCall(
             testConfig[1].asset,
             abi.encodeWithSelector(IERC20Metadata.decimals.selector),
-            abi.encode(validDecimals)
+            abi.encode(PRESET_DECIMALS)
         );
     }
 
@@ -174,7 +173,7 @@ abstract contract BaseRewardsControllerTest is BaseTest {
         vm.mockCall(
             testConfig[0].asset,
             abi.encodeWithSelector(IERC20Metadata.decimals.selector),
-            abi.encode(18)
+            abi.encode(PRESET_DECIMALS)
         );
     }
 

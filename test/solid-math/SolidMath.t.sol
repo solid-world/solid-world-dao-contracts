@@ -39,9 +39,8 @@ contract SolidMathTest is BaseSolidMathTest {
         timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
         certificationDate = bound(certificationDate, CURRENT_DATE, CURRENT_DATE + _yearsToSeconds(50));
 
-        SolidMathWrapper dummy = new SolidMathWrapper();
-
-        try dummy.computeTimeAppreciationDiscount(timeAppreciation, certificationDate) {} catch (
+        SolidMathWrapper wrapper = new SolidMathWrapper();
+        try wrapper.computeTimeAppreciationDiscount(timeAppreciation, certificationDate) {} catch (
             bytes memory reason
         ) {
             assertEq(SolidMath.InvalidTADiscount.selector, bytes4(reason), "Fuzz test failed.");
@@ -54,7 +53,7 @@ contract SolidMathTest is BaseSolidMathTest {
             10000,
             8_2300,
             COLLATERALIZATION_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         // js:    9783871661228226000000
@@ -74,7 +73,7 @@ contract SolidMathTest is BaseSolidMathTest {
             10000,
             8_2300,
             COLLATERALIZATION_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         // js:       8995576416018013000000
@@ -96,7 +95,7 @@ contract SolidMathTest is BaseSolidMathTest {
             10000,
             8_2300,
             COLLATERALIZATION_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         // js:       4161551663070000000000
@@ -121,14 +120,14 @@ contract SolidMathTest is BaseSolidMathTest {
         certificationDate = bound(certificationDate, CURRENT_DATE + 1, CURRENT_DATE + _yearsToSeconds(50));
         inputAmount = bound(inputAmount, 0, type(uint256).max / 1e18);
 
-        SolidMathWrapper dummy = new SolidMathWrapper();
+        SolidMathWrapper wrapper = new SolidMathWrapper();
         try
-            dummy.computeCollateralizationOutcome(
+            wrapper.computeCollateralizationOutcome(
                 certificationDate,
                 inputAmount,
                 timeAppreciation,
                 COLLATERALIZATION_FEE,
-                18
+                PRESET_DECIMALS
             )
         {} catch (bytes memory reason) {
             assertEq(SolidMath.InvalidTADiscount.selector, bytes4(reason), "Fuzz test failed.");
@@ -141,7 +140,7 @@ contract SolidMathTest is BaseSolidMathTest {
             10000e18,
             99_5888,
             DECOLLATERALIZATION_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         assertEq(cbtUserCut, 10555);
@@ -155,7 +154,7 @@ contract SolidMathTest is BaseSolidMathTest {
             10000e18,
             8_0105,
             DECOLLATERALIZATION_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         assertEq(amountOut, 10324);
@@ -170,7 +169,7 @@ contract SolidMathTest is BaseSolidMathTest {
             1000e18,
             8_0105,
             DECOLLATERALIZATION_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         assertEq(amountOut, 2184);
@@ -188,14 +187,14 @@ contract SolidMathTest is BaseSolidMathTest {
         certificationDate = bound(certificationDate, 1, CURRENT_DATE + _yearsToSeconds(50));
         inputAmount = bound(inputAmount, 0, type(uint256).max / SolidMath.TIME_APPRECIATION_BASIS_POINTS);
 
-        SolidMathWrapper dummy = new SolidMathWrapper();
+        SolidMathWrapper wrapper = new SolidMathWrapper();
         try
-            dummy.computeDecollateralizationOutcome(
+            wrapper.computeDecollateralizationOutcome(
                 certificationDate,
                 inputAmount,
                 timeAppreciation,
                 DECOLLATERALIZATION_FEE,
-                18
+                PRESET_DECIMALS
             )
         {} catch (bytes memory reason) {
             assertEq(SolidMath.InvalidTADiscount.selector, bytes4(reason), "Fuzz test failed.");
@@ -209,7 +208,7 @@ contract SolidMathTest is BaseSolidMathTest {
             expectedFcbtAmount,
             8_0105,
             DECOLLATERALIZATION_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         // js result:       9999128559644928000000
@@ -231,7 +230,7 @@ contract SolidMathTest is BaseSolidMathTest {
             minAmountIn,
             8_0105,
             DECOLLATERALIZATION_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         assertEq(amountOut, expectedFcbtAmount);
@@ -245,7 +244,7 @@ contract SolidMathTest is BaseSolidMathTest {
             expectedFcbtAmount,
             8_0105,
             DECOLLATERALIZATION_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         // js result:        4726073221850000000000
@@ -261,7 +260,7 @@ contract SolidMathTest is BaseSolidMathTest {
             minAmountIn,
             8_0105,
             DECOLLATERALIZATION_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         assertEq(amountOut, expectedFcbtAmount);
@@ -284,24 +283,24 @@ contract SolidMathTest is BaseSolidMathTest {
         decollateralizationFee = bound(decollateralizationFee, 1, 9900);
         // max 99% fee
 
-        SolidMathWrapper dummy = new SolidMathWrapper();
+        SolidMathWrapper wrapper = new SolidMathWrapper();
 
         try
-            dummy.computeDecollateralizationMinAmountInAndDaoCut(
+            wrapper.computeDecollateralizationMinAmountInAndDaoCut(
                 certificationDate,
                 expectedFcbtAmount,
                 timeAppreciation,
                 decollateralizationFee,
-                18
+                PRESET_DECIMALS
             )
         returns (uint minAmountIn, uint minCbtDaoCut) {
             try
-                dummy.computeDecollateralizationOutcome(
+                wrapper.computeDecollateralizationOutcome(
                     certificationDate,
                     minAmountIn,
                     timeAppreciation,
                     decollateralizationFee,
-                    18
+                    PRESET_DECIMALS
                 )
             returns (uint amountOut, uint cbtDaoCut, uint) {
                 assertEq(amountOut, expectedFcbtAmount);
@@ -320,7 +319,7 @@ contract SolidMathTest is BaseSolidMathTest {
             10000,
             1647,
             REWARDS_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         assertEq(rewardAmount, 0);
@@ -333,7 +332,7 @@ contract SolidMathTest is BaseSolidMathTest {
             10000,
             8_2359,
             REWARDS_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         assertEq(rewardAmount, 15.6465e18);
@@ -346,7 +345,7 @@ contract SolidMathTest is BaseSolidMathTest {
             10000,
             8_2360,
             REWARDS_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         //js:   15620736937500000000
@@ -363,7 +362,7 @@ contract SolidMathTest is BaseSolidMathTest {
             10000,
             8_2360,
             REWARDS_FEE,
-            18
+            PRESET_DECIMALS
         );
 
         //js:   10192727432200000000
@@ -383,14 +382,14 @@ contract SolidMathTest is BaseSolidMathTest {
         certificationDate = bound(certificationDate, 1, CURRENT_DATE + _yearsToSeconds(50));
         availableCredits = bound(availableCredits, 0, type(uint256).max / 1e18 / SolidMath.FEE_BASIS_POINTS);
 
-        SolidMathWrapper dummy = new SolidMathWrapper();
+        SolidMathWrapper wrapper = new SolidMathWrapper();
         try
-            dummy.computeWeeklyBatchReward(
+            wrapper.computeWeeklyBatchReward(
                 certificationDate,
                 availableCredits,
                 timeAppreciation,
                 REWARDS_FEE,
-                18
+                PRESET_DECIMALS
             )
         {} catch (bytes memory reason) {
             assertEq(SolidMath.InvalidTADiscount.selector, bytes4(reason), "Fuzz test failed.");
@@ -403,7 +402,7 @@ contract SolidMathTest is BaseSolidMathTest {
             10000,
             1647,
             COLLATERALIZATION_FEE,
-            18
+            PRESET_DECIMALS
         );
     }
 }

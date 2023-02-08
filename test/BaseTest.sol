@@ -6,6 +6,7 @@ import "forge-std/console.sol";
 
 abstract contract BaseTest is Test {
     uint constant ONE_YEAR = 52 weeks;
+    uint8 constant PRESET_DECIMALS = 18;
 
     function _expectRevertWithMessage(string memory message) internal {
         vm.expectRevert(abi.encodePacked(message));
