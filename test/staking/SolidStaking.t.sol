@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-import "./BaseSolidStaking.sol";
+import "./BaseSolidStaking.t.sol";
 
-contract SolidStakingTest is BaseSolidStaking {
+contract SolidStakingTest is BaseSolidStakingTest {
     function testSetupFailsWhenAlreadyInitialized() public {
         _expectRevert_AlreadyInitialized();
         solidStaking.setup(IRewardsController(rewardsController), ownerAccount);

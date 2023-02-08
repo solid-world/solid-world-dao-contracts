@@ -5,7 +5,7 @@ import "../BaseTest.sol";
 import "../../contracts/SolidStaking.sol";
 import "../../contracts/CollateralizedBasketToken.sol";
 
-abstract contract BaseSolidStaking is BaseTest {
+abstract contract BaseSolidStakingTest is BaseTest {
     address emissionManager;
     address rewardsController;
     address carbonRewardsManager;
