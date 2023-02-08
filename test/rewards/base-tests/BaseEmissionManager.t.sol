@@ -11,11 +11,7 @@ import "../../../contracts/rewards/RewardsController.sol";
 abstract contract BaseEmissionManagerTest is BaseTest {
     uint32 constant CURRENT_DATE = 1666016743;
 
-    event EmissionAdminUpdated(
-        address indexed reward,
-        address indexed oldAdmin,
-        address indexed newAdmin
-    );
+    event EmissionAdminUpdated(address indexed reward, address indexed oldAdmin, address indexed newAdmin);
     event RewardsControllerUpdated(address indexed newRewardsController);
     event CarbonRewardsManagerUpdated(address indexed newCarbonRewardsManager);
 
@@ -102,11 +98,7 @@ abstract contract BaseEmissionManagerTest is BaseTest {
             abi.encodeWithSelector(IRewardsDistributor.setEmissionManager.selector),
             abi.encode()
         );
-        vm.mockCall(
-            controller,
-            abi.encodeWithSelector(IRewardsController.setClaimer.selector),
-            abi.encode()
-        );
+        vm.mockCall(controller, abi.encodeWithSelector(IRewardsController.setClaimer.selector), abi.encode());
     }
 
     function _makeTestDistributionConfigAndEmpowerEmissionAdmin()
@@ -159,10 +151,7 @@ abstract contract BaseEmissionManagerTest is BaseTest {
     ) internal {
         vm.expectCall(
             controller,
-            abi.encodeCall(
-                IRewardsDistributor.setEmissionPerSecond,
-                (asset, rewards, emissionsPerSecond)
-            )
+            abi.encodeCall(IRewardsDistributor.setEmissionPerSecond, (asset, rewards, emissionsPerSecond))
         );
     }
 
@@ -181,10 +170,7 @@ abstract contract BaseEmissionManagerTest is BaseTest {
         address reward,
         IEACAggregatorProxy rewardOracle
     ) internal {
-        vm.expectCall(
-            controller,
-            abi.encodeCall(IRewardsController.setRewardOracle, (reward, rewardOracle))
-        );
+        vm.expectCall(controller, abi.encodeCall(IRewardsController.setRewardOracle, (reward, rewardOracle)));
     }
 
     function _expectConfigureAssetsIsCalledOnRewardsController(
@@ -197,13 +183,8 @@ abstract contract BaseEmissionManagerTest is BaseTest {
         vm.expectCall(controller, abi.encodeCall(IRewardsController.setClaimer, (user, claimer)));
     }
 
-    function _expectSetEmissionManagerIsCalledOnRewardsController(address newEmissionManager)
-        internal
-    {
-        vm.expectCall(
-            controller,
-            abi.encodeCall(IRewardsDistributor.setEmissionManager, newEmissionManager)
-        );
+    function _expectSetEmissionManagerIsCalledOnRewardsController(address newEmissionManager) internal {
+        vm.expectCall(controller, abi.encodeCall(IRewardsDistributor.setEmissionManager, newEmissionManager));
     }
 
     function _expectProperMethodsAreCalledDuringRewardDistributionUpdate(
@@ -235,9 +216,7 @@ abstract contract BaseEmissionManagerTest is BaseTest {
     }
 
     function _expectRevert_NotEmissionAdmin(address sender, address reward) internal {
-        vm.expectRevert(
-            abi.encodeWithSelector(IEmissionManager.NotEmissionAdmin.selector, sender, reward)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IEmissionManager.NotEmissionAdmin.selector, sender, reward));
     }
 
     function _expectRevert_AlreadyInitialized() internal {

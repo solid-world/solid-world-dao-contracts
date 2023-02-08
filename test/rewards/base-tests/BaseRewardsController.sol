@@ -66,9 +66,7 @@ abstract contract BaseRewardsControllerTest is BaseTest {
         emit AssetConfigUpdated(asset, reward, 0, 0, 0, 0, 0);
     }
 
-    function _expectEmitRewardOracleUpdated(address reward, IEACAggregatorProxy rewardOracle)
-        internal
-    {
+    function _expectEmitRewardOracleUpdated(address reward, IEACAggregatorProxy rewardOracle) internal {
         vm.expectEmit(true, true, false, false, address(rewardsController));
         emit RewardOracleUpdated(reward, address(rewardOracle));
     }
@@ -88,9 +86,7 @@ abstract contract BaseRewardsControllerTest is BaseTest {
         emit SolidStakingUpdated(_solidStaking);
     }
 
-    function _expectRevert_InvalidRewardOracle(address reward, IEACAggregatorProxy rewardOracle)
-        internal
-    {
+    function _expectRevert_InvalidRewardOracle(address reward, IEACAggregatorProxy rewardOracle) internal {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IRewardsController.InvalidRewardOracle.selector,
@@ -101,21 +97,15 @@ abstract contract BaseRewardsControllerTest is BaseTest {
     }
 
     function _expectRevert_NotEmissionManager(address sender) internal {
-        vm.expectRevert(
-            abi.encodeWithSelector(IRewardsDistributor.NotEmissionManager.selector, sender)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IRewardsDistributor.NotEmissionManager.selector, sender));
     }
 
     function _expectRevert_InvalidAssetDecimals(address asset) internal {
-        vm.expectRevert(
-            abi.encodeWithSelector(IRewardsDistributor.InvalidAssetDecimals.selector, asset)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IRewardsDistributor.InvalidAssetDecimals.selector, asset));
     }
 
     function _expectRevert_NotSolidStaking(address sender) internal {
-        vm.expectRevert(
-            abi.encodeWithSelector(IRewardsController.NotSolidStaking.selector, sender)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IRewardsController.NotSolidStaking.selector, sender));
     }
 
     function _expectRevert_InvalidInput() internal {
@@ -163,18 +153,12 @@ abstract contract BaseRewardsControllerTest is BaseTest {
     function _mockDistributionConfigOrdinaryCalls() private {
         vm.mockCall(
             solidStakingViewActions,
-            abi.encodeWithSelector(
-                ISolidStakingViewActions.totalStaked.selector,
-                testConfig[0].asset
-            ),
+            abi.encodeWithSelector(ISolidStakingViewActions.totalStaked.selector, testConfig[0].asset),
             abi.encode(1000)
         );
         vm.mockCall(
             solidStakingViewActions,
-            abi.encodeWithSelector(
-                ISolidStakingViewActions.totalStaked.selector,
-                testConfig[1].asset
-            ),
+            abi.encodeWithSelector(ISolidStakingViewActions.totalStaked.selector, testConfig[1].asset),
             abi.encode(2000)
         );
         vm.mockCall(

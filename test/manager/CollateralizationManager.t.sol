@@ -178,8 +178,10 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         uint expectedCbtDaoCut = 900e18;
         uint expectedCbtForfeited = 1000e18;
 
-        (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = manager
-            .simulateBatchCollateralization(BATCH_ID, 10000);
+        (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = manager.simulateBatchCollateralization(
+            BATCH_ID,
+            10000
+        );
         assertApproxEqAbs(cbtUserCut, expectedCbtUserCut, 2.331e18);
         assertApproxEqAbs(cbtDaoCut, expectedCbtDaoCut, 0.259e18);
         assertApproxEqAbs(cbtForfeited, expectedCbtForfeited, 2.59e18);
@@ -227,9 +229,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function _expectRevert_InvalidBatchId(uint batchId) private {
-        vm.expectRevert(
-            abi.encodeWithSelector(CollateralizationManager.InvalidBatchId.selector, batchId)
-        );
+        vm.expectRevert(abi.encodeWithSelector(CollateralizationManager.InvalidBatchId.selector, batchId));
     }
 
     function _expectRevert_InvalidInput() private {
@@ -255,8 +255,6 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function _expectRevert_BatchCertified(uint batchId) private {
-        vm.expectRevert(
-            abi.encodeWithSelector(CollateralizationManager.BatchCertified.selector, batchId)
-        );
+        vm.expectRevert(abi.encodeWithSelector(CollateralizationManager.BatchCertified.selector, batchId));
     }
 }

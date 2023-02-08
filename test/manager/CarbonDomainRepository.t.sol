@@ -47,7 +47,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
 
         uint volumeCoefficientInput0 = 50000;
         uint40 decayPerSecondInput0 = _getTestDecayPerSecond();
-        uint16 maxDepreciationInput0 = 10; // 1% yearly rate
+        uint16 maxDepreciationInput0 = 10;
+        // 1% yearly rate
 
         vm.warp(CURRENT_DATE + 2 days);
         _expectEmitCategoryUpdated(
@@ -73,7 +74,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
 
         uint volumeCoefficientInput1 = 75000;
         uint40 decayPerSecondInput1 = _getTestDecayPerSecond();
-        uint16 maxDepreciationInput1 = 20; // 2% yearly rate
+        uint16 maxDepreciationInput1 = 20;
+        // 2% yearly rate
 
         vm.warp(CURRENT_DATE + 4 days);
         _expectEmitCategoryUpdated(
@@ -95,7 +97,8 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         assertEq(category1.decayPerSecond, decayPerSecondInput1);
         assertEq(category1.maxDepreciation, maxDepreciationInput1);
         assertEq(category1.lastCollateralizationTimestamp, CURRENT_DATE + 4 days);
-        assertEq(category1.lastCollateralizationMomentum, 142500); // 90% * 50000 * 75000 / 50000 + 75000 = 142500
+        assertEq(category1.lastCollateralizationMomentum, 142500);
+        // 90% * 50000 * 75000 / 50000 + 75000 = 142500
     }
 
     function testAddProject() public {
@@ -469,9 +472,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
     }
 
     function _expectRevert_InvalidBatchId(uint batchId) private {
-        vm.expectRevert(
-            abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchId.selector, batchId)
-        );
+        vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchId.selector, batchId));
     }
 
     function _expectRevert_InvalidInput() private {
@@ -479,8 +480,6 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
     }
 
     function _expectRevert_InvalidBatchSupplier() private {
-        vm.expectRevert(
-            abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchSupplier.selector)
-        );
+        vm.expectRevert(abi.encodeWithSelector(CarbonDomainRepository.InvalidBatchSupplier.selector));
     }
 }

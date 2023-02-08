@@ -52,10 +52,7 @@ interface IRewardsDistributor {
     /// @dev Emitted when the emission manager address is updated.
     /// @param oldEmissionManager The address of the old emission manager
     /// @param newEmissionManager The address of the new emission manager
-    event EmissionManagerUpdated(
-        address indexed oldEmissionManager,
-        address indexed newEmissionManager
-    );
+    event EmissionManagerUpdated(address indexed oldEmissionManager, address indexed newEmissionManager);
 
     /// @dev Sets the end date for the distribution
     /// @param asset The asset to incentivize
@@ -90,10 +87,7 @@ interface IRewardsDistributor {
     /// @param asset The incentivized asset
     /// @param reward The reward token of the incentivized asset
     /// @return true, if distribution can be updated for the asset - reward pair
-    function canUpdateCarbonRewardDistribution(address asset, address reward)
-        external
-        view
-        returns (bool);
+    function canUpdateCarbonRewardDistribution(address asset, address reward) external view returns (bool);
 
     /// @dev Gets the end date for the distribution
     /// @param asset The incentivized asset
@@ -142,10 +136,7 @@ interface IRewardsDistributor {
     /// @param user The address of the user
     /// @param reward The address of the reward token
     /// @return Unclaimed rewards, not including new distributions
-    function getAccruedRewardAmountForUser(address user, address reward)
-        external
-        view
-        returns (uint);
+    function getAccruedRewardAmountForUser(address user, address reward) external view returns (uint);
 
     /// @dev Returns a single rewards balance of a user, including virtually accrued and unrealized claimable rewards.
     /// @param assets List of incentivized assets to check eligible distributions

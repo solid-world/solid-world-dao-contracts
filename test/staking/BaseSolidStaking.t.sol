@@ -83,9 +83,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
     }
 
     function _expectRevert_TokenAlreadyAdded(address tokenAddress) internal {
-        vm.expectRevert(
-            abi.encodeWithSelector(ISolidStakingErrors.TokenAlreadyAdded.selector, tokenAddress)
-        );
+        vm.expectRevert(abi.encodeWithSelector(ISolidStakingErrors.TokenAlreadyAdded.selector, tokenAddress));
     }
 
     function _expectRevert_InvalidTokenAddress(address tokenAddress) internal {
@@ -97,11 +95,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
     function _expectCall_RewardsController_handleUserStakeChanged(address tokenAddress) internal {
         uint oldUserStake = 0;
         uint oldTotalStaked = 0;
-        _expectCall_RewardsController_handleUserStakeChanged(
-            tokenAddress,
-            oldUserStake,
-            oldTotalStaked
-        );
+        _expectCall_RewardsController_handleUserStakeChanged(tokenAddress, oldUserStake, oldTotalStaked);
     }
 
     function _expectCall_RewardsController_handleUserStakeChanged(
@@ -118,31 +112,20 @@ abstract contract BaseSolidStakingTest is BaseTest {
         );
     }
 
-    function _expectCall_RewardsController_claimAllRewardsOnBehalf(address[] memory assets)
-        internal
-    {
+    function _expectCall_RewardsController_claimAllRewardsOnBehalf(address[] memory assets) internal {
         vm.expectCall(
             rewardsController,
-            abi.encodeCall(
-                IRewardsController.claimAllRewardsOnBehalf,
-                (assets, testAccount, testAccount)
-            )
+            abi.encodeCall(IRewardsController.claimAllRewardsOnBehalf, (assets, testAccount, testAccount))
         );
     }
 
-    function _createTestToken()
-        internal
-        returns (CollateralizedBasketToken token, address tokenAddress)
-    {
+    function _createTestToken() internal returns (CollateralizedBasketToken token, address tokenAddress) {
         token = new CollateralizedBasketToken("Test Token", "TT");
         tokenAddress = address(token);
         vm.label(tokenAddress, "Test token");
     }
 
-    function _configuredTestToken()
-        internal
-        returns (CollateralizedBasketToken token, address tokenAddress)
-    {
+    function _configuredTestToken() internal returns (CollateralizedBasketToken token, address tokenAddress) {
         (token, tokenAddress) = _createTestToken();
         _configureTestToken(token, tokenAddress);
     }

@@ -37,15 +37,13 @@ contract RewardScenarios is BaseRewardScenariosTest {
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 1 days);
 
         vm.prank(user1);
-        solidStaking.stake(assetMangrove, 5000e18); // updates index
+        solidStaking.stake(assetMangrove, 5000e18);
+        // updates index
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 2 days);
-        CollateralizedBasketToken(usdcToken).mint(rewardsVault, 30 days * 1e18); // $1 per second, for a month
-        emissionManager.setEmissionPerSecond(
-            assetMangrove,
-            _toArray(usdcToken),
-            _toArrayUint88(1e18)
-        );
+        CollateralizedBasketToken(usdcToken).mint(rewardsVault, 30 days * 1e18);
+        // $1 per second, for a month
+        emissionManager.setEmissionPerSecond(assetMangrove, _toArray(usdcToken), _toArrayUint88(1e18));
 
         // accrued all carbon rewards and distribution ended + accrued 6 days of usdc rewards
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 8 days);
@@ -75,10 +73,8 @@ contract RewardScenarios is BaseRewardScenariosTest {
         assertApproxEqAbs(unclaimedAmounts1[0], (mangroveEmissionPerSecond / 2) * 6 days, DELTA);
         assertEq(unclaimedAmounts1[2], (1e18 / 2) * 6 days);
 
-        uint balanceBeforeClaimingRewards0 = CollateralizedBasketToken(mangroveRewardToken)
-            .balanceOf(user0);
-        uint balanceBeforeClaimingRewards1 = CollateralizedBasketToken(mangroveRewardToken)
-            .balanceOf(user1);
+        uint balanceBeforeClaimingRewards0 = CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0);
+        uint balanceBeforeClaimingRewards1 = CollateralizedBasketToken(mangroveRewardToken).balanceOf(user1);
         vm.prank(user0);
         rewardsController.claimAllRewardsToSelf(incentivizedAssets);
         assertEq(
@@ -97,8 +93,9 @@ contract RewardScenarios is BaseRewardScenariosTest {
     function testUserRewardsAreCorrectlyAccountedWhenClaimingMultipleTimesAndModifyingStakeDuringDistributionPeriod()
         public
     {
-        uint mangroveBalanceBeforeClaimingRewards = CollateralizedBasketToken(mangroveRewardToken)
-            .balanceOf(user0);
+        uint mangroveBalanceBeforeClaimingRewards = CollateralizedBasketToken(mangroveRewardToken).balanceOf(
+            user0
+        );
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END);
 
         address[] memory assets = _toArray(assetMangrove);
@@ -118,8 +115,10 @@ contract RewardScenarios is BaseRewardScenariosTest {
         solidStaking.stake(assetMangrove, 5000e18);
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 2 days);
-        (, uint[] memory unclaimedAmounts0) = rewardsController
-            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, user0);
+        (, uint[] memory unclaimedAmounts0) = rewardsController.getAllUnclaimedRewardAmountsForUserAndAssets(
+            assets,
+            user0
+        );
         assertApproxEqAbs(
             unclaimedAmounts0[0],
             mangroveEmissionPerSecond * 1 days + (mangroveEmissionPerSecond / 2) * 1 days,
@@ -129,18 +128,23 @@ contract RewardScenarios is BaseRewardScenariosTest {
         rewardsController.claimAllRewardsToSelf(assets);
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 3 days);
-        (, uint[] memory unclaimedAmounts1) = rewardsController
-            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, user0);
+        (, uint[] memory unclaimedAmounts1) = rewardsController.getAllUnclaimedRewardAmountsForUserAndAssets(
+            assets,
+            user0
+        );
         assertApproxEqAbs(unclaimedAmounts1[0], (mangroveEmissionPerSecond / 2) * 1 days, DELTA);
         vm.prank(user0);
         solidStaking.withdrawStakeAndClaimRewards(assetMangrove, 2500e18);
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 5 days);
-        (, uint[] memory unclaimedAmounts2) = rewardsController
-            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, user0);
+        (, uint[] memory unclaimedAmounts2) = rewardsController.getAllUnclaimedRewardAmountsForUserAndAssets(
+            assets,
+            user0
+        );
         assertApproxEqAbs(unclaimedAmounts2[0], (mangroveEmissionPerSecond / 3) * 2 days, DELTA);
 
-        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 7 days); // distribution ended
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 7 days);
+        // distribution ended
 
         vm.prank(user0);
         rewardsController.claimAllRewardsToSelf(assets);
@@ -167,19 +171,24 @@ contract RewardScenarios is BaseRewardScenariosTest {
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 8 days);
 
-        (, uint[] memory unclaimedAmounts3) = rewardsController
-            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, user0);
+        (, uint[] memory unclaimedAmounts3) = rewardsController.getAllUnclaimedRewardAmountsForUserAndAssets(
+            assets,
+            user0
+        );
         assertEq(unclaimedAmounts3[0], 0);
-        (, uint[] memory unclaimedAmounts4) = rewardsController
-            .getAllUnclaimedRewardAmountsForUserAndAssets(assets, user1);
+        (, uint[] memory unclaimedAmounts4) = rewardsController.getAllUnclaimedRewardAmountsForUserAndAssets(
+            assets,
+            user1
+        );
         assertEq(unclaimedAmounts4[0], 0);
     }
 
     function testRewardsAccountingWorksAcrossMoreWeeksAndRegardlessOfTheUpdateFunctionBeingCalledWithDelay()
         public
     {
-        uint mangroveBalanceBeforeClaimingRewards = CollateralizedBasketToken(mangroveRewardToken)
-            .balanceOf(user0);
+        uint mangroveBalanceBeforeClaimingRewards = CollateralizedBasketToken(mangroveRewardToken).balanceOf(
+            user0
+        );
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END);
 
         address[] memory assets = _toArray(assetMangrove);
@@ -197,7 +206,8 @@ contract RewardScenarios is BaseRewardScenariosTest {
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 10 days + 12 hours);
         emissionManager.updateCarbonRewardDistribution(assets, categoryIds);
 
-        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 14 days); // 2 distribution periods passed
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 14 days);
+        // 2 distribution periods passed
         vm.prank(user0);
         rewardsController.claimAllRewardsToSelf(assets);
 

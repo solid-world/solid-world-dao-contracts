@@ -186,8 +186,7 @@ contract RewardsControllerTest is BaseRewardsControllerTest {
 
     /// @notice copying from storage to memory is not supported ootb
     function _configureAssets() private {
-        RewardsDataTypes.DistributionConfig[]
-            memory config = new RewardsDataTypes.DistributionConfig[](2);
+        RewardsDataTypes.DistributionConfig[] memory config = new RewardsDataTypes.DistributionConfig[](2);
         config[0] = testConfig[0];
         config[1] = testConfig[1];
         rewardsController.configureAssets(config);

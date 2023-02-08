@@ -120,9 +120,7 @@ library DecollateralizationManager {
         uint vintage
     ) external view returns (DomainDataTypes.TokenDecollateralizationInfo[] memory result) {
         DomainDataTypes.TokenDecollateralizationInfo[]
-            memory allInfos = new DomainDataTypes.TokenDecollateralizationInfo[](
-                _storage.batchIds.length
-            );
+            memory allInfos = new DomainDataTypes.TokenDecollateralizationInfo[](_storage.batchIds.length);
         uint infoCount;
 
         for (uint i; i < _storage.batchIds.length; i++) {
@@ -184,10 +182,7 @@ library DecollateralizationManager {
             revert InvalidBatchId(batchId);
         }
 
-        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(
-            _storage,
-            batchId
-        );
+        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(_storage, batchId);
 
         (amountOut, , ) = SolidMath.computeDecollateralizationOutcome(
             _storage.batches[batchId].certificationDate,
@@ -206,9 +201,7 @@ library DecollateralizationManager {
         );
     }
 
-    function _rebalanceCategory(SolidWorldManagerStorage.Storage storage _storage, uint categoryId)
-        internal
-    {
+    function _rebalanceCategory(SolidWorldManagerStorage.Storage storage _storage, uint categoryId) internal {
         uint totalQuantifiedForwardCredits;
         uint totalCollateralizedForwardCredits;
 
@@ -269,14 +262,13 @@ library DecollateralizationManager {
 
         CollateralizedBasketToken cbt = _getCollateralizedTokenForBatchId(_storage, batchId);
 
-        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath
-            .computeDecollateralizationOutcome(
-                _storage.batches[batchId].certificationDate,
-                amountIn,
-                _storage.batches[batchId].batchTA,
-                _storage.decollateralizationFee,
-                cbt.decimals()
-            );
+        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath.computeDecollateralizationOutcome(
+            _storage.batches[batchId].certificationDate,
+            amountIn,
+            _storage.batches[batchId].batchTA,
+            _storage.decollateralizationFee,
+            cbt.decimals()
+        );
 
         if (amountOut == 0) {
             revert AmountOutTooLow(amountOut);

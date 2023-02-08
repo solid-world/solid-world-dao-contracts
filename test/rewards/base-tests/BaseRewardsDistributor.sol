@@ -24,10 +24,7 @@ abstract contract BaseRewardsDistributor is BaseTest {
         uint newDistributionEnd,
         uint assetIndex
     );
-    event EmissionManagerUpdated(
-        address indexed oldEmissionManager,
-        address indexed newEmissionManager
-    );
+    event EmissionManagerUpdated(address indexed oldEmissionManager, address indexed newEmissionManager);
 
     struct RewardsDistributionPreset {
         address user;
@@ -186,10 +183,7 @@ abstract contract BaseRewardsDistributor is BaseTest {
         vm.label(preset.user, "PresetUser");
     }
 
-    function _initializedRewardsDistributor()
-        private
-        returns (IRewardsDistributor _rewardsDistributor)
-    {
+    function _initializedRewardsDistributor() private returns (IRewardsDistributor _rewardsDistributor) {
         RewardsController rewardsController = new RewardsController();
         rewardsController.setup(solidStakingViewActions, rewardsVault, emissionManager);
 
@@ -272,11 +266,7 @@ abstract contract BaseRewardsDistributor is BaseTest {
 
     function _expectRevert_DistributionNonExistent(address asset, address reward) internal {
         vm.expectRevert(
-            abi.encodeWithSelector(
-                IRewardsDistributor.DistributionNonExistent.selector,
-                asset,
-                reward
-            )
+            abi.encodeWithSelector(IRewardsDistributor.DistributionNonExistent.selector, asset, reward)
         );
     }
 
@@ -314,10 +304,10 @@ abstract contract BaseRewardsDistributor is BaseTest {
         address reward,
         uint emissionPerSecond
     ) internal {
-        (
-            address[] memory rewards,
-            uint88[] memory emissionsPerSecond
-        ) = _makeRewardsAndEmissionsPerSecond(reward, emissionPerSecond);
+        (address[] memory rewards, uint88[] memory emissionsPerSecond) = _makeRewardsAndEmissionsPerSecond(
+            reward,
+            emissionPerSecond
+        );
 
         vm.startPrank(emissionManager);
         rewardsDistributor.setEmissionPerSecond(asset, rewards, emissionsPerSecond);
@@ -360,11 +350,7 @@ abstract contract BaseRewardsDistributor is BaseTest {
         (, emissionPerSecond, , ) = rewardsDistributor.getRewardDistribution(asset, reward);
     }
 
-    function _getDistributionIndex(address asset, address reward)
-        internal
-        view
-        returns (uint index)
-    {
+    function _getDistributionIndex(address asset, address reward) internal view returns (uint index) {
         (index, , , ) = rewardsDistributor.getRewardDistribution(asset, reward);
     }
 

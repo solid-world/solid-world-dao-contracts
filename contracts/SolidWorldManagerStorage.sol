@@ -104,11 +104,7 @@ abstract contract SolidWorldManagerStorage {
         return _storage._forwardContractBatch;
     }
 
-    function collateralizedBasketTokenDeployer()
-        external
-        view
-        returns (CollateralizedBasketTokenDeployer)
-    {
+    function collateralizedBasketTokenDeployer() external view returns (CollateralizedBasketTokenDeployer) {
         return _storage._collateralizedBasketTokenDeployer;
     }
 
