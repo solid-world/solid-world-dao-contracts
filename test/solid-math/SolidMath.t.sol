@@ -1,123 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-import "forge-std/Test.sol";
-import "../../contracts/libraries/SolidMath.sol";
+import "./BaseSolidMath.t.sol";
+import "./SolidMathWrapper.t.sol";
 
-/// @notice Dummy wrapper over some SolidMath functions, such that we can make external calls to them
-/// @notice and use the try/catch syntax
-contract DummySolidMath {
-    function computeTimeAppreciationDiscount(uint timeAppreciation, uint certificationDate)
-        external
-        view
-        returns (uint)
-    {
-        return SolidMath.computeTimeAppreciationDiscount(timeAppreciation, certificationDate);
-    }
-
-    function computeCollateralizationOutcome(
-        uint certificationDate,
-        uint fcbtAmount,
-        uint timeAppreciation,
-        uint collateralizationFee,
-        uint cbtDecimals
-    )
-        external
-        view
-        returns (
-            uint,
-            uint,
-            uint
-        )
-    {
-        return
-            SolidMath.computeCollateralizationOutcome(
-                certificationDate,
-                fcbtAmount,
-                timeAppreciation,
-                collateralizationFee,
-                cbtDecimals
-            );
-    }
-
-    function computeDecollateralizationOutcome(
-        uint certificationDate,
-        uint cbtAmount,
-        uint timeAppreciation,
-        uint decollateralizationFee,
-        uint cbtDecimals
-    )
-        external
-        view
-        returns (
-            uint,
-            uint,
-            uint
-        )
-    {
-        return
-            SolidMath.computeDecollateralizationOutcome(
-                certificationDate,
-                cbtAmount,
-                timeAppreciation,
-                decollateralizationFee,
-                cbtDecimals
-            );
-    }
-
-    function computeDecollateralizationMinAmountInAndDaoCut(
-        uint certificationDate,
-        uint expectedFcbtAmount,
-        uint timeAppreciation,
-        uint decollateralizationFee,
-        uint cbtDecimals
-    ) external view returns (uint minAmountIn, uint minCbtDaoCut) {
-        return
-            SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
-                certificationDate,
-                expectedFcbtAmount,
-                timeAppreciation,
-                decollateralizationFee,
-                cbtDecimals
-            );
-    }
-
-    function computeWeeklyBatchReward(
-        uint certificationDate,
-        uint availableCredits,
-        uint timeAppreciation,
-        uint rewardsFee,
-        uint decimals
-    ) external view returns (uint netRewardAmount, uint feeAmount) {
-        return
-            SolidMath.computeWeeklyBatchReward(
-                certificationDate,
-                availableCredits,
-                timeAppreciation,
-                rewardsFee,
-                decimals
-            );
-    }
-}
-
-contract SolidMathTest is Test {
-    uint constant COLLATERALIZATION_FEE = 200; // 2%
-    uint constant DECOLLATERALIZATION_FEE = 500; // 5%
-    uint constant REWARDS_FEE = 500; // 5%
-    uint constant ONE_YEAR = 1 weeks * 52;
-    uint constant CURRENT_DATE = 1666016743;
-
-    function setUp() public {
-        vm.warp(CURRENT_DATE);
-        vm.label(vm.addr(1), "Dummy account 1");
-    }
-
+contract SolidMathTest is BaseSolidMathTest {
     function testComputeTimeAppreciationDiscountSingleWeek() public {
-        uint timeAppreciation = 80_000; // 8%
         uint certificationDate = block.timestamp + 1 weeks;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(
-            timeAppreciation,
+            PRESET_TIME_APPRECIATION,
             certificationDate
         );
         uint expected = 998_402; //js: 998402.178529
@@ -126,11 +18,10 @@ contract SolidMathTest is Test {
     }
 
     function testComputeTimeAppreciationDiscountFewWeeks() public {
-        uint timeAppreciation = 80_000; // 8%
         uint certificationDate = block.timestamp + 5 weeks;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(
-            timeAppreciation,
+            PRESET_TIME_APPRECIATION,
             certificationDate
         );
         uint expected = 992_036; //js: 992036.382217
@@ -139,11 +30,10 @@ contract SolidMathTest is Test {
     }
 
     function testComputeTimeAppreciationDiscountOneYear() public {
-        uint timeAppreciation = 80_000; // 8%
         uint certificationDate = block.timestamp + ONE_YEAR;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(
-            timeAppreciation,
+            PRESET_TIME_APPRECIATION,
             certificationDate
         );
         uint expected = 920_210; //js: 920210.191351
@@ -157,7 +47,7 @@ contract SolidMathTest is Test {
         timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
         certificationDate = bound(certificationDate, CURRENT_DATE, CURRENT_DATE + 50 * ONE_YEAR);
 
-        DummySolidMath dummy = new DummySolidMath();
+        SolidMathWrapper dummy = new SolidMathWrapper();
 
         try dummy.computeTimeAppreciationDiscount(timeAppreciation, certificationDate) {} catch (
             bytes memory reason
@@ -246,7 +136,7 @@ contract SolidMathTest is Test {
         );
         inputAmount = bound(inputAmount, 0, type(uint256).max / 1e18);
 
-        DummySolidMath dummy = new DummySolidMath();
+        SolidMathWrapper dummy = new SolidMathWrapper();
         try
             dummy.computeCollateralizationOutcome(
                 certificationDate,
@@ -318,7 +208,7 @@ contract SolidMathTest is Test {
             type(uint256).max / SolidMath.TIME_APPRECIATION_BASIS_POINTS
         );
 
-        DummySolidMath dummy = new DummySolidMath();
+        SolidMathWrapper dummy = new SolidMathWrapper();
         try
             dummy.computeDecollateralizationOutcome(
                 certificationDate,
@@ -415,7 +305,7 @@ contract SolidMathTest is Test {
         timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
         decollateralizationFee = bound(decollateralizationFee, 1, 9900); // max 99% fee
 
-        DummySolidMath dummy = new DummySolidMath();
+        SolidMathWrapper dummy = new SolidMathWrapper();
 
         try
             dummy.computeDecollateralizationMinAmountInAndDaoCut(
@@ -518,7 +408,7 @@ contract SolidMathTest is Test {
             type(uint256).max / 1e18 / SolidMath.FEE_BASIS_POINTS
         );
 
-        DummySolidMath dummy = new DummySolidMath();
+        SolidMathWrapper dummy = new SolidMathWrapper();
         try
             dummy.computeWeeklyBatchReward(
                 certificationDate,
