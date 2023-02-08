@@ -2,7 +2,7 @@
 pragma solidity ^0.8.16;
 
 import "forge-std/Test.sol";
-import "../contracts/libraries/SolidMath.sol";
+import "../../contracts/libraries/SolidMath.sol";
 
 /// @notice Dummy wrapper over some SolidMath functions, such that we can make external calls to them
 /// @notice and use the try/catch syntax
