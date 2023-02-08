@@ -6,31 +6,28 @@ import "./SolidMathWrapper.t.sol";
 
 contract SolidMathTest is BaseSolidMathTest {
     function testComputeTimeAppreciationDiscountSingleWeek() public {
-        uint certificationDate = block.timestamp + 1 weeks;
+        uint certificationDate = CURRENT_DATE + 1 weeks;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(PRESET_TIME_APPRECIATION, certificationDate);
-        uint expected = 998_402;
-        //js: 998402.178529
+        uint expected = 998_402; // js: 998402.178529
 
         assertEq(actual, expected);
     }
 
     function testComputeTimeAppreciationDiscountFewWeeks() public {
-        uint certificationDate = block.timestamp + 5 weeks;
+        uint certificationDate = CURRENT_DATE + 5 weeks;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(PRESET_TIME_APPRECIATION, certificationDate);
-        uint expected = 992_036;
-        //js: 992036.382217
+        uint expected = 992_036; // js: 992036.382217
 
         assertEq(actual, expected);
     }
 
     function testComputeTimeAppreciationDiscountOneYear() public {
-        uint certificationDate = block.timestamp + ONE_YEAR;
+        uint certificationDate = CURRENT_DATE + ONE_YEAR;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(PRESET_TIME_APPRECIATION, certificationDate);
-        uint expected = 920_210;
-        //js: 920210.191351
+        uint expected = 920_210; // js: 920210.191351
 
         assertEq(actual, expected);
     }
@@ -49,7 +46,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testCollateralizationOutcome_oneWeek() public {
         (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = SolidMath.computeCollateralizationOutcome(
-            block.timestamp + 1 weeks + 1 hours,
+            CURRENT_DATE + 1 weeks + 1 hours,
             10000,
             8_2300,
             COLLATERALIZATION_FEE,
@@ -69,7 +66,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testCollateralizationOutcome_oneYear() public {
         (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = SolidMath.computeCollateralizationOutcome(
-            block.timestamp + ONE_YEAR + 1 hours,
+            CURRENT_DATE + ONE_YEAR + 1 hours,
             10000,
             8_2300,
             COLLATERALIZATION_FEE,
@@ -91,7 +88,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testCollateralizationOutcome_tenYears() public {
         (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = SolidMath.computeCollateralizationOutcome(
-            block.timestamp + _yearsToSeconds(10) + 1 hours,
+            CURRENT_DATE + _yearsToSeconds(10) + 1 hours,
             10000,
             8_2300,
             COLLATERALIZATION_FEE,
@@ -150,30 +147,28 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testDecollateralizationOutcome_oneYear() public {
         (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath.computeDecollateralizationOutcome(
-            block.timestamp + ONE_YEAR + 1 hours,
+            CURRENT_DATE + ONE_YEAR + 1 hours,
             10000e18,
             8_0105,
             DECOLLATERALIZATION_FEE,
             PRESET_DECIMALS
         );
 
-        assertEq(amountOut, 10324);
-        //js: 10324.8997581
+        assertEq(amountOut, 10324); // js: 10324.8997581
         assertEq(cbtDaoCut, 500e18);
         assertEq(cbtToBurn, 9500e18);
     }
 
     function testDecollateralizationOutcome_tenYears() public {
         (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath.computeDecollateralizationOutcome(
-            block.timestamp + _yearsToSeconds(10),
+            CURRENT_DATE + _yearsToSeconds(10),
             1000e18,
             8_0105,
             DECOLLATERALIZATION_FEE,
             PRESET_DECIMALS
         );
 
-        assertEq(amountOut, 2184);
-        //js: 2184.46952993
+        assertEq(amountOut, 2184); // js: 2184.46952993
         assertEq(cbtDaoCut, 50e18);
         assertEq(cbtToBurn, 950e18);
     }
@@ -204,7 +199,7 @@ contract SolidMathTest is BaseSolidMathTest {
     function testComputeDecollateralizationMinAmountInAndDaoCut_oneYear() public {
         uint expectedFcbtAmount = 10324;
         (uint minAmountIn, uint minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
-            block.timestamp + ONE_YEAR + 1 hours,
+            CURRENT_DATE + ONE_YEAR + 1 hours,
             expectedFcbtAmount,
             8_0105,
             DECOLLATERALIZATION_FEE,
@@ -226,7 +221,7 @@ contract SolidMathTest is BaseSolidMathTest {
         assertApproxEqAbs(minCbtDaoCut, 499956427982247510163, 427000000000000);
 
         (uint amountOut, uint cbtDaoCut, ) = SolidMath.computeDecollateralizationOutcome(
-            block.timestamp + ONE_YEAR + 1 hours,
+            CURRENT_DATE + ONE_YEAR + 1 hours,
             minAmountIn,
             8_0105,
             DECOLLATERALIZATION_FEE,
@@ -240,7 +235,7 @@ contract SolidMathTest is BaseSolidMathTest {
     function testComputeDecollateralizationMinAmountInAndDaoCut_tenYears() public {
         uint expectedFcbtAmount = 10324;
         (uint minAmountIn, uint minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
-            block.timestamp + _yearsToSeconds(10) + 1 hours,
+            CURRENT_DATE + _yearsToSeconds(10) + 1 hours,
             expectedFcbtAmount,
             8_0105,
             DECOLLATERALIZATION_FEE,
@@ -256,7 +251,7 @@ contract SolidMathTest is BaseSolidMathTest {
         assertApproxEqAbs(minCbtDaoCut, 236303661093000000000, 0.000342e18);
 
         (uint amountOut, uint cbtDaoCut, ) = SolidMath.computeDecollateralizationOutcome(
-            block.timestamp + _yearsToSeconds(10) + 1 hours,
+            CURRENT_DATE + _yearsToSeconds(10) + 1 hours,
             minAmountIn,
             8_0105,
             DECOLLATERALIZATION_FEE,
@@ -280,8 +275,7 @@ contract SolidMathTest is BaseSolidMathTest {
         );
         certificationDate = bound(certificationDate, CURRENT_DATE, CURRENT_DATE + _yearsToSeconds(50));
         timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
-        decollateralizationFee = bound(decollateralizationFee, 1, 9900);
-        // max 99% fee
+        decollateralizationFee = bound(decollateralizationFee, 1, 9900); // max 99% fee
 
         SolidMathWrapper wrapper = new SolidMathWrapper();
 
@@ -315,7 +309,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testComputeWeeklyBatchReward_batchIsCertified() public {
         (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
-            block.timestamp - 1 minutes,
+            CURRENT_DATE - 1 minutes,
             10000,
             1647,
             REWARDS_FEE,
@@ -328,7 +322,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testComputeWeeklyBatchReward_lessThanOneWeek() public {
         (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
-            block.timestamp + 1 minutes,
+            CURRENT_DATE + 1 minutes,
             10000,
             8_2359,
             REWARDS_FEE,
@@ -341,35 +335,35 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testComputeWeeklyBatchReward_oneWeek() public {
         (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
-            block.timestamp + 1 weeks + 1 minutes,
+            CURRENT_DATE + 1 weeks + 1 minutes,
             10000,
             8_2360,
             REWARDS_FEE,
             PRESET_DECIMALS
         );
 
-        //js:   15620736937500000000
-        //sol:  15618000000000000000
+        // js:   15620736937500000000
+        // sol:  15618000000000000000
         assertApproxEqAbs(rewardAmount, 15.6207369375e18, 0.00274e18);
-        //js:   822144049341000000
-        //sol:  822000000000000000
+        // js:   822144049341000000
+        // sol:  822000000000000000
         assertApproxEqAbs(feeAmount, 0.822144049341e18, 0.00014405e18);
     }
 
     function testComputeWeeklyBatchReward_fiveYears() public {
         (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
-            block.timestamp + _yearsToSeconds(5) + 1 minutes,
+            CURRENT_DATE + _yearsToSeconds(5) + 1 minutes,
             10000,
             8_2360,
             REWARDS_FEE,
             PRESET_DECIMALS
         );
 
-        //js:   10192727432200000000
-        //sol:  10193500000000000000
+        // js:   10192727432200000000
+        // sol:  10193500000000000000
         assertApproxEqAbs(rewardAmount, 10.1927274322e18, 0.00077257e18);
-        //js:   536459338537000000
-        //sol:  536500000000000000
+        // js:   536459338537000000
+        // sol:  536500000000000000
         assertApproxEqAbs(feeAmount, 0.536459338537e18, 0.0000407e18);
     }
 
@@ -398,7 +392,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testFailComputeCollateralizationOutcome_ifCertificationDateIsInThePast() public view {
         SolidMath.computeCollateralizationOutcome(
-            block.timestamp - 1 hours,
+            CURRENT_DATE - 1 hours,
             10000,
             1647,
             COLLATERALIZATION_FEE,
