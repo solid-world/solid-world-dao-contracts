@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-import "./BaseTest.sol";
-import "../contracts/libraries/DomainDataTypes.sol";
-import "../contracts/libraries/ReactiveTimeAppreciationMath.sol";
+import "../BaseTest.sol";
+import "../../contracts/libraries/DomainDataTypes.sol";
+import "../../contracts/libraries/ReactiveTimeAppreciationMath.sol";
 
 /// @notice Dummy wrapper over some ReactiveTimeAppreciationMath functions, such that we can make external calls to them
 /// @notice and use the try/catch syntax
