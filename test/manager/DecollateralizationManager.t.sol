@@ -84,29 +84,19 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
 
         vm.warp(CURRENT_DATE + ONE_YEAR);
 
-        uint expectedAmountDecollateralized = (8100 / 10) * 9; // 90%
-        _expectEmitTokensDecollateralized(
-            BATCH_ID,
-            testAccount,
-            cbtUserCut,
-            expectedAmountDecollateralized
-        );
+        uint expectedAmountDecollateralized = (8100 / 10) * 9;
+        // 90%
+        _expectEmitTokensDecollateralized(BATCH_ID, testAccount, cbtUserCut, expectedAmountDecollateralized);
         manager.decollateralizeTokens(BATCH_ID, cbtUserCut, expectedAmountDecollateralized);
 
         vm.stopPrank();
 
-        assertEq(
-            forwardContractBatch.balanceOf(testAccount, BATCH_ID),
-            expectedAmountDecollateralized
-        );
+        assertEq(forwardContractBatch.balanceOf(testAccount, BATCH_ID), expectedAmountDecollateralized);
         assertEq(
             forwardContractBatch.balanceOf(address(manager), BATCH_ID),
             10000 - expectedAmountDecollateralized
         );
-        assertEq(
-            manager.getBatch(BATCH_ID).collateralizedCredits,
-            10000 - expectedAmountDecollateralized
-        );
+        assertEq(manager.getBatch(BATCH_ID).collateralizedCredits, 10000 - expectedAmountDecollateralized);
         assertEq(manager.getCategoryToken(CATEGORY_ID).balanceOf(testAccount), 2.331e18);
         assertApproxEqAbs(
             manager.getCategoryToken(CATEGORY_ID).balanceOf(feeReceiver),
@@ -165,9 +155,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         manager.bulkDecollateralizeTokens(new uint[](1), new uint[](1), new uint[](2));
     }
 
-    function testDecollateralizeTokens_triggersCategoryRebalance_batchesNotAccumulatingAreIgnored()
-        public
-    {
+    function testDecollateralizeTokens_triggersCategoryRebalance_batchesNotAccumulatingAreIgnored() public {
         _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
         _addBatch(BATCH_ID + 1, PROJECT_ID, CURRENT_DATE + ONE_YEAR, 99999, 10000);
 
@@ -366,11 +354,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
 
     function testGetBatchesDecollateralizationInfo() public {
         _addCategoryAndProjectWithApprovedSpending(CATEGORY_ID, PROJECT_ID, TIME_APPRECIATION);
-        _addCategoryAndProjectWithApprovedSpending(
-            CATEGORY_ID + 1,
-            PROJECT_ID + 1,
-            TIME_APPRECIATION
-        );
+        _addCategoryAndProjectWithApprovedSpending(CATEGORY_ID + 1, PROJECT_ID + 1, TIME_APPRECIATION);
         _addBatchWithVintageToProject(BATCH_ID, PROJECT_ID, 2022);
         _addBatchWithVintageToProject(BATCH_ID + 1, PROJECT_ID, 2022);
         _addBatchWithVintageToProject(BATCH_ID + 2, PROJECT_ID, 2023);
@@ -475,15 +459,11 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function _expectRevert_InvalidBatchId(uint batchId) private {
-        vm.expectRevert(
-            abi.encodeWithSelector(DecollateralizationManager.InvalidBatchId.selector, batchId)
-        );
+        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.InvalidBatchId.selector, batchId));
     }
 
     function _expectRevert_AmountOutTooLow(uint amount) private {
-        vm.expectRevert(
-            abi.encodeWithSelector(DecollateralizationManager.AmountOutTooLow.selector, amount)
-        );
+        vm.expectRevert(abi.encodeWithSelector(DecollateralizationManager.AmountOutTooLow.selector, amount));
     }
 
     function _expectRevert_AmountOutLessThanMinimum(uint amountOut, uint amountOutMin) private {

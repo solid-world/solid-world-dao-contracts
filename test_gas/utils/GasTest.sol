@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "forge-std/Test.sol";
+import "../../test/BaseTest.sol";
 
-abstract contract GasTest is Test {
+abstract contract GasTest is BaseTest {
     string private checkpointLabel;
     uint private checkpointGasLeft = 1; // Start the slot warm.
 

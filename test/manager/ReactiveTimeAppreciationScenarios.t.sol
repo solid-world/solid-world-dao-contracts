@@ -8,14 +8,13 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         _addBatchWithDependencies(CURRENT_DATE + ONE_YEAR, 50000);
 
         vm.startPrank(testAccount);
-        manager.collateralizeBatch(BATCH_ID, 1000, 828e18); // you lose 8% from TA and then 10% from fee
+        manager.collateralizeBatch(BATCH_ID, 1000, 828e18);
+        // you lose 8% from TA and then 10% from fee
         _assertBatchTaEqualsExactlyInitialCategoryTa();
 
-        (uint decollateralizationAmountOut, , ) = manager.simulateDecollateralization(
-            BATCH_ID,
-            1000e18
-        );
-        assertEq(decollateralizationAmountOut, 978); // you lose 10% from fee and gain 1/0.92 from TA
+        (uint decollateralizationAmountOut, , ) = manager.simulateDecollateralization(BATCH_ID, 1000e18);
+        assertEq(decollateralizationAmountOut, 978);
+        // you lose 10% from fee and gain 1/0.92 from TA
 
         manager.collateralizeBatch(BATCH_ID, 1000, 828e18);
         _assertBatchTaEqualsApproxInitialCategoryTa();
@@ -35,7 +34,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     function testReactiveTAOutcomes_updatedCategoryParams_batch1YearFromCertification() public {
         _addBatchWithDependencies(CURRENT_DATE + ONE_YEAR + 5 days, 50000);
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
+        // 5% decay per day
 
         DomainDataTypes.Category memory category = manager.getCategory(CATEGORY_ID);
         assertEq(category.averageTA, INITIAL_CATEGORY_TA);
@@ -82,7 +82,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             0
         );
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 20); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 20);
+        // 5% decay per day
 
         (, uint reactiveTAAfterUpdate0) = ReactiveTimeAppreciationMath.computeReactiveTA(
             manager.getCategory(CATEGORY_ID),
@@ -97,7 +98,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             0
         );
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 0); // 0% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 0);
+        // 0% decay per day
 
         (, uint reactiveTAAfterUpdate1) = ReactiveTimeAppreciationMath.computeReactiveTA(
             manager.getCategory(CATEGORY_ID),
@@ -105,13 +107,15 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         );
 
         assertEq(reactiveTABeforeUpdate1, 77857);
-        assertEq(reactiveTAAfterUpdate1, 97857); // values matching py implementation
+        assertEq(reactiveTAAfterUpdate1, 97857);
+        // values matching py implementation
     }
 
     function testReactiveTAOutcomes_updatedCategoryParams_batch7YearFromCertification() public {
-        _addBatchWithDependencies(CURRENT_DATE + 7 * ONE_YEAR + 5 days, 50000);
+        _addBatchWithDependencies(CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
+        // 5% decay per day
 
         vm.warp(CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
@@ -137,9 +141,10 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     function testReactiveTAOutcomes_updatedCategoryParams_batch7YearFromCertification_moreCollateralizationOps()
         public
     {
-        _addBatchWithDependencies(CURRENT_DATE + 7 * ONE_YEAR + 5 days, 50000);
+        _addBatchWithDependencies(CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
+        // 5% decay per day
 
         vm.warp(CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
@@ -169,10 +174,11 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     {
         _addCategoryAndProjectWithApprovedSpending();
         for (uint i; i < 5; i++) {
-            _addBatch(BATCH_ID + i, CURRENT_DATE + 7 * ONE_YEAR + 5 days, 50000);
+            _addBatch(BATCH_ID + i, CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
+        // 5% decay per day
 
         vm.warp(CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
@@ -195,10 +201,11 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     {
         _addCategoryAndProjectWithApprovedSpending();
         for (uint i; i < 5; i++) {
-            _addBatch(BATCH_ID + i, CURRENT_DATE + 7 * ONE_YEAR + 5 days, 50000);
+            _addBatch(BATCH_ID + i, CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
+        // 5% decay per day
 
         vm.warp(CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
@@ -225,10 +232,11 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     {
         _addCategoryAndProjectWithApprovedSpending();
         for (uint i; i < 5; i++) {
-            _addBatch(BATCH_ID + i, CURRENT_DATE + 7 * ONE_YEAR + 5 days, 50000);
+            _addBatch(BATCH_ID + i, CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
-        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10); // 5% decay per day
+        manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
+        // 5% decay per day
 
         vm.warp(CURRENT_DATE + 5 days);
         uint[] memory cbtUserCut = new uint[](5);
@@ -240,24 +248,34 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             uint[] memory _cbtDaoCut = new uint[](5);
             uint[] memory _cbtForfeited = new uint[](5);
 
-            (_cbtUserCut[0], _cbtDaoCut[0], _cbtForfeited[0]) = manager
-                .simulateBatchCollateralization(BATCH_ID + i, 5000);
+            (_cbtUserCut[0], _cbtDaoCut[0], _cbtForfeited[0]) = manager.simulateBatchCollateralization(
+                BATCH_ID + i,
+                5000
+            );
             manager.collateralizeBatch(BATCH_ID + i, 5000, 0);
 
-            (_cbtUserCut[1], _cbtDaoCut[1], _cbtForfeited[1]) = manager
-                .simulateBatchCollateralization(BATCH_ID + i, 10000);
+            (_cbtUserCut[1], _cbtDaoCut[1], _cbtForfeited[1]) = manager.simulateBatchCollateralization(
+                BATCH_ID + i,
+                10000
+            );
             manager.collateralizeBatch(BATCH_ID + i, 10000, 0);
 
-            (_cbtUserCut[2], _cbtDaoCut[2], _cbtForfeited[2]) = manager
-                .simulateBatchCollateralization(BATCH_ID + i, 20000);
+            (_cbtUserCut[2], _cbtDaoCut[2], _cbtForfeited[2]) = manager.simulateBatchCollateralization(
+                BATCH_ID + i,
+                20000
+            );
             manager.collateralizeBatch(BATCH_ID + i, 20000, 0);
 
-            (_cbtUserCut[3], _cbtDaoCut[3], _cbtForfeited[3]) = manager
-                .simulateBatchCollateralization(BATCH_ID + i, 10000);
+            (_cbtUserCut[3], _cbtDaoCut[3], _cbtForfeited[3]) = manager.simulateBatchCollateralization(
+                BATCH_ID + i,
+                10000
+            );
             manager.collateralizeBatch(BATCH_ID + i, 10000, 0);
 
-            (_cbtUserCut[4], _cbtDaoCut[4], _cbtForfeited[4]) = manager
-                .simulateBatchCollateralization(BATCH_ID + i, 5000);
+            (_cbtUserCut[4], _cbtDaoCut[4], _cbtForfeited[4]) = manager.simulateBatchCollateralization(
+                BATCH_ID + i,
+                5000
+            );
             manager.collateralizeBatch(BATCH_ID + i, 5000, 0);
 
             cbtUserCut[i] =
@@ -266,12 +284,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
                 _cbtUserCut[2] +
                 _cbtUserCut[3] +
                 _cbtUserCut[4];
-            cbtDaoCut[i] =
-                _cbtDaoCut[0] +
-                _cbtDaoCut[1] +
-                _cbtDaoCut[2] +
-                _cbtDaoCut[3] +
-                _cbtDaoCut[4];
+            cbtDaoCut[i] = _cbtDaoCut[0] + _cbtDaoCut[1] + _cbtDaoCut[2] + _cbtDaoCut[3] + _cbtDaoCut[4];
             cbtForfeited[i] =
                 _cbtForfeited[0] +
                 _cbtForfeited[1] +
@@ -285,16 +298,8 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         uint userERC20Balance = cbt.balanceOf(testAccount);
         uint feesERC20 = cbt.balanceOf(feeReceiver);
         uint rewards = _computeRewards();
-        uint cbtUserCutTotal = cbtUserCut[0] +
-            cbtUserCut[1] +
-            cbtUserCut[2] +
-            cbtUserCut[3] +
-            cbtUserCut[4];
-        uint cbtDaoCutTotal = cbtDaoCut[0] +
-            cbtDaoCut[1] +
-            cbtDaoCut[2] +
-            cbtDaoCut[3] +
-            cbtDaoCut[4];
+        uint cbtUserCutTotal = cbtUserCut[0] + cbtUserCut[1] + cbtUserCut[2] + cbtUserCut[3] + cbtUserCut[4];
+        uint cbtDaoCutTotal = cbtDaoCut[0] + cbtDaoCut[1] + cbtDaoCut[2] + cbtDaoCut[3] + cbtDaoCut[4];
         uint cbtForfeitedTotal = cbtForfeited[0] +
             cbtForfeited[1] +
             cbtForfeited[2] +
@@ -324,8 +329,9 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         uint[] memory categories = new uint[](1);
         categories[0] = CATEGORY_ID;
         for (uint i = 1; i <= 52 * 7 + 2; i++) {
-            (, uint[] memory rewardAmounts, uint[] memory rewardFees) = manager
-                .computeWeeklyCarbonRewards(categories);
+            (, uint[] memory rewardAmounts, uint[] memory rewardFees) = manager.computeWeeklyCarbonRewards(
+                categories
+            );
             rewards += rewardAmounts[0];
             rewards += rewardFees[0];
             vm.warp(CURRENT_DATE + 5 days + 1 + i * 1 weeks);

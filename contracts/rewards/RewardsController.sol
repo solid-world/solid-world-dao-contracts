@@ -65,10 +65,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     }
 
     /// @inheritdoc IRewardsController
-    function setRewardOracle(address reward, IEACAggregatorProxy rewardOracle)
-        external
-        onlyEmissionManager
-    {
+    function setRewardOracle(address reward, IEACAggregatorProxy rewardOracle) external onlyEmissionManager {
         _setRewardOracle(reward, rewardOracle);
     }
 
@@ -98,12 +95,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
             revert NotSolidStaking(msg.sender);
         }
 
-        _updateAllRewardDistributionsAndUserRewardsForAsset(
-            asset,
-            user,
-            oldUserStake,
-            oldTotalStaked
-        );
+        _updateAllRewardDistributionsAndUserRewardsForAsset(asset, user, oldUserStake, oldTotalStaked);
     }
 
     /// @inheritdoc IRewardsController
@@ -180,10 +172,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         rewardsList = new address[](rewardsListLength);
         claimedAmounts = new uint[](rewardsListLength);
 
-        _updateAllRewardDistributionsAndUserRewardsForAssets(
-            user,
-            _getAssetStakedAmounts(assets, user)
-        );
+        _updateAllRewardDistributionsAndUserRewardsForAssets(user, _getAssetStakedAmounts(assets, user));
 
         for (uint i; i < assets.length; i++) {
             address asset = assets[i];
@@ -197,10 +186,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
                     .accrued;
                 if (rewardAmount != 0) {
                     claimedAmounts[j] += rewardAmount;
-                    _assetData[asset]
-                        .rewardDistribution[rewardsList[j]]
-                        .userReward[user]
-                        .accrued = 0;
+                    _assetData[asset].rewardDistribution[rewardsList[j]].userReward[user].accrued = 0;
                 }
             }
         }

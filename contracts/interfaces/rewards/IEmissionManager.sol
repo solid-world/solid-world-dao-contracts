@@ -10,11 +10,7 @@ import "./IRewardsController.sol";
 interface IEmissionManager {
     error NotEmissionAdmin(address sender, address reward);
 
-    event EmissionAdminUpdated(
-        address indexed reward,
-        address indexed oldAdmin,
-        address indexed newAdmin
-    );
+    event EmissionAdminUpdated(address indexed reward, address indexed oldAdmin, address indexed newAdmin);
     event RewardsControllerUpdated(address indexed newRewardsController);
     event CarbonRewardsManagerUpdated(address indexed newCarbonRewardsManager);
 
@@ -66,8 +62,7 @@ interface IEmissionManager {
     /// @dev Computes and mints weekly carbon rewards, and instructs RewardsController how to distribute them
     /// @param assets The incentivized assets (hypervisors)
     /// @param _categoryIds The categories to which the incentivized assets belong
-    function updateCarbonRewardDistribution(address[] calldata assets, uint[] calldata _categoryIds)
-        external;
+    function updateCarbonRewardDistribution(address[] calldata assets, uint[] calldata _categoryIds) external;
 
     /// @dev Whitelists an address to claim the rewards on behalf of another address
     /// @dev Only callable by the owner of the EmissionManager

@@ -71,7 +71,8 @@ contract UniswapEACAggregatorProxyAdapter is IEACAggregatorProxy, Ownable {
     function latestAnswer() external view override returns (int) {
         uint price = _computePrice();
 
-        return int(price); // will not overflow
+        return int(price);
+        // will not overflow
     }
 
     /// @dev decimals of the quote token

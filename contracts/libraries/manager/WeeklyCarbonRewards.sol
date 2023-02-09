@@ -34,9 +34,7 @@ library WeeklyCarbonRewards {
 
     /// @param _storage Struct containing the current state used or modified by this function
     /// @param _rewardsFee The new rewards fee charged on weekly rewards
-    function setRewardsFee(SolidWorldManagerStorage.Storage storage _storage, uint16 _rewardsFee)
-        external
-    {
+    function setRewardsFee(SolidWorldManagerStorage.Storage storage _storage, uint16 _rewardsFee) external {
         _storage.rewardsFee = _rewardsFee;
 
         emit RewardsFeeUpdated(_rewardsFee);
@@ -123,9 +121,7 @@ library WeeklyCarbonRewards {
         }
     }
 
-    function _rebalanceCategory(SolidWorldManagerStorage.Storage storage _storage, uint categoryId)
-        internal
-    {
+    function _rebalanceCategory(SolidWorldManagerStorage.Storage storage _storage, uint categoryId) internal {
         uint totalQuantifiedForwardCredits;
         uint totalCollateralizedForwardCredits;
 

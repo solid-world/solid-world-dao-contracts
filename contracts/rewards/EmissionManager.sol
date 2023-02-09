@@ -36,10 +36,7 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     }
 
     /// @inheritdoc IEmissionManager
-    function configureAssets(RewardsDataTypes.DistributionConfig[] memory config)
-        external
-        override
-    {
+    function configureAssets(RewardsDataTypes.DistributionConfig[] memory config) external override {
         for (uint i; i < config.length; i++) {
             if (_emissionAdmins[config[i].reward] != msg.sender) {
                 revert NotEmissionAdmin(msg.sender, config[i].reward);

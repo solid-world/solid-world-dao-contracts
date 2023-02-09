@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-import "./BaseSolidStaking.sol";
+import "./BaseSolidStaking.t.sol";
 
-contract SolidStakingTest is BaseSolidStaking {
+contract SolidStakingTest is BaseSolidStakingTest {
     function testSetupFailsWhenAlreadyInitialized() public {
         _expectRevert_AlreadyInitialized();
         solidStaking.setup(IRewardsController(rewardsController), ownerAccount);
@@ -68,18 +68,11 @@ contract SolidStakingTest is BaseSolidStaking {
         vm.startPrank(testAccount);
         solidStaking.stake(tokenAddress, amountToStake);
 
-        _expectCall_RewardsController_handleUserStakeChanged(
-            tokenAddress,
-            amountToStake,
-            amountToStake
-        );
+        _expectCall_RewardsController_handleUserStakeChanged(tokenAddress, amountToStake, amountToStake);
         _expectEmit_Withdraw(testAccount, tokenAddress, amountToWithdraw);
         solidStaking.withdraw(tokenAddress, amountToWithdraw);
 
-        assertEq(
-            solidStaking.userStake(tokenAddress, testAccount),
-            amountToStake - amountToWithdraw
-        );
+        assertEq(solidStaking.userStake(tokenAddress, testAccount), amountToStake - amountToWithdraw);
 
         assertEq(
             token.balanceOf(address(solidStaking)),
@@ -116,11 +109,7 @@ contract SolidStakingTest is BaseSolidStaking {
         vm.startPrank(testAccount);
         solidStaking.stake(tokenAddress, amountToStake);
 
-        _expectCall_RewardsController_handleUserStakeChanged(
-            tokenAddress,
-            amountToStake,
-            amountToStake
-        );
+        _expectCall_RewardsController_handleUserStakeChanged(tokenAddress, amountToStake, amountToStake);
         _expectCall_RewardsController_claimAllRewardsOnBehalf(assets);
         _expectEmit_Withdraw(testAccount, tokenAddress, amountToWithdraw);
         solidStaking.withdrawStakeAndClaimRewards(tokenAddress, amountToWithdraw);

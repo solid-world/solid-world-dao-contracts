@@ -23,10 +23,11 @@ library ReactiveTimeAppreciationMath {
     /// @param forwardCreditsAmount The size of the forward credits to be collateralized
     /// @return decayingMomentum The current decaying momentum of the category
     /// @return reactiveTA The time appreciation value influenced by current market conditions
-    function computeReactiveTA(
-        DomainDataTypes.Category memory categoryState,
-        uint forwardCreditsAmount
-    ) internal view returns (uint decayingMomentum, uint reactiveTA) {
+    function computeReactiveTA(DomainDataTypes.Category memory categoryState, uint forwardCreditsAmount)
+        internal
+        view
+        returns (uint decayingMomentum, uint reactiveTA)
+    {
         if (categoryState.volumeCoefficient == 0) {
             return (0, categoryState.averageTA);
         }
@@ -49,10 +50,7 @@ library ReactiveTimeAppreciationMath {
             reactiveFactor;
 
         if (reactiveTA >= SolidMath.TIME_APPRECIATION_BASIS_POINTS) {
-            revert ReactiveTAMathBroken(
-                forwardCreditsAmount,
-                categoryState.lastCollateralizationMomentum
-            );
+            revert ReactiveTAMathBroken(forwardCreditsAmount, categoryState.lastCollateralizationMomentum);
         }
     }
 
@@ -68,8 +66,7 @@ library ReactiveTimeAppreciationMath {
         uint lastCollateralizationMomentum,
         uint lastCollateralizationTimestamp
     ) internal view returns (uint decayingMomentum) {
-        uint secondsPassedSinceLastCollateralization = block.timestamp -
-            lastCollateralizationTimestamp;
+        uint secondsPassedSinceLastCollateralization = block.timestamp - lastCollateralizationTimestamp;
 
         int decayMultiplier = int(DECAY_BASIS_POINTS) -
             int(secondsPassedSinceLastCollateralization * decayPerSecond);
@@ -145,11 +142,7 @@ library ReactiveTimeAppreciationMath {
         pure
         returns (uint initialMomentum)
     {
-        initialMomentum = Math.mulDiv(
-            volumeCoefficient,
-            maxDepreciation,
-            DEPRECIATION_BASIS_POINTS
-        );
+        initialMomentum = Math.mulDiv(volumeCoefficient, maxDepreciation, DEPRECIATION_BASIS_POINTS);
     }
 
     /// @dev Computes the adjusted value of momentum for a category when category update event occurs
@@ -168,11 +161,7 @@ library ReactiveTimeAppreciationMath {
             category.lastCollateralizationTimestamp
         );
 
-        adjustedMomentum = Math.mulDiv(
-            adjustedMomentum,
-            newVolumeCoefficient,
-            category.volumeCoefficient
-        );
+        adjustedMomentum = Math.mulDiv(adjustedMomentum, newVolumeCoefficient, category.volumeCoefficient);
 
         int depreciationDiff = int(newMaxDepreciation) - int(uint(category.maxDepreciation));
         if (depreciationDiff > 0) {
@@ -186,9 +175,6 @@ library ReactiveTimeAppreciationMath {
 
     /// @return the depreciation expressed in terms of TA basis points
     function taQuantifiedDepreciation(uint16 depreciation) internal pure returns (uint) {
-        return
-            (depreciation * SolidMath.TIME_APPRECIATION_BASIS_POINTS) /
-            DEPRECIATION_BASIS_POINTS /
-            100;
+        return (depreciation * SolidMath.TIME_APPRECIATION_BASIS_POINTS) / DEPRECIATION_BASIS_POINTS / 100;
     }
 }

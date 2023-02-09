@@ -79,10 +79,7 @@ library SolidMath {
     {
         assert(certificationDate > block.timestamp);
 
-        uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
-            timeAppreciation,
-            certificationDate
-        );
+        uint timeAppreciationDiscount = computeTimeAppreciationDiscount(timeAppreciation, certificationDate);
         uint mintableCbtAmount = Math.mulDiv(
             fcbtAmount * timeAppreciationDiscount,
             10**cbtDecimals,
@@ -126,16 +123,9 @@ library SolidMath {
         uint cbtDaoCut = Math.mulDiv(cbtAmount, decollateralizationFee, FEE_BASIS_POINTS);
         uint cbtToBurn = cbtAmount - cbtDaoCut;
 
-        uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
-            timeAppreciation,
-            certificationDate
-        );
+        uint timeAppreciationDiscount = computeTimeAppreciationDiscount(timeAppreciation, certificationDate);
 
-        uint fcbtAmount = Math.mulDiv(
-            cbtToBurn,
-            TIME_APPRECIATION_BASIS_POINTS,
-            timeAppreciationDiscount
-        );
+        uint fcbtAmount = Math.mulDiv(cbtToBurn, TIME_APPRECIATION_BASIS_POINTS, timeAppreciationDiscount);
 
         return (fcbtAmount / 10**cbtDecimals, cbtDaoCut, cbtToBurn);
     }
@@ -156,10 +146,7 @@ library SolidMath {
         uint decollateralizationFee,
         uint cbtDecimals
     ) internal view returns (uint minAmountIn, uint minCbtDaoCut) {
-        uint timeAppreciationDiscount = computeTimeAppreciationDiscount(
-            timeAppreciation,
-            certificationDate
-        );
+        uint timeAppreciationDiscount = computeTimeAppreciationDiscount(timeAppreciation, certificationDate);
 
         uint minAmountInAfterFee = Math.mulDiv(
             expectedFcbtAmount * timeAppreciationDiscount,
@@ -195,10 +182,7 @@ library SolidMath {
             return (0, 0);
         }
 
-        uint oldDiscount = computeTimeAppreciationDiscount(
-            timeAppreciation,
-            certificationDate + 1 weeks
-        );
+        uint oldDiscount = computeTimeAppreciationDiscount(timeAppreciation, certificationDate + 1 weeks);
         uint newDiscount = computeTimeAppreciationDiscount(timeAppreciation, certificationDate);
 
         uint grossRewardAmount = Math.mulDiv(

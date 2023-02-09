@@ -55,14 +55,8 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
     function testChangeOfStakeUpdatesDistributionTimestamp() public {
         _loadDistributionPreset();
 
-        assertEq(
-            _getDistributionUpdateTimestamp(preset.asset0, preset.reward00),
-            preset.updateTimestamp
-        );
-        assertEq(
-            _getDistributionUpdateTimestamp(preset.asset0, preset.reward01),
-            preset.updateTimestamp
-        );
+        assertEq(_getDistributionUpdateTimestamp(preset.asset0, preset.reward00), preset.updateTimestamp);
+        assertEq(_getDistributionUpdateTimestamp(preset.asset0, preset.reward01), preset.updateTimestamp);
     }
 
     function testChangeOfStakeUpdatesUserIndex() public {
@@ -116,18 +110,15 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
         );
     }
 
-    function testGetAllUnclaimedRewardAmountsForUserAndAssets_rewardsListIsInOrderOfConfiguration()
-        public
-    {
+    function testGetAllUnclaimedRewardAmountsForUserAndAssets_rewardsListIsInOrderOfConfiguration() public {
         _loadDistributionPreset();
 
         // rewards continue to grow another 5 seconds
         vm.warp(CURRENT_DATE + preset.accruingPeriod + 5 seconds);
-        (address[] memory rewardsList, ) = rewardsDistributor
-            .getAllUnclaimedRewardAmountsForUserAndAssets(
-                _toArray(preset.asset0, preset.asset1),
-                preset.user
-            );
+        (address[] memory rewardsList, ) = rewardsDistributor.getAllUnclaimedRewardAmountsForUserAndAssets(
+            _toArray(preset.asset0, preset.asset1),
+            preset.user
+        );
 
         assertEq(rewardsList.length, 3);
         assertEq(rewardsList[0], preset.reward00);
@@ -140,11 +131,10 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
 
         // rewards continue to grow another 5 seconds
         vm.warp(CURRENT_DATE + preset.accruingPeriod + 5 seconds);
-        (, uint[] memory unclaimedAmounts) = rewardsDistributor
-            .getAllUnclaimedRewardAmountsForUserAndAssets(
-                _toArray(preset.asset0, preset.asset1),
-                preset.user
-            );
+        (, uint[] memory unclaimedAmounts) = rewardsDistributor.getAllUnclaimedRewardAmountsForUserAndAssets(
+            _toArray(preset.asset0, preset.asset1),
+            preset.user
+        );
 
         assertEq(unclaimedAmounts.length, 3);
         assertEq(
@@ -163,11 +153,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
 
     function testSetDistributionEnd_failsIfNotCalledByEmissionManager() public {
         _expectRevert_NotEmissionManager();
-        rewardsDistributor.setDistributionEnd(
-            preset.asset0,
-            preset.reward00,
-            CURRENT_DATE + 1 weeks
-        );
+        rewardsDistributor.setDistributionEnd(preset.asset0, preset.reward00, CURRENT_DATE + 1 weeks);
     }
 
     function testSetDistributionEnd_failsForNonExistentDistribution() public {
@@ -189,25 +175,14 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
             CURRENT_DATE + 2 weeks,
             0
         );
-        rewardsDistributor.setDistributionEnd(
-            preset.asset1,
-            preset.reward1,
-            CURRENT_DATE + 2 weeks
-        );
+        rewardsDistributor.setDistributionEnd(preset.asset1, preset.reward1, CURRENT_DATE + 2 weeks);
     }
 
     function testSetDistributionEnd_persistsDistributionEnd() public {
         vm.prank(emissionManager);
-        rewardsDistributor.setDistributionEnd(
-            preset.asset1,
-            preset.reward1,
-            CURRENT_DATE + 2 weeks
-        );
+        rewardsDistributor.setDistributionEnd(preset.asset1, preset.reward1, CURRENT_DATE + 2 weeks);
 
-        uint distributionEnd1 = rewardsDistributor.getDistributionEnd(
-            preset.asset1,
-            preset.reward1
-        );
+        uint distributionEnd1 = rewardsDistributor.getDistributionEnd(preset.asset1, preset.reward1);
         assertEq(distributionEnd1, CURRENT_DATE + 2 weeks);
     }
 
@@ -247,15 +222,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
         uint88[] memory newEmissionsPerSecond = _toArrayUint88(100, 200);
 
         vm.prank(emissionManager);
-        _expectEmitAssetConfigUpdated(
-            preset.asset0,
-            rewards[0],
-            0,
-            100,
-            CURRENT_DATE,
-            CURRENT_DATE,
-            0
-        );
+        _expectEmitAssetConfigUpdated(preset.asset0, rewards[0], 0, 100, CURRENT_DATE, CURRENT_DATE, 0);
         _expectEmitAssetConfigUpdated(
             preset.asset0,
             rewards[1],
@@ -280,11 +247,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
             _toArray(preset.reward00, preset.reward01),
             _toArrayUint88(100, 200)
         );
-        rewardsDistributor.setEmissionPerSecond(
-            preset.asset1,
-            _toArray(preset.reward1),
-            _toArrayUint88(300)
-        );
+        rewardsDistributor.setEmissionPerSecond(preset.asset1, _toArray(preset.reward1), _toArrayUint88(300));
 
         assertEq(
             _getDistributionIndex(preset.asset0, preset.reward00),
@@ -349,25 +312,13 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
     function testUpdateCarbonRewardDistribution_failsForInvalidInput() public {
         vm.startPrank(emissionManager);
         _expectRevert_InvalidInput();
-        rewardsDistributor.updateCarbonRewardDistribution(
-            new address[](0),
-            new address[](1),
-            new uint[](1)
-        );
+        rewardsDistributor.updateCarbonRewardDistribution(new address[](0), new address[](1), new uint[](1));
 
         _expectRevert_InvalidInput();
-        rewardsDistributor.updateCarbonRewardDistribution(
-            new address[](1),
-            new address[](0),
-            new uint[](1)
-        );
+        rewardsDistributor.updateCarbonRewardDistribution(new address[](1), new address[](0), new uint[](1));
 
         _expectRevert_InvalidInput();
-        rewardsDistributor.updateCarbonRewardDistribution(
-            new address[](1),
-            new address[](1),
-            new uint[](0)
-        );
+        rewardsDistributor.updateCarbonRewardDistribution(new address[](1), new address[](1), new uint[](0));
         vm.stopPrank();
     }
 
@@ -503,10 +454,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
     ) private {
         vm.warp(uint(int32(CURRENT_DATE) + secondsRelativeToDistributionEnd));
 
-        bool canUpdate = rewardsDistributor.canUpdateCarbonRewardDistribution(
-            preset.asset0,
-            preset.reward00
-        );
+        bool canUpdate = rewardsDistributor.canUpdateCarbonRewardDistribution(preset.asset0, preset.reward00);
         assertEq(canUpdate, expectedResult);
     }
 }

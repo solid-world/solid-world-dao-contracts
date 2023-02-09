@@ -6,7 +6,7 @@
         "singleQuote": false,
         "explicitTypes": "preserve",
         "tabWidth": 4,
-        "printWidth": 100
+        "printWidth": 110
       }
     },
     {

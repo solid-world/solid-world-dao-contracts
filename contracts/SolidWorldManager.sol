@@ -133,13 +133,7 @@ contract SolidWorldManager is
         uint[] calldata rewardFees,
         address rewardsVault
     ) external whenNotPaused {
-        _storage.mintWeeklyCarbonRewards(
-            categoryIds,
-            carbonRewards,
-            rewardAmounts,
-            rewardFees,
-            rewardsVault
-        );
+        _storage.mintWeeklyCarbonRewards(categoryIds, carbonRewards, rewardAmounts, rewardFees, rewardsVault);
     }
 
     /// @inheritdoc ICollateralizationManager

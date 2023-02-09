@@ -106,7 +106,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
                     status: 0,
                     projectId: PROJECT_ID + (i % rewards),
                     collateralizedCredits: 10000,
-                    certificationDate: uint32(CURRENT_DATE + ONE_YEAR * 10),
+                    certificationDate: uint32(CURRENT_DATE + _yearsToSeconds(10)),
                     vintage: 2022,
                     batchTA: 0,
                     supplier: vm.addr(13),
@@ -118,8 +118,9 @@ contract CarbonRewardDistributionGasTest is GasTest {
 
         address[] memory assets = new address[](rewards);
         uint[] memory categoryIds = new uint[](rewards);
-        RewardsDataTypes.DistributionConfig[]
-            memory config = new RewardsDataTypes.DistributionConfig[](rewards);
+        RewardsDataTypes.DistributionConfig[] memory config = new RewardsDataTypes.DistributionConfig[](
+            rewards
+        );
 
         for (uint i = 0; i < rewards; i++) {
             assets[i] = address(new CollateralizedBasketToken("", ""));

@@ -5,10 +5,7 @@ contract MockUniswapV3Pool {
     function observe(uint32[] calldata)
         external
         pure
-        returns (
-            int56[] memory tickCumulatives,
-            uint160[] memory secondsPerLiquidityCumulativeX128s
-        )
+        returns (int56[] memory tickCumulatives, uint160[] memory secondsPerLiquidityCumulativeX128s)
     {
         tickCumulatives = new int56[](2);
         tickCumulatives[0] = 0;

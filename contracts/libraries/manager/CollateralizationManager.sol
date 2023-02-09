@@ -77,21 +77,8 @@ library CollateralizationManager {
             revert AmountOutLessThanMinimum(cbtUserCut, amountOutMin);
         }
 
-        _updateBatchTA(
-            _storage,
-            batchId,
-            reactiveTA,
-            amountIn,
-            cbtUserCut + cbtDaoCut,
-            cbt.decimals()
-        );
-        _rebalanceCategory(
-            _storage,
-            _storage.batchCategory[batchId],
-            reactiveTA,
-            amountIn,
-            decayingMomentum
-        );
+        _updateBatchTA(_storage, batchId, reactiveTA, amountIn, cbtUserCut + cbtDaoCut, cbt.decimals());
+        _rebalanceCategory(_storage, _storage.batchCategory[batchId], reactiveTA, amountIn, decayingMomentum);
 
         _performCollateralization(_storage, cbt, batchId, amountIn, cbtUserCut, cbtDaoCut);
 
@@ -157,13 +144,8 @@ library CollateralizationManager {
             revert CannotCollateralizeTheWeekBeforeCertification();
         }
 
-        DomainDataTypes.Category storage category = _storage.categories[
-            _storage.batchCategory[batchId]
-        ];
-        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(
-            _storage,
-            batchId
-        );
+        DomainDataTypes.Category storage category = _storage.categories[_storage.batchCategory[batchId]];
+        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(_storage, batchId);
 
         (, uint reactiveTA) = ReactiveTimeAppreciationMath.computeReactiveTA(category, amountIn);
 
@@ -232,8 +214,7 @@ library CollateralizationManager {
         uint latestAverageTA = (category.averageTA *
             category.totalCollateralized +
             reactiveTA *
-            currentCollateralizedAmount) /
-            (category.totalCollateralized + currentCollateralizedAmount);
+            currentCollateralizedAmount) / (category.totalCollateralized + currentCollateralizedAmount);
 
         category.averageTA = uint24(latestAverageTA);
         category.totalCollateralized += currentCollateralizedAmount;
