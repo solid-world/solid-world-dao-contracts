@@ -1,36 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
+import "./ReactiveTimeAppreciationMathWrapper.t.sol";
 import "../BaseTest.sol";
 import "../../contracts/libraries/DomainDataTypes.sol";
 import "../../contracts/libraries/ReactiveTimeAppreciationMath.sol";
-
-/// @notice Dummy wrapper over some ReactiveTimeAppreciationMath functions, such that we can make external calls to them
-/// @notice and use the try/catch syntax
-contract DummyReactiveTimeAppreciationMath {
-    function computeReactiveTA(DomainDataTypes.Category memory categoryState, uint forwardCreditsAmount)
-        external
-        view
-        returns (uint decayingMomentum, uint reactiveTA)
-    {
-        return ReactiveTimeAppreciationMath.computeReactiveTA(categoryState, forwardCreditsAmount);
-    }
-
-    function inferBatchTA(
-        uint circulatingCBT,
-        uint totalCollateralizedForwardCredits,
-        uint certificationDate,
-        uint cbtDecimals
-    ) external view returns (uint batchTA) {
-        return
-            ReactiveTimeAppreciationMath.inferBatchTA(
-                circulatingCBT,
-                totalCollateralizedForwardCredits,
-                certificationDate,
-                cbtDecimals
-            );
-    }
-}
 
 contract ReactiveTimeAppreciationMathTest is BaseTest {
     uint32 constant CURRENT_DATE = 1666016743;
@@ -193,8 +167,8 @@ contract ReactiveTimeAppreciationMathTest is BaseTest {
         categoryState.lastCollateralizationTimestamp = lastCollateralizationTimestamp;
         categoryState.lastCollateralizationMomentum = lastCollateralizationMomentum;
 
-        DummyReactiveTimeAppreciationMath dummy = new DummyReactiveTimeAppreciationMath();
-        try dummy.computeReactiveTA(categoryState, forwardCreditsAmount) {} catch (bytes memory reason) {
+        ReactiveTimeAppreciationMathWrapper wrapper = new ReactiveTimeAppreciationMathWrapper();
+        try wrapper.computeReactiveTA(categoryState, forwardCreditsAmount) {} catch (bytes memory reason) {
             assertEq(
                 bytes4(keccak256(bytes("ReactiveTAMathBroken(uint256,uint256)"))),
                 bytes4(reason),
@@ -272,9 +246,9 @@ contract ReactiveTimeAppreciationMathTest is BaseTest {
         );
         certificationDate = bound(certificationDate, CURRENT_DATE + 72 weeks, type(uint32).max);
 
-        DummyReactiveTimeAppreciationMath dummy = new DummyReactiveTimeAppreciationMath();
+        ReactiveTimeAppreciationMathWrapper wrapper = new ReactiveTimeAppreciationMathWrapper();
         try
-            dummy.inferBatchTA(
+            wrapper.inferBatchTA(
                 circulatingCBT,
                 totalCollateralizedForwardCredits,
                 certificationDate,
