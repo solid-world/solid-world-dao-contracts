@@ -62,7 +62,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
                     collateralizedCredits: 10000,
-                    certificationDate: uint32(CURRENT_DATE + 1 minutes),
+                    certificationDate: PRESET_CURRENT_DATE + 1 minutes,
                     vintage: 2022,
                     batchTA: 10_0000,
                     supplier: testAccount,
@@ -110,7 +110,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
                     collateralizedCredits: 10000,
-                    certificationDate: uint32(CURRENT_DATE + 7 weeks + ONE_YEAR),
+                    certificationDate: PRESET_CURRENT_DATE + 7 weeks + ONE_YEAR,
                     vintage: 2022,
                     batchTA: 10_0000,
                     supplier: testAccount,
@@ -126,7 +126,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: PROJECT_ID,
                 collateralizedCredits: 10000,
-                certificationDate: uint32(CURRENT_DATE + 1 minutes + ONE_YEAR),
+                certificationDate: PRESET_CURRENT_DATE + 1 minutes + ONE_YEAR,
                 vintage: 2022,
                 batchTA: 10_0000,
                 supplier: testAccount,
@@ -141,7 +141,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: PROJECT_ID + 1,
                 collateralizedCredits: 10000,
-                certificationDate: uint32(CURRENT_DATE + 2 weeks + ONE_YEAR),
+                certificationDate: PRESET_CURRENT_DATE + 2 weeks + ONE_YEAR,
                 vintage: 2022,
                 batchTA: 10_0000,
                 supplier: testAccount,
@@ -151,7 +151,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         );
 
         // Batches 11 and 12 are certified
-        vm.warp(CURRENT_DATE + 6 weeks + 6 days + ONE_YEAR);
+        vm.warp(PRESET_CURRENT_DATE + 6 weeks + 6 days + ONE_YEAR);
 
         uint expectedBatchWeeklyRewardAmount = 19.1764e18;
         uint expectedRewardFeeAmount = 1.0092e18;
@@ -180,7 +180,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         assertApproxEqAbs(rewardFees[1], expectedRewardFeeAmount * 3, 0.0009e18);
 
         // All batches are certified
-        vm.warp(CURRENT_DATE + 7 weeks + 1 minutes + ONE_YEAR);
+        vm.warp(PRESET_CURRENT_DATE + 7 weeks + 1 minutes + ONE_YEAR);
 
         (
             address[] memory carbonRewardsCertified,
@@ -213,7 +213,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                     status: 0,
                     projectId: PROJECT_ID + (i % 2),
                     collateralizedCredits: 10000 * ((i % 2) + 1),
-                    certificationDate: uint32(CURRENT_DATE + 7 weeks),
+                    certificationDate: PRESET_CURRENT_DATE + 7 weeks,
                     vintage: 2022,
                     batchTA: uint24(1647 + (i * 100)), // 1747, 1847, 1947, 2047, 2147
                     supplier: testAccount,
@@ -228,7 +228,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: PROJECT_ID,
                 collateralizedCredits: 1000000,
-                certificationDate: uint32(CURRENT_DATE + 3 weeks), // should be skipped
+                certificationDate: PRESET_CURRENT_DATE + 3 weeks, // should be skipped
                 vintage: 2022,
                 batchTA: uint24(9999),
                 supplier: testAccount,
@@ -242,7 +242,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: PROJECT_ID + 2,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 7 weeks),
+                certificationDate: PRESET_CURRENT_DATE + 7 weeks,
                 vintage: 2022,
                 batchTA: 1647,
                 supplier: testAccount,
@@ -250,7 +250,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
             }),
             0
         );
-        vm.warp(CURRENT_DATE + 6 weeks);
+        vm.warp(PRESET_CURRENT_DATE + 6 weeks);
         CollateralizedBasketToken rewardToken0 = manager.getCategoryToken(CATEGORY_ID);
         CollateralizedBasketToken rewardToken1 = manager.getCategoryToken(CATEGORY_ID + 1);
         CollateralizedBasketToken rewardToken2 = manager.getCategoryToken(CATEGORY_ID + 2);

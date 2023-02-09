@@ -48,8 +48,6 @@ abstract contract BaseRewardsDistributor is BaseTest {
         uint accruedRewards1;
     }
 
-    uint32 constant CURRENT_DATE = 1666016743;
-
     RewardsDistributionPreset preset;
     IRewardsDistributor rewardsDistributor;
     address solidStakingViewActions;
@@ -58,7 +56,7 @@ abstract contract BaseRewardsDistributor is BaseTest {
     address rewardOracle;
 
     function setUp() public {
-        vm.warp(CURRENT_DATE);
+        vm.warp(PRESET_CURRENT_DATE);
 
         solidStakingViewActions = vm.addr(1);
         rewardsVault = vm.addr(2);
@@ -107,7 +105,7 @@ abstract contract BaseRewardsDistributor is BaseTest {
         preset.userStake = 100e18;
         preset.totalStaked = 500e18;
         preset.accruingPeriod = 5 seconds;
-        preset.updateTimestamp = CURRENT_DATE + preset.accruingPeriod;
+        preset.updateTimestamp = PRESET_CURRENT_DATE + preset.accruingPeriod;
         preset.asset0 = address(new CollateralizedBasketToken("", ""));
         preset.asset1 = address(new CollateralizedBasketToken("", ""));
         preset.reward00 = address(new CollateralizedBasketToken("", ""));
@@ -203,17 +201,17 @@ abstract contract BaseRewardsDistributor is BaseTest {
         config[0].asset = preset.asset0;
         config[0].reward = preset.reward00;
         config[0].rewardOracle = IEACAggregatorProxy(rewardOracle);
-        config[0].distributionEnd = CURRENT_DATE;
+        config[0].distributionEnd = PRESET_CURRENT_DATE;
 
         config[1].asset = preset.asset1;
         config[1].reward = preset.reward1;
         config[1].rewardOracle = IEACAggregatorProxy(rewardOracle);
-        config[1].distributionEnd = CURRENT_DATE + 1 seconds;
+        config[1].distributionEnd = PRESET_CURRENT_DATE + 1 seconds;
 
         config[2].asset = preset.asset0;
         config[2].reward = preset.reward01;
         config[2].rewardOracle = IEACAggregatorProxy(rewardOracle);
-        config[2].distributionEnd = CURRENT_DATE + 2 seconds;
+        config[2].distributionEnd = PRESET_CURRENT_DATE + 2 seconds;
     }
 
     function _expectEmitAccrued(
@@ -285,7 +283,7 @@ abstract contract BaseRewardsDistributor is BaseTest {
         _distributeRewardsForOneWeek(preset.asset0, preset.reward01, preset.emissionPerSecond01);
         _distributeRewardsForOneWeek(preset.asset1, preset.reward1, preset.emissionPerSecond1);
 
-        vm.warp(CURRENT_DATE + preset.accruingPeriod);
+        vm.warp(PRESET_CURRENT_DATE + preset.accruingPeriod);
         _simulateUserStaking(preset.asset0, preset.user, preset.userStake, preset.totalStaked);
         _simulateUserStaking(preset.asset1, preset.user, preset.userStake, preset.totalStaked);
     }
@@ -311,7 +309,7 @@ abstract contract BaseRewardsDistributor is BaseTest {
 
         vm.startPrank(emissionManager);
         rewardsDistributor.setEmissionPerSecond(asset, rewards, emissionsPerSecond);
-        rewardsDistributor.setDistributionEnd(asset, reward, CURRENT_DATE + 1 weeks);
+        rewardsDistributor.setDistributionEnd(asset, reward, PRESET_CURRENT_DATE + 1 weeks);
         vm.stopPrank();
     }
 

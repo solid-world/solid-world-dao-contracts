@@ -5,7 +5,8 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
 abstract contract BaseTest is Test {
-    uint constant ONE_YEAR = 52 weeks;
+    uint32 constant ONE_YEAR = 52 weeks;
+    uint32 constant PRESET_CURRENT_DATE = 1666016743;
     uint8 constant PRESET_DECIMALS = 18;
 
     function _expectRevertWithMessage(string memory message) internal {

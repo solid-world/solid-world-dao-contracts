@@ -31,7 +31,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
 
     function testChangesOfStakeEmitAccruedEvent() public {
         _distributeRewardsForOneWeek(preset.asset0, preset.reward00, preset.emissionPerSecond00);
-        vm.warp(CURRENT_DATE + preset.accruingPeriod);
+        vm.warp(PRESET_CURRENT_DATE + preset.accruingPeriod);
 
         _expectEmitAccrued(
             preset.asset0,
@@ -97,7 +97,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
         _loadDistributionPreset();
 
         // rewards continue to grow another 5 seconds
-        vm.warp(CURRENT_DATE + preset.accruingPeriod + 5 seconds);
+        vm.warp(PRESET_CURRENT_DATE + preset.accruingPeriod + 5 seconds);
         uint totalRewards = rewardsDistributor.getUnclaimedRewardAmountForUserAndAssets(
             _toArray(preset.asset0),
             preset.user,
@@ -114,7 +114,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
         _loadDistributionPreset();
 
         // rewards continue to grow another 5 seconds
-        vm.warp(CURRENT_DATE + preset.accruingPeriod + 5 seconds);
+        vm.warp(PRESET_CURRENT_DATE + preset.accruingPeriod + 5 seconds);
         (address[] memory rewardsList, ) = rewardsDistributor.getAllUnclaimedRewardAmountsForUserAndAssets(
             _toArray(preset.asset0, preset.asset1),
             preset.user
@@ -130,7 +130,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
         _loadDistributionPreset();
 
         // rewards continue to grow another 5 seconds
-        vm.warp(CURRENT_DATE + preset.accruingPeriod + 5 seconds);
+        vm.warp(PRESET_CURRENT_DATE + preset.accruingPeriod + 5 seconds);
         (, uint[] memory unclaimedAmounts) = rewardsDistributor.getAllUnclaimedRewardAmountsForUserAndAssets(
             _toArray(preset.asset0, preset.asset1),
             preset.user
@@ -153,7 +153,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
 
     function testSetDistributionEnd_failsIfNotCalledByEmissionManager() public {
         _expectRevert_NotEmissionManager();
-        rewardsDistributor.setDistributionEnd(preset.asset0, preset.reward00, CURRENT_DATE + 1 weeks);
+        rewardsDistributor.setDistributionEnd(preset.asset0, preset.reward00, PRESET_CURRENT_DATE + 1 weeks);
     }
 
     function testSetDistributionEnd_failsForNonExistentDistribution() public {
@@ -161,7 +161,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
 
         vm.prank(emissionManager);
         _expectRevert_DistributionNonExistent(preset.asset0, reward);
-        rewardsDistributor.setDistributionEnd(preset.asset0, reward, CURRENT_DATE + 1 weeks);
+        rewardsDistributor.setDistributionEnd(preset.asset0, reward, PRESET_CURRENT_DATE + 1 weeks);
     }
 
     function testSetDistributionEnd_emitsEvent() public {
@@ -171,19 +171,19 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
             preset.reward1,
             0,
             0,
-            CURRENT_DATE + 1 seconds,
-            CURRENT_DATE + 2 weeks,
+            PRESET_CURRENT_DATE + 1 seconds,
+            PRESET_CURRENT_DATE + 2 weeks,
             0
         );
-        rewardsDistributor.setDistributionEnd(preset.asset1, preset.reward1, CURRENT_DATE + 2 weeks);
+        rewardsDistributor.setDistributionEnd(preset.asset1, preset.reward1, PRESET_CURRENT_DATE + 2 weeks);
     }
 
     function testSetDistributionEnd_persistsDistributionEnd() public {
         vm.prank(emissionManager);
-        rewardsDistributor.setDistributionEnd(preset.asset1, preset.reward1, CURRENT_DATE + 2 weeks);
+        rewardsDistributor.setDistributionEnd(preset.asset1, preset.reward1, PRESET_CURRENT_DATE + 2 weeks);
 
         uint distributionEnd1 = rewardsDistributor.getDistributionEnd(preset.asset1, preset.reward1);
-        assertEq(distributionEnd1, CURRENT_DATE + 2 weeks);
+        assertEq(distributionEnd1, PRESET_CURRENT_DATE + 2 weeks);
     }
 
     function testSetEmissionPerSecond_failsIfNotCalledByEmissionManager() public {
@@ -222,14 +222,22 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
         uint88[] memory newEmissionsPerSecond = _toArrayUint88(100, 200);
 
         vm.prank(emissionManager);
-        _expectEmitAssetConfigUpdated(preset.asset0, rewards[0], 0, 100, CURRENT_DATE, CURRENT_DATE, 0);
+        _expectEmitAssetConfigUpdated(
+            preset.asset0,
+            rewards[0],
+            0,
+            100,
+            PRESET_CURRENT_DATE,
+            PRESET_CURRENT_DATE,
+            0
+        );
         _expectEmitAssetConfigUpdated(
             preset.asset0,
             rewards[1],
             0,
             200,
-            CURRENT_DATE + 2 seconds,
-            CURRENT_DATE + 2 seconds,
+            PRESET_CURRENT_DATE + 2 seconds,
+            PRESET_CURRENT_DATE + 2 seconds,
             0
         );
         rewardsDistributor.setEmissionPerSecond(preset.asset0, rewards, newEmissionsPerSecond);
@@ -240,7 +248,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
         _distributeRewardsForOneWeek(preset.asset0, preset.reward01, 800);
         _distributeRewardsForOneWeek(preset.asset1, preset.reward1, 900);
 
-        vm.warp(CURRENT_DATE + preset.accruingPeriod);
+        vm.warp(PRESET_CURRENT_DATE + preset.accruingPeriod);
         vm.startPrank(emissionManager);
         rewardsDistributor.setEmissionPerSecond(
             preset.asset0,
@@ -292,7 +300,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
 
     function testCanUpdateCarbonRewardDistribution() public {
         vm.prank(emissionManager);
-        rewardsDistributor.setDistributionEnd(preset.asset0, preset.reward00, CURRENT_DATE);
+        rewardsDistributor.setDistributionEnd(preset.asset0, preset.reward00, PRESET_CURRENT_DATE);
 
         _canUpdateCarbonRewardDistribution_relativeToDistributionEnd(-1 seconds, false);
         _canUpdateCarbonRewardDistribution_relativeToDistributionEnd(0 seconds, true);
@@ -333,7 +341,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
     }
 
     function testUpdateCarbonRewardDistribution_emitsEvents() public {
-        uint32 distributionEnd = CURRENT_DATE + 1 weeks;
+        uint32 distributionEnd = PRESET_CURRENT_DATE + 1 weeks;
         uint32 secondsTillDistributionEnd = 100;
         uint32 updateCarbonRewardDistributionTimeStamp = distributionEnd +
             1 weeks -
@@ -370,7 +378,7 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
     }
 
     function testUpdateCarbonRewardDistribution_persists() public {
-        uint32 distributionEnd = CURRENT_DATE + 1 weeks;
+        uint32 distributionEnd = PRESET_CURRENT_DATE + 1 weeks;
         uint32 secondsTillDistributionEnd = 100;
         uint32 updateCarbonRewardDistributionTimeStamp = distributionEnd +
             1 weeks -
@@ -416,8 +424,8 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
 
         assertEq(index, 0);
         assertEq(emissionPerSecond, 0);
-        assertEq(lastUpdateTimestamp, CURRENT_DATE);
-        assertEq(distributionEnd, CURRENT_DATE);
+        assertEq(lastUpdateTimestamp, PRESET_CURRENT_DATE);
+        assertEq(distributionEnd, PRESET_CURRENT_DATE);
     }
 
     function _assertInitialSecondDistributionIsCorrect() private {
@@ -430,8 +438,8 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
 
         assertEq(index, 0);
         assertEq(emissionPerSecond, 0);
-        assertEq(lastUpdateTimestamp, CURRENT_DATE);
-        assertEq(distributionEnd, CURRENT_DATE + 1 seconds);
+        assertEq(lastUpdateTimestamp, PRESET_CURRENT_DATE);
+        assertEq(distributionEnd, PRESET_CURRENT_DATE + 1 seconds);
     }
 
     function _assertInitialThirdDistributionIsCorrect() private {
@@ -444,15 +452,15 @@ contract RewardsDistributorTest is BaseRewardsDistributor {
 
         assertEq(index, 0);
         assertEq(emissionPerSecond, 0);
-        assertEq(lastUpdateTimestamp, CURRENT_DATE);
-        assertEq(distributionEnd, CURRENT_DATE + 2 seconds);
+        assertEq(lastUpdateTimestamp, PRESET_CURRENT_DATE);
+        assertEq(distributionEnd, PRESET_CURRENT_DATE + 2 seconds);
     }
 
     function _canUpdateCarbonRewardDistribution_relativeToDistributionEnd(
         int secondsRelativeToDistributionEnd,
         bool expectedResult
     ) private {
-        vm.warp(uint(int32(CURRENT_DATE) + secondsRelativeToDistributionEnd));
+        vm.warp(uint(int32(PRESET_CURRENT_DATE) + secondsRelativeToDistributionEnd));
 
         bool canUpdate = rewardsDistributor.canUpdateCarbonRewardDistribution(preset.asset0, preset.reward00);
         assertEq(canUpdate, expectedResult);

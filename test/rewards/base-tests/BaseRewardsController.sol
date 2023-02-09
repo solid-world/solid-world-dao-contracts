@@ -20,8 +20,6 @@ abstract contract BaseRewardsControllerTest is BaseTest {
     event RewardsVaultUpdated(address indexed rewardsVault);
     event SolidStakingUpdated(address indexed solidStaking);
 
-    uint32 constant CURRENT_DATE = 1666016743;
-
     RewardsDataTypes.DistributionConfig[2] testConfig;
     IRewardsController rewardsController;
     address solidStakingViewActions;
@@ -30,7 +28,7 @@ abstract contract BaseRewardsControllerTest is BaseTest {
     address arbitraryAccount;
 
     function setUp() public {
-        vm.warp(CURRENT_DATE);
+        vm.warp(PRESET_CURRENT_DATE);
 
         solidStakingViewActions = vm.addr(1);
         rewardsVault = vm.addr(2);
@@ -122,13 +120,13 @@ abstract contract BaseRewardsControllerTest is BaseTest {
         testConfig[0].reward = vm.addr(4);
         testConfig[0].asset = vm.addr(5);
         testConfig[0].emissionPerSecond = 100;
-        testConfig[0].distributionEnd = CURRENT_DATE;
+        testConfig[0].distributionEnd = PRESET_CURRENT_DATE;
         testConfig[0].rewardOracle = IEACAggregatorProxy(vm.addr(6));
 
         testConfig[1].reward = vm.addr(7);
         testConfig[1].asset = vm.addr(8);
         testConfig[1].emissionPerSecond = 200;
-        testConfig[1].distributionEnd = CURRENT_DATE;
+        testConfig[1].distributionEnd = PRESET_CURRENT_DATE;
         testConfig[1].rewardOracle = IEACAggregatorProxy(vm.addr(9));
     }
 

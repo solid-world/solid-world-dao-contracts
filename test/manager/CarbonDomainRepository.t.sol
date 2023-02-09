@@ -50,7 +50,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         uint16 maxDepreciationInput0 = 10;
         // 1% yearly rate
 
-        vm.warp(CURRENT_DATE + 2 days);
+        vm.warp(PRESET_CURRENT_DATE + 2 days);
         _expectEmitCategoryUpdated(
             CATEGORY_ID,
             volumeCoefficientInput0,
@@ -69,7 +69,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         assertEq(category0.volumeCoefficient, volumeCoefficientInput0);
         assertEq(category0.decayPerSecond, decayPerSecondInput0);
         assertEq(category0.maxDepreciation, maxDepreciationInput0);
-        assertEq(category0.lastCollateralizationTimestamp, CURRENT_DATE + 2 days);
+        assertEq(category0.lastCollateralizationTimestamp, PRESET_CURRENT_DATE + 2 days);
         assertEq(category0.lastCollateralizationMomentum, 50000);
 
         uint volumeCoefficientInput1 = 75000;
@@ -77,7 +77,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         uint16 maxDepreciationInput1 = 20;
         // 2% yearly rate
 
-        vm.warp(CURRENT_DATE + 4 days);
+        vm.warp(PRESET_CURRENT_DATE + 4 days);
         _expectEmitCategoryUpdated(
             CATEGORY_ID,
             volumeCoefficientInput1,
@@ -96,7 +96,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         assertEq(category1.volumeCoefficient, volumeCoefficientInput1);
         assertEq(category1.decayPerSecond, decayPerSecondInput1);
         assertEq(category1.maxDepreciation, maxDepreciationInput1);
-        assertEq(category1.lastCollateralizationTimestamp, CURRENT_DATE + 4 days);
+        assertEq(category1.lastCollateralizationTimestamp, PRESET_CURRENT_DATE + 4 days);
         assertEq(category1.lastCollateralizationMomentum, 142500);
         // 90% * 50000 * 75000 / 50000 + 75000 = 142500
     }
@@ -152,7 +152,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 12),
+                certificationDate: PRESET_CURRENT_DATE + 12,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
@@ -168,7 +168,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         assertEq(batch.id, batchId);
         assertEq(batch.status, 0);
         assertEq(batch.projectId, 5);
-        assertEq(batch.certificationDate, uint32(CURRENT_DATE + 12));
+        assertEq(batch.certificationDate, PRESET_CURRENT_DATE + 12);
         assertEq(batch.vintage, 2022);
         assertEq(batch.batchTA, 1);
         assertEq(batch.supplier, testAccount);
@@ -188,7 +188,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 12),
+                certificationDate: PRESET_CURRENT_DATE + 12,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
@@ -203,7 +203,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 24),
+                certificationDate: PRESET_CURRENT_DATE + 24,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
@@ -229,7 +229,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 12),
+                certificationDate: PRESET_CURRENT_DATE + 12,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
@@ -251,7 +251,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 12),
+                certificationDate: PRESET_CURRENT_DATE + 12,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
@@ -276,7 +276,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 12),
+                certificationDate: PRESET_CURRENT_DATE + 12,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
@@ -296,7 +296,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 12),
+                certificationDate: PRESET_CURRENT_DATE + 12,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
@@ -311,7 +311,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 12),
+                certificationDate: PRESET_CURRENT_DATE + 12,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
@@ -331,7 +331,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 12),
+                certificationDate: PRESET_CURRENT_DATE + 12,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: address(0),
@@ -351,7 +351,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE),
+                certificationDate: PRESET_CURRENT_DATE,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
@@ -371,7 +371,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE - 1),
+                certificationDate: PRESET_CURRENT_DATE - 1,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
@@ -392,7 +392,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE - 1),
+                certificationDate: PRESET_CURRENT_DATE - 1,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: address(0),
@@ -408,7 +408,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE - 1),
+                certificationDate: PRESET_CURRENT_DATE - 1,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: address(manager),
@@ -419,25 +419,25 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
     }
 
     function testSetBatchCertificationDate_failsForNonExistingBatch() public {
-        _addBatchWithDependencies(CURRENT_DATE + 52 weeks, 10000);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + 52 weeks, 10000);
 
         _expectRevert_InvalidBatchId(17);
-        manager.setBatchCertificationDate(17, uint32(CURRENT_DATE + 53 weeks));
+        manager.setBatchCertificationDate(17, PRESET_CURRENT_DATE + 53 weeks);
     }
 
     function testSetBatchCertificationDate_failsForCertificationDateLaterThanCurrent() public {
-        _addBatchWithDependencies(CURRENT_DATE + 52 weeks, 10000);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + 52 weeks, 10000);
 
         _expectRevert_InvalidInput();
-        manager.setBatchCertificationDate(BATCH_ID, uint32(CURRENT_DATE + 53 weeks));
+        manager.setBatchCertificationDate(BATCH_ID, PRESET_CURRENT_DATE + 53 weeks);
     }
 
     function testSetBatchCertificationDate() public {
-        _addBatchWithDependencies(CURRENT_DATE + 52 weeks, 10000);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + 52 weeks, 10000);
 
-        manager.setBatchCertificationDate(BATCH_ID, uint32(CURRENT_DATE + 51 weeks));
+        manager.setBatchCertificationDate(BATCH_ID, PRESET_CURRENT_DATE + 51 weeks);
 
-        assertEq(manager.getBatch(BATCH_ID).certificationDate, uint32(CURRENT_DATE + 51 weeks));
+        assertEq(manager.getBatch(BATCH_ID).certificationDate, PRESET_CURRENT_DATE + 51 weeks);
     }
 
     function _expectEmitCategoryCreated() private {

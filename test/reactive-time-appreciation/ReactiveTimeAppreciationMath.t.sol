@@ -10,14 +10,17 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
         uint decayPerSecond = _getTestDecayPerSecond();
 
         uint32[] memory lastCollateralizationTimestamps = new uint32[](6);
-        lastCollateralizationTimestamps[0] = uint32(CURRENT_DATE - 1 days);
-        lastCollateralizationTimestamps[1] = uint32(CURRENT_DATE - 21 days);
-        lastCollateralizationTimestamps[2] = uint32(CURRENT_DATE - 1 days - 18 hours);
-        lastCollateralizationTimestamps[3] = uint32(
-            CURRENT_DATE - 3 days - 15 hours - 33 minutes - 12 seconds
-        );
-        lastCollateralizationTimestamps[4] = uint32(CURRENT_DATE - 19 days - 18 hours);
-        lastCollateralizationTimestamps[5] = uint32(CURRENT_DATE - 20 days);
+        lastCollateralizationTimestamps[0] = PRESET_CURRENT_DATE - 1 days;
+        lastCollateralizationTimestamps[1] = PRESET_CURRENT_DATE - 21 days;
+        lastCollateralizationTimestamps[2] = PRESET_CURRENT_DATE - 1 days - 18 hours;
+        lastCollateralizationTimestamps[3] =
+            PRESET_CURRENT_DATE -
+            3 days -
+            15 hours -
+            33 minutes -
+            12 seconds;
+        lastCollateralizationTimestamps[4] = PRESET_CURRENT_DATE - 19 days - 18 hours;
+        lastCollateralizationTimestamps[5] = PRESET_CURRENT_DATE - 20 days;
 
         uint decayingMomentum0 = ReactiveTimeAppreciationMath.computeDecayingMomentum(
             decayPerSecond,
@@ -64,7 +67,7 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
         uint lastCollateralizationTimestamp
     ) public {
         decayPerSecond = bound(decayPerSecond, 0, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS);
-        lastCollateralizationTimestamp = bound(lastCollateralizationTimestamp, 0, CURRENT_DATE);
+        lastCollateralizationTimestamp = bound(lastCollateralizationTimestamp, 0, PRESET_CURRENT_DATE);
         ReactiveTimeAppreciationMath.computeDecayingMomentum(
             decayPerSecond,
             lastCollateralizationMomentum,
@@ -85,7 +88,7 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
         categoryStates[0].maxDepreciation = maxDepreciation;
         categoryStates[0].averageTA = averageTA;
         categoryStates[0].totalCollateralized = 0;
-        categoryStates[0].lastCollateralizationTimestamp = CURRENT_DATE;
+        categoryStates[0].lastCollateralizationTimestamp = PRESET_CURRENT_DATE;
         categoryStates[0].lastCollateralizationMomentum = 0;
         // eliminates decaying momentum from the equation
 
@@ -94,7 +97,7 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
         categoryStates[1].maxDepreciation = maxDepreciation;
         categoryStates[1].averageTA = averageTA;
         categoryStates[1].totalCollateralized = 0;
-        categoryStates[1].lastCollateralizationTimestamp = CURRENT_DATE;
+        categoryStates[1].lastCollateralizationTimestamp = PRESET_CURRENT_DATE;
         // decayingMomentum = lastCollateralizationMomentum
         categoryStates[1].lastCollateralizationMomentum = 30000;
 
@@ -135,7 +138,9 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
     ) public {
         volumeCoefficient = bound(volumeCoefficient, 10000, type(uint).max / 100);
         decayPerSecond = uint40(bound(decayPerSecond, 0, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS));
-        lastCollateralizationTimestamp = uint32(bound(lastCollateralizationTimestamp, 0, CURRENT_DATE));
+        lastCollateralizationTimestamp = uint32(
+            bound(lastCollateralizationTimestamp, 0, PRESET_CURRENT_DATE)
+        );
 
         averageTA = uint24(bound(averageTA, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1));
         maxDepreciation = uint16(bound(maxDepreciation, 0, averageTA / 1000));
@@ -177,7 +182,7 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
         categoryState.averageTA = 1599;
         // 8% per year
         categoryState.totalCollateralized = 0;
-        categoryState.lastCollateralizationTimestamp = CURRENT_DATE;
+        categoryState.lastCollateralizationTimestamp = PRESET_CURRENT_DATE;
         categoryState.lastCollateralizationMomentum = 0;
 
         uint forwardCreditsAmount = 1e18;
@@ -194,7 +199,7 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
     function testFailInferBatchTA_weeksTillCertificationAre0() public {
         uint circulatingCBT = 945 * 10**PRESET_DECIMALS;
         uint totalCollateralizedForwardCredits = 1000;
-        uint certificationDate = CURRENT_DATE;
+        uint certificationDate = PRESET_CURRENT_DATE;
 
         uint batchTA = ReactiveTimeAppreciationMath.inferBatchTA(
             circulatingCBT,
@@ -207,13 +212,13 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
     }
 
     function testFailInferBatchTA_invalidInputs() public view {
-        ReactiveTimeAppreciationMath.inferBatchTA(0, 0, CURRENT_DATE, PRESET_DECIMALS);
+        ReactiveTimeAppreciationMath.inferBatchTA(0, 0, PRESET_CURRENT_DATE, PRESET_DECIMALS);
     }
 
     function testInferBatchTA() public {
         uint circulatingCBT = 880.88600587e18;
         uint totalCollateralizedForwardCredits = 1000;
-        uint certificationDate = CURRENT_DATE + 77 weeks;
+        uint certificationDate = PRESET_CURRENT_DATE + 77 weeks;
 
         uint batchTA = ReactiveTimeAppreciationMath.inferBatchTA(
             circulatingCBT,
@@ -236,7 +241,7 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
             1,
             circulatingCBT / 1e18
         );
-        certificationDate = bound(certificationDate, CURRENT_DATE + 72 weeks, type(uint32).max);
+        certificationDate = bound(certificationDate, PRESET_CURRENT_DATE + 72 weeks, type(uint32).max);
 
         ReactiveTimeAppreciationMathWrapper wrapper = new ReactiveTimeAppreciationMathWrapper();
         try
@@ -277,7 +282,7 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
         category.averageTA = 1599;
         // 8% yearly rate
         category.totalCollateralized = 0;
-        category.lastCollateralizationTimestamp = CURRENT_DATE;
+        category.lastCollateralizationTimestamp = PRESET_CURRENT_DATE;
         category.lastCollateralizationMomentum = 50000;
 
         uint newVolumeCoefficient = 75000;
@@ -288,7 +293,7 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
         uint newMaxDepreciation2 = 5;
         // 0.5% yearly rate
 
-        vm.warp(CURRENT_DATE + 2 days);
+        vm.warp(PRESET_CURRENT_DATE + 2 days);
         uint adjustedMomentum0 = ReactiveTimeAppreciationMath.computeAdjustedMomentum(
             category,
             newVolumeCoefficient,
@@ -323,7 +328,9 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
         volumeCoefficient = bound(volumeCoefficient, 0, type(uint256).max / 101 - 1);
         newVolumeCoefficient = bound(newVolumeCoefficient, 0, volumeCoefficient);
         decayPerSecond = uint40(bound(decayPerSecond, 0, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS));
-        lastCollateralizationTimestamp = uint32(bound(lastCollateralizationTimestamp, 0, CURRENT_DATE));
+        lastCollateralizationTimestamp = uint32(
+            bound(lastCollateralizationTimestamp, 0, PRESET_CURRENT_DATE)
+        );
 
         averageTA = uint24(bound(averageTA, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1));
         maxDepreciation = uint16(bound(maxDepreciation, 0, averageTA / 1000));

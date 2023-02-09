@@ -9,9 +9,8 @@ abstract contract BaseSolidMathTest is BaseTest {
     uint constant DECOLLATERALIZATION_FEE = 500; // 5%
     uint constant REWARDS_FEE = 500; // 5%
     uint constant PRESET_TIME_APPRECIATION = 8_0000; // 8%
-    uint constant CURRENT_DATE = 1666016743;
 
     function setUp() public {
-        vm.warp(CURRENT_DATE);
+        vm.warp(PRESET_CURRENT_DATE);
     }
 }

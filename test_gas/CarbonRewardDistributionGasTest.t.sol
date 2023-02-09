@@ -9,7 +9,6 @@ import "../contracts/SolidStaking.sol";
 import "../contracts/rewards/RewardsController.sol";
 
 contract CarbonRewardDistributionGasTest is GasTest {
-    uint32 constant CURRENT_DATE = 1666016743;
     uint constant CATEGORY_ID = 1;
     uint constant PROJECT_ID = 3;
     uint constant BATCH_ID = 5;

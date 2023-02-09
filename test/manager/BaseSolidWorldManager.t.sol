@@ -23,14 +23,12 @@ abstract contract BaseSolidWorldManager is BaseTest {
     uint constant BATCH_ID = 5;
     uint24 constant INITIAL_CATEGORY_TA = 8_0000;
 
-    uint constant CURRENT_DATE = 1666016743;
-
     uint16 constant COLLATERALIZATION_FEE = 1000; // 10%
     uint16 constant DECOLLATERALIZATION_FEE = 1000; // 10%
     uint16 constant REWARDS_FEE = 500; // 5%
 
     function setUp() public virtual {
-        vm.warp(CURRENT_DATE);
+        vm.warp(PRESET_CURRENT_DATE);
 
         manager = new SolidWorldManager();
         forwardContractBatch = new ForwardContractBatchToken("");

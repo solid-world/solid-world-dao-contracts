@@ -5,10 +5,8 @@ import "../BaseTest.sol";
 import "../../contracts/libraries/ReactiveTimeAppreciationMath.sol";
 
 contract BaseReactiveTimeAppreciationMathTest is BaseTest {
-    uint32 constant CURRENT_DATE = 1666016743;
-
     function setUp() public {
-        vm.warp(CURRENT_DATE);
+        vm.warp(PRESET_CURRENT_DATE);
     }
 
     function _getTestDecayPerSecond() internal pure returns (uint decayPerSecond) {
