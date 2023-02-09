@@ -5,12 +5,20 @@ import "../BaseTest.sol";
 import "../../contracts/libraries/ReactiveTimeAppreciationMath.sol";
 
 contract BaseReactiveTimeAppreciationMathTest is BaseTest {
+    uint40 immutable PRESET_DECAY_PER_SECOND;
+
+    constructor() {
+        PRESET_DECAY_PER_SECOND = _getTestDecayPerSecond();
+    }
+
     function setUp() public {
         vm.warp(PRESET_CURRENT_DATE);
     }
 
-    function _getTestDecayPerSecond() internal pure returns (uint decayPerSecond) {
+    function _getTestDecayPerSecond() internal pure returns (uint40 decayPerSecond) {
         // 5% decay per day quantified per second
-        decayPerSecond = Math.mulDiv(5, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS, 100 * 1 days);
+        decayPerSecond = uint40(
+            Math.mulDiv(5, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS, 100 * 1 days)
+        );
     }
 }

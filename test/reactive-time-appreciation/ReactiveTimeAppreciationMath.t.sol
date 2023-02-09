@@ -7,9 +7,8 @@ import "./BaseReactiveTimeAppreciationMath.sol";
 contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTest {
     function testComputeDecayingMomentum() public {
         uint lastCollateralizationMomentum = 10000;
-        uint decayPerSecond = _getTestDecayPerSecond();
 
-        uint32[] memory lastCollateralizationTimestamps = new uint32[](6);
+        uint[] memory lastCollateralizationTimestamps = new uint[](6);
         lastCollateralizationTimestamps[0] = PRESET_CURRENT_DATE - 1 days;
         lastCollateralizationTimestamps[1] = PRESET_CURRENT_DATE - 21 days;
         lastCollateralizationTimestamps[2] = PRESET_CURRENT_DATE - 1 days - 18 hours;
@@ -22,43 +21,22 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
         lastCollateralizationTimestamps[4] = PRESET_CURRENT_DATE - 19 days - 18 hours;
         lastCollateralizationTimestamps[5] = PRESET_CURRENT_DATE - 20 days;
 
-        uint decayingMomentum0 = ReactiveTimeAppreciationMath.computeDecayingMomentum(
-            decayPerSecond,
-            lastCollateralizationMomentum,
-            lastCollateralizationTimestamps[0]
-        );
-        uint decayingMomentum1 = ReactiveTimeAppreciationMath.computeDecayingMomentum(
-            decayPerSecond,
-            lastCollateralizationMomentum,
-            lastCollateralizationTimestamps[1]
-        );
-        uint decayingMomentum2 = ReactiveTimeAppreciationMath.computeDecayingMomentum(
-            decayPerSecond,
-            lastCollateralizationMomentum,
-            lastCollateralizationTimestamps[2]
-        );
-        uint decayingMomentum3 = ReactiveTimeAppreciationMath.computeDecayingMomentum(
-            decayPerSecond,
-            lastCollateralizationMomentum,
-            lastCollateralizationTimestamps[3]
-        );
-        uint decayingMomentum4 = ReactiveTimeAppreciationMath.computeDecayingMomentum(
-            decayPerSecond,
-            lastCollateralizationMomentum,
-            lastCollateralizationTimestamps[4]
-        );
-        uint decayingMomentum5 = ReactiveTimeAppreciationMath.computeDecayingMomentum(
-            decayPerSecond,
-            lastCollateralizationMomentum,
-            lastCollateralizationTimestamps[5]
-        );
+        uint[] memory expectedDecayingMomentum = new uint[](6);
+        expectedDecayingMomentum[0] = 9500;
+        expectedDecayingMomentum[1] = 0;
+        expectedDecayingMomentum[2] = 9125;
+        expectedDecayingMomentum[3] = 8175;
+        expectedDecayingMomentum[4] = 125;
+        expectedDecayingMomentum[5] = 0;
 
-        assertEq(decayingMomentum0, 9500);
-        assertEq(decayingMomentum1, 0);
-        assertEq(decayingMomentum2, 9125);
-        assertEq(decayingMomentum3, 8175);
-        assertEq(decayingMomentum4, 125);
-        assertEq(decayingMomentum5, 0);
+        for (uint i; i < lastCollateralizationTimestamps.length; i++) {
+            uint decayingMomentum = ReactiveTimeAppreciationMath.computeDecayingMomentum(
+                PRESET_DECAY_PER_SECOND,
+                lastCollateralizationMomentum,
+                lastCollateralizationTimestamps[i]
+            );
+            assertEq(decayingMomentum, expectedDecayingMomentum[i]);
+        }
     }
 
     function testComputeDecayingMomentum_fuzz(
@@ -76,29 +54,24 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
     }
 
     function testComputeReactiveTA() public {
-        uint24 decayPerSecond = uint24(_getTestDecayPerSecond());
-        uint16 maxDepreciation = 10;
-        // 1% yearly rate
-        uint24 averageTA = 80000;
-        // 8% yearly rate
+        uint16 maxDepreciation = 10; // 1% yearly rate
+        uint24 averageTA = 80000; // 8% yearly rate
 
         DomainDataTypes.Category[] memory categoryStates = new DomainDataTypes.Category[](2);
         categoryStates[0].volumeCoefficient = 50000;
-        categoryStates[0].decayPerSecond = decayPerSecond;
+        categoryStates[0].decayPerSecond = PRESET_DECAY_PER_SECOND;
         categoryStates[0].maxDepreciation = maxDepreciation;
         categoryStates[0].averageTA = averageTA;
         categoryStates[0].totalCollateralized = 0;
         categoryStates[0].lastCollateralizationTimestamp = PRESET_CURRENT_DATE;
-        categoryStates[0].lastCollateralizationMomentum = 0;
-        // eliminates decaying momentum from the equation
+        categoryStates[0].lastCollateralizationMomentum = 0; // eliminates decaying momentum from the equation
 
         categoryStates[1].volumeCoefficient = 50000;
-        categoryStates[1].decayPerSecond = decayPerSecond;
+        categoryStates[1].decayPerSecond = PRESET_DECAY_PER_SECOND;
         categoryStates[1].maxDepreciation = maxDepreciation;
         categoryStates[1].averageTA = averageTA;
         categoryStates[1].totalCollateralized = 0;
-        categoryStates[1].lastCollateralizationTimestamp = PRESET_CURRENT_DATE;
-        // decayingMomentum = lastCollateralizationMomentum
+        categoryStates[1].lastCollateralizationTimestamp = PRESET_CURRENT_DATE; // decayingMomentum = lastCollateralizationMomentum
         categoryStates[1].lastCollateralizationMomentum = 30000;
 
         (uint decayingMomentum0, uint reactiveTA0) = ReactiveTimeAppreciationMath.computeReactiveTA(
@@ -276,7 +249,7 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
     function testComputeAdjustedMomentum() public {
         DomainDataTypes.Category memory category;
         category.volumeCoefficient = 50000;
-        category.decayPerSecond = uint40(_getTestDecayPerSecond());
+        category.decayPerSecond = PRESET_DECAY_PER_SECOND;
         category.maxDepreciation = 10;
         // 1% yearly rate
         category.averageTA = 1599;
