@@ -21,4 +21,26 @@ contract BaseReactiveTimeAppreciationMathTest is BaseTest {
             Math.mulDiv(5, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS, 100 * 1 days)
         );
     }
+
+    function _boundNewVolumeCoefficient(uint newVolumeCoefficient, uint volumeCoefficient)
+        internal
+        returns (uint)
+    {
+        return bound(newVolumeCoefficient, 0, volumeCoefficient);
+    }
+
+    function _boundLastCollateralizationTimestamp(uint lastCollateralizationTimestamp)
+        internal
+        returns (uint32)
+    {
+        return uint32(bound(lastCollateralizationTimestamp, 0, PRESET_CURRENT_DATE));
+    }
+
+    function _boundDecayPerSecond(uint40 decayPerSecond) internal returns (uint40) {
+        return uint40(bound(decayPerSecond, 0, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS));
+    }
+
+    function _boundAverageTA(uint24 averageTA) internal returns (uint24) {
+        return uint24(bound(averageTA, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1));
+    }
 }
