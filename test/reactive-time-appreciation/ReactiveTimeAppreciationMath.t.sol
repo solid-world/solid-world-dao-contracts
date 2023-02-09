@@ -2,20 +2,12 @@
 pragma solidity ^0.8.16;
 
 import "./ReactiveTimeAppreciationMathWrapper.t.sol";
-import "../BaseTest.sol";
-import "../../contracts/libraries/DomainDataTypes.sol";
-import "../../contracts/libraries/ReactiveTimeAppreciationMath.sol";
+import "./BaseReactiveTimeAppreciationMath.sol";
 
-contract ReactiveTimeAppreciationMathTest is BaseTest {
-    uint32 constant CURRENT_DATE = 1666016743;
-
-    function setUp() public {
-        vm.warp(CURRENT_DATE);
-    }
-
+contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTest {
     function testComputeDecayingMomentum() public {
         uint lastCollateralizationMomentum = 10000;
-        uint decayPerSecond = getTestDecayPerSecond();
+        uint decayPerSecond = _getTestDecayPerSecond();
 
         uint32[] memory lastCollateralizationTimestamps = new uint32[](6);
         lastCollateralizationTimestamps[0] = uint32(CURRENT_DATE - 1 days);
@@ -81,7 +73,7 @@ contract ReactiveTimeAppreciationMathTest is BaseTest {
     }
 
     function testComputeReactiveTA() public {
-        uint24 decayPerSecond = uint24(getTestDecayPerSecond());
+        uint24 decayPerSecond = uint24(_getTestDecayPerSecond());
         uint16 maxDepreciation = 10;
         // 1% yearly rate
         uint24 averageTA = 80000;
@@ -279,7 +271,7 @@ contract ReactiveTimeAppreciationMathTest is BaseTest {
     function testComputeAdjustedMomentum() public {
         DomainDataTypes.Category memory category;
         category.volumeCoefficient = 50000;
-        category.decayPerSecond = uint40(getTestDecayPerSecond());
+        category.decayPerSecond = uint40(_getTestDecayPerSecond());
         category.maxDepreciation = 10;
         // 1% yearly rate
         category.averageTA = 1599;
@@ -356,10 +348,5 @@ contract ReactiveTimeAppreciationMathTest is BaseTest {
         categoryState.lastCollateralizationMomentum = lastCollateralizationMomentum;
 
         ReactiveTimeAppreciationMath.inferMomentum(categoryState, newVolumeCoefficient, newMaxDepreciation);
-    }
-
-    function getTestDecayPerSecond() internal pure returns (uint decayPerSecond) {
-        // 5% decay per day quantified per second
-        decayPerSecond = Math.mulDiv(5, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS, 100 * 1 days);
     }
 }
