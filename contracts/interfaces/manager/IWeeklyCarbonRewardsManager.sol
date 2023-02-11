@@ -5,6 +5,10 @@ pragma solidity ^0.8.16;
 /// @notice Computes and mints weekly carbon rewards
 /// @author Solid World DAO
 interface IWeeklyCarbonRewardsManager {
+    event WeeklyRewardMinted(address indexed rewardToken, uint indexed rewardAmount);
+    event RewardsFeeUpdated(uint indexed rewardsFee);
+    event RewardsMinterUpdated(address indexed rewardsMinter);
+
     /// @param weeklyRewardsMinter The only account allowed to mint weekly carbon rewards
     function setWeeklyRewardsMinter(address weeklyRewardsMinter) external;
 

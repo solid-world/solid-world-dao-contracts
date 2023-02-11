@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.16;
 
+import "./CategoryRebalancer.sol";
 import "../DomainDataTypes.sol";
 import "../SolidMath.sol";
 import "../GPv2SafeERC20.sol";
@@ -13,16 +14,13 @@ library DecollateralizationManager {
     /// @notice Constant used as input for decollateralization simulation for ordering batches with the same category and vintage
     uint public constant DECOLLATERALIZATION_SIMULATION_INPUT = 1000e18;
 
+    using CategoryRebalancer for SolidWorldManagerStorage.Storage;
+
     event TokensDecollateralized(
         uint indexed batchId,
         address indexed tokensOwner,
         uint amountIn,
         uint amountOut
-    );
-    event CategoryRebalanced(
-        uint indexed categoryId,
-        uint indexed averageTA,
-        uint indexed totalCollateralized
     );
     event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
 
@@ -47,7 +45,7 @@ library DecollateralizationManager {
     ) external {
         _decollateralizeTokens(_storage, batchId, amountIn, amountOutMin);
 
-        _rebalanceCategory(_storage, _storage.batchCategory[batchId]);
+        _storage.rebalanceCategory(_storage.batchCategory[batchId]);
     }
 
     /// @dev Bulk-decollateralizes ERC20 tokens into multiple ERC1155 tokens with specified amounts
@@ -82,7 +80,7 @@ library DecollateralizationManager {
         }
 
         uint decollateralizedCategoryId = _storage.batchCategory[batchIds[0]];
-        _rebalanceCategory(_storage, decollateralizedCategoryId);
+        _storage.rebalanceCategory(decollateralizedCategoryId);
     }
 
     /// @dev Simulates decollateralization of `amountIn` ERC20 tokens for ERC1155 tokens with id `batchId`
@@ -199,45 +197,6 @@ library DecollateralizationManager {
             _storage.decollateralizationFee,
             collateralizedToken.decimals()
         );
-    }
-
-    function _rebalanceCategory(SolidWorldManagerStorage.Storage storage _storage, uint categoryId) internal {
-        uint totalQuantifiedForwardCredits;
-        uint totalCollateralizedForwardCredits;
-
-        uint[] storage projects = _storage.categoryProjects[categoryId];
-        for (uint i; i < projects.length; i++) {
-            uint projectId = projects[i];
-            uint[] storage _batches = _storage.projectBatches[projectId];
-            for (uint j; j < _batches.length; j++) {
-                uint batchId = _batches[j];
-                uint collateralizedForwardCredits = _storage.batches[batchId].collateralizedCredits;
-                if (
-                    collateralizedForwardCredits == 0 ||
-                    _storage.batches[batchId].certificationDate <= block.timestamp ||
-                    !_storage.batches[batchId].isAccumulating
-                ) {
-                    continue;
-                }
-
-                totalQuantifiedForwardCredits +=
-                    _storage.batches[batchId].batchTA *
-                    collateralizedForwardCredits;
-                totalCollateralizedForwardCredits += collateralizedForwardCredits;
-            }
-        }
-
-        if (totalCollateralizedForwardCredits == 0) {
-            _storage.categories[categoryId].totalCollateralized = 0;
-            emit CategoryRebalanced(categoryId, _storage.categories[categoryId].averageTA, 0);
-            return;
-        }
-
-        uint latestAverageTA = totalQuantifiedForwardCredits / totalCollateralizedForwardCredits;
-        _storage.categories[categoryId].averageTA = uint24(latestAverageTA);
-        _storage.categories[categoryId].totalCollateralized = totalCollateralizedForwardCredits;
-
-        emit CategoryRebalanced(categoryId, latestAverageTA, totalCollateralizedForwardCredits);
     }
 
     /// @dev Decollateralizes `amountIn` of ERC20 tokens and sends `amountOut` ERC1155 tokens with id `batchId` to msg.sender
