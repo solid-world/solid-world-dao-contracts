@@ -9,8 +9,6 @@ import "../../../contracts/SolidWorldManager.sol";
 import "../../../contracts/rewards/RewardsController.sol";
 
 abstract contract BaseEmissionManagerTest is BaseTest {
-    uint32 constant CURRENT_DATE = 1666016743;
-
     event EmissionAdminUpdated(address indexed reward, address indexed oldAdmin, address indexed newAdmin);
     event RewardsControllerUpdated(address indexed newRewardsController);
     event CarbonRewardsManagerUpdated(address indexed newCarbonRewardsManager);
@@ -23,7 +21,7 @@ abstract contract BaseEmissionManagerTest is BaseTest {
     address emissionAdmin;
 
     function setUp() public {
-        vm.warp(CURRENT_DATE);
+        vm.warp(PRESET_CURRENT_DATE);
 
         owner = vm.addr(7);
         carbonRewardsManager = vm.addr(11);

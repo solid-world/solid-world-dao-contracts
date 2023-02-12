@@ -4,6 +4,19 @@ pragma solidity ^0.8.16;
 /// @notice Handles batch collateralization operations.
 /// @author Solid World DAO
 interface ICollateralizationManager {
+    event CategoryRebalanced(
+        uint indexed categoryId,
+        uint indexed averageTA,
+        uint indexed totalCollateralized
+    );
+    event BatchCollateralized(
+        uint indexed batchId,
+        address indexed batchSupplier,
+        uint amountIn,
+        uint amountOut
+    );
+    event CollateralizationFeeUpdated(uint indexed collateralizationFee);
+
     /// @dev Collateralizes `amountIn` of ERC1155 tokens with id `batchId` for msg.sender
     /// @dev prior to calling, msg.sender must approve SolidWorldManager to spend its ERC1155 tokens with id `batchId`
     /// @dev nonReentrant, to avoid possible reentrancy after calling safeTransferFrom

@@ -6,7 +6,7 @@ import "./SolidMathWrapper.t.sol";
 
 contract SolidMathTest is BaseSolidMathTest {
     function testComputeTimeAppreciationDiscountSingleWeek() public {
-        uint certificationDate = CURRENT_DATE + 1 weeks;
+        uint certificationDate = PRESET_CURRENT_DATE + 1 weeks;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(PRESET_TIME_APPRECIATION, certificationDate);
         uint expected = 998_402; // js: 998402.178529
@@ -15,7 +15,7 @@ contract SolidMathTest is BaseSolidMathTest {
     }
 
     function testComputeTimeAppreciationDiscountFewWeeks() public {
-        uint certificationDate = CURRENT_DATE + 5 weeks;
+        uint certificationDate = PRESET_CURRENT_DATE + 5 weeks;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(PRESET_TIME_APPRECIATION, certificationDate);
         uint expected = 992_036; // js: 992036.382217
@@ -24,7 +24,7 @@ contract SolidMathTest is BaseSolidMathTest {
     }
 
     function testComputeTimeAppreciationDiscountOneYear() public {
-        uint certificationDate = CURRENT_DATE + ONE_YEAR;
+        uint certificationDate = PRESET_CURRENT_DATE + ONE_YEAR;
 
         uint actual = SolidMath.computeTimeAppreciationDiscount(PRESET_TIME_APPRECIATION, certificationDate);
         uint expected = 920_210; // js: 920210.191351
@@ -34,7 +34,11 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testComputeTimeAppreciationDiscount_fuzz(uint timeAppreciation, uint certificationDate) public {
         timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
-        certificationDate = bound(certificationDate, CURRENT_DATE, CURRENT_DATE + _yearsToSeconds(50));
+        certificationDate = bound(
+            certificationDate,
+            PRESET_CURRENT_DATE,
+            PRESET_CURRENT_DATE + _yearsToSeconds(50)
+        );
 
         SolidMathWrapper wrapper = new SolidMathWrapper();
         try wrapper.computeTimeAppreciationDiscount(timeAppreciation, certificationDate) {} catch (
@@ -46,7 +50,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testCollateralizationOutcome_oneWeek() public {
         (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = SolidMath.computeCollateralizationOutcome(
-            CURRENT_DATE + 1 weeks + 1 hours,
+            PRESET_CURRENT_DATE + 1 weeks + 1 hours,
             10000,
             8_2300,
             COLLATERALIZATION_FEE,
@@ -66,7 +70,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testCollateralizationOutcome_oneYear() public {
         (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = SolidMath.computeCollateralizationOutcome(
-            CURRENT_DATE + ONE_YEAR + 1 hours,
+            PRESET_CURRENT_DATE + ONE_YEAR + 1 hours,
             10000,
             8_2300,
             COLLATERALIZATION_FEE,
@@ -88,7 +92,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testCollateralizationOutcome_tenYears() public {
         (uint cbtUserCut, uint cbtDaoCut, uint cbtForfeited) = SolidMath.computeCollateralizationOutcome(
-            CURRENT_DATE + _yearsToSeconds(10) + 1 hours,
+            PRESET_CURRENT_DATE + _yearsToSeconds(10) + 1 hours,
             10000,
             8_2300,
             COLLATERALIZATION_FEE,
@@ -114,7 +118,11 @@ contract SolidMathTest is BaseSolidMathTest {
         uint inputAmount
     ) public {
         timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
-        certificationDate = bound(certificationDate, CURRENT_DATE + 1, CURRENT_DATE + _yearsToSeconds(50));
+        certificationDate = bound(
+            certificationDate,
+            PRESET_CURRENT_DATE + 1,
+            PRESET_CURRENT_DATE + _yearsToSeconds(50)
+        );
         inputAmount = bound(inputAmount, 0, type(uint256).max / 1e18);
 
         SolidMathWrapper wrapper = new SolidMathWrapper();
@@ -133,7 +141,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testDecollateralizationOutcome_oneWeek() public {
         (uint cbtUserCut, uint cbtDaoCut, uint cbtToBurn) = SolidMath.computeDecollateralizationOutcome(
-            CURRENT_DATE + 1 weeks,
+            PRESET_CURRENT_DATE + 1 weeks,
             10000e18,
             99_5888,
             DECOLLATERALIZATION_FEE,
@@ -147,7 +155,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testDecollateralizationOutcome_oneYear() public {
         (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath.computeDecollateralizationOutcome(
-            CURRENT_DATE + ONE_YEAR + 1 hours,
+            PRESET_CURRENT_DATE + ONE_YEAR + 1 hours,
             10000e18,
             8_0105,
             DECOLLATERALIZATION_FEE,
@@ -161,7 +169,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testDecollateralizationOutcome_tenYears() public {
         (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath.computeDecollateralizationOutcome(
-            CURRENT_DATE + _yearsToSeconds(10),
+            PRESET_CURRENT_DATE + _yearsToSeconds(10),
             1000e18,
             8_0105,
             DECOLLATERALIZATION_FEE,
@@ -179,7 +187,7 @@ contract SolidMathTest is BaseSolidMathTest {
         uint inputAmount
     ) public {
         timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
-        certificationDate = bound(certificationDate, 1, CURRENT_DATE + _yearsToSeconds(50));
+        certificationDate = bound(certificationDate, 1, PRESET_CURRENT_DATE + _yearsToSeconds(50));
         inputAmount = bound(inputAmount, 0, type(uint256).max / SolidMath.TIME_APPRECIATION_BASIS_POINTS);
 
         SolidMathWrapper wrapper = new SolidMathWrapper();
@@ -199,7 +207,7 @@ contract SolidMathTest is BaseSolidMathTest {
     function testComputeDecollateralizationMinAmountInAndDaoCut_oneYear() public {
         uint expectedFcbtAmount = 10324;
         (uint minAmountIn, uint minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
-            CURRENT_DATE + ONE_YEAR + 1 hours,
+            PRESET_CURRENT_DATE + ONE_YEAR + 1 hours,
             expectedFcbtAmount,
             8_0105,
             DECOLLATERALIZATION_FEE,
@@ -221,7 +229,7 @@ contract SolidMathTest is BaseSolidMathTest {
         assertApproxEqAbs(minCbtDaoCut, 499956427982247510163, 427000000000000);
 
         (uint amountOut, uint cbtDaoCut, ) = SolidMath.computeDecollateralizationOutcome(
-            CURRENT_DATE + ONE_YEAR + 1 hours,
+            PRESET_CURRENT_DATE + ONE_YEAR + 1 hours,
             minAmountIn,
             8_0105,
             DECOLLATERALIZATION_FEE,
@@ -235,7 +243,7 @@ contract SolidMathTest is BaseSolidMathTest {
     function testComputeDecollateralizationMinAmountInAndDaoCut_tenYears() public {
         uint expectedFcbtAmount = 10324;
         (uint minAmountIn, uint minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
-            CURRENT_DATE + _yearsToSeconds(10) + 1 hours,
+            PRESET_CURRENT_DATE + _yearsToSeconds(10) + 1 hours,
             expectedFcbtAmount,
             8_0105,
             DECOLLATERALIZATION_FEE,
@@ -251,7 +259,7 @@ contract SolidMathTest is BaseSolidMathTest {
         assertApproxEqAbs(minCbtDaoCut, 236303661093000000000, 0.000342e18);
 
         (uint amountOut, uint cbtDaoCut, ) = SolidMath.computeDecollateralizationOutcome(
-            CURRENT_DATE + _yearsToSeconds(10) + 1 hours,
+            PRESET_CURRENT_DATE + _yearsToSeconds(10) + 1 hours,
             minAmountIn,
             8_0105,
             DECOLLATERALIZATION_FEE,
@@ -273,7 +281,11 @@ contract SolidMathTest is BaseSolidMathTest {
             0,
             type(uint256).max / 1e18 / SolidMath.FEE_BASIS_POINTS
         );
-        certificationDate = bound(certificationDate, CURRENT_DATE, CURRENT_DATE + _yearsToSeconds(50));
+        certificationDate = bound(
+            certificationDate,
+            PRESET_CURRENT_DATE,
+            PRESET_CURRENT_DATE + _yearsToSeconds(50)
+        );
         timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
         decollateralizationFee = bound(decollateralizationFee, 1, 9900); // max 99% fee
 
@@ -309,7 +321,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testComputeWeeklyBatchReward_batchIsCertified() public {
         (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
-            CURRENT_DATE - 1 minutes,
+            PRESET_CURRENT_DATE - 1 minutes,
             10000,
             1647,
             REWARDS_FEE,
@@ -322,7 +334,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testComputeWeeklyBatchReward_lessThanOneWeek() public {
         (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
-            CURRENT_DATE + 1 minutes,
+            PRESET_CURRENT_DATE + 1 minutes,
             10000,
             8_2359,
             REWARDS_FEE,
@@ -335,7 +347,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testComputeWeeklyBatchReward_oneWeek() public {
         (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
-            CURRENT_DATE + 1 weeks + 1 minutes,
+            PRESET_CURRENT_DATE + 1 weeks + 1 minutes,
             10000,
             8_2360,
             REWARDS_FEE,
@@ -352,7 +364,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testComputeWeeklyBatchReward_fiveYears() public {
         (uint rewardAmount, uint feeAmount) = SolidMath.computeWeeklyBatchReward(
-            CURRENT_DATE + _yearsToSeconds(5) + 1 minutes,
+            PRESET_CURRENT_DATE + _yearsToSeconds(5) + 1 minutes,
             10000,
             8_2360,
             REWARDS_FEE,
@@ -373,7 +385,7 @@ contract SolidMathTest is BaseSolidMathTest {
         uint availableCredits
     ) public {
         timeAppreciation = bound(timeAppreciation, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1);
-        certificationDate = bound(certificationDate, 1, CURRENT_DATE + _yearsToSeconds(50));
+        certificationDate = bound(certificationDate, 1, PRESET_CURRENT_DATE + _yearsToSeconds(50));
         availableCredits = bound(availableCredits, 0, type(uint256).max / 1e18 / SolidMath.FEE_BASIS_POINTS);
 
         SolidMathWrapper wrapper = new SolidMathWrapper();
@@ -392,7 +404,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
     function testFailComputeCollateralizationOutcome_ifCertificationDateIsInThePast() public view {
         SolidMath.computeCollateralizationOutcome(
-            CURRENT_DATE - 1 hours,
+            PRESET_CURRENT_DATE - 1 hours,
             10000,
             1647,
             COLLATERALIZATION_FEE,

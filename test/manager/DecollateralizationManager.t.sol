@@ -33,7 +33,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testDecollateralizeTokens_failsIfDecollateralizingMoreTokensThanOwned() public {
-        _addBatchWithDependencies(CURRENT_DATE + 12, 100);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + 12, 100);
 
         vm.prank(testAccount);
         _expectRevertWithMessage("ERC20: burn amount exceeds balance");
@@ -41,7 +41,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testDecollateralizeTokens_failsWithoutApprovingManagerToSpendTokens() public {
-        _addBatchWithDependencies(CURRENT_DATE + 12, 100);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + 12, 100);
 
         vm.startPrank(testAccount);
         manager.getCategoryToken(CATEGORY_ID).approve(address(manager), 0);
@@ -51,7 +51,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testDecollateralizeTokensWhenERC20InputIsTooLow() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + 1 weeks, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + 1 weeks, 10000);
 
         uint amountOutMin = 81e18;
 
@@ -62,7 +62,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testDecollateralizeTokensWhenERC1155OutputIsLessThanMinimum() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
 
         uint cbtUserCut = 81e18;
 
@@ -74,7 +74,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testDecollateralizeTokens_whenBatchIsCertified() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
 
         uint cbtUserCut = 8100e18;
         uint cbtDaoCut = 900e18;
@@ -82,7 +82,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 10000, cbtUserCut);
 
-        vm.warp(CURRENT_DATE + ONE_YEAR);
+        vm.warp(PRESET_CURRENT_DATE + ONE_YEAR);
 
         uint expectedAmountDecollateralized = (8100 / 10) * 9;
         // 90%
@@ -106,7 +106,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testDecollateralizeTokensBurnsERC20AndReceivesERC1155() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
 
         uint cbtUserCut = 8102.331e18;
         uint cbtDaoCut = 900e18;
@@ -131,7 +131,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testDecollateralizeTokens_triggersCategoryRebalance() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
 
         uint cbtUserCut = 8100e18;
 
@@ -156,8 +156,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testDecollateralizeTokens_triggersCategoryRebalance_batchesNotAccumulatingAreIgnored() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
-        _addBatch(BATCH_ID + 1, PROJECT_ID, CURRENT_DATE + ONE_YEAR, 99999, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatch(BATCH_ID + 1, PROJECT_ID, PRESET_CURRENT_DATE + ONE_YEAR, 99999, 10000);
 
         uint cbtUserCut = 8100e18;
 
@@ -199,13 +199,13 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testBulkDecollateralizeTokens_failsForBatchesBelongingToDifferentCategories() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
         _addBatchWithDependencies(
             CATEGORY_ID + 1,
             PROJECT_ID + 1,
             BATCH_ID + 1,
             TIME_APPRECIATION,
-            CURRENT_DATE + ONE_YEAR,
+            PRESET_CURRENT_DATE + ONE_YEAR,
             10000
         );
 
@@ -228,8 +228,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testBulkDecollateralizeTokens_inputAmountIs0() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
-        _addBatch(BATCH_ID + 1, CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatch(BATCH_ID + 1, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
 
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 10000, 8100e18);
@@ -250,8 +250,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testBulkDecollateralizeTokens_verifyTokenBalances() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
-        _addBatch(BATCH_ID + 1, CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatch(BATCH_ID + 1, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
 
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 10000, 8100e18);
@@ -285,8 +285,8 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testBulkDecollateralizeTokens_triggersCategoryRebalance() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
-        _addBatch(BATCH_ID + 1, CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatch(BATCH_ID + 1, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
 
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 10000, 8100e18);
@@ -317,9 +317,9 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     function testBulkDecollateralizeTokens_triggersCategoryRebalance_batchesNotAccumulatingAreIgnored()
         public
     {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
-        _addBatch(BATCH_ID + 1, CURRENT_DATE + ONE_YEAR, 10000);
-        _addBatch(BATCH_ID + 2, PROJECT_ID, CURRENT_DATE + ONE_YEAR, 99999, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatch(BATCH_ID + 1, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatch(BATCH_ID + 2, PROJECT_ID, PRESET_CURRENT_DATE + ONE_YEAR, 99999, 10000);
 
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 10000, 8100e18);
@@ -415,7 +415,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: projectId,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
+                certificationDate: PRESET_CURRENT_DATE + ONE_YEAR,
                 vintage: uint16(vintage),
                 batchTA: 0,
                 supplier: testAccount,

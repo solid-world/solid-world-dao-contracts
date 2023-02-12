@@ -5,7 +5,7 @@ import "./BaseSolidWorldManager.t.sol";
 
 contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     function testReactiveTAOutcomes_initialCategoryParams() public {
-        _addBatchWithDependencies(CURRENT_DATE + ONE_YEAR, 50000);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + ONE_YEAR, 50000);
 
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 1000, 828e18);
@@ -32,7 +32,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     }
 
     function testReactiveTAOutcomes_updatedCategoryParams_batch1YearFromCertification() public {
-        _addBatchWithDependencies(CURRENT_DATE + ONE_YEAR + 5 days, 50000);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + ONE_YEAR + 5 days, 50000);
 
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
@@ -42,7 +42,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
         assertEq(category.totalCollateralized, 0);
         assertEq(category.lastCollateralizationMomentum, 10000);
 
-        vm.warp(CURRENT_DATE + 5 days);
+        vm.warp(PRESET_CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 5000, 4140e18);
 
@@ -75,7 +75,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
 
         assertApproxEqAbs(mintedERC20 + rewards, 5000e18 + 10000e18 + 20000e18, 0.065e18);
 
-        vm.warp(CURRENT_DATE + 5 days);
+        vm.warp(PRESET_CURRENT_DATE + 5 days);
 
         (, uint reactiveTABeforeUpdate0) = ReactiveTimeAppreciationMath.computeReactiveTA(
             manager.getCategory(CATEGORY_ID),
@@ -92,7 +92,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
 
         assertEq(reactiveTABeforeUpdate0, reactiveTAAfterUpdate0);
 
-        vm.warp(CURRENT_DATE + 100 days);
+        vm.warp(PRESET_CURRENT_DATE + 100 days);
         (, uint reactiveTABeforeUpdate1) = ReactiveTimeAppreciationMath.computeReactiveTA(
             manager.getCategory(CATEGORY_ID),
             0
@@ -112,12 +112,12 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     }
 
     function testReactiveTAOutcomes_updatedCategoryParams_batch7YearFromCertification() public {
-        _addBatchWithDependencies(CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
 
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
 
-        vm.warp(CURRENT_DATE + 5 days);
+        vm.warp(PRESET_CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 5000, 0);
 
@@ -141,12 +141,12 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     function testReactiveTAOutcomes_updatedCategoryParams_batch7YearFromCertification_moreCollateralizationOps()
         public
     {
-        _addBatchWithDependencies(CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
 
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
 
-        vm.warp(CURRENT_DATE + 5 days);
+        vm.warp(PRESET_CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
         manager.collateralizeBatch(BATCH_ID, 5000, 0);
 
@@ -174,13 +174,13 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     {
         _addCategoryAndProjectWithApprovedSpending();
         for (uint i; i < 5; i++) {
-            _addBatch(BATCH_ID + i, CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
+            _addBatch(BATCH_ID + i, PRESET_CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
 
-        vm.warp(CURRENT_DATE + 5 days);
+        vm.warp(PRESET_CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
         for (uint i; i < 5; i++) {
             manager.collateralizeBatch(BATCH_ID + i, 10000, 0);
@@ -201,13 +201,13 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     {
         _addCategoryAndProjectWithApprovedSpending();
         for (uint i; i < 5; i++) {
-            _addBatch(BATCH_ID + i, CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
+            _addBatch(BATCH_ID + i, PRESET_CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
 
-        vm.warp(CURRENT_DATE + 5 days);
+        vm.warp(PRESET_CURRENT_DATE + 5 days);
         vm.startPrank(testAccount);
         for (uint i; i < 5; i++) {
             manager.collateralizeBatch(BATCH_ID + i, 5000, 0);
@@ -232,13 +232,13 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     {
         _addCategoryAndProjectWithApprovedSpending();
         for (uint i; i < 5; i++) {
-            _addBatch(BATCH_ID + i, CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
+            _addBatch(BATCH_ID + i, PRESET_CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
 
-        vm.warp(CURRENT_DATE + 5 days);
+        vm.warp(PRESET_CURRENT_DATE + 5 days);
         uint[] memory cbtUserCut = new uint[](5);
         uint[] memory cbtDaoCut = new uint[](5);
         uint[] memory cbtForfeited = new uint[](5);
@@ -325,7 +325,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     }
 
     function _computeRewards() private returns (uint rewards) {
-        vm.warp(CURRENT_DATE + 5 days + 1);
+        vm.warp(PRESET_CURRENT_DATE + 5 days + 1);
         uint[] memory categories = new uint[](1);
         categories[0] = CATEGORY_ID;
         for (uint i = 1; i <= 52 * 7 + 2; i++) {
@@ -334,7 +334,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             );
             rewards += rewardAmounts[0];
             rewards += rewardFees[0];
-            vm.warp(CURRENT_DATE + 5 days + 1 + i * 1 weeks);
+            vm.warp(PRESET_CURRENT_DATE + 5 days + 1 + i * 1 weeks);
         }
     }
 }

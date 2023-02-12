@@ -27,7 +27,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatch_whenCollateralizing0() public {
-        _addBatchWithDependencies(CURRENT_DATE + 12, 100);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + 12, 100);
 
         vm.prank(testAccount);
         _expectRevert_InvalidInput();
@@ -35,7 +35,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatchWhenNotEnoughFunds() public {
-        _addBatchWithDependencies(CURRENT_DATE + 1 weeks, 100);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + 1 weeks, 100);
 
         vm.prank(testAccount);
         _expectRevertWithMessage("ERC1155: insufficient balance for transfer");
@@ -43,7 +43,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatch_theWeekBeforeCertification() public {
-        _addBatchWithDependencies(CURRENT_DATE + 1 weeks - 1, 100);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + 1 weeks - 1, 100);
 
         vm.prank(testAccount);
         _expectRevert_CannotCollateralizeTheWeekBeforeCertification();
@@ -51,7 +51,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatchWhenERC20OutputIsLessThanMinimum() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 100);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 100);
 
         uint cbtUserCut = 81.03e18;
         vm.prank(testAccount);
@@ -60,16 +60,16 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatch_failsIfBatchIsCertified() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + 1 weeks, 100);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + 1 weeks, 100);
 
-        vm.warp(CURRENT_DATE + 1 weeks);
+        vm.warp(PRESET_CURRENT_DATE + 1 weeks);
 
         _expectRevert_BatchCertified(BATCH_ID);
         manager.collateralizeBatch(BATCH_ID, 100, 81e18);
     }
 
     function testCollateralizeBatchMintsERC20AndTransfersERC1155ToManager() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 100);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 100);
 
         uint cbtUserCut = 81e18;
         uint cbtDaoCut = 9e18;
@@ -94,7 +94,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatch_updatesBatchTAAndRebalancesCategory() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + 1 weeks, 100);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + 1 weeks, 100);
 
         vm.prank(testAccount);
         _expectEmitCategoryRebalanced(CATEGORY_ID, TIME_APPRECIATION, 100);
@@ -109,7 +109,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatchWorksWhenCollateralizationFeeIs0() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 100);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 100);
 
         manager.setCollateralizationFee(0);
 
@@ -132,7 +132,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testCollateralizeBatch_failsIfBatchIsNotAccumulating() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 100);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 100);
 
         manager.setBatchAccumulating(BATCH_ID, false);
 
@@ -152,17 +152,17 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testSimulateBatchCollateralization_failsIfBatchIsCertified() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + 1 weeks, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + 1 weeks, 10000);
 
-        vm.warp(CURRENT_DATE + 1 weeks);
+        vm.warp(PRESET_CURRENT_DATE + 1 weeks);
 
         _expectRevert_BatchCertified(BATCH_ID);
         manager.simulateBatchCollateralization(BATCH_ID, 10000);
     }
 
     function testSimulateBatchCollateralization_weekBeforeCertification() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + 1 weeks - 1, 10000);
-        _addBatch(BATCH_ID + 1, CURRENT_DATE + 1, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + 1 weeks - 1, 10000);
+        _addBatch(BATCH_ID + 1, PRESET_CURRENT_DATE + 1, 10000);
 
         _expectRevert_CannotCollateralizeTheWeekBeforeCertification();
         manager.simulateBatchCollateralization(BATCH_ID, 10000);
@@ -172,7 +172,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testSimulateBatchCollateralization() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 10000);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 10000);
 
         uint expectedCbtUserCut = 8100e18;
         uint expectedCbtDaoCut = 900e18;
@@ -188,7 +188,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function testSimulateBatchCollateralization_failsIfBatchIsNotAccumulating() public {
-        _addBatchWithDependencies(TIME_APPRECIATION, CURRENT_DATE + ONE_YEAR, 100);
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 100);
 
         manager.setBatchAccumulating(BATCH_ID, false);
 

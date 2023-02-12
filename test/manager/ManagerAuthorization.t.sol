@@ -23,7 +23,7 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
                 status: 0,
                 projectId: 5,
                 collateralizedCredits: 0,
-                certificationDate: uint32(CURRENT_DATE + 12),
+                certificationDate: PRESET_CURRENT_DATE + 12,
                 vintage: 2022,
                 batchTA: 1,
                 supplier: testAccount,
@@ -63,8 +63,8 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
     }
 
     function testERC1155TransfersToManager() public {
-        _addBatchWithDependencies(CURRENT_DATE + 3 weeks, 10000);
-        _addBatch(BATCH_ID + 1, CURRENT_DATE + 3 weeks, 10000);
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + 3 weeks, 10000);
+        _addBatch(BATCH_ID + 1, PRESET_CURRENT_DATE + 3 weeks, 10000);
 
         vm.startPrank(testAccount);
         _expectRevertWithMessage("ERC1155: ERC1155Receiver rejected tokens");

@@ -18,10 +18,9 @@ abstract contract BaseRewardScenariosTest is BaseTest {
     uint16 constant DECOLLATERALIZATION_FEE = 1000; // 10%
     uint16 constant REWARDS_FEE = 500; // 5%
 
-    uint32 constant CURRENT_DATE = 1666016743;
-    uint32 constant INITIAL_CARBON_DISTRIBUTION_END = CURRENT_DATE + 3 days;
+    uint32 constant INITIAL_CARBON_DISTRIBUTION_END = PRESET_CURRENT_DATE + 3 days;
     uint32 constant USDC_DISTRIBUTION_DELAY = 5 days;
-    uint32 constant INITIAL_USDC_DISTRIBUTION_END = CURRENT_DATE + USDC_DISTRIBUTION_DELAY + 30 days;
+    uint32 constant INITIAL_USDC_DISTRIBUTION_END = PRESET_CURRENT_DATE + USDC_DISTRIBUTION_DELAY + 30 days;
     uint24 constant INITIAL_CATEGORY_TA = 82360;
 
     uint constant DELTA = 1e6; // 0.000000000001 precision
@@ -44,7 +43,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
     address rewardOracle;
 
     function setUp() public {
-        vm.warp(CURRENT_DATE);
+        vm.warp(PRESET_CURRENT_DATE);
 
         rewardsController = new RewardsController();
         solidStaking = new SolidStaking();
@@ -162,7 +161,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
                     status: 0,
                     projectId: i % 2 == 0 ? MANGROVE_PROJECT_ID : REFORESTATION_PROJECT_ID,
                     collateralizedCredits: 0,
-                    certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
+                    certificationDate: PRESET_CURRENT_DATE + ONE_YEAR,
                     vintage: 2023,
                     batchTA: 0,
                     supplier: i % 2 == 0 ? user0 : user1,
@@ -176,7 +175,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
                     status: 0,
                     projectId: i % 2 == 0 ? MANGROVE_PROJECT_ID : REFORESTATION_PROJECT_ID,
                     collateralizedCredits: 0,
-                    certificationDate: uint32(CURRENT_DATE + ONE_YEAR),
+                    certificationDate: PRESET_CURRENT_DATE + ONE_YEAR,
                     vintage: 2023,
                     batchTA: 0,
                     supplier: i % 2 == 0 ? user1 : user0,
@@ -221,7 +220,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
     }
 
     function _initialConfigurationUSDCRewards() private {
-        vm.warp(CURRENT_DATE + USDC_DISTRIBUTION_DELAY);
+        vm.warp(PRESET_CURRENT_DATE + USDC_DISTRIBUTION_DELAY);
 
         RewardsDataTypes.DistributionConfig[] memory usdcConfig = new RewardsDataTypes.DistributionConfig[](
             2
@@ -240,7 +239,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
 
         emissionManager.configureAssets(usdcConfig);
 
-        vm.warp(CURRENT_DATE);
+        vm.warp(PRESET_CURRENT_DATE);
     }
 
     function _rewardsVaultApprovesRewardsController() private {

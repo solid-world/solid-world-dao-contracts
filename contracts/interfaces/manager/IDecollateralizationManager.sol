@@ -6,6 +6,14 @@ import "../../libraries/DomainDataTypes.sol";
 /// @notice Handles batch decollateralization operations.
 /// @author Solid World DAO
 interface IDecollateralizationManager {
+    event TokensDecollateralized(
+        uint indexed batchId,
+        address indexed tokensOwner,
+        uint amountIn,
+        uint amountOut
+    );
+    event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
+
     /// @dev Decollateralizes `amountIn` of ERC20 tokens and sends `amountOut` ERC1155 tokens with id `batchId` to msg.sender
     /// @dev prior to calling, msg.sender must approve SolidWorldManager to spend `amountIn` ERC20 tokens
     /// @dev nonReentrant (_decollateralizeTokens), to avoid possible reentrancy after calling safeTransferFrom
