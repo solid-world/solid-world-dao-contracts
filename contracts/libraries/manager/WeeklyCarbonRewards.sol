@@ -1,20 +1,18 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.16;
 
-import "../../SolidWorldManagerStorage.sol";
+import "./CategoryRebalancer.sol";
 import "../SolidMath.sol";
+import "../../SolidWorldManagerStorage.sol";
 
 /// @notice Computes and mints weekly carbon rewards
 /// @author Solid World DAO
 library WeeklyCarbonRewards {
+    using CategoryRebalancer for SolidWorldManagerStorage.Storage;
+
     event WeeklyRewardMinted(address indexed rewardToken, uint indexed rewardAmount);
     event RewardsFeeUpdated(uint indexed rewardsFee);
     event RewardsMinterUpdated(address indexed rewardsMinter);
-    event CategoryRebalanced(
-        uint indexed categoryId,
-        uint indexed averageTA,
-        uint indexed totalCollateralized
-    );
 
     /// @dev Thrown if minting weekly rewards is called by an unauthorized account
     error UnauthorizedRewardMinting(address account);
@@ -117,53 +115,8 @@ library WeeklyCarbonRewards {
 
             rewardToken.mint(_storage.feeReceiver, rewardFees[i]);
 
-            _rebalanceCategory(_storage, categoryIds[i]);
+            _storage.rebalanceCategory(categoryIds[i]);
         }
-    }
-
-    function _rebalanceCategory(SolidWorldManagerStorage.Storage storage _storage, uint categoryId) internal {
-        uint totalQuantifiedForwardCredits;
-        uint totalCollateralizedForwardCredits;
-
-        uint[] storage projectIds = _storage.categoryProjects[categoryId];
-        for (uint i; i < projectIds.length; i++) {
-            uint projectId = projectIds[i];
-            uint[] storage batchIds = _storage.projectBatches[projectId];
-            uint numOfBatches = batchIds.length;
-            for (uint j; j < numOfBatches; ) {
-                DomainDataTypes.Batch storage batch = _storage.batches[batchIds[j]];
-                uint collateralizedForwardCredits = batch.collateralizedCredits;
-                if (
-                    collateralizedForwardCredits == 0 ||
-                    _isBatchCertified(_storage, batch.id) ||
-                    !batch.isAccumulating
-                ) {
-                    unchecked {
-                        j++;
-                    }
-                    continue;
-                }
-
-                totalQuantifiedForwardCredits += batch.batchTA * collateralizedForwardCredits;
-                totalCollateralizedForwardCredits += collateralizedForwardCredits;
-
-                unchecked {
-                    j++;
-                }
-            }
-        }
-
-        if (totalCollateralizedForwardCredits == 0) {
-            _storage.categories[categoryId].totalCollateralized = 0;
-            emit CategoryRebalanced(categoryId, _storage.categories[categoryId].averageTA, 0);
-            return;
-        }
-
-        uint latestAverageTA = totalQuantifiedForwardCredits / totalCollateralizedForwardCredits;
-        _storage.categories[categoryId].averageTA = uint24(latestAverageTA);
-        _storage.categories[categoryId].totalCollateralized = totalCollateralizedForwardCredits;
-
-        emit CategoryRebalanced(categoryId, latestAverageTA, totalCollateralizedForwardCredits);
     }
 
     /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
@@ -243,7 +196,7 @@ library WeeklyCarbonRewards {
     }
 
     function _isBatchCertified(SolidWorldManagerStorage.Storage storage _storage, uint batchId)
-        internal
+        private
         view
         returns (bool)
     {

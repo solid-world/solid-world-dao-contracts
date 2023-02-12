@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.16;
 
+import "./CategoryRebalancer.sol";
 import "../DomainDataTypes.sol";
 import "../SolidMath.sol";
 import "../ReactiveTimeAppreciationMath.sol";
@@ -10,16 +11,13 @@ import "../../SolidWorldManagerStorage.sol";
 /// @notice Handles batch collateralization operations.
 /// @author Solid World DAO
 library CollateralizationManager {
+    using CategoryRebalancer for SolidWorldManagerStorage.Storage;
+
     event BatchCollateralized(
         uint indexed batchId,
         address indexed batchSupplier,
         uint amountIn,
         uint amountOut
-    );
-    event CategoryRebalanced(
-        uint indexed categoryId,
-        uint indexed averageTA,
-        uint indexed totalCollateralized
     );
     event CollateralizationFeeUpdated(uint indexed collateralizationFee);
 
@@ -78,7 +76,7 @@ library CollateralizationManager {
         }
 
         _updateBatchTA(_storage, batchId, reactiveTA, amountIn, cbtUserCut + cbtDaoCut, cbt.decimals());
-        _rebalanceCategory(_storage, _storage.batchCategory[batchId], reactiveTA, amountIn, decayingMomentum);
+        _storage.rebalanceCategory(_storage.batchCategory[batchId], reactiveTA, amountIn, decayingMomentum);
 
         _performCollateralization(_storage, cbt, batchId, amountIn, cbtUserCut, cbtDaoCut);
 
@@ -200,28 +198,6 @@ library CollateralizationManager {
                 cbtDecimals
             )
         );
-    }
-
-    function _rebalanceCategory(
-        SolidWorldManagerStorage.Storage storage _storage,
-        uint categoryId,
-        uint reactiveTA,
-        uint currentCollateralizedAmount,
-        uint decayingMomentum
-    ) internal {
-        DomainDataTypes.Category storage category = _storage.categories[categoryId];
-
-        uint latestAverageTA = (category.averageTA *
-            category.totalCollateralized +
-            reactiveTA *
-            currentCollateralizedAmount) / (category.totalCollateralized + currentCollateralizedAmount);
-
-        category.averageTA = uint24(latestAverageTA);
-        category.totalCollateralized += currentCollateralizedAmount;
-        category.lastCollateralizationMomentum = decayingMomentum + currentCollateralizedAmount;
-        category.lastCollateralizationTimestamp = uint32(block.timestamp);
-
-        emit CategoryRebalanced(categoryId, latestAverageTA, category.totalCollateralized);
     }
 
     function _getCollateralizedTokenForBatchId(

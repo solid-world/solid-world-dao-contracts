@@ -6,6 +6,16 @@ import "../../libraries/DomainDataTypes.sol";
 /// @notice Handles all CRUD operations for categories, projects, batches
 /// @author Solid World DAO
 interface ICarbonDomainRepository {
+    event CategoryCreated(uint indexed categoryId);
+    event CategoryUpdated(
+        uint indexed categoryId,
+        uint indexed volumeCoefficient,
+        uint indexed decayPerSecond,
+        uint maxDepreciation
+    );
+    event ProjectCreated(uint indexed projectId);
+    event BatchCreated(uint indexed batchId);
+
     /// @param categoryId The category ID
     /// @param tokenName The name of the ERC20 token that will be created for the category
     /// @param tokenSymbol The symbol of the ERC20 token that will be created for the category
