@@ -32,3 +32,6 @@ node_modules
 /out
 
 .idea
+
+/report
+lcov.info

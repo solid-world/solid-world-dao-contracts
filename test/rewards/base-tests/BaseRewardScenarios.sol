@@ -31,6 +31,9 @@ abstract contract BaseRewardScenariosTest is BaseTest {
     SolidWorldManager solidWorldManager;
     ForwardContractBatchToken forwardContractBatch;
 
+    uint mangroveInitialBalance;
+    uint reforestationInitialBalance;
+
     address rewardsVault;
     address feeReceiver;
     address user0;
@@ -70,6 +73,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         _configureStakableAssets();
         _usersBecomeLiquidityProviders();
         _configureRewardDistribution();
+        _computeInitialBalances();
 
         _labelAccounts();
     }
@@ -200,6 +204,11 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         _initialConfigurationUSDCRewards();
     }
 
+    function _computeInitialBalances() private {
+        mangroveInitialBalance = IERC20(mangroveRewardToken).balanceOf(user0);
+        reforestationInitialBalance = IERC20(reforestationRewardToken).balanceOf(user0);
+    }
+
     function _initialConfigurationCarbonRewards() private {
         RewardsDataTypes.DistributionConfig[] memory carbonConfig = new RewardsDataTypes.DistributionConfig[](
             2
@@ -275,25 +284,17 @@ abstract contract BaseRewardScenariosTest is BaseTest {
 
     function _usersCollateralizeForwards() private {
         vm.startPrank(user0);
-        solidWorldManager.collateralizeBatch(BATCH_ID, 5000, 4130.352e18);
-        // mangrove
-        solidWorldManager.collateralizeBatch(BATCH_ID + 5, 10000, 8260.704e18);
-        // reforestation
-        solidWorldManager.collateralizeBatch(BATCH_ID + 2, 15000, 12391.056e18);
-        // mangrove
-        solidWorldManager.collateralizeBatch(BATCH_ID + 7, 20000, 16521.408e18);
-        // reforestation
+        solidWorldManager.collateralizeBatch(BATCH_ID, 5000, 4130.352e18); // mangrove
+        solidWorldManager.collateralizeBatch(BATCH_ID + 5, 10000, 8260.704e18); // reforestation
+        solidWorldManager.collateralizeBatch(BATCH_ID + 2, 15000, 12391.056e18); // mangrove
+        solidWorldManager.collateralizeBatch(BATCH_ID + 7, 20000, 16521.408e18); // reforestation
         vm.stopPrank();
 
         vm.startPrank(user1);
-        solidWorldManager.collateralizeBatch(BATCH_ID + 4, 5000, 4130.352e18);
-        // mangrove
-        solidWorldManager.collateralizeBatch(BATCH_ID + 1, 10000, 8260.704e18);
-        // reforestation
-        solidWorldManager.collateralizeBatch(BATCH_ID + 6, 15000, 12391.056e18);
-        // mangrove
-        solidWorldManager.collateralizeBatch(BATCH_ID + 3, 20000, 16521.408e18);
-        // reforestation
+        solidWorldManager.collateralizeBatch(BATCH_ID + 4, 5000, 4130.352e18); // mangrove
+        solidWorldManager.collateralizeBatch(BATCH_ID + 1, 10000, 8260.704e18); // reforestation
+        solidWorldManager.collateralizeBatch(BATCH_ID + 6, 15000, 12391.056e18); // mangrove
+        solidWorldManager.collateralizeBatch(BATCH_ID + 3, 20000, 16521.408e18); // reforestation
         vm.stopPrank();
     }
 

@@ -73,29 +73,24 @@ contract RewardScenarios is BaseRewardScenariosTest {
         assertApproxEqAbs(unclaimedAmounts1[0], (mangroveEmissionPerSecond / 2) * 6 days, DELTA);
         assertEq(unclaimedAmounts1[2], (1e18 / 2) * 6 days);
 
-        uint balanceBeforeClaimingRewards0 = CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0);
-        uint balanceBeforeClaimingRewards1 = CollateralizedBasketToken(mangroveRewardToken).balanceOf(user1);
         vm.prank(user0);
         rewardsController.claimAllRewardsToSelf(incentivizedAssets);
         assertEq(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0),
-            balanceBeforeClaimingRewards0 + unclaimedAmounts0[0]
+            mangroveInitialBalance + unclaimedAmounts0[0]
         );
 
         vm.prank(user1);
         rewardsController.claimAllRewardsToSelf(incentivizedAssets);
         assertEq(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user1),
-            balanceBeforeClaimingRewards1 + unclaimedAmounts1[0]
+            mangroveInitialBalance + unclaimedAmounts1[0]
         );
     }
 
     function testUserRewardsAreCorrectlyAccountedWhenClaimingMultipleTimesAndModifyingStakeDuringDistributionPeriod()
         public
     {
-        uint mangroveBalanceBeforeClaimingRewards = CollateralizedBasketToken(mangroveRewardToken).balanceOf(
-            user0
-        );
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END);
 
         address[] memory assets = _toArray(assetMangrove);
@@ -153,15 +148,11 @@ contract RewardScenarios is BaseRewardScenariosTest {
 
         assertEq(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0),
-            mangroveBalanceBeforeClaimingRewards +
-                unclaimedAmounts0[0] +
-                unclaimedAmounts1[0] +
-                unclaimedAmounts2[0] *
-                2
+            mangroveInitialBalance + unclaimedAmounts0[0] + unclaimedAmounts1[0] + unclaimedAmounts2[0] * 2
         );
         assertApproxEqAbs(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user1),
-            mangroveBalanceBeforeClaimingRewards +
+            mangroveInitialBalance +
                 (mangroveEmissionPerSecond / 2) *
                 2 days +
                 ((mangroveEmissionPerSecond * 2) / 3) *
@@ -186,9 +177,6 @@ contract RewardScenarios is BaseRewardScenariosTest {
     function testRewardsAccountingWorksAcrossMoreWeeksAndRegardlessOfTheUpdateFunctionBeingCalledWithDelay()
         public
     {
-        uint mangroveBalanceBeforeClaimingRewards = CollateralizedBasketToken(mangroveRewardToken).balanceOf(
-            user0
-        );
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END);
 
         address[] memory assets = _toArray(assetMangrove);
@@ -213,7 +201,7 @@ contract RewardScenarios is BaseRewardScenariosTest {
 
         assertApproxEqAbs(
             CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0),
-            mangroveBalanceBeforeClaimingRewards + rewardAmounts[0] * 2,
+            mangroveInitialBalance + rewardAmounts[0] * 2,
             DELTA
         );
 
@@ -222,5 +210,132 @@ contract RewardScenarios is BaseRewardScenariosTest {
             0,
             DELTA
         );
+    }
+
+    function testWithdrawAndClaimOrderDoesntMatter() public {
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END);
+
+        address[] memory assets = _toArray(assetMangrove);
+        uint[] memory categoryIds = _toArray(MANGROVE_CATEGORY_ID);
+        emissionManager.updateCarbonRewardDistribution(assets, categoryIds);
+        (, uint mangroveEmissionPerSecond, , ) = rewardsController.getRewardDistribution(
+            assetMangrove,
+            mangroveRewardToken
+        );
+        uint user0ExpectedBalance = mangroveInitialBalance +
+            mangroveEmissionPerSecond *
+            2 days +
+            (mangroveEmissionPerSecond / 2) *
+            1 days;
+        uint user1ExpectedBalance = mangroveInitialBalance +
+            mangroveEmissionPerSecond *
+            1 days +
+            (mangroveEmissionPerSecond / 2) *
+            1 days;
+        uint user0ActualBalance;
+        uint user1ActualBalance;
+
+        vm.prank(user0);
+        solidStaking.stake(assetMangrove, 5000e18);
+
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 1 days);
+        vm.prank(user1);
+        solidStaking.stake(assetMangrove, 5000e18);
+
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 2 days);
+
+        (user0ActualBalance, user1ActualBalance) = _usersWithdrawThenClaim(mangroveEmissionPerSecond);
+        assertApproxEqAbs(user0ActualBalance, user0ExpectedBalance, DELTA);
+        assertApproxEqAbs(user1ActualBalance, user1ExpectedBalance, DELTA);
+
+        (user0ActualBalance, user1ActualBalance) = _usersClaimThenWithdraw(mangroveEmissionPerSecond);
+        assertApproxEqAbs(user0ActualBalance, user0ExpectedBalance, DELTA);
+        assertApproxEqAbs(user1ActualBalance, user1ExpectedBalance, DELTA);
+
+        (user0ActualBalance, user1ActualBalance) = _mixUsersClaimAndWithdraw(mangroveEmissionPerSecond);
+        assertApproxEqAbs(user0ActualBalance, user0ExpectedBalance, DELTA);
+        assertApproxEqAbs(user1ActualBalance, user1ExpectedBalance, DELTA);
+    }
+
+    function _usersWithdrawThenClaim(uint rewardsPerSecond)
+        private
+        returns (uint user0Balance, uint user1Balance)
+    {
+        uint snapshotId = vm.snapshot();
+        vm.prank(user0);
+        solidStaking.withdrawStakeAndClaimRewards(assetMangrove, 5000e18);
+
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 3 days);
+        vm.prank(user1);
+        solidStaking.withdrawStakeAndClaimRewards(assetMangrove, 5000e18);
+
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 4 days);
+        vm.startPrank(user0);
+        solidStaking.stake(assetMangrove, 5000e18);
+
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 5 days);
+        solidStaking.withdrawStakeAndClaimRewards(assetMangrove, 5000e18);
+        vm.stopPrank();
+
+        user0Balance = CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0);
+        user1Balance = CollateralizedBasketToken(mangroveRewardToken).balanceOf(user1);
+        vm.revertTo(snapshotId);
+    }
+
+    function _usersClaimThenWithdraw(uint rewardsPerSecond)
+        private
+        returns (uint user0Balance, uint user1Balance)
+    {
+        uint snapshotId = vm.snapshot();
+
+        _userClaimsThenWithdraws(user0);
+
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 3 days);
+        _userClaimsThenWithdraws(user1);
+
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 4 days);
+        vm.prank(user0);
+        solidStaking.stake(assetMangrove, 5000e18);
+
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 5 days);
+        _userClaimsThenWithdraws(user0);
+
+        user0Balance = CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0);
+        user1Balance = CollateralizedBasketToken(mangroveRewardToken).balanceOf(user1);
+
+        vm.revertTo(snapshotId);
+    }
+
+    function _mixUsersClaimAndWithdraw(uint rewardsPerSecond)
+        private
+        returns (uint user0Balance, uint user1Balance)
+    {
+        uint snapshotId = vm.snapshot();
+
+        _userClaimsThenWithdraws(user0);
+
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 3 days);
+        vm.prank(user1);
+        solidStaking.withdrawStakeAndClaimRewards(assetMangrove, 5000e18);
+
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 4 days);
+        vm.prank(user0);
+        solidStaking.stake(assetMangrove, 5000e18);
+
+        vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 5 days);
+        vm.prank(user0);
+        solidStaking.withdrawStakeAndClaimRewards(assetMangrove, 5000e18);
+
+        user0Balance = CollateralizedBasketToken(mangroveRewardToken).balanceOf(user0);
+        user1Balance = CollateralizedBasketToken(mangroveRewardToken).balanceOf(user1);
+
+        vm.revertTo(snapshotId);
+    }
+
+    function _userClaimsThenWithdraws(address user) private {
+        vm.startPrank(user);
+        rewardsController.claimAllRewardsToSelf(_toArray(assetMangrove));
+        solidStaking.withdraw(assetMangrove, 5000e18);
+        vm.stopPrank();
     }
 }

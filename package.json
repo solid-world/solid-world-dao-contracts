@@ -7,6 +7,7 @@
     "test:gas": "FOUNDRY_PROFILE=gas forge test -vvv",
     "test:gasReport": "forge test -vvv --gas-report",
     "test:coverage": "forge coverage",
+    "test:coverage:lcov": "rm -f lcov.info && rm -rf ./report && forge coverage --report lcov && lcov --remove lcov.info -o lcov.info 'test/*' 'test_gas/*' 'contracts/mocks/*' '**/ABDKMath64x64.sol' '**/GPv2SafeERC20.sol' '**/CategoryRebalancer.sol' && genhtml ./lcov.info -o report --branch-coverage && open ./report/index.html",
     "deploy:local": "hardhat deploy --network localhost",
     "export:local": "hardhat export --export - --network localhost",
     "contracts:validate-size": "forge build --sizes"
