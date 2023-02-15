@@ -102,6 +102,24 @@ You can also debug a single test using the debug flag and the test function name
 forge test --debug functionToDebug
 ```
 
-All tests can be found in the folder `./test`.
-
+Unit tests can be found in the folders `./test` and `./test_gas`.
 The output of tests can be found in the folder `./out`.
+
+## Test coverage
+
+A quick but limited way to check the test coverage is to run the following command:
+
+```sh
+yarn test:coverage
+```
+
+A more detailed and focused coverage report can be obtained by running the following command:
+
+```sh
+yarn test:coverage:lcov
+```
+However, this assumes that you have the `lcov` package installed globally. If you don't, you can install it with the following command:
+
+```sh
+brew install lcov
+```
