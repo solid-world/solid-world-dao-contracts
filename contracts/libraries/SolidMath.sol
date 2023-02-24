@@ -160,7 +160,7 @@ library SolidMath {
             FEE_BASIS_POINTS - decollateralizationFee
         );
 
-        minCbtDaoCut = Math.mulDiv(minAmountIn, decollateralizationFee, FEE_BASIS_POINTS);
+        minCbtDaoCut = minAmountIn - minAmountInAfterFee;
     }
 
     /// @dev Computes the amount of ERC20 tokens to be rewarded over the next 7 days
