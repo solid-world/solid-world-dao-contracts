@@ -228,7 +228,7 @@ contract SolidMathTest is BaseSolidMathTest {
         // delta = 499956427982247510163 - 499956001052631578947 = 426929615931216 = ~427000000000000
         assertApproxEqAbs(minCbtDaoCut, 499956427982247510163, 427000000000000);
 
-        (uint amountOut, uint cbtDaoCut, ) = SolidMath.computeDecollateralizationOutcome(
+        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath.computeDecollateralizationOutcome(
             PRESET_CURRENT_DATE + ONE_YEAR + 1 hours,
             minAmountIn,
             8_0105,
@@ -238,6 +238,7 @@ contract SolidMathTest is BaseSolidMathTest {
 
         assertEq(amountOut, expectedFcbtAmount);
         assertEq(minCbtDaoCut, cbtDaoCut);
+        assertEq(minAmountIn, cbtDaoCut + cbtToBurn);
     }
 
     function testComputeDecollateralizationMinAmountInAndDaoCut_tenYears() public {
