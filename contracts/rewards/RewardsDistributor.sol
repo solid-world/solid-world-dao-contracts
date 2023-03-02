@@ -45,7 +45,6 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     function getRewardDistribution(address asset, address reward)
         public
         view
-        override
         returns (
             uint,
             uint,
@@ -62,12 +61,12 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     }
 
     /// @inheritdoc IRewardsDistributor
-    function getDistributionEnd(address asset, address reward) external view override returns (uint) {
+    function getDistributionEnd(address asset, address reward) external view returns (uint) {
         return _assetData[asset].rewardDistribution[reward].distributionEnd;
     }
 
     /// @inheritdoc IRewardsDistributor
-    function getRewardsByAsset(address asset) external view override returns (address[] memory) {
+    function getRewardsByAsset(address asset) external view returns (address[] memory) {
         uint128 rewardsCount = _assetData[asset].availableRewardsCount;
         address[] memory rewards = new address[](rewardsCount);
 
@@ -78,7 +77,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     }
 
     /// @inheritdoc IRewardsDistributor
-    function getAllRewards() external view override returns (address[] memory) {
+    function getAllRewards() external view returns (address[] memory) {
         return _rewardsList;
     }
 
@@ -87,17 +86,12 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address user,
         address asset,
         address reward
-    ) public view override returns (uint) {
+    ) public view returns (uint) {
         return _assetData[asset].rewardDistribution[reward].userReward[user].index;
     }
 
     /// @inheritdoc IRewardsDistributor
-    function getAccruedRewardAmountForUser(address user, address reward)
-        external
-        view
-        override
-        returns (uint)
-    {
+    function getAccruedRewardAmountForUser(address user, address reward) external view returns (uint) {
         uint totalAccrued;
         for (uint i; i < _assetsList.length; i++) {
             totalAccrued += _assetData[_assetsList[i]].rewardDistribution[reward].userReward[user].accrued;
@@ -111,7 +105,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address[] calldata assets,
         address user,
         address reward
-    ) external view override returns (uint unclaimedAmount) {
+    ) external view returns (uint unclaimedAmount) {
         RewardsDataTypes.AssetStakedAmounts[] memory assetStakedAmounts = _getAssetStakedAmounts(
             assets,
             user
@@ -140,7 +134,6 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     function getAllUnclaimedRewardAmountsForUserAndAssets(address[] calldata assets, address user)
         external
         view
-        override
         returns (address[] memory rewardsList, uint[] memory unclaimedAmounts)
     {
         RewardsDataTypes.AssetStakedAmounts[] memory assetStakedAmounts = _getAssetStakedAmounts(
@@ -176,7 +169,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address asset,
         address reward,
         uint32 newDistributionEnd
-    ) external override onlyEmissionManager distributionExists(asset, reward) {
+    ) external onlyEmissionManager distributionExists(asset, reward) {
         uint oldDistributionEnd = _setDistributionEnd(asset, reward, newDistributionEnd);
         uint index = _assetData[asset].rewardDistribution[reward].index;
 
@@ -196,7 +189,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address asset,
         address[] calldata rewards,
         uint88[] calldata newEmissionsPerSecond
-    ) external override onlyEmissionManager {
+    ) external onlyEmissionManager {
         if (rewards.length != newEmissionsPerSecond.length) {
             revert InvalidInput();
         }
@@ -225,7 +218,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         address[] calldata assets,
         address[] calldata rewards,
         uint[] calldata rewardAmounts
-    ) external override onlyEmissionManager {
+    ) external onlyEmissionManager {
         if (assets.length != rewards.length || rewards.length != rewardAmounts.length) {
             revert InvalidInput();
         }

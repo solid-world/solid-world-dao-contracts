@@ -39,7 +39,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
     }
 
     /// @inheritdoc ISolidStakingOwnerActions
-    function addToken(address token) external override onlyOwner {
+    function addToken(address token) external onlyOwner {
         if (tokenAdded[token]) {
             revert TokenAlreadyAdded(token);
         }
@@ -51,7 +51,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
     }
 
     /// @inheritdoc ISolidStakingActions
-    function stake(address token, uint amount) external override nonReentrant validToken(token) {
+    function stake(address token, uint amount) external nonReentrant validToken(token) {
         uint oldUserStake = _balanceOf(token, msg.sender);
         uint oldTotalStake = _totalStaked(token);
 
@@ -65,14 +65,13 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
     }
 
     /// @inheritdoc ISolidStakingActions
-    function withdraw(address token, uint amount) external override nonReentrant validToken(token) {
+    function withdraw(address token, uint amount) external nonReentrant validToken(token) {
         _withdraw(token, amount);
     }
 
     /// @inheritdoc ISolidStakingActions
     function withdrawStakeAndClaimRewards(address token, uint amount)
         external
-        override
         nonReentrant
         validToken(token)
     {
@@ -81,23 +80,17 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
     }
 
     /// @inheritdoc ISolidStakingViewActions
-    function balanceOf(address token, address account)
-        external
-        view
-        override
-        validToken(token)
-        returns (uint)
-    {
+    function balanceOf(address token, address account) external view validToken(token) returns (uint) {
         return _balanceOf(token, account);
     }
 
     /// @inheritdoc ISolidStakingViewActions
-    function totalStaked(address token) external view override validToken(token) returns (uint) {
+    function totalStaked(address token) external view validToken(token) returns (uint) {
         return _totalStaked(token);
     }
 
     /// @inheritdoc ISolidStakingViewActions
-    function getTokens() external view override returns (address[] memory _tokens) {
+    function getTokens() external view returns (address[] memory _tokens) {
         _tokens = tokens;
     }
 
