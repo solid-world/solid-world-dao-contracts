@@ -37,24 +37,23 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     }
 
     /// @inheritdoc IRewardsController
-    function getRewardsVault() external view override returns (address) {
+    function getRewardsVault() external view returns (address) {
         return REWARDS_VAULT;
     }
 
     /// @inheritdoc IRewardsController
-    function getClaimer(address user) external view override returns (address) {
+    function getClaimer(address user) external view returns (address) {
         return _authorizedClaimers[user];
     }
 
     /// @inheritdoc IRewardsController
-    function getRewardOracle(address reward) external view override returns (address) {
+    function getRewardOracle(address reward) external view returns (address) {
         return address(_rewardOracle[reward]);
     }
 
     /// @inheritdoc IRewardsController
     function configureAssets(RewardsDataTypes.DistributionConfig[] memory config)
         external
-        override
         onlyEmissionManager
     {
         for (uint i; i < config.length; i++) {
@@ -70,17 +69,17 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     }
 
     /// @inheritdoc IRewardsController
-    function setClaimer(address user, address caller) external override onlyEmissionManager {
+    function setClaimer(address user, address caller) external onlyEmissionManager {
         _authorizedClaimers[user] = caller;
         emit ClaimerSet(user, caller);
     }
 
     /// @inheritdoc IRewardsController
-    function setRewardsVault(address rewardsVault) external override onlyEmissionManager {
+    function setRewardsVault(address rewardsVault) external onlyEmissionManager {
         _setRewardsVault(rewardsVault);
     }
 
-    function setSolidStaking(address solidStaking) external override onlyEmissionManager {
+    function setSolidStaking(address solidStaking) external onlyEmissionManager {
         _setSolidStaking(solidStaking);
     }
 
@@ -90,7 +89,7 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         address user,
         uint oldUserStake,
         uint oldTotalStaked
-    ) external override {
+    ) external {
         if (msg.sender != address(solidStakingViewActions)) {
             revert NotSolidStaking(msg.sender);
         }
@@ -101,7 +100,6 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     /// @inheritdoc IRewardsController
     function claimAllRewards(address[] calldata assets, address to)
         external
-        override
         returns (address[] memory rewardsList, uint[] memory claimedAmounts)
     {
         if (to == address(0)) {
@@ -118,7 +116,6 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
         address to
     )
         external
-        override
         onlyAuthorizedClaimers(msg.sender, user)
         returns (address[] memory rewardsList, uint[] memory claimedAmounts)
     {
@@ -132,7 +129,6 @@ contract RewardsController is IRewardsController, RewardsDistributor, PostConstr
     /// @inheritdoc IRewardsController
     function claimAllRewardsToSelf(address[] calldata assets)
         external
-        override
         returns (address[] memory rewardsList, uint[] memory claimedAmounts)
     {
         return _claimAllRewards(assets, msg.sender, msg.sender, msg.sender);

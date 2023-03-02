@@ -36,7 +36,7 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     }
 
     /// @inheritdoc IEmissionManager
-    function configureAssets(RewardsDataTypes.DistributionConfig[] memory config) external override {
+    function configureAssets(RewardsDataTypes.DistributionConfig[] memory config) external {
         for (uint i; i < config.length; i++) {
             if (_emissionAdmins[config[i].reward] != msg.sender) {
                 revert NotEmissionAdmin(msg.sender, config[i].reward);
@@ -48,7 +48,6 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     /// @inheritdoc IEmissionManager
     function setRewardOracle(address reward, IEACAggregatorProxy rewardOracle)
         external
-        override
         onlyEmissionAdmin(reward)
     {
         _rewardsController.setRewardOracle(reward, rewardOracle);
@@ -59,7 +58,7 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
         address asset,
         address reward,
         uint32 newDistributionEnd
-    ) external override onlyEmissionAdmin(reward) {
+    ) external onlyEmissionAdmin(reward) {
         _rewardsController.setDistributionEnd(asset, reward, newDistributionEnd);
     }
 
@@ -68,7 +67,7 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
         address asset,
         address[] calldata rewards,
         uint88[] calldata newEmissionsPerSecond
-    ) external override {
+    ) external {
         for (uint i; i < rewards.length; i++) {
             if (_emissionAdmins[rewards[i]] != msg.sender) {
                 revert NotEmissionAdmin(msg.sender, rewards[i]);
@@ -80,7 +79,6 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     /// @inheritdoc IEmissionManager
     function updateCarbonRewardDistribution(address[] calldata assets, uint[] calldata categoryIds)
         external
-        override
         nonReentrant
     {
         if (assets.length != categoryIds.length) {
@@ -105,54 +103,54 @@ contract EmissionManager is Ownable, IEmissionManager, PostConstruct, Reentrancy
     }
 
     /// @inheritdoc IEmissionManager
-    function setClaimer(address user, address claimer) external override onlyOwner {
+    function setClaimer(address user, address claimer) external onlyOwner {
         _rewardsController.setClaimer(user, claimer);
     }
 
     /// @inheritdoc IEmissionManager
-    function setRewardsVault(address rewardsVault) external override onlyOwner {
+    function setRewardsVault(address rewardsVault) external onlyOwner {
         _rewardsController.setRewardsVault(rewardsVault);
     }
 
     /// @inheritdoc IEmissionManager
-    function setEmissionManager(address emissionManager) external override onlyOwner {
+    function setEmissionManager(address emissionManager) external onlyOwner {
         _rewardsController.setEmissionManager(emissionManager);
     }
 
     /// @inheritdoc IEmissionManager
-    function setSolidStaking(address solidStaking) external override onlyOwner {
+    function setSolidStaking(address solidStaking) external onlyOwner {
         _rewardsController.setSolidStaking(solidStaking);
     }
 
     /// @inheritdoc IEmissionManager
-    function setEmissionAdmin(address reward, address admin) external override onlyOwner {
+    function setEmissionAdmin(address reward, address admin) external onlyOwner {
         address oldAdmin = _emissionAdmins[reward];
         _emissionAdmins[reward] = admin;
         emit EmissionAdminUpdated(reward, oldAdmin, admin);
     }
 
     /// @inheritdoc IEmissionManager
-    function setRewardsController(address controller) external override onlyOwner {
+    function setRewardsController(address controller) external onlyOwner {
         _setRewardsController(controller);
     }
 
     /// @inheritdoc IEmissionManager
-    function setCarbonRewardsManager(address carbonRewardsManager) external override onlyOwner {
+    function setCarbonRewardsManager(address carbonRewardsManager) external onlyOwner {
         _setCarbonRewardsManager(carbonRewardsManager);
     }
 
     /// @inheritdoc IEmissionManager
-    function getRewardsController() external view override returns (IRewardsController) {
+    function getRewardsController() external view returns (IRewardsController) {
         return _rewardsController;
     }
 
     /// @inheritdoc IEmissionManager
-    function getEmissionAdmin(address reward) external view override returns (address) {
+    function getEmissionAdmin(address reward) external view returns (address) {
         return _emissionAdmins[reward];
     }
 
     /// @inheritdoc IEmissionManager
-    function getCarbonRewardsManager() external view override returns (address) {
+    function getCarbonRewardsManager() external view returns (address) {
         return address(_carbonRewardsManager);
     }
 
