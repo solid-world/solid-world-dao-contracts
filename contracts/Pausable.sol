@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.16;
+pragma solidity 0.8.16;
 
 /// @author Solid World DAO
 /// @dev Base contract which allows children to implement an emergency stop mechanism.

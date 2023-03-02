@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.16;
+pragma solidity 0.8.16;
 
 /// @notice Handles batch collateralization operations.
 /// @author Solid World DAO
