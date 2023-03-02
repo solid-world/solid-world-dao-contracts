@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.16;
+pragma solidity 0.8.16;
 
 /// @title Permissionless state-mutating actions
 /// @notice Contains state-mutating functions that can be called by anyone

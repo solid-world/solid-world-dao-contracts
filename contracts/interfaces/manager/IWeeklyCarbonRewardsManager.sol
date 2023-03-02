@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.16;
+pragma solidity 0.8.16;
 
 /// @title The interface for weekly carbon rewards processing
 /// @notice Computes and mints weekly carbon rewards

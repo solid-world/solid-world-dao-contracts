@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.16;
+pragma solidity 0.8.16;
 
 contract MockUniswapV3Pool {
     function observe(uint32[] calldata)
