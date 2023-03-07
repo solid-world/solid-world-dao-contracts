@@ -30,6 +30,18 @@ contract LiquidityDeployer is ILiquidityDeployer {
         conversionRateDecimals = _conversionRateDecimals;
     }
 
+    function depositToken0(uint amount) external {
+        if (amount == 0) {
+            revert InvalidInput();
+        }
+    }
+
+    function depositToken1(uint amount) external {
+        if (amount == 0) {
+            revert InvalidInput();
+        }
+    }
+
     function getToken0() external view returns (address) {
         return address(token0);
     }

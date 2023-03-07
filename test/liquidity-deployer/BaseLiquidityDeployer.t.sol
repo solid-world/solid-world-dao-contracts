@@ -24,4 +24,8 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
             conversionRateDecimals
         );
     }
+
+    function _expectRevert_InvalidInput() internal {
+        vm.expectRevert(abi.encodeWithSelector(ILiquidityDeployer.InvalidInput.selector));
+    }
 }

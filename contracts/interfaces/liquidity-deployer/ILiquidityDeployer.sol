@@ -3,6 +3,12 @@ pragma solidity 0.8.16;
 
 /// @author Solid World
 interface ILiquidityDeployer {
+    error InvalidInput();
+
+    function depositToken0(uint amount) external;
+
+    function depositToken1(uint amount) external;
+
     function getToken0() external view returns (address);
 
     function getToken1() external view returns (address);

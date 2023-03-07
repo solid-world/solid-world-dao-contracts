@@ -12,4 +12,14 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         assertEq(liquidityDeployer.getConversionRate(), conversionRate);
         assertEq(liquidityDeployer.getConversionRateDecimals(), conversionRateDecimals);
     }
+
+    function testDepositMustBeGreaterThan0ForToken0() public {
+        _expectRevert_InvalidInput();
+        liquidityDeployer.depositToken0(0);
+    }
+
+    function testDepositMustBeGreaterThan0ForToken1() public {
+        _expectRevert_InvalidInput();
+        liquidityDeployer.depositToken1(0);
+    }
 }
