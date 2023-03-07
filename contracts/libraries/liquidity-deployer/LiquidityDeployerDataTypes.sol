@@ -18,4 +18,11 @@ library LiquidityDeployerDataTypes {
         uint token0Amount;
         uint token1Amount;
     }
+
+    struct Depositors {
+        address[] token0Depositors;
+        address[] token1Depositors;
+        mapping(address => bool) isToken0Depositor;
+        mapping(address => bool) isToken1Depositor;
+    }
 }
