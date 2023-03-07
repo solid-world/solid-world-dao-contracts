@@ -14,13 +14,15 @@ contract LiquidityDeployerTest is BaseTest {
         address gammaVault = vm.addr(3);
         address uniProxy = vm.addr(4);
         uint conversionRate = 1;
+        uint8 conversionRateDecimals = 6;
 
         ILiquidityDeployer liquidityDeployer = new LiquidityDeployer(
             token0,
             token1,
             gammaVault,
             uniProxy,
-            conversionRate
+            conversionRate,
+            conversionRateDecimals
         );
 
         assertEq(liquidityDeployer.getToken0(), token0);
@@ -28,5 +30,6 @@ contract LiquidityDeployerTest is BaseTest {
         assertEq(liquidityDeployer.getGammaVault(), gammaVault);
         assertEq(liquidityDeployer.getUniProxy(), uniProxy);
         assertEq(liquidityDeployer.getConversionRate(), conversionRate);
+        assertEq(liquidityDeployer.getConversionRateDecimals(), conversionRateDecimals);
     }
 }

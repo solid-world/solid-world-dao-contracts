@@ -12,19 +12,22 @@ contract LiquidityDeployer is ILiquidityDeployer {
     address internal immutable gammaVault;
     IUniProxy internal immutable uniProxy;
     uint internal immutable conversionRate;
+    uint8 internal immutable conversionRateDecimals;
 
     constructor(
         address _token0,
         address _token1,
         address _gammaVault,
         address _uniProxy,
-        uint _conversionRate
+        uint _conversionRate,
+        uint8 _conversionRateDecimals
     ) {
         token0 = IERC20(_token0);
         token1 = IERC20(_token1);
         gammaVault = _gammaVault;
         uniProxy = IUniProxy(_uniProxy);
         conversionRate = _conversionRate;
+        conversionRateDecimals = _conversionRateDecimals;
     }
 
     function getToken0() external view returns (address) {
@@ -35,15 +38,23 @@ contract LiquidityDeployer is ILiquidityDeployer {
         return address(token1);
     }
 
+    /// @inheritdoc ILiquidityDeployer
     function getGammaVault() external view returns (address) {
         return gammaVault;
     }
 
+    /// @inheritdoc ILiquidityDeployer
     function getUniProxy() external view returns (address) {
         return address(uniProxy);
     }
 
+    /// @inheritdoc ILiquidityDeployer
     function getConversionRate() external view returns (uint) {
         return conversionRate;
+    }
+
+    /// @inheritdoc ILiquidityDeployer
+    function getConversionRateDecimals() external view returns (uint8) {
+        return conversionRateDecimals;
     }
 }
