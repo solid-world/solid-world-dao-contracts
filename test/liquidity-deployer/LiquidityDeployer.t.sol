@@ -94,4 +94,26 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         assertEq(token1Depositors.length, 1);
         assertEq(token1Depositors[0], address(this));
     }
+
+    function testDepositToken0_token0BalanceOfLiquidityDeployerIncreasesWithDepositAmount() public {
+        uint amount = 100;
+
+        uint token0BalanceBefore = IERC20(token0).balanceOf(address(liquidityDeployer));
+        liquidityDeployer.depositToken0(amount);
+        liquidityDeployer.depositToken0(amount * 2);
+        uint token0BalanceAfter = IERC20(token0).balanceOf(address(liquidityDeployer));
+
+        assertEq(token0BalanceAfter, token0BalanceBefore + amount * 3);
+    }
+
+    function testDepositToken1_token1BalanceOfLiquidityDeployerIncreasesWithDepositAmount() public {
+        uint amount = 100;
+
+        uint token1BalanceBefore = IERC20(token1).balanceOf(address(liquidityDeployer));
+        liquidityDeployer.depositToken1(amount);
+        liquidityDeployer.depositToken1(amount * 2);
+        uint token1BalanceAfter = IERC20(token1).balanceOf(address(liquidityDeployer));
+
+        assertEq(token1BalanceAfter, token1BalanceBefore + amount * 3);
+    }
 }

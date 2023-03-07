@@ -15,9 +15,13 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
 
     ILiquidityDeployer liquidityDeployer;
 
+    address testAccount0;
+    address testAccount1 = vm.addr(6);
+
     function setUp() public {
         token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         token1 = address(new TestToken("USD Coin", "USDC", 6));
+        testAccount0 = address(this);
 
         liquidityDeployer = new LiquidityDeployer(
             token0,
@@ -29,6 +33,8 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         );
 
         _labelAccounts();
+        _mintTokens();
+        _approveSpending();
     }
 
     function _labelAccounts() private {
@@ -36,6 +42,29 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         vm.label(token1, "USDC");
         vm.label(gammaVault, "Gamma Vault");
         vm.label(uniProxy, "UniProxy");
+        vm.label(address(liquidityDeployer), "Liquidity Deployer");
+        vm.label(testAccount0, "Test Account 0");
+        vm.label(testAccount1, "Test Account 1");
+    }
+
+    function _mintTokens() private {
+        TestToken(token0).mint(address(testAccount0), 10_000);
+        TestToken(token1).mint(address(testAccount0), 10_000);
+
+        TestToken(token0).mint(address(testAccount1), 10_000);
+        TestToken(token1).mint(address(testAccount1), 10_000);
+    }
+
+    function _approveSpending() private {
+        vm.startPrank(testAccount0);
+        IERC20(token0).approve(address(liquidityDeployer), type(uint).max);
+        IERC20(token1).approve(address(liquidityDeployer), type(uint).max);
+        vm.stopPrank();
+
+        vm.startPrank(testAccount1);
+        IERC20(token0).approve(address(liquidityDeployer), type(uint).max);
+        IERC20(token1).approve(address(liquidityDeployer), type(uint).max);
+        vm.stopPrank();
     }
 
     function _expectRevert_InvalidInput() internal {

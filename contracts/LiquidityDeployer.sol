@@ -4,9 +4,12 @@ pragma solidity 0.8.16;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/liquidity-deployer/ILiquidityDeployer.sol";
 import "./libraries/liquidity-deployer/LiquidityDeployerDataTypes.sol";
+import "./libraries/GPv2SafeERC20.sol";
 
 /// @author Solid World
 contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
+    using GPv2SafeERC20 for IERC20;
+
     LiquidityDeployerDataTypes.Config internal config;
     LiquidityDeployerDataTypes.TotalDeposits internal totalDeposits;
     LiquidityDeployerDataTypes.Depositors internal depositors;
@@ -39,6 +42,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         config.conversionRateDecimals = conversionRateDecimals;
     }
 
+    /// @inheritdoc ILiquidityDeployer
     function depositToken0(uint amount) external nonReentrant validDepositAmount(amount) {
         token0Balance[msg.sender] += amount;
         totalDeposits.token0Amount += amount;
@@ -47,8 +51,11 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
             depositors.isToken0Depositor[msg.sender] = true;
             depositors.token0Depositors.push(msg.sender);
         }
+
+        config.token0.safeTransferFrom(msg.sender, address(this), amount);
     }
 
+    /// @inheritdoc ILiquidityDeployer
     function depositToken1(uint amount) external nonReentrant validDepositAmount(amount) {
         token1Balance[msg.sender] += amount;
         totalDeposits.token1Amount += amount;
@@ -57,6 +64,8 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
             depositors.isToken1Depositor[msg.sender] = true;
             depositors.token1Depositors.push(msg.sender);
         }
+
+        config.token1.safeTransferFrom(msg.sender, address(this), amount);
     }
 
     function getToken0() external view returns (address) {

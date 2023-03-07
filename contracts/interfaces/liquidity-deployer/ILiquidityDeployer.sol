@@ -5,8 +5,10 @@ pragma solidity 0.8.16;
 interface ILiquidityDeployer {
     error InvalidInput();
 
+    /// @notice The caller must approve the contract to spend `amount` of token0
     function depositToken0(uint amount) external;
 
+    /// @notice The caller must approve the contract to spend `amount` of token1
     function depositToken1(uint amount) external;
 
     function getToken0() external view returns (address);
