@@ -30,4 +30,6 @@ interface ILiquidityDeployer {
     function token0BalanceOf(address account) external view returns (uint);
 
     function token1BalanceOf(address account) external view returns (uint);
+
+    function getTotalDeposits() external view returns (uint token0Amount, uint token1Amount);
 }

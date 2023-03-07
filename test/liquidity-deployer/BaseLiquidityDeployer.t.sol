@@ -9,8 +9,8 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     address token1 = vm.addr(2);
     address gammaVault = vm.addr(3);
     address uniProxy = vm.addr(4);
-    uint conversionRate = 1;
-    uint8 conversionRateDecimals = 6;
+    uint conversionRate = 255;
+    uint8 conversionRateDecimals = 1;
 
     ILiquidityDeployer liquidityDeployer;
 

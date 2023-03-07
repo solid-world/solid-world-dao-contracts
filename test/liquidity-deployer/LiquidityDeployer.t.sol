@@ -42,4 +42,28 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         liquidityDeployer.depositToken1(amount);
         assertEq(liquidityDeployer.token1BalanceOf(address(this)), amount * 2);
     }
+
+    function testDepositToken0_increasesTotalDepositOfToken0() public {
+        uint amount = 100;
+
+        liquidityDeployer.depositToken0(amount);
+        (uint token0Amount, ) = liquidityDeployer.getTotalDeposits();
+        assertEq(token0Amount, amount);
+
+        liquidityDeployer.depositToken0(amount);
+        (token0Amount, ) = liquidityDeployer.getTotalDeposits();
+        assertEq(token0Amount, amount * 2);
+    }
+
+    function testDepositToken1_increasesTotalDepositOfToken1() public {
+        uint amount = 100;
+
+        liquidityDeployer.depositToken1(amount);
+        (, uint token1Amount) = liquidityDeployer.getTotalDeposits();
+        assertEq(token1Amount, amount);
+
+        liquidityDeployer.depositToken1(amount);
+        (, token1Amount) = liquidityDeployer.getTotalDeposits();
+        assertEq(token1Amount, amount * 2);
+    }
 }
