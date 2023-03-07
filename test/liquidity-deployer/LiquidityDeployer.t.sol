@@ -22,4 +22,24 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         _expectRevert_InvalidInput();
         liquidityDeployer.depositToken1(0);
     }
+
+    function testDepositToken0_increasesBalanceOfToken0() public {
+        uint amount = 100;
+
+        liquidityDeployer.depositToken0(amount);
+        assertEq(liquidityDeployer.token0BalanceOf(address(this)), amount);
+
+        liquidityDeployer.depositToken0(amount);
+        assertEq(liquidityDeployer.token0BalanceOf(address(this)), amount * 2);
+    }
+
+    function testDepositToken1_increasesBalanceOfToken1() public {
+        uint amount = 100;
+
+        liquidityDeployer.depositToken1(amount);
+        assertEq(liquidityDeployer.token1BalanceOf(address(this)), amount);
+
+        liquidityDeployer.depositToken1(amount);
+        assertEq(liquidityDeployer.token1BalanceOf(address(this)), amount * 2);
+    }
 }

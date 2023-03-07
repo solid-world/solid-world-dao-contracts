@@ -1,18 +1,32 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
 
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/liquidity-deployer/ILiquidityDeployer.sol";
 import "./interfaces/liquidity-deployer/IUniProxy.sol";
 
 /// @author Solid World
-contract LiquidityDeployer is ILiquidityDeployer {
+contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     IERC20 internal immutable token0;
     IERC20 internal immutable token1;
     address internal immutable gammaVault;
     IUniProxy internal immutable uniProxy;
     uint internal immutable conversionRate;
     uint8 internal immutable conversionRateDecimals;
+
+    /// @dev Account => token0 balance
+    mapping(address => uint) internal token0Balance;
+
+    /// @dev Account => token1 balance
+    mapping(address => uint) internal token1Balance;
+
+    modifier validDepositAmount(uint amount) {
+        if (amount == 0) {
+            revert InvalidInput();
+        }
+        _;
+    }
 
     constructor(
         address _token0,
@@ -30,16 +44,12 @@ contract LiquidityDeployer is ILiquidityDeployer {
         conversionRateDecimals = _conversionRateDecimals;
     }
 
-    function depositToken0(uint amount) external {
-        if (amount == 0) {
-            revert InvalidInput();
-        }
+    function depositToken0(uint amount) external nonReentrant validDepositAmount(amount) {
+        token0Balance[msg.sender] += amount;
     }
 
-    function depositToken1(uint amount) external {
-        if (amount == 0) {
-            revert InvalidInput();
-        }
+    function depositToken1(uint amount) external nonReentrant validDepositAmount(amount) {
+        token1Balance[msg.sender] += amount;
     }
 
     function getToken0() external view returns (address) {
@@ -68,5 +78,13 @@ contract LiquidityDeployer is ILiquidityDeployer {
     /// @inheritdoc ILiquidityDeployer
     function getConversionRateDecimals() external view returns (uint8) {
         return conversionRateDecimals;
+    }
+
+    function token0BalanceOf(address account) external view returns (uint) {
+        return token0Balance[account];
+    }
+
+    function token1BalanceOf(address account) external view returns (uint) {
+        return token1Balance[account];
     }
 }
