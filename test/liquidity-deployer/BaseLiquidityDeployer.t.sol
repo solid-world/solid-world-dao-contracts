@@ -74,6 +74,10 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         vm.expectRevert(abi.encodeWithSelector(ILiquidityDeployer.InvalidInput.selector));
     }
 
+    function _expectRevert_Token0AmountTooSmall(uint amount) internal {
+        vm.expectRevert(abi.encodeWithSelector(ILiquidityDeployer.Token0AmountTooSmall.selector, amount));
+    }
+
     function _expectEmit_Token0Deposited(address depositor, uint amount) internal {
         vm.expectEmit(true, true, true, false, address(liquidityDeployer));
         emit Token0Deposited(depositor, amount);

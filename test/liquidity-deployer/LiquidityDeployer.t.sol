@@ -130,4 +130,21 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         _expectEmit_Token1Deposited(address(this), amount);
         liquidityDeployer.depositToken1(amount);
     }
+
+    function testConvertToken0DecimalsToToken1_revertsIfConvertedValueIs0() public {
+        uint token0Amount = 0.9999999e12; //1e12 is the minimum amount of token0 that can be converted to token1
+
+        _expectRevert_Token0AmountTooSmall(token0Amount);
+        liquidityDeployer.convertToken0DecimalsToToken1(token0Amount);
+    }
+
+    function testConvertToken0DecimalsToToken1() public {
+        assertEq(liquidityDeployer.convertToken0DecimalsToToken1(1e12), 1);
+        assertEq(liquidityDeployer.convertToken0DecimalsToToken1(100e18), 100e6);
+    }
+
+    function testConvertToken0ValueToToken1() public {
+        assertEq(liquidityDeployer.convertToken0ValueToToken1(1e12), 25);
+        assertEq(liquidityDeployer.convertToken0ValueToToken1(100e18), 2550e6);
+    }
 }
