@@ -5,6 +5,9 @@ pragma solidity 0.8.16;
 interface ILiquidityDeployer {
     error InvalidInput();
 
+    event Token0Deposited(address indexed depositor, uint indexed amount);
+    event Token1Deposited(address indexed depositor, uint indexed amount);
+
     /// @notice The caller must approve the contract to spend `amount` of token0
     function depositToken0(uint amount) external;
 

@@ -116,4 +116,18 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
 
         assertEq(token1BalanceAfter, token1BalanceBefore + amount * 3);
     }
+
+    function testDepositToken0_emitsDepositEvent() public {
+        uint amount = 100;
+
+        _expectEmit_Token0Deposited(address(this), amount);
+        liquidityDeployer.depositToken0(amount);
+    }
+
+    function testDepositToken1_emitsDepositEvent() public {
+        uint amount = 100;
+
+        _expectEmit_Token1Deposited(address(this), amount);
+        liquidityDeployer.depositToken1(amount);
+    }
 }

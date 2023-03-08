@@ -18,6 +18,9 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     address testAccount0;
     address testAccount1 = vm.addr(6);
 
+    event Token0Deposited(address indexed depositor, uint indexed amount);
+    event Token1Deposited(address indexed depositor, uint indexed amount);
+
     function setUp() public {
         token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         token1 = address(new TestToken("USD Coin", "USDC", 6));
@@ -69,5 +72,15 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
 
     function _expectRevert_InvalidInput() internal {
         vm.expectRevert(abi.encodeWithSelector(ILiquidityDeployer.InvalidInput.selector));
+    }
+
+    function _expectEmit_Token0Deposited(address depositor, uint amount) internal {
+        vm.expectEmit(true, true, true, false, address(liquidityDeployer));
+        emit Token0Deposited(depositor, amount);
+    }
+
+    function _expectEmit_Token1Deposited(address depositor, uint amount) internal {
+        vm.expectEmit(true, true, true, false, address(liquidityDeployer));
+        emit Token1Deposited(depositor, amount);
     }
 }

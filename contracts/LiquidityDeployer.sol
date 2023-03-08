@@ -53,6 +53,8 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         }
 
         config.token0.safeTransferFrom(msg.sender, address(this), amount);
+
+        emit Token0Deposited(msg.sender, amount);
     }
 
     /// @inheritdoc ILiquidityDeployer
@@ -66,6 +68,8 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         }
 
         config.token1.safeTransferFrom(msg.sender, address(this), amount);
+
+        emit Token1Deposited(msg.sender, amount);
     }
 
     function getToken0() external view returns (address) {
