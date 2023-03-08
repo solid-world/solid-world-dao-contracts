@@ -4,7 +4,6 @@ pragma solidity 0.8.16;
 /// @author Solid World
 interface ILiquidityDeployer {
     error InvalidInput();
-    error Token0AmountTooSmall(uint amount);
     error InsufficientToken0Balance(address account, uint balance, uint withdrawAmount);
     error InsufficientToken1Balance(address account, uint balance, uint withdrawAmount);
 
@@ -50,13 +49,4 @@ interface ILiquidityDeployer {
     function getToken0Depositors() external view returns (address[] memory);
 
     function getToken1Depositors() external view returns (address[] memory);
-
-    /// @return token0AmountConvertedDecimals = token0Amount * 10**token1Decimals / 10**token0Decimals
-    function convertToken0DecimalsToToken1(uint token0Amount)
-        external
-        view
-        returns (uint token0AmountConvertedDecimals);
-
-    /// @return convertedToken0Amount = token0AmountConvertedDecimals * conversionRate / 10 ** conversionRateDecimals
-    function convertToken0ValueToToken1(uint token0Amount) external view returns (uint convertedToken0Amount);
 }

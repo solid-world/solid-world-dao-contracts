@@ -3,7 +3,6 @@ pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./interfaces/liquidity-deployer/ILiquidityDeployer.sol";
 import "./libraries/liquidity-deployer/LiquidityDeployerDataTypes.sol";
 import "./libraries/GPv2SafeERC20.sol";
@@ -155,46 +154,19 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         }
     }
 
-    /// @inheritdoc ILiquidityDeployer
-    function convertToken0DecimalsToToken1(uint token0Amount) public view returns (uint) {
-        uint token0Decimals = IERC20Metadata(address(config.token0)).decimals();
-        uint token1Decimals = IERC20Metadata(address(config.token1)).decimals();
-
-        uint token0AmountConvertedDecimals = Math.mulDiv(
-            token0Amount,
-            10**token1Decimals,
-            10**token0Decimals
-        );
-
-        if (token0AmountConvertedDecimals == 0) {
-            revert Token0AmountTooSmall(token0Amount);
-        }
-
-        return token0AmountConvertedDecimals;
-    }
-
-    /// @inheritdoc ILiquidityDeployer
-    function convertToken0ValueToToken1(uint token0Amount) public view returns (uint) {
-        uint token0AmountConvertedDecimals = convertToken0DecimalsToToken1(token0Amount);
-
-        uint token0Converted = Math.mulDiv(
-            token0AmountConvertedDecimals,
-            config.conversionRate,
-            10**config.conversionRateDecimals
-        );
-
-        if (token0Converted == 0) {
-            revert Token0AmountTooSmall(token0Amount);
-        }
-
-        return token0Converted;
-    }
-
     function _isToken0Depositor(address account) internal view returns (bool) {
         return depositors.isToken0Depositor[account];
     }
 
     function _isToken1Depositor(address account) internal view returns (bool) {
         return depositors.isToken1Depositor[account];
+    }
+
+    function _token0Decimals() internal view returns (uint8) {
+        return IERC20Metadata(address(config.token0)).decimals();
+    }
+
+    function _token1Decimals() internal view returns (uint8) {
+        return IERC20Metadata(address(config.token1)).decimals();
     }
 }
