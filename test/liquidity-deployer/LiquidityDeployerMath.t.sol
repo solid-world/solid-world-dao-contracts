@@ -3,6 +3,7 @@ pragma solidity 0.8.16;
 
 import "../BaseTest.sol";
 import "../../contracts/libraries/liquidity-deployer/LiquidityDeployerMath.sol";
+import "../../contracts/libraries/liquidity-deployer/LiquidityDeployerDataTypes.sol";
 
 contract LiquidityDeployerMathTest is BaseTest {
     function testConvertToken0DecimalsToToken1_revertsIfConvertedValueIs0() public {
@@ -71,6 +72,22 @@ contract LiquidityDeployerMathTest is BaseTest {
             ),
             2550e6
         );
+    }
+
+    function testAdjustTokenAmount_neutralAdjustmentFactor() public {
+        uint amount = 100;
+        LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
+            .AdjustmentFactor({ numerator: 1, denominator: 1 });
+
+        assertEq(LiquidityDeployerMath.adjustTokenAmount(amount, adjustmentFactor), amount);
+    }
+
+    function testAdjustTokenAmount() public {
+        uint amount = 100;
+        LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
+            .AdjustmentFactor({ numerator: 2, denominator: 3 });
+
+        assertEq(LiquidityDeployerMath.adjustTokenAmount(amount, adjustmentFactor), 66);
     }
 
     function _expectRevert_Token0AmountTooSmall(uint amount) internal {

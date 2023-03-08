@@ -2,6 +2,7 @@
 pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import "./LiquidityDeployerDataTypes.sol";
 
 /// @author Solid World
 library LiquidityDeployerMath {
@@ -12,7 +13,7 @@ library LiquidityDeployerMath {
         uint token0Decimals,
         uint token1Decimals,
         uint token0Amount
-    ) public pure returns (uint token0AmountConvertedDecimals) {
+    ) internal pure returns (uint token0AmountConvertedDecimals) {
         token0AmountConvertedDecimals = Math.mulDiv(token0Amount, 10**token1Decimals, 10**token0Decimals);
 
         if (token0AmountConvertedDecimals == 0) {
@@ -29,7 +30,7 @@ library LiquidityDeployerMath {
         uint conversionRate,
         uint conversionRateDecimals,
         uint token0Amount
-    ) public pure returns (uint token0Converted) {
+    ) internal pure returns (uint token0Converted) {
         uint token0AmountConvertedDecimals = convertToken0DecimalsToToken1(
             token0Decimals,
             token1Decimals,
@@ -47,5 +48,32 @@ library LiquidityDeployerMath {
         }
 
         return token0Converted;
+    }
+
+    function neutralAdjustmentFactor()
+        internal
+        pure
+        returns (LiquidityDeployerDataTypes.AdjustmentFactor memory)
+    {
+        return LiquidityDeployerDataTypes.AdjustmentFactor(1, 1);
+    }
+
+    function adjustTokenAmount(
+        uint amount,
+        LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor
+    ) internal pure returns (uint) {
+        if (_isNeutralAdjustmentFactor(adjustmentFactor)) {
+            return amount;
+        }
+
+        return Math.mulDiv(amount, adjustmentFactor.numerator, adjustmentFactor.denominator);
+    }
+
+    function _isNeutralAdjustmentFactor(LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor)
+        private
+        pure
+        returns (bool)
+    {
+        return adjustmentFactor.numerator == adjustmentFactor.denominator;
     }
 }

@@ -6,7 +6,7 @@ import "../../contracts/LiquidityDeployer.sol";
 import "./TestToken.sol";
 
 abstract contract BaseLiquidityDeployerTest is BaseTest {
-    uint constant INITIAL_TOKEN_BALANCE = 10_000;
+    uint constant INITIAL_TOKEN_BALANCE = 1_000_000e18;
     address token0;
     address token1;
     address gammaVault = vm.addr(3);

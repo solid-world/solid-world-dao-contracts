@@ -25,4 +25,17 @@ library LiquidityDeployerDataTypes {
         mapping(address => bool) isToken0Depositor;
         mapping(address => bool) isToken1Depositor;
     }
+
+    struct DeployedLiquidity {
+        // Account => token0Amount
+        mapping(address => uint) token0;
+        // Account => token1Amount
+        mapping(address => uint) token1;
+    }
+
+    /// @dev used to adjust deployable liquidity to maintain proportionality
+    struct AdjustmentFactor {
+        uint numerator;
+        uint denominator;
+    }
 }

@@ -22,6 +22,11 @@ interface ILiquidityDeployer {
 
     function withdrawToken1(uint amount) external;
 
+    /// @notice Looks at the current configuration and state of the contract, deploys
+    /// the available liquidity to the Gamma Vault, and distributes the LP tokens to
+    /// the depositors proportionally
+    function deployLiquidity() external;
+
     function getToken0() external view returns (address);
 
     function getToken1() external view returns (address);
@@ -49,4 +54,20 @@ interface ILiquidityDeployer {
     function getToken0Depositors() external view returns (address[] memory);
 
     function getToken1Depositors() external view returns (address[] memory);
+
+    /// @param liquidityProvider account that contributed liquidity
+    /// @return lastDeployedAmount amount of token0 liquidity that was
+    /// deployed by the liquidity provider during the last deployment
+    function getLastToken0LiquidityDeployed(address liquidityProvider)
+        external
+        view
+        returns (uint lastDeployedAmount);
+
+    /// @param liquidityProvider account that contributed liquidity
+    /// @return lastDeployedAmount amount of token1 liquidity that was
+    /// last deployed by the liquidity provider during the last deployment
+    function getLastToken1LiquidityDeployed(address liquidityProvider)
+        external
+        view
+        returns (uint lastDeployedAmount);
 }

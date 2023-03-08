@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "./interfaces/liquidity-deployer/ILiquidityDeployer.sol";
 import "./libraries/liquidity-deployer/LiquidityDeployerDataTypes.sol";
+import "./libraries/liquidity-deployer/LiquidityDeployerMath.sol";
 import "./libraries/GPv2SafeERC20.sol";
 
 /// @author Solid World
@@ -14,6 +15,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     LiquidityDeployerDataTypes.Config internal config;
     LiquidityDeployerDataTypes.TotalDeposits internal totalDeposits;
     LiquidityDeployerDataTypes.Depositors internal depositors;
+    LiquidityDeployerDataTypes.DeployedLiquidity internal lastDeployedLiquidity;
 
     /// @dev Account => token0 balance
     mapping(address => uint) internal token0Balance;
@@ -99,6 +101,11 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         emit Token1Withdrawn(msg.sender, amount);
     }
 
+    /// @inheritdoc ILiquidityDeployer
+    function deployLiquidity() external nonReentrant {
+        _computeDeployableLiquidity();
+    }
+
     function getToken0() external view returns (address) {
         return address(config.token0);
     }
@@ -151,6 +158,84 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         token1Depositors = new address[](depositors.token1Depositors.length);
         for (uint i; i < depositors.token1Depositors.length; i++) {
             token1Depositors[i] = depositors.token1Depositors[i];
+        }
+    }
+
+    /// @inheritdoc ILiquidityDeployer
+    function getLastToken0LiquidityDeployed(address liquidityProvider)
+        external
+        view
+        returns (uint lastDeployedAmount)
+    {
+        lastDeployedAmount = lastDeployedLiquidity.token0[liquidityProvider];
+    }
+
+    /// @inheritdoc ILiquidityDeployer
+    function getLastToken1LiquidityDeployed(address liquidityProvider)
+        external
+        view
+        returns (uint lastDeployedAmount)
+    {
+        lastDeployedAmount = lastDeployedLiquidity.token1[liquidityProvider];
+    }
+
+    function _computeDeployableLiquidity() internal {
+        uint totalToken0ValueInToken1 = LiquidityDeployerMath.convertToken0ValueToToken1(
+            _token0Decimals(),
+            _token1Decimals(),
+            config.conversionRate,
+            config.conversionRateDecimals,
+            totalDeposits.token0Amount
+        );
+
+        if (totalToken0ValueInToken1 > totalDeposits.token1Amount) {
+            LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
+                .AdjustmentFactor(totalDeposits.token1Amount, totalToken0ValueInToken1);
+            _computeToken0DeployableLiquidity(adjustmentFactor);
+            _computeToken1DeployableLiquidity(LiquidityDeployerMath.neutralAdjustmentFactor());
+        } else {
+            LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
+                .AdjustmentFactor(totalToken0ValueInToken1, totalDeposits.token1Amount);
+            _computeToken0DeployableLiquidity(LiquidityDeployerMath.neutralAdjustmentFactor());
+            _computeToken1DeployableLiquidity(adjustmentFactor);
+        }
+    }
+
+    function _computeToken0DeployableLiquidity(
+        LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor
+    ) internal {
+        for (uint i; i < depositors.token0Depositors.length; i++) {
+            address token0Depositor = depositors.token0Depositors[i];
+            uint token0DepositorBalance = token0Balance[token0Depositor];
+
+            if (token0DepositorBalance == 0) {
+                lastDeployedLiquidity.token0[token0Depositor] = 0;
+                continue;
+            }
+
+            lastDeployedLiquidity.token0[token0Depositor] = LiquidityDeployerMath.adjustTokenAmount(
+                token0DepositorBalance,
+                adjustmentFactor
+            );
+        }
+    }
+
+    function _computeToken1DeployableLiquidity(
+        LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor
+    ) internal {
+        for (uint i; i < depositors.token1Depositors.length; i++) {
+            address token1Depositor = depositors.token1Depositors[i];
+            uint token1DepositorBalance = token1Balance[token1Depositor];
+
+            if (token1DepositorBalance == 0) {
+                lastDeployedLiquidity.token1[token1Depositor] = 0;
+                continue;
+            }
+
+            lastDeployedLiquidity.token1[token1Depositor] = LiquidityDeployerMath.adjustTokenAmount(
+                token1DepositorBalance,
+                adjustmentFactor
+            );
         }
     }
 

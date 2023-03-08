@@ -248,4 +248,68 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         _expectEmit_Token1Withdrawn(address(this), amount);
         liquidityDeployer.withdrawToken1(amount);
     }
+
+    function testDeployLiquidity_lastDeployableLiquidity_totalDepositOfToken0IsBigger_bothAccountsDepositBothTokens()
+        public
+    {
+        uint account0Token0Deposit = 5e18;
+        uint account0Token1Deposit = 50e6;
+        uint account1Token0Deposit = 3e18;
+        uint account1Token1Deposit = 100e6;
+
+        // totalToken0 = 204e6 (converted to token1)
+        // adjustmentFactor = 150e6/204e6 = 0.735294117647058823529411764705
+
+        uint account0Token0Deployable = 3.676470588235294117e18; // account0Token0Deposit * adjustmentFactor
+        uint account1Token0Deployable = 2.205882352941176470e18; // account1Token0Deposit * adjustmentFactor
+        uint account0Token1Deployable = 50e6;
+        uint account1Token1Deployable = 100e6;
+
+        liquidityDeployer.depositToken0(account0Token0Deposit);
+        liquidityDeployer.depositToken1(account0Token1Deposit);
+
+        vm.startPrank(testAccount1);
+        liquidityDeployer.depositToken0(account1Token0Deposit);
+        liquidityDeployer.depositToken1(account1Token1Deposit);
+        vm.stopPrank();
+
+        liquidityDeployer.deployLiquidity();
+
+        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount0), account0Token0Deployable);
+        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount1), account1Token0Deployable);
+        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount0), account0Token1Deployable);
+        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount1), account1Token1Deployable);
+    }
+
+    function testDeployLiquidity_lastDeployableLiquidity_totalDepositOfToken1IsBigger_bothAccountsDepositBothTokens()
+        public
+    {
+        uint account0Token0Deposit = 5e18;
+        uint account0Token1Deposit = 250e6;
+        uint account1Token0Deposit = 3e18;
+        uint account1Token1Deposit = 100e6;
+
+        // totalToken0 = 204e6 (converted to token1)
+        // adjustmentFactor = 204e6/350e6 = 0.582857142857142857142857142857
+
+        uint account0Token0Deployable = 5e18;
+        uint account1Token0Deployable = 3e18;
+        uint account0Token1Deployable = 145.714285e6; // account0Token1Deposit * adjustmentFactor
+        uint account1Token1Deployable = 58.285714e6; // account1Token1Deposit * adjustmentFactor
+
+        liquidityDeployer.depositToken0(account0Token0Deposit);
+        liquidityDeployer.depositToken1(account0Token1Deposit);
+
+        vm.startPrank(testAccount1);
+        liquidityDeployer.depositToken0(account1Token0Deposit);
+        liquidityDeployer.depositToken1(account1Token1Deposit);
+        vm.stopPrank();
+
+        liquidityDeployer.deployLiquidity();
+
+        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount0), account0Token0Deployable);
+        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount1), account1Token0Deployable);
+        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount0), account0Token1Deployable);
+        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount1), account1Token1Deployable);
+    }
 }
