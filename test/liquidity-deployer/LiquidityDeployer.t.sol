@@ -147,4 +147,28 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         assertEq(liquidityDeployer.convertToken0ValueToToken1(1e12), 25);
         assertEq(liquidityDeployer.convertToken0ValueToToken1(100e18), 2550e6);
     }
+
+    function testWithdrawToken0_revertsIfAmountIs0() public {
+        _expectRevert_InvalidInput();
+        liquidityDeployer.withdrawToken0(0);
+    }
+
+    function testWithdrawToken1_revertsIfAmountIs0() public {
+        _expectRevert_InvalidInput();
+        liquidityDeployer.withdrawToken1(0);
+    }
+
+    function testWithdrawToken0_revertsIfAmountIsGreaterThanBalance() public {
+        uint withdrawAmount = 10_001;
+
+        _expectRevert_InsufficientToken0Balance(address(this), 0, withdrawAmount);
+        liquidityDeployer.withdrawToken0(withdrawAmount);
+    }
+
+    function testWithdrawToken1_revertsIfAmountIsGreaterThanBalance() public {
+        uint withdrawAmount = 10_001;
+
+        _expectRevert_InsufficientToken1Balance(address(this), 0, withdrawAmount);
+        liquidityDeployer.withdrawToken1(withdrawAmount);
+    }
 }

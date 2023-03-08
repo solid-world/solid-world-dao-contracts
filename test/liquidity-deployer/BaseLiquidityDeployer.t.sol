@@ -6,6 +6,7 @@ import "../../contracts/LiquidityDeployer.sol";
 import "./TestToken.sol";
 
 abstract contract BaseLiquidityDeployerTest is BaseTest {
+    uint constant INITIAL_TOKEN_BALANCE = 10_000;
     address token0;
     address token1;
     address gammaVault = vm.addr(3);
@@ -51,11 +52,11 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     }
 
     function _mintTokens() private {
-        TestToken(token0).mint(address(testAccount0), 10_000);
-        TestToken(token1).mint(address(testAccount0), 10_000);
+        TestToken(token0).mint(address(testAccount0), INITIAL_TOKEN_BALANCE);
+        TestToken(token1).mint(address(testAccount0), INITIAL_TOKEN_BALANCE);
 
-        TestToken(token0).mint(address(testAccount1), 10_000);
-        TestToken(token1).mint(address(testAccount1), 10_000);
+        TestToken(token0).mint(address(testAccount1), INITIAL_TOKEN_BALANCE);
+        TestToken(token1).mint(address(testAccount1), INITIAL_TOKEN_BALANCE);
     }
 
     function _approveSpending() private {
@@ -76,6 +77,36 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
 
     function _expectRevert_Token0AmountTooSmall(uint amount) internal {
         vm.expectRevert(abi.encodeWithSelector(ILiquidityDeployer.Token0AmountTooSmall.selector, amount));
+    }
+
+    function _expectRevert_InsufficientToken0Balance(
+        address account,
+        uint balance,
+        uint withdrawAmount
+    ) internal {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ILiquidityDeployer.InsufficientToken0Balance.selector,
+                account,
+                balance,
+                withdrawAmount
+            )
+        );
+    }
+
+    function _expectRevert_InsufficientToken1Balance(
+        address account,
+        uint balance,
+        uint withdrawAmount
+    ) internal {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ILiquidityDeployer.InsufficientToken1Balance.selector,
+                account,
+                balance,
+                withdrawAmount
+            )
+        );
     }
 
     function _expectEmit_Token0Deposited(address depositor, uint amount) internal {

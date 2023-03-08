@@ -5,6 +5,8 @@ pragma solidity 0.8.16;
 interface ILiquidityDeployer {
     error InvalidInput();
     error Token0AmountTooSmall(uint amount);
+    error InsufficientToken0Balance(address account, uint balance, uint withdrawAmount);
+    error InsufficientToken1Balance(address account, uint balance, uint withdrawAmount);
 
     event Token0Deposited(address indexed depositor, uint indexed amount);
     event Token1Deposited(address indexed depositor, uint indexed amount);
@@ -14,6 +16,10 @@ interface ILiquidityDeployer {
 
     /// @notice The caller must approve the contract to spend `amount` of token1
     function depositToken1(uint amount) external;
+
+    function withdrawToken0(uint amount) external;
+
+    function withdrawToken1(uint amount) external;
 
     function getToken0() external view returns (address);
 

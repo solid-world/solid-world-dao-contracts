@@ -21,7 +21,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     /// @dev Account => token1 balance
     mapping(address => uint) internal token1Balance;
 
-    modifier validDepositAmount(uint amount) {
+    modifier validTokenAmount(uint amount) {
         if (amount == 0) {
             revert InvalidInput();
         }
@@ -45,7 +45,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     /// @inheritdoc ILiquidityDeployer
-    function depositToken0(uint amount) external nonReentrant validDepositAmount(amount) {
+    function depositToken0(uint amount) external nonReentrant validTokenAmount(amount) {
         token0Balance[msg.sender] += amount;
         totalDeposits.token0Amount += amount;
 
@@ -60,7 +60,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     /// @inheritdoc ILiquidityDeployer
-    function depositToken1(uint amount) external nonReentrant validDepositAmount(amount) {
+    function depositToken1(uint amount) external nonReentrant validTokenAmount(amount) {
         token1Balance[msg.sender] += amount;
         totalDeposits.token1Amount += amount;
 
@@ -72,6 +72,18 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         config.token1.safeTransferFrom(msg.sender, address(this), amount);
 
         emit Token1Deposited(msg.sender, amount);
+    }
+
+    function withdrawToken0(uint amount) external nonReentrant validTokenAmount(amount) {
+        if (token0Balance[msg.sender] < amount) {
+            revert InsufficientToken0Balance(msg.sender, token0Balance[msg.sender], amount);
+        }
+    }
+
+    function withdrawToken1(uint amount) external nonReentrant validTokenAmount(amount) {
+        if (token1Balance[msg.sender] < amount) {
+            revert InsufficientToken1Balance(msg.sender, token1Balance[msg.sender], amount);
+        }
     }
 
     function getToken0() external view returns (address) {
