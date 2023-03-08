@@ -10,6 +10,8 @@ interface ILiquidityDeployer {
 
     event Token0Deposited(address indexed depositor, uint indexed amount);
     event Token1Deposited(address indexed depositor, uint indexed amount);
+    event Token0Withdrawn(address indexed withdrawer, uint indexed amount);
+    event Token1Withdrawn(address indexed withdrawer, uint indexed amount);
 
     /// @notice The caller must approve the contract to spend `amount` of token0
     function depositToken0(uint amount) external;

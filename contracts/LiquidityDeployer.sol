@@ -78,12 +78,26 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         if (token0Balance[msg.sender] < amount) {
             revert InsufficientToken0Balance(msg.sender, token0Balance[msg.sender], amount);
         }
+
+        token0Balance[msg.sender] -= amount;
+        totalDeposits.token0Amount -= amount;
+
+        config.token0.safeTransfer(msg.sender, amount);
+
+        emit Token0Withdrawn(msg.sender, amount);
     }
 
     function withdrawToken1(uint amount) external nonReentrant validTokenAmount(amount) {
         if (token1Balance[msg.sender] < amount) {
             revert InsufficientToken1Balance(msg.sender, token1Balance[msg.sender], amount);
         }
+
+        token1Balance[msg.sender] -= amount;
+        totalDeposits.token1Amount -= amount;
+
+        config.token1.safeTransfer(msg.sender, amount);
+
+        emit Token1Withdrawn(msg.sender, amount);
     }
 
     function getToken0() external view returns (address) {

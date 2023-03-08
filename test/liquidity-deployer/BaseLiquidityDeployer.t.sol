@@ -21,6 +21,8 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
 
     event Token0Deposited(address indexed depositor, uint indexed amount);
     event Token1Deposited(address indexed depositor, uint indexed amount);
+    event Token0Withdrawn(address indexed withdrawer, uint indexed amount);
+    event Token1Withdrawn(address indexed withdrawer, uint indexed amount);
 
     function setUp() public {
         token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
@@ -117,5 +119,15 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     function _expectEmit_Token1Deposited(address depositor, uint amount) internal {
         vm.expectEmit(true, true, true, false, address(liquidityDeployer));
         emit Token1Deposited(depositor, amount);
+    }
+
+    function _expectEmit_Token0Withdrawn(address withdrawer, uint amount) internal {
+        vm.expectEmit(true, true, true, false, address(liquidityDeployer));
+        emit Token0Withdrawn(withdrawer, amount);
+    }
+
+    function _expectEmit_Token1Withdrawn(address withdrawer, uint amount) internal {
+        vm.expectEmit(true, true, true, false, address(liquidityDeployer));
+        emit Token1Withdrawn(withdrawer, amount);
     }
 }
