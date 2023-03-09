@@ -23,6 +23,8 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     mapping(address => uint) internal totalDeposits;
     /// @dev Account => Token => Balance
     mapping(address => mapping(address => uint)) internal userTokenBalance;
+    /// @dev Account => Amount
+    mapping(address => uint) internal lastLPTokensOwed;
 
     modifier validTokenAmount(uint amount) {
         if (amount == 0) {
@@ -83,7 +85,9 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         ) = _prepareDeployableLiquidity();
 
         _allowUniProxyToSpendDeployableLiquidity();
-        _depositToUniProxy();
+        uint lpTokens = _depositToUniProxy();
+
+        _prepareLPTokensOwed(lpTokens);
     }
 
     function getToken0() external view returns (address) {
@@ -156,17 +160,15 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         return (lastTotalDeployedLiquidity[_token0Address()], lastTotalDeployedLiquidity[_token1Address()]);
     }
 
+    function getLastLPTokensOwed(address liquidityProvider) external view returns (uint) {
+        return lastLPTokensOwed[liquidityProvider];
+    }
+
     function _prepareDeployableLiquidity()
         internal
         returns (uint token0TotalDeployableLiquidity, uint token1TotalDeployableLiquidity)
     {
-        uint totalToken0ValueInToken1 = LiquidityDeployerMath.convertTokenValue(
-            _token0Decimals(),
-            _token1Decimals(),
-            config.conversionRate,
-            config.conversionRateDecimals,
-            totalDeposits[_token0Address()]
-        );
+        uint totalToken0ValueInToken1 = _convertToken0ToToken1(totalDeposits[_token0Address()]);
 
         if (totalToken0ValueInToken1 > totalDeposits[_token1Address()]) {
             LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction(
@@ -267,6 +269,43 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
                 address(this),
                 config.gammaVault,
                 _uniProxyMinIn()
+            );
+    }
+
+    function _prepareLPTokensOwed(uint lpTokens) internal {
+        uint totalLiquidityInToken1 = _totalToken0DeployedLiquidityInToken1() +
+            lastTotalDeployedLiquidity[_token1Address()];
+
+        for (uint i; i < depositors.tokenDepositors.length; i++) {
+            address tokenDepositor = depositors.tokenDepositors[i];
+            uint token0DeployableLiquidity = lastDeployedLiquidity[_token0Address()][tokenDepositor];
+            uint token1DeployableLiquidity = lastDeployedLiquidity[_token1Address()][tokenDepositor];
+            uint token0DeployableLiquidityInToken1 = _convertToken0ToToken1(token0DeployableLiquidity);
+
+            uint totalLiquidityInToken1ForDepositor = token0DeployableLiquidityInToken1 +
+                token1DeployableLiquidity;
+            uint lpTokensOwed = Math.mulDiv(
+                lpTokens,
+                totalLiquidityInToken1ForDepositor,
+                totalLiquidityInToken1
+            );
+
+            lastLPTokensOwed[tokenDepositor] = lpTokensOwed;
+        }
+    }
+
+    function _totalToken0DeployedLiquidityInToken1() internal view returns (uint) {
+        return _convertToken0ToToken1(lastTotalDeployedLiquidity[_token0Address()]);
+    }
+
+    function _convertToken0ToToken1(uint token0Amount) internal view returns (uint) {
+        return
+            LiquidityDeployerMath.convertTokenValue(
+                _token0Decimals(),
+                _token1Decimals(),
+                config.conversionRate,
+                config.conversionRateDecimals,
+                token0Amount
             );
     }
 

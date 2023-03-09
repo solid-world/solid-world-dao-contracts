@@ -68,4 +68,6 @@ interface ILiquidityDeployer {
         returns (uint lastDeployedAmount);
 
     function getLastTotalDeployedLiquidity() external view returns (uint, uint);
+
+    function getLastLPTokensOwed(address liquidityProvider) external view returns (uint);
 }

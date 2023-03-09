@@ -393,4 +393,26 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         );
         liquidityDeployer.deployLiquidity();
     }
+
+    function testDeployLiquidity_computesHowMuchEachLiquidityProviderIsOwed() public {
+        _doDeposits(5e18, 50e6, 3e18, 100e6);
+
+        // user0 total liquidity value = 143.749985e6
+        // user1 total liquidity value = 156.249991e6
+        // total liquidity value = 299.999976e6
+        // user0 percentage = 143.749985e6 / 299.999976e6 = 0.479166654999999066666591999994
+        // user1 percentage = 156.249991e6 / 299.999976e6 = 0.520833345000000933333408000005
+        // lp tokens = 1_000_000e18
+        // user0 owed = 1_000_000e18 * 0.479166654999999066666591999994 = 479166.654999999066666591e18
+        // user1 owed = 1_000_000e18 * 0.520833345000000933333408000005 = 520833.345000000933333408e18
+
+        liquidityDeployer.deployLiquidity();
+
+        uint user0LPTokens = liquidityDeployer.getLastLPTokensOwed(testAccount0);
+        uint user1LPTokens = liquidityDeployer.getLastLPTokensOwed(testAccount1);
+
+        assertEq(user0LPTokens, 479166.654999999066666591e18);
+        assertEq(user1LPTokens, 520833.345000000933333408e18);
+        assertApproxEqAbs(user0LPTokens + user1LPTokens, 1_000_000e18, 1); // dust
+    }
 }
