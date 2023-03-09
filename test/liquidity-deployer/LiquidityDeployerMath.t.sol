@@ -6,38 +6,12 @@ import "../../contracts/libraries/liquidity-deployer/LiquidityDeployerMath.sol";
 import "../../contracts/libraries/liquidity-deployer/LiquidityDeployerDataTypes.sol";
 
 contract LiquidityDeployerMathTest is BaseTest {
-    function testConvertTokenDecimals_revertsIfConvertedValueIs0() public {
-        uint token0Decimals = 18;
-        uint token1Decimals = 6;
-        uint token0Amount = 0.9999999e12; //1e12 is the minimum amount of token0 that can be converted to token1
-
-        _expectRevert_TokenAmountTooSmall(token0Amount);
-        LiquidityDeployerMath.convertTokenDecimals(token0Decimals, token1Decimals, token0Amount);
-    }
-
     function testConvertTokenDecimals() public {
         uint token0Decimals = 18;
         uint token1Decimals = 6;
 
         assertEq(LiquidityDeployerMath.convertTokenDecimals(token0Decimals, token1Decimals, 1e12), 1);
         assertEq(LiquidityDeployerMath.convertTokenDecimals(token0Decimals, token1Decimals, 100e18), 100e6);
-    }
-
-    function testConvertTokenValue_revertsIfConvertedValueIs0() public {
-        uint token0Decimals = 18;
-        uint token1Decimals = 6;
-        uint conversionRate = 1;
-        uint conversionRateDecimals = 2;
-        uint token0Amount = 1e12;
-
-        _expectRevert_TokenAmountTooSmall(token0Amount);
-        LiquidityDeployerMath.convertTokenValue(
-            token0Decimals,
-            token1Decimals,
-            conversionRate,
-            conversionRateDecimals,
-            token0Amount
-        );
     }
 
     function testConvertTokenValue() public {
@@ -97,9 +71,5 @@ contract LiquidityDeployerMathTest is BaseTest {
         });
 
         assertEq(LiquidityDeployerMath.adjustTokenAmount(amount, adjustmentFactor), 66);
-    }
-
-    function _expectRevert_TokenAmountTooSmall(uint amount) internal {
-        vm.expectRevert(abi.encodeWithSelector(LiquidityDeployerMath.TokenAmountTooSmall.selector, amount));
     }
 }

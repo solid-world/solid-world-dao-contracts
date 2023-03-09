@@ -277,6 +277,13 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         liquidityDeployer.deployLiquidity();
     }
 
+    function testDeployLiquidity_revertsIfToken0TotalDepositsInToken1Are0() public {
+        _doDeposits(0.999999999998e12, 50e6, 1, 100e6);
+
+        _expectRevert_NotEnoughDeposits(0.999999999999e12, 150e6); // 1e12 is the minimum
+        liquidityDeployer.deployLiquidity();
+    }
+
     function testDeployLiquidity_lastDeployableLiquidity_totalDepositOfToken0IsBigger_bothAccountsDepositBothTokens()
         public
     {

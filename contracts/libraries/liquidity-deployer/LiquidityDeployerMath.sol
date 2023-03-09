@@ -6,7 +6,6 @@ import "./LiquidityDeployerDataTypes.sol";
 
 /// @author Solid World
 library LiquidityDeployerMath {
-    error TokenAmountTooSmall(uint amount);
     error InvalidFraction(uint numerator, uint denominator);
 
     /// @return tokenAmountConvertedDecimals = tokenAmount * 10**newDecimals / 10**currentDecimals
@@ -16,12 +15,6 @@ library LiquidityDeployerMath {
         uint tokenAmount
     ) internal pure returns (uint tokenAmountConvertedDecimals) {
         tokenAmountConvertedDecimals = Math.mulDiv(tokenAmount, 10**newDecimals, 10**currentDecimals);
-
-        if (tokenAmountConvertedDecimals == 0) {
-            revert TokenAmountTooSmall(tokenAmount);
-        }
-
-        return tokenAmountConvertedDecimals;
     }
 
     /// @return tokenConverted = tokenAmountConvertedDecimals * conversionRate / 10 ** conversionRateDecimals
@@ -32,19 +25,20 @@ library LiquidityDeployerMath {
         uint conversionRateDecimals,
         uint tokenAmount
     ) internal pure returns (uint tokenConverted) {
+        if (tokenAmount == 0) {
+            tokenConverted = 0;
+        }
+
         uint tokenAmountConvertedDecimals = convertTokenDecimals(currentDecimals, newDecimals, tokenAmount);
+        if (tokenAmountConvertedDecimals == 0) {
+            tokenConverted = 0;
+        }
 
         tokenConverted = Math.mulDiv(
             tokenAmountConvertedDecimals,
             conversionRate,
             10**conversionRateDecimals
         );
-
-        if (tokenConverted == 0) {
-            revert TokenAmountTooSmall(tokenAmount);
-        }
-
-        return tokenConverted;
     }
 
     function neutralFraction() internal pure returns (LiquidityDeployerDataTypes.Fraction memory) {

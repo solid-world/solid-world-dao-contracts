@@ -169,6 +169,9 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         returns (uint token0TotalDeployableLiquidity, uint token1TotalDeployableLiquidity)
     {
         uint totalToken0ValueInToken1 = _convertToken0ToToken1(totalDeposits[_token0Address()]);
+        if (totalToken0ValueInToken1 == 0) {
+            revert NotEnoughDeposits(totalDeposits[_token0Address()], totalDeposits[_token1Address()]);
+        }
 
         if (totalToken0ValueInToken1 > totalDeposits[_token1Address()]) {
             LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction(
