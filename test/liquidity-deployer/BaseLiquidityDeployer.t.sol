@@ -52,7 +52,7 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     function _labelAccounts() private {
         vm.label(token0, "MCBT");
         vm.label(token1, "USDC");
-        vm.label(lpToken, "LP Token");
+        vm.label(address(lpToken), "LP Token");
         vm.label(gammaVault, "Gamma Vault");
         vm.label(uniProxy, "UniProxy");
         vm.label(address(liquidityDeployer), "Liquidity Deployer");

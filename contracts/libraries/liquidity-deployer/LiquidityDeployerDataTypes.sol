@@ -15,10 +15,9 @@ library LiquidityDeployerDataTypes {
     }
 
     struct Depositors {
-        /// @dev Token => Depositors
-        mapping(address => address[]) tokenDepositors;
-        /// @dev Token => Depositor => IsDepositor
-        mapping(address => mapping(address => bool)) isDepositor;
+        address[] tokenDepositors;
+        /// @dev Depositor => IsDepositor
+        mapping(address => bool) isDepositor;
     }
 
     /// @dev used to adjust deployable liquidity to maintain proportionality

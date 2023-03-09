@@ -67,32 +67,46 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         assertEq(token1Amount, amount * 2);
     }
 
-    function testDepositToken0_addsDepositorToToken0DepositorsOnlyOnce() public {
+    function testDepositToken0_addsDepositorToDepositorsOnlyOnce() public {
         uint amount = 100;
 
         liquidityDeployer.depositToken0(amount);
-        address[] memory token0Depositors = liquidityDeployer.getToken0Depositors();
-        assertEq(token0Depositors.length, 1);
-        assertEq(token0Depositors[0], address(this));
+        address[] memory tokenDepositors = liquidityDeployer.getTokenDepositors();
+        assertEq(tokenDepositors.length, 1);
+        assertEq(tokenDepositors[0], address(this));
 
         liquidityDeployer.depositToken0(amount);
-        token0Depositors = liquidityDeployer.getToken0Depositors();
-        assertEq(token0Depositors.length, 1);
-        assertEq(token0Depositors[0], address(this));
+        tokenDepositors = liquidityDeployer.getTokenDepositors();
+        assertEq(tokenDepositors.length, 1);
+        assertEq(tokenDepositors[0], address(this));
     }
 
-    function testDepositToken1_addsDepositorToToken1DepositorsOnlyOnce() public {
+    function testDepositToken1_addsDepositorToDepositorsOnlyOnce() public {
         uint amount = 100;
 
         liquidityDeployer.depositToken1(amount);
-        address[] memory token1Depositors = liquidityDeployer.getToken1Depositors();
-        assertEq(token1Depositors.length, 1);
-        assertEq(token1Depositors[0], address(this));
+        address[] memory tokenDepositors = liquidityDeployer.getTokenDepositors();
+        assertEq(tokenDepositors.length, 1);
+        assertEq(tokenDepositors[0], address(this));
 
         liquidityDeployer.depositToken1(amount);
-        token1Depositors = liquidityDeployer.getToken1Depositors();
-        assertEq(token1Depositors.length, 1);
-        assertEq(token1Depositors[0], address(this));
+        tokenDepositors = liquidityDeployer.getTokenDepositors();
+        assertEq(tokenDepositors.length, 1);
+        assertEq(tokenDepositors[0], address(this));
+    }
+
+    function testDepositBothTokens_addsDepositorToDepositorsOnlyOnce() public {
+        uint amount = 100;
+
+        liquidityDeployer.depositToken0(amount);
+        address[] memory tokenDepositors = liquidityDeployer.getTokenDepositors();
+        assertEq(tokenDepositors.length, 1);
+        assertEq(tokenDepositors[0], address(this));
+
+        liquidityDeployer.depositToken1(amount);
+        tokenDepositors = liquidityDeployer.getTokenDepositors();
+        assertEq(tokenDepositors.length, 1);
+        assertEq(tokenDepositors[0], address(this));
     }
 
     function testDepositToken0_token0BalanceOfLiquidityDeployerIncreasesWithDepositAmount() public {
@@ -378,5 +392,14 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
             gammaVault
         );
         liquidityDeployer.deployLiquidity();
+    }
+
+    function testDeployLiquidity_computesHowMuchEveryDepositorIsOwed() public {
+        // calculez cu cat contribuie la lichiditate fiecare user in token1 ca parte _computeTokenDeployableLiquidity
+        // compute total liquidity deposited as token1 from lastTotalDeployedLiquidity
+        // add storage mapping totalDepositedFinal
+        // iterate through depositors of token 0, for each look into lastDeployedLiquidity, convert to token 1, add to totalDepositedFinal
+        // iterate through depositors of token 1, for each look into lastDeployedLiquidity, add to totalDepositedFinal
+        // iterate through all total depositors and compute how much he's owed as totalDepositedFinal/totalLiquidityDeposited * lpTokens
     }
 }

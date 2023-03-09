@@ -127,12 +127,11 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         token1Amount = totalDeposits[_token1Address()];
     }
 
-    function getToken0Depositors() external view returns (address[] memory token0Depositors) {
-        token0Depositors = _getTokenDepositors(_token0Address());
-    }
-
-    function getToken1Depositors() external view returns (address[] memory token1Depositors) {
-        token1Depositors = _getTokenDepositors(_token1Address());
+    function getTokenDepositors() external view returns (address[] memory tokenDepositors) {
+        tokenDepositors = new address[](depositors.tokenDepositors.length);
+        for (uint i; i < depositors.tokenDepositors.length; i++) {
+            tokenDepositors[i] = depositors.tokenDepositors[i];
+        }
     }
 
     /// @inheritdoc ILiquidityDeployer
@@ -199,8 +198,8 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         address token,
         LiquidityDeployerDataTypes.Fraction memory adjustmentFactor
     ) internal returns (uint totalDeployableLiquidity) {
-        for (uint i; i < depositors.tokenDepositors[token].length; i++) {
-            address tokenDepositor = depositors.tokenDepositors[token][i];
+        for (uint i; i < depositors.tokenDepositors.length; i++) {
+            address tokenDepositor = depositors.tokenDepositors[i];
             uint tokenDepositorBalance = userTokenBalance[tokenDepositor][token];
 
             if (tokenDepositorBalance == 0) {
@@ -220,9 +219,9 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         userTokenBalance[msg.sender][token] += amount;
         totalDeposits[token] += amount;
 
-        if (!depositors.isDepositor[token][msg.sender]) {
-            depositors.isDepositor[token][msg.sender] = true;
-            depositors.tokenDepositors[token].push(msg.sender);
+        if (!depositors.isDepositor[msg.sender]) {
+            depositors.isDepositor[msg.sender] = true;
+            depositors.tokenDepositors.push(msg.sender);
         }
 
         IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
@@ -241,13 +240,6 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         IERC20(token).safeTransfer(msg.sender, amount);
 
         emit TokenWithdrawn(token, msg.sender, amount);
-    }
-
-    function _getTokenDepositors(address token) internal view returns (address[] memory tokenDepositors) {
-        tokenDepositors = new address[](depositors.tokenDepositors[token].length);
-        for (uint i; i < depositors.tokenDepositors[token].length; i++) {
-            tokenDepositors[i] = depositors.tokenDepositors[token][i];
-        }
     }
 
     function _allowUniProxyToSpendDeployableLiquidity() internal {

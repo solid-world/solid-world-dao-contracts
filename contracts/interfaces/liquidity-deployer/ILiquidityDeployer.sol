@@ -49,9 +49,7 @@ interface ILiquidityDeployer {
 
     function getTotalDeposits() external view returns (uint token0Amount, uint token1Amount);
 
-    function getToken0Depositors() external view returns (address[] memory);
-
-    function getToken1Depositors() external view returns (address[] memory);
+    function getTokenDepositors() external view returns (address[] memory);
 
     /// @param liquidityProvider account that contributed liquidity
     /// @return lastDeployedAmount amount of token0 liquidity that was
