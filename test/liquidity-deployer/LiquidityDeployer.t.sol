@@ -393,13 +393,4 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         );
         liquidityDeployer.deployLiquidity();
     }
-
-    function testDeployLiquidity_computesHowMuchEveryDepositorIsOwed() public {
-        // calculez cu cat contribuie la lichiditate fiecare user in token1 ca parte _computeTokenDeployableLiquidity
-        // compute total liquidity deposited as token1 from lastTotalDeployedLiquidity
-        // add storage mapping totalDepositedFinal
-        // iterate through depositors of token 0, for each look into lastDeployedLiquidity, convert to token 1, add to totalDepositedFinal
-        // iterate through depositors of token 1, for each look into lastDeployedLiquidity, add to totalDepositedFinal
-        // iterate through all total depositors and compute how much he's owed as totalDepositedFinal/totalLiquidityDeposited * lpTokens
-    }
 }
