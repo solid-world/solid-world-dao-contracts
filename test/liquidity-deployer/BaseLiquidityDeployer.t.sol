@@ -7,6 +7,8 @@ import "./TestToken.sol";
 
 abstract contract BaseLiquidityDeployerTest is BaseTest {
     uint constant INITIAL_TOKEN_BALANCE = 1_000_000e18;
+    uint constant MINTED_LP_TOKENS = 1_000_000e18;
+
     address token0;
     address token1;
     address gammaVault = vm.addr(3);
@@ -18,6 +20,9 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
 
     address testAccount0;
     address testAccount1 = vm.addr(6);
+    address testAccount2 = vm.addr(7);
+
+    TestToken lpToken;
 
     event TokenDeposited(address indexed token, address indexed depositor, uint indexed amount);
     event TokenWithdrawn(address indexed token, address indexed withdrawer, uint indexed amount);
@@ -25,6 +30,7 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     function setUp() public {
         token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         token1 = address(new TestToken("USD Coin", "USDC", 6));
+        lpToken = new TestToken("Gamma LP Token", "MCBT-USDC", 18);
         testAccount0 = address(this);
 
         liquidityDeployer = new LiquidityDeployer(
@@ -39,16 +45,20 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         _labelAccounts();
         _mintTokens();
         _approveSpending();
+
+        _mockUniProxy_deposit();
     }
 
     function _labelAccounts() private {
         vm.label(token0, "MCBT");
         vm.label(token1, "USDC");
+        vm.label(lpToken, "LP Token");
         vm.label(gammaVault, "Gamma Vault");
         vm.label(uniProxy, "UniProxy");
         vm.label(address(liquidityDeployer), "Liquidity Deployer");
         vm.label(testAccount0, "Test Account 0");
         vm.label(testAccount1, "Test Account 1");
+        vm.label(testAccount2, "Test Account 2");
     }
 
     function _mintTokens() private {
@@ -57,6 +67,8 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
 
         TestToken(token0).mint(address(testAccount1), INITIAL_TOKEN_BALANCE);
         TestToken(token1).mint(address(testAccount1), INITIAL_TOKEN_BALANCE);
+
+        lpToken.mint(address(liquidityDeployer), INITIAL_TOKEN_BALANCE);
     }
 
     function _approveSpending() private {
@@ -86,6 +98,24 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
             liquidityDeployer.depositToken1(account1Token1Deposit);
         }
         vm.stopPrank();
+    }
+
+    function _mockUniProxy_deposit() internal {
+        vm.mockCall(
+            uniProxy,
+            abi.encodeWithSelector(IUniProxy.deposit.selector),
+            abi.encode(MINTED_LP_TOKENS)
+        );
+    }
+
+    function _expectDepositIsCalledOnUniProxy(
+        uint deposit0,
+        uint deposit1,
+        address to,
+        address pos
+    ) internal {
+        uint[4] memory minIn = [uint(0), uint(0), uint(0), uint(0)];
+        vm.expectCall(uniProxy, abi.encodeCall(IUniProxy.deposit, (deposit0, deposit1, to, pos, minIn)));
     }
 
     function _expectRevert_InvalidInput() internal {

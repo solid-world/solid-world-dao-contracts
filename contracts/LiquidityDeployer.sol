@@ -81,6 +81,9 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
             lastTotalDeployedLiquidity[_token0Address()],
             lastTotalDeployedLiquidity[_token1Address()]
         ) = _computeDeployableLiquidity();
+
+        _allowUniProxyToSpendDeployableLiquidity();
+        _depositToUniProxy();
     }
 
     function getToken0() external view returns (address) {
@@ -247,6 +250,22 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         }
     }
 
+    function _allowUniProxyToSpendDeployableLiquidity() internal {
+        config.token0.approve(address(config.uniProxy), lastTotalDeployedLiquidity[_token0Address()]);
+        config.token1.approve(address(config.uniProxy), lastTotalDeployedLiquidity[_token1Address()]);
+    }
+
+    function _depositToUniProxy() internal returns (uint lpTokens) {
+        return
+            config.uniProxy.deposit(
+                lastTotalDeployedLiquidity[_token0Address()],
+                lastTotalDeployedLiquidity[_token1Address()],
+                address(this),
+                config.gammaVault,
+                _uniProxyMinIn()
+            );
+    }
+
     function _token0Decimals() internal view returns (uint8) {
         return IERC20Metadata(address(config.token0)).decimals();
     }
@@ -261,5 +280,9 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
 
     function _token1Address() internal view returns (address) {
         return address(config.token1);
+    }
+
+    function _uniProxyMinIn() internal pure returns (uint[4] memory) {
+        return [uint(0), uint(0), uint(0), uint(0)];
     }
 }

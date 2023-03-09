@@ -342,4 +342,41 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         assertEq(lastToken0DeployedLiquidity, account0Token0Deployable + account1Token0Deployable);
         assertEq(lastToken1DeployedLiquidity, account0Token1Deployable + account1Token1Deployable);
     }
+
+    function testDeployLiquidity_approvesUniProxyToSpendDeployableTokens() public {
+        _doDeposits(5e18, 50e6, 3e18, 100e6);
+
+        uint account0Token0Deployable = 3.676470588235294117e18;
+        uint account1Token0Deployable = 2.205882352941176470e18;
+        uint account0Token1Deployable = 50e6;
+        uint account1Token1Deployable = 100e6;
+
+        liquidityDeployer.deployLiquidity();
+
+        assertEq(
+            IERC20(token0).allowance(address(liquidityDeployer), address(uniProxy)),
+            account0Token0Deployable + account1Token0Deployable
+        );
+        assertEq(
+            IERC20(token1).allowance(address(liquidityDeployer), address(uniProxy)),
+            account0Token1Deployable + account1Token1Deployable
+        );
+    }
+
+    function testDeployLiquidity_calls_UniProxy_deposit() public {
+        _doDeposits(5e18, 50e6, 3e18, 100e6);
+
+        uint account0Token0Deployable = 3.676470588235294117e18;
+        uint account1Token0Deployable = 2.205882352941176470e18;
+        uint account0Token1Deployable = 50e6;
+        uint account1Token1Deployable = 100e6;
+
+        _expectDepositIsCalledOnUniProxy(
+            account0Token0Deployable + account1Token0Deployable,
+            account0Token1Deployable + account1Token1Deployable,
+            address(liquidityDeployer),
+            gammaVault
+        );
+        liquidityDeployer.deployLiquidity();
+    }
 }
