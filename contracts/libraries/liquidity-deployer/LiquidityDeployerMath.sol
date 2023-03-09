@@ -7,6 +7,7 @@ import "./LiquidityDeployerDataTypes.sol";
 /// @author Solid World
 library LiquidityDeployerMath {
     error TokenAmountTooSmall(uint amount);
+    error InvalidAdjustmentFactor(uint numerator, uint denominator);
 
     /// @return tokenAmountConvertedDecimals = tokenAmount * 10**newDecimals / 10**currentDecimals
     function convertTokenDecimals(
@@ -58,6 +59,10 @@ library LiquidityDeployerMath {
         uint amount,
         LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor
     ) internal pure returns (uint) {
+        if (adjustmentFactor.denominator == 0) {
+            revert InvalidAdjustmentFactor(adjustmentFactor.numerator, adjustmentFactor.denominator);
+        }
+
         if (_isNeutralAdjustmentFactor(adjustmentFactor)) {
             return amount;
         }

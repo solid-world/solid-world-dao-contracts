@@ -5,6 +5,7 @@ pragma solidity 0.8.16;
 interface ILiquidityDeployer {
     error InvalidInput();
     error InsufficientTokenBalance(address token, address account, uint balance, uint withdrawAmount);
+    error NotEnoughDeposits(uint token0Deposits, uint token1Deposits);
 
     event TokenDeposited(address indexed token, address indexed depositor, uint indexed amount);
     event TokenWithdrawn(address indexed token, address indexed withdrawer, uint indexed amount);

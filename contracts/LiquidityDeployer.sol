@@ -29,6 +29,16 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         _;
     }
 
+    modifier sufficientDeposits() {
+        uint token0Deposits = totalDeposits[_token0Address()];
+        uint token1Deposits = totalDeposits[_token1Address()];
+
+        if (token0Deposits == 0 || token1Deposits == 0) {
+            revert NotEnoughDeposits(token0Deposits, token1Deposits);
+        }
+        _;
+    }
+
     constructor(
         address token0,
         address token1,
@@ -64,7 +74,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     /// @inheritdoc ILiquidityDeployer
-    function deployLiquidity() external nonReentrant {
+    function deployLiquidity() external nonReentrant sufficientDeposits {
         _computeDeployableLiquidity();
     }
 

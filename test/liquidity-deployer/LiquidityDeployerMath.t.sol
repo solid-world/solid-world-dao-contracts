@@ -68,6 +68,15 @@ contract LiquidityDeployerMathTest is BaseTest {
         );
     }
 
+    function testAdjustTokenAmount_revertsForInvalidAdjustmentFactor() public {
+        uint amount = 100;
+        LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
+            .AdjustmentFactor({ numerator: 1, denominator: 0 });
+
+        vm.expectRevert(abi.encodeWithSelector(LiquidityDeployerMath.InvalidAdjustmentFactor.selector, 1, 0));
+        LiquidityDeployerMath.adjustTokenAmount(amount, adjustmentFactor);
+    }
+
     function testAdjustTokenAmount_neutralAdjustmentFactor() public {
         uint amount = 100;
         LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes

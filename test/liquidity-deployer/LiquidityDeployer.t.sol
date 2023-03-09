@@ -249,6 +249,20 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         liquidityDeployer.withdrawToken1(amount);
     }
 
+    function testDeployLiquidity_revertsIfNotEnoughDeposits() public {
+        _expectRevert_NotEnoughDeposits(0, 0);
+        liquidityDeployer.deployLiquidity();
+
+        liquidityDeployer.depositToken0(1);
+        _expectRevert_NotEnoughDeposits(1, 0);
+        liquidityDeployer.deployLiquidity();
+
+        liquidityDeployer.depositToken1(1);
+        liquidityDeployer.withdrawToken0(1);
+        _expectRevert_NotEnoughDeposits(0, 1);
+        liquidityDeployer.deployLiquidity();
+    }
+
     function testDeployLiquidity_lastDeployableLiquidity_totalDepositOfToken0IsBigger_bothAccountsDepositBothTokens()
         public
     {
@@ -303,6 +317,36 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         vm.startPrank(testAccount1);
         liquidityDeployer.depositToken0(account1Token0Deposit);
         liquidityDeployer.depositToken1(account1Token1Deposit);
+        vm.stopPrank();
+
+        liquidityDeployer.deployLiquidity();
+
+        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount0), account0Token0Deployable);
+        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount1), account1Token0Deployable);
+        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount0), account0Token1Deployable);
+        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount1), account1Token1Deployable);
+    }
+
+    function testDeployLiquidity_lastDeployableLiquidity_totalDepositOfToken0IsBigger_account0DepositsBothTokens_account1DepositsToken0()
+        public
+    {
+        uint account0Token0Deposit = 5e18;
+        uint account0Token1Deposit = 50e6;
+        uint account1Token0Deposit = 3e18;
+
+        // totalToken0 = 204e6 (converted to token1)
+        // adjustmentFactor = 50e6/204e6 = 0.245098039215686274509803921568
+
+        uint account0Token0Deployable = 1.225490196078431372e18; // account0Token0Deposit * adjustmentFactor
+        uint account1Token0Deployable = 0.735294117647058823e18; // account1Token0Deposit * adjustmentFactor
+        uint account0Token1Deployable = 50e6;
+        uint account1Token1Deployable = 0;
+
+        liquidityDeployer.depositToken0(account0Token0Deposit);
+        liquidityDeployer.depositToken1(account0Token1Deposit);
+
+        vm.startPrank(testAccount1);
+        liquidityDeployer.depositToken0(account1Token0Deposit);
         vm.stopPrank();
 
         liquidityDeployer.deployLiquidity();
