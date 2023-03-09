@@ -68,4 +68,6 @@ interface ILiquidityDeployer {
         external
         view
         returns (uint lastDeployedAmount);
+
+    function getLastTotalDeployedLiquidity() external view returns (uint, uint);
 }

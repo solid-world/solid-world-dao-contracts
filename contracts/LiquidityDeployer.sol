@@ -18,6 +18,8 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     /// @dev Token => Account => Amount
     mapping(address => mapping(address => uint)) internal lastDeployedLiquidity;
     /// @dev Token => Amount
+    mapping(address => uint) internal lastTotalDeployedLiquidity;
+    /// @dev Token => Amount
     mapping(address => uint) internal totalDeposits;
     /// @dev Account => Token => Balance
     mapping(address => mapping(address => uint)) internal userTokenBalance;
@@ -75,7 +77,10 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
 
     /// @inheritdoc ILiquidityDeployer
     function deployLiquidity() external nonReentrant sufficientDeposits {
-        _computeDeployableLiquidity();
+        (
+            lastTotalDeployedLiquidity[_token0Address()],
+            lastTotalDeployedLiquidity[_token1Address()]
+        ) = _computeDeployableLiquidity();
     }
 
     function getToken0() external view returns (address) {
@@ -145,7 +150,14 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         lastDeployedAmount = lastDeployedLiquidity[_token1Address()][liquidityProvider];
     }
 
-    function _computeDeployableLiquidity() internal {
+    function getLastTotalDeployedLiquidity() external view returns (uint, uint) {
+        return (lastTotalDeployedLiquidity[_token0Address()], lastTotalDeployedLiquidity[_token1Address()]);
+    }
+
+    function _computeDeployableLiquidity()
+        internal
+        returns (uint token0TotalDeployableLiquidity, uint token1TotalDeployableLiquidity)
+    {
         uint totalToken0ValueInToken1 = LiquidityDeployerMath.convertTokenValue(
             _token0Decimals(),
             _token1Decimals(),
@@ -157,26 +169,32 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         if (totalToken0ValueInToken1 > totalDeposits[_token1Address()]) {
             LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
                 .AdjustmentFactor(totalDeposits[_token1Address()], totalToken0ValueInToken1);
-            _computeTokenDeployableLiquidity(_token0Address(), adjustmentFactor);
-            _computeTokenDeployableLiquidity(
+            token0TotalDeployableLiquidity = _computeTokenDeployableLiquidity(
+                _token0Address(),
+                adjustmentFactor
+            );
+            token1TotalDeployableLiquidity = _computeTokenDeployableLiquidity(
                 _token1Address(),
                 LiquidityDeployerMath.neutralAdjustmentFactor()
             );
         } else {
             LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
                 .AdjustmentFactor(totalToken0ValueInToken1, totalDeposits[_token1Address()]);
-            _computeTokenDeployableLiquidity(
+            token0TotalDeployableLiquidity = _computeTokenDeployableLiquidity(
                 _token0Address(),
                 LiquidityDeployerMath.neutralAdjustmentFactor()
             );
-            _computeTokenDeployableLiquidity(_token1Address(), adjustmentFactor);
+            token1TotalDeployableLiquidity = _computeTokenDeployableLiquidity(
+                _token1Address(),
+                adjustmentFactor
+            );
         }
     }
 
     function _computeTokenDeployableLiquidity(
         address token,
         LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor
-    ) internal {
+    ) internal returns (uint totalDeployableLiquidity) {
         for (uint i; i < depositors.tokenDepositors[token].length; i++) {
             address tokenDepositor = depositors.tokenDepositors[token][i];
             uint tokenDepositorBalance = userTokenBalance[tokenDepositor][token];
@@ -190,6 +208,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
                 tokenDepositorBalance,
                 adjustmentFactor
             );
+            totalDeployableLiquidity += lastDeployedLiquidity[token][tokenDepositor];
         }
     }
 

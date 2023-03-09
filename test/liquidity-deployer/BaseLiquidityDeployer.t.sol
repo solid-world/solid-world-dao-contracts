@@ -71,6 +71,23 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         vm.stopPrank();
     }
 
+    function _doDeposits(
+        uint account0Token0Deposit,
+        uint account0Token1Deposit,
+        uint account1Token0Deposit,
+        uint account1Token1Deposit
+    ) internal {
+        liquidityDeployer.depositToken0(account0Token0Deposit);
+        liquidityDeployer.depositToken1(account0Token1Deposit);
+
+        vm.startPrank(testAccount1);
+        liquidityDeployer.depositToken0(account1Token0Deposit);
+        if (account1Token1Deposit > 0) {
+            liquidityDeployer.depositToken1(account1Token1Deposit);
+        }
+        vm.stopPrank();
+    }
+
     function _expectRevert_InvalidInput() internal {
         vm.expectRevert(abi.encodeWithSelector(ILiquidityDeployer.InvalidInput.selector));
     }
