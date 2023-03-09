@@ -167,22 +167,23 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         );
 
         if (totalToken0ValueInToken1 > totalDeposits[_token1Address()]) {
-            LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
-                .AdjustmentFactor(totalDeposits[_token1Address()], totalToken0ValueInToken1);
-            token0TotalDeployableLiquidity = _computeTokenDeployableLiquidity(
-                _token0Address(),
-                adjustmentFactor
+            LiquidityDeployerDataTypes.Fraction memory fraction = LiquidityDeployerDataTypes.Fraction(
+                totalDeposits[_token1Address()],
+                totalToken0ValueInToken1
             );
+            token0TotalDeployableLiquidity = _computeTokenDeployableLiquidity(_token0Address(), fraction);
             token1TotalDeployableLiquidity = _computeTokenDeployableLiquidity(
                 _token1Address(),
-                LiquidityDeployerMath.neutralAdjustmentFactor()
+                LiquidityDeployerMath.neutralFraction()
             );
         } else {
-            LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
-                .AdjustmentFactor(totalToken0ValueInToken1, totalDeposits[_token1Address()]);
+            LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction(
+                totalToken0ValueInToken1,
+                totalDeposits[_token1Address()]
+            );
             token0TotalDeployableLiquidity = _computeTokenDeployableLiquidity(
                 _token0Address(),
-                LiquidityDeployerMath.neutralAdjustmentFactor()
+                LiquidityDeployerMath.neutralFraction()
             );
             token1TotalDeployableLiquidity = _computeTokenDeployableLiquidity(
                 _token1Address(),
@@ -193,7 +194,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
 
     function _computeTokenDeployableLiquidity(
         address token,
-        LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor
+        LiquidityDeployerDataTypes.Fraction memory adjustmentFactor
     ) internal returns (uint totalDeployableLiquidity) {
         for (uint i; i < depositors.tokenDepositors[token].length; i++) {
             address tokenDepositor = depositors.tokenDepositors[token][i];

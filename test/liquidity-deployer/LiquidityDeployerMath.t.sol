@@ -68,27 +68,33 @@ contract LiquidityDeployerMathTest is BaseTest {
         );
     }
 
-    function testAdjustTokenAmount_revertsForInvalidAdjustmentFactor() public {
+    function testAdjustTokenAmount_revertsForInvalidFraction() public {
         uint amount = 100;
-        LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
-            .AdjustmentFactor({ numerator: 1, denominator: 0 });
+        LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction({
+            numerator: 1,
+            denominator: 0
+        });
 
-        vm.expectRevert(abi.encodeWithSelector(LiquidityDeployerMath.InvalidAdjustmentFactor.selector, 1, 0));
+        vm.expectRevert(abi.encodeWithSelector(LiquidityDeployerMath.InvalidFraction.selector, 1, 0));
         LiquidityDeployerMath.adjustTokenAmount(amount, adjustmentFactor);
     }
 
     function testAdjustTokenAmount_neutralAdjustmentFactor() public {
         uint amount = 100;
-        LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
-            .AdjustmentFactor({ numerator: 1, denominator: 1 });
+        LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction({
+            numerator: 1,
+            denominator: 1
+        });
 
         assertEq(LiquidityDeployerMath.adjustTokenAmount(amount, adjustmentFactor), amount);
     }
 
     function testAdjustTokenAmount() public {
         uint amount = 100;
-        LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
-            .AdjustmentFactor({ numerator: 2, denominator: 3 });
+        LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction({
+            numerator: 2,
+            denominator: 3
+        });
 
         assertEq(LiquidityDeployerMath.adjustTokenAmount(amount, adjustmentFactor), 66);
     }

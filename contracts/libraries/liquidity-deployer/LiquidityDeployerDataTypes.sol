@@ -22,7 +22,7 @@ library LiquidityDeployerDataTypes {
     }
 
     /// @dev used to adjust deployable liquidity to maintain proportionality
-    struct AdjustmentFactor {
+    struct Fraction {
         uint numerator;
         uint denominator;
     }
