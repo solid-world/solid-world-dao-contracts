@@ -13,14 +13,14 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     using GPv2SafeERC20 for IERC20;
 
     LiquidityDeployerDataTypes.Config internal config;
-    LiquidityDeployerDataTypes.TotalDeposits internal totalDeposits;
     LiquidityDeployerDataTypes.Depositors internal depositors;
-    LiquidityDeployerDataTypes.DeployedLiquidity internal lastDeployedLiquidity;
 
-    /// @dev Account => token0 balance
-    mapping(address => uint) internal token0Balance;
-    /// @dev Account => token1 balance
-    mapping(address => uint) internal token1Balance;
+    /// @dev Token => Account => Amount
+    mapping(address => mapping(address => uint)) internal lastDeployedLiquidity;
+    /// @dev Token => Amount
+    mapping(address => uint) internal totalDeposits;
+    /// @dev Account => Token => Balance
+    mapping(address => mapping(address => uint)) internal userTokenBalance;
 
     modifier validTokenAmount(uint amount) {
         if (amount == 0) {
@@ -47,58 +47,20 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
 
     /// @inheritdoc ILiquidityDeployer
     function depositToken0(uint amount) external nonReentrant validTokenAmount(amount) {
-        token0Balance[msg.sender] += amount;
-        totalDeposits.token0Amount += amount;
-
-        if (!_isToken0Depositor(msg.sender)) {
-            depositors.isToken0Depositor[msg.sender] = true;
-            depositors.token0Depositors.push(msg.sender);
-        }
-
-        config.token0.safeTransferFrom(msg.sender, address(this), amount);
-
-        emit Token0Deposited(msg.sender, amount);
+        _depositToken(_token0Address(), amount);
     }
 
     /// @inheritdoc ILiquidityDeployer
     function depositToken1(uint amount) external nonReentrant validTokenAmount(amount) {
-        token1Balance[msg.sender] += amount;
-        totalDeposits.token1Amount += amount;
-
-        if (!_isToken1Depositor(msg.sender)) {
-            depositors.isToken1Depositor[msg.sender] = true;
-            depositors.token1Depositors.push(msg.sender);
-        }
-
-        config.token1.safeTransferFrom(msg.sender, address(this), amount);
-
-        emit Token1Deposited(msg.sender, amount);
+        _depositToken(_token1Address(), amount);
     }
 
     function withdrawToken0(uint amount) external nonReentrant validTokenAmount(amount) {
-        if (token0Balance[msg.sender] < amount) {
-            revert InsufficientToken0Balance(msg.sender, token0Balance[msg.sender], amount);
-        }
-
-        token0Balance[msg.sender] -= amount;
-        totalDeposits.token0Amount -= amount;
-
-        config.token0.safeTransfer(msg.sender, amount);
-
-        emit Token0Withdrawn(msg.sender, amount);
+        _withdrawToken(_token0Address(), amount);
     }
 
     function withdrawToken1(uint amount) external nonReentrant validTokenAmount(amount) {
-        if (token1Balance[msg.sender] < amount) {
-            revert InsufficientToken1Balance(msg.sender, token1Balance[msg.sender], amount);
-        }
-
-        token1Balance[msg.sender] -= amount;
-        totalDeposits.token1Amount -= amount;
-
-        config.token1.safeTransfer(msg.sender, amount);
-
-        emit Token1Withdrawn(msg.sender, amount);
+        _withdrawToken(_token1Address(), amount);
     }
 
     /// @inheritdoc ILiquidityDeployer
@@ -107,11 +69,11 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     function getToken0() external view returns (address) {
-        return address(config.token0);
+        return _token0Address();
     }
 
     function getToken1() external view returns (address) {
-        return address(config.token1);
+        return _token1Address();
     }
 
     /// @inheritdoc ILiquidityDeployer
@@ -135,30 +97,24 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     function token0BalanceOf(address account) external view returns (uint) {
-        return token0Balance[account];
+        return userTokenBalance[account][_token0Address()];
     }
 
     function token1BalanceOf(address account) external view returns (uint) {
-        return token1Balance[account];
+        return userTokenBalance[account][_token1Address()];
     }
 
     function getTotalDeposits() external view returns (uint token0Amount, uint token1Amount) {
-        token0Amount = totalDeposits.token0Amount;
-        token1Amount = totalDeposits.token1Amount;
+        token0Amount = totalDeposits[_token0Address()];
+        token1Amount = totalDeposits[_token1Address()];
     }
 
     function getToken0Depositors() external view returns (address[] memory token0Depositors) {
-        token0Depositors = new address[](depositors.token0Depositors.length);
-        for (uint i; i < depositors.token0Depositors.length; i++) {
-            token0Depositors[i] = depositors.token0Depositors[i];
-        }
+        token0Depositors = _getTokenDepositors(_token0Address());
     }
 
     function getToken1Depositors() external view returns (address[] memory token1Depositors) {
-        token1Depositors = new address[](depositors.token1Depositors.length);
-        for (uint i; i < depositors.token1Depositors.length; i++) {
-            token1Depositors[i] = depositors.token1Depositors[i];
-        }
+        token1Depositors = _getTokenDepositors(_token1Address());
     }
 
     /// @inheritdoc ILiquidityDeployer
@@ -167,7 +123,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         view
         returns (uint lastDeployedAmount)
     {
-        lastDeployedAmount = lastDeployedLiquidity.token0[liquidityProvider];
+        lastDeployedAmount = lastDeployedLiquidity[_token0Address()][liquidityProvider];
     }
 
     /// @inheritdoc ILiquidityDeployer
@@ -176,75 +132,89 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         view
         returns (uint lastDeployedAmount)
     {
-        lastDeployedAmount = lastDeployedLiquidity.token1[liquidityProvider];
+        lastDeployedAmount = lastDeployedLiquidity[_token1Address()][liquidityProvider];
     }
 
     function _computeDeployableLiquidity() internal {
-        uint totalToken0ValueInToken1 = LiquidityDeployerMath.convertToken0ValueToToken1(
+        uint totalToken0ValueInToken1 = LiquidityDeployerMath.convertTokenValue(
             _token0Decimals(),
             _token1Decimals(),
             config.conversionRate,
             config.conversionRateDecimals,
-            totalDeposits.token0Amount
+            totalDeposits[_token0Address()]
         );
 
-        if (totalToken0ValueInToken1 > totalDeposits.token1Amount) {
+        if (totalToken0ValueInToken1 > totalDeposits[_token1Address()]) {
             LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
-                .AdjustmentFactor(totalDeposits.token1Amount, totalToken0ValueInToken1);
-            _computeToken0DeployableLiquidity(adjustmentFactor);
-            _computeToken1DeployableLiquidity(LiquidityDeployerMath.neutralAdjustmentFactor());
+                .AdjustmentFactor(totalDeposits[_token1Address()], totalToken0ValueInToken1);
+            _computeTokenDeployableLiquidity(_token0Address(), adjustmentFactor);
+            _computeTokenDeployableLiquidity(
+                _token1Address(),
+                LiquidityDeployerMath.neutralAdjustmentFactor()
+            );
         } else {
             LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor = LiquidityDeployerDataTypes
-                .AdjustmentFactor(totalToken0ValueInToken1, totalDeposits.token1Amount);
-            _computeToken0DeployableLiquidity(LiquidityDeployerMath.neutralAdjustmentFactor());
-            _computeToken1DeployableLiquidity(adjustmentFactor);
+                .AdjustmentFactor(totalToken0ValueInToken1, totalDeposits[_token1Address()]);
+            _computeTokenDeployableLiquidity(
+                _token0Address(),
+                LiquidityDeployerMath.neutralAdjustmentFactor()
+            );
+            _computeTokenDeployableLiquidity(_token1Address(), adjustmentFactor);
         }
     }
 
-    function _computeToken0DeployableLiquidity(
+    function _computeTokenDeployableLiquidity(
+        address token,
         LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor
     ) internal {
-        for (uint i; i < depositors.token0Depositors.length; i++) {
-            address token0Depositor = depositors.token0Depositors[i];
-            uint token0DepositorBalance = token0Balance[token0Depositor];
+        for (uint i; i < depositors.tokenDepositors[token].length; i++) {
+            address tokenDepositor = depositors.tokenDepositors[token][i];
+            uint tokenDepositorBalance = userTokenBalance[tokenDepositor][token];
 
-            if (token0DepositorBalance == 0) {
-                lastDeployedLiquidity.token0[token0Depositor] = 0;
+            if (tokenDepositorBalance == 0) {
+                lastDeployedLiquidity[token][tokenDepositor] = 0;
                 continue;
             }
 
-            lastDeployedLiquidity.token0[token0Depositor] = LiquidityDeployerMath.adjustTokenAmount(
-                token0DepositorBalance,
+            lastDeployedLiquidity[token][tokenDepositor] = LiquidityDeployerMath.adjustTokenAmount(
+                tokenDepositorBalance,
                 adjustmentFactor
             );
         }
     }
 
-    function _computeToken1DeployableLiquidity(
-        LiquidityDeployerDataTypes.AdjustmentFactor memory adjustmentFactor
-    ) internal {
-        for (uint i; i < depositors.token1Depositors.length; i++) {
-            address token1Depositor = depositors.token1Depositors[i];
-            uint token1DepositorBalance = token1Balance[token1Depositor];
+    function _depositToken(address token, uint amount) internal {
+        userTokenBalance[msg.sender][token] += amount;
+        totalDeposits[token] += amount;
 
-            if (token1DepositorBalance == 0) {
-                lastDeployedLiquidity.token1[token1Depositor] = 0;
-                continue;
-            }
-
-            lastDeployedLiquidity.token1[token1Depositor] = LiquidityDeployerMath.adjustTokenAmount(
-                token1DepositorBalance,
-                adjustmentFactor
-            );
+        if (!depositors.isDepositor[token][msg.sender]) {
+            depositors.isDepositor[token][msg.sender] = true;
+            depositors.tokenDepositors[token].push(msg.sender);
         }
+
+        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+
+        emit TokenDeposited(token, msg.sender, amount);
     }
 
-    function _isToken0Depositor(address account) internal view returns (bool) {
-        return depositors.isToken0Depositor[account];
+    function _withdrawToken(address token, uint amount) internal {
+        if (userTokenBalance[msg.sender][token] < amount) {
+            revert InsufficientTokenBalance(token, msg.sender, userTokenBalance[msg.sender][token], amount);
+        }
+
+        userTokenBalance[msg.sender][token] -= amount;
+        totalDeposits[token] -= amount;
+
+        IERC20(token).safeTransfer(msg.sender, amount);
+
+        emit TokenWithdrawn(token, msg.sender, amount);
     }
 
-    function _isToken1Depositor(address account) internal view returns (bool) {
-        return depositors.isToken1Depositor[account];
+    function _getTokenDepositors(address token) internal view returns (address[] memory tokenDepositors) {
+        tokenDepositors = new address[](depositors.tokenDepositors[token].length);
+        for (uint i; i < depositors.tokenDepositors[token].length; i++) {
+            tokenDepositors[i] = depositors.tokenDepositors[token][i];
+        }
     }
 
     function _token0Decimals() internal view returns (uint8) {
@@ -253,5 +223,13 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
 
     function _token1Decimals() internal view returns (uint8) {
         return IERC20Metadata(address(config.token1)).decimals();
+    }
+
+    function _token0Address() internal view returns (address) {
+        return address(config.token0);
+    }
+
+    function _token1Address() internal view returns (address) {
+        return address(config.token1);
     }
 }

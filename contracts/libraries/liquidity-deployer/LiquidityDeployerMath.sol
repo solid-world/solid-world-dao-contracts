@@ -6,48 +6,44 @@ import "./LiquidityDeployerDataTypes.sol";
 
 /// @author Solid World
 library LiquidityDeployerMath {
-    error Token0AmountTooSmall(uint amount);
+    error TokenAmountTooSmall(uint amount);
 
-    /// @return token0AmountConvertedDecimals = token0Amount * 10**token1Decimals / 10**token0Decimals
-    function convertToken0DecimalsToToken1(
-        uint token0Decimals,
-        uint token1Decimals,
-        uint token0Amount
-    ) internal pure returns (uint token0AmountConvertedDecimals) {
-        token0AmountConvertedDecimals = Math.mulDiv(token0Amount, 10**token1Decimals, 10**token0Decimals);
+    /// @return tokenAmountConvertedDecimals = tokenAmount * 10**newDecimals / 10**currentDecimals
+    function convertTokenDecimals(
+        uint currentDecimals,
+        uint newDecimals,
+        uint tokenAmount
+    ) internal pure returns (uint tokenAmountConvertedDecimals) {
+        tokenAmountConvertedDecimals = Math.mulDiv(tokenAmount, 10**newDecimals, 10**currentDecimals);
 
-        if (token0AmountConvertedDecimals == 0) {
-            revert Token0AmountTooSmall(token0Amount);
+        if (tokenAmountConvertedDecimals == 0) {
+            revert TokenAmountTooSmall(tokenAmount);
         }
 
-        return token0AmountConvertedDecimals;
+        return tokenAmountConvertedDecimals;
     }
 
-    /// @return token0Converted = token0AmountConvertedDecimals * conversionRate / 10 ** conversionRateDecimals
-    function convertToken0ValueToToken1(
-        uint token0Decimals,
-        uint token1Decimals,
+    /// @return tokenConverted = tokenAmountConvertedDecimals * conversionRate / 10 ** conversionRateDecimals
+    function convertTokenValue(
+        uint currentDecimals,
+        uint newDecimals,
         uint conversionRate,
         uint conversionRateDecimals,
-        uint token0Amount
-    ) internal pure returns (uint token0Converted) {
-        uint token0AmountConvertedDecimals = convertToken0DecimalsToToken1(
-            token0Decimals,
-            token1Decimals,
-            token0Amount
-        );
+        uint tokenAmount
+    ) internal pure returns (uint tokenConverted) {
+        uint tokenAmountConvertedDecimals = convertTokenDecimals(currentDecimals, newDecimals, tokenAmount);
 
-        token0Converted = Math.mulDiv(
-            token0AmountConvertedDecimals,
+        tokenConverted = Math.mulDiv(
+            tokenAmountConvertedDecimals,
             conversionRate,
             10**conversionRateDecimals
         );
 
-        if (token0Converted == 0) {
-            revert Token0AmountTooSmall(token0Amount);
+        if (tokenConverted == 0) {
+            revert TokenAmountTooSmall(tokenAmount);
         }
 
-        return token0Converted;
+        return tokenConverted;
     }
 
     function neutralAdjustmentFactor()

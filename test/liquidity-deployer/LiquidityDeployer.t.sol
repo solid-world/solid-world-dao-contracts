@@ -120,14 +120,14 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
     function testDepositToken0_emitsDepositEvent() public {
         uint amount = 100;
 
-        _expectEmit_Token0Deposited(address(this), amount);
+        _expectEmit_TokenDeposited(token0, address(this), amount);
         liquidityDeployer.depositToken0(amount);
     }
 
     function testDepositToken1_emitsDepositEvent() public {
         uint amount = 100;
 
-        _expectEmit_Token1Deposited(address(this), amount);
+        _expectEmit_TokenDeposited(token1, address(this), amount);
         liquidityDeployer.depositToken1(amount);
     }
 
@@ -144,14 +144,14 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
     function testWithdrawToken0_revertsIfAmountIsGreaterThanBalance() public {
         uint withdrawAmount = 10_001;
 
-        _expectRevert_InsufficientToken0Balance(address(this), 0, withdrawAmount);
+        _expectRevert_InsufficientTokenBalance(token0, address(this), 0, withdrawAmount);
         liquidityDeployer.withdrawToken0(withdrawAmount);
     }
 
     function testWithdrawToken1_revertsIfAmountIsGreaterThanBalance() public {
         uint withdrawAmount = 10_001;
 
-        _expectRevert_InsufficientToken1Balance(address(this), 0, withdrawAmount);
+        _expectRevert_InsufficientTokenBalance(token1, address(this), 0, withdrawAmount);
         liquidityDeployer.withdrawToken1(withdrawAmount);
     }
 
@@ -236,7 +236,7 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
 
         liquidityDeployer.depositToken0(amount);
 
-        _expectEmit_Token0Withdrawn(address(this), amount);
+        _expectEmit_TokenWithdrawn(token0, address(this), amount);
         liquidityDeployer.withdrawToken0(amount);
     }
 
@@ -245,7 +245,7 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
 
         liquidityDeployer.depositToken1(amount);
 
-        _expectEmit_Token1Withdrawn(address(this), amount);
+        _expectEmit_TokenWithdrawn(token1, address(this), amount);
         liquidityDeployer.withdrawToken1(amount);
     }
 

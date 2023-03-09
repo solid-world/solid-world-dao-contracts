@@ -14,23 +14,11 @@ library LiquidityDeployerDataTypes {
         uint8 conversionRateDecimals;
     }
 
-    struct TotalDeposits {
-        uint token0Amount;
-        uint token1Amount;
-    }
-
     struct Depositors {
-        address[] token0Depositors;
-        address[] token1Depositors;
-        mapping(address => bool) isToken0Depositor;
-        mapping(address => bool) isToken1Depositor;
-    }
-
-    struct DeployedLiquidity {
-        // Account => token0Amount
-        mapping(address => uint) token0;
-        // Account => token1Amount
-        mapping(address => uint) token1;
+        /// @dev Token => Depositors
+        mapping(address => address[]) tokenDepositors;
+        /// @dev Token => Depositor => IsDepositor
+        mapping(address => mapping(address => bool)) isDepositor;
     }
 
     /// @dev used to adjust deployable liquidity to maintain proportionality

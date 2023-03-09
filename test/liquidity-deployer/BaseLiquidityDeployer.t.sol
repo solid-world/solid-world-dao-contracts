@@ -19,10 +19,8 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     address testAccount0;
     address testAccount1 = vm.addr(6);
 
-    event Token0Deposited(address indexed depositor, uint indexed amount);
-    event Token1Deposited(address indexed depositor, uint indexed amount);
-    event Token0Withdrawn(address indexed withdrawer, uint indexed amount);
-    event Token1Withdrawn(address indexed withdrawer, uint indexed amount);
+    event TokenDeposited(address indexed token, address indexed depositor, uint indexed amount);
+    event TokenWithdrawn(address indexed token, address indexed withdrawer, uint indexed amount);
 
     function setUp() public {
         token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
@@ -77,14 +75,16 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         vm.expectRevert(abi.encodeWithSelector(ILiquidityDeployer.InvalidInput.selector));
     }
 
-    function _expectRevert_InsufficientToken0Balance(
+    function _expectRevert_InsufficientTokenBalance(
+        address token,
         address account,
         uint balance,
         uint withdrawAmount
     ) internal {
         vm.expectRevert(
             abi.encodeWithSelector(
-                ILiquidityDeployer.InsufficientToken0Balance.selector,
+                ILiquidityDeployer.InsufficientTokenBalance.selector,
+                token,
                 account,
                 balance,
                 withdrawAmount
@@ -92,38 +92,21 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         );
     }
 
-    function _expectRevert_InsufficientToken1Balance(
-        address account,
-        uint balance,
-        uint withdrawAmount
+    function _expectEmit_TokenDeposited(
+        address token,
+        address depositor,
+        uint amount
     ) internal {
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ILiquidityDeployer.InsufficientToken1Balance.selector,
-                account,
-                balance,
-                withdrawAmount
-            )
-        );
+        vm.expectEmit(true, true, true, true, address(liquidityDeployer));
+        emit TokenDeposited(token, depositor, amount);
     }
 
-    function _expectEmit_Token0Deposited(address depositor, uint amount) internal {
-        vm.expectEmit(true, true, true, false, address(liquidityDeployer));
-        emit Token0Deposited(depositor, amount);
-    }
-
-    function _expectEmit_Token1Deposited(address depositor, uint amount) internal {
-        vm.expectEmit(true, true, true, false, address(liquidityDeployer));
-        emit Token1Deposited(depositor, amount);
-    }
-
-    function _expectEmit_Token0Withdrawn(address withdrawer, uint amount) internal {
-        vm.expectEmit(true, true, true, false, address(liquidityDeployer));
-        emit Token0Withdrawn(withdrawer, amount);
-    }
-
-    function _expectEmit_Token1Withdrawn(address withdrawer, uint amount) internal {
-        vm.expectEmit(true, true, true, false, address(liquidityDeployer));
-        emit Token1Withdrawn(withdrawer, amount);
+    function _expectEmit_TokenWithdrawn(
+        address token,
+        address withdrawer,
+        uint amount
+    ) internal {
+        vm.expectEmit(true, true, true, true, address(liquidityDeployer));
+        emit TokenWithdrawn(token, withdrawer, amount);
     }
 }

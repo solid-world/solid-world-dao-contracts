@@ -4,13 +4,10 @@ pragma solidity 0.8.16;
 /// @author Solid World
 interface ILiquidityDeployer {
     error InvalidInput();
-    error InsufficientToken0Balance(address account, uint balance, uint withdrawAmount);
-    error InsufficientToken1Balance(address account, uint balance, uint withdrawAmount);
+    error InsufficientTokenBalance(address token, address account, uint balance, uint withdrawAmount);
 
-    event Token0Deposited(address indexed depositor, uint indexed amount);
-    event Token1Deposited(address indexed depositor, uint indexed amount);
-    event Token0Withdrawn(address indexed withdrawer, uint indexed amount);
-    event Token1Withdrawn(address indexed withdrawer, uint indexed amount);
+    event TokenDeposited(address indexed token, address indexed depositor, uint indexed amount);
+    event TokenWithdrawn(address indexed token, address indexed withdrawer, uint indexed amount);
 
     /// @notice The caller must approve the contract to spend `amount` of token0
     function depositToken0(uint amount) external;
