@@ -3,7 +3,9 @@ pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/liquidity-deployer/ILiquidityDeployer.sol";
+import "./interfaces/liquidity-deployer/IUniProxy.sol";
 import "./libraries/liquidity-deployer/LiquidityDeployerDataTypes.sol";
 import "./libraries/liquidity-deployer/LiquidityDeployerMath.sol";
 import "./libraries/GPv2SafeERC20.sol";
@@ -34,8 +36,8 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     modifier sufficientDeposits() {
-        uint token0Deposits = totalDeposits[_token0Address()];
-        uint token1Deposits = totalDeposits[_token1Address()];
+        uint token0Deposits = totalDeposits[config.token0];
+        uint token1Deposits = totalDeposits[config.token1];
 
         if (token0Deposits == 0 || token1Deposits == 0) {
             revert NotEnoughDeposits(token0Deposits, token1Deposits);
@@ -51,37 +53,39 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         uint conversionRate,
         uint8 conversionRateDecimals
     ) {
-        config.token0 = IERC20(token0);
-        config.token1 = IERC20(token1);
+        config.token0 = token0;
+        config.token1 = token1;
         config.gammaVault = gammaVault;
-        config.uniProxy = IUniProxy(uniProxy);
+        config.uniProxy = uniProxy;
         config.conversionRate = conversionRate;
         config.conversionRateDecimals = conversionRateDecimals;
+        config.token0Decimals = IERC20Metadata(token0).decimals();
+        config.token1Decimals = IERC20Metadata(token1).decimals();
     }
 
     /// @inheritdoc ILiquidityDeployer
     function depositToken0(uint amount) external nonReentrant validTokenAmount(amount) {
-        _depositToken(_token0Address(), amount);
+        _depositToken(config.token0, amount);
     }
 
     /// @inheritdoc ILiquidityDeployer
     function depositToken1(uint amount) external nonReentrant validTokenAmount(amount) {
-        _depositToken(_token1Address(), amount);
+        _depositToken(config.token1, amount);
     }
 
     function withdrawToken0(uint amount) external nonReentrant validTokenAmount(amount) {
-        _withdrawToken(_token0Address(), amount);
+        _withdrawToken(config.token0, amount);
     }
 
     function withdrawToken1(uint amount) external nonReentrant validTokenAmount(amount) {
-        _withdrawToken(_token1Address(), amount);
+        _withdrawToken(config.token1, amount);
     }
 
     /// @inheritdoc ILiquidityDeployer
     function deployLiquidity() external nonReentrant sufficientDeposits {
         (
-            lastTotalDeployedLiquidity[_token0Address()],
-            lastTotalDeployedLiquidity[_token1Address()]
+            lastTotalDeployedLiquidity[config.token0],
+            lastTotalDeployedLiquidity[config.token1]
         ) = _prepareDeployableLiquidity();
 
         _allowUniProxyToSpendDeployableLiquidity();
@@ -91,11 +95,11 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     function getToken0() external view returns (address) {
-        return _token0Address();
+        return config.token0;
     }
 
     function getToken1() external view returns (address) {
-        return _token1Address();
+        return config.token1;
     }
 
     /// @inheritdoc ILiquidityDeployer
@@ -119,16 +123,16 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     function token0BalanceOf(address account) external view returns (uint) {
-        return userTokenBalance[account][_token0Address()];
+        return userTokenBalance[account][config.token0];
     }
 
     function token1BalanceOf(address account) external view returns (uint) {
-        return userTokenBalance[account][_token1Address()];
+        return userTokenBalance[account][config.token1];
     }
 
     function getTotalDeposits() external view returns (uint token0Amount, uint token1Amount) {
-        token0Amount = totalDeposits[_token0Address()];
-        token1Amount = totalDeposits[_token1Address()];
+        token0Amount = totalDeposits[config.token0];
+        token1Amount = totalDeposits[config.token1];
     }
 
     function getTokenDepositors() external view returns (address[] memory tokenDepositors) {
@@ -144,7 +148,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         view
         returns (uint lastDeployedAmount)
     {
-        lastDeployedAmount = lastDeployedLiquidity[_token0Address()][liquidityProvider];
+        lastDeployedAmount = lastDeployedLiquidity[config.token0][liquidityProvider];
     }
 
     /// @inheritdoc ILiquidityDeployer
@@ -153,11 +157,11 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         view
         returns (uint lastDeployedAmount)
     {
-        lastDeployedAmount = lastDeployedLiquidity[_token1Address()][liquidityProvider];
+        lastDeployedAmount = lastDeployedLiquidity[config.token1][liquidityProvider];
     }
 
     function getLastTotalDeployedLiquidity() external view returns (uint, uint) {
-        return (lastTotalDeployedLiquidity[_token0Address()], lastTotalDeployedLiquidity[_token1Address()]);
+        return (lastTotalDeployedLiquidity[config.token0], lastTotalDeployedLiquidity[config.token1]);
     }
 
     function getLastLPTokensOwed(address liquidityProvider) external view returns (uint) {
@@ -168,14 +172,14 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         internal
         returns (uint token0TotalDeployableLiquidity, uint token1TotalDeployableLiquidity)
     {
-        uint totalToken0ValueInToken1 = _convertToken0ToToken1(totalDeposits[_token0Address()]);
+        uint totalToken0ValueInToken1 = _convertToken0ToToken1(totalDeposits[config.token0]);
         if (totalToken0ValueInToken1 == 0) {
-            revert NotEnoughDeposits(totalDeposits[_token0Address()], totalDeposits[_token1Address()]);
+            revert NotEnoughDeposits(totalDeposits[config.token0], totalDeposits[config.token1]);
         }
 
-        if (totalToken0ValueInToken1 > totalDeposits[_token1Address()]) {
+        if (totalToken0ValueInToken1 > totalDeposits[config.token1]) {
             LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction(
-                totalDeposits[_token1Address()],
+                totalDeposits[config.token1],
                 totalToken0ValueInToken1
             );
             (token0TotalDeployableLiquidity, token1TotalDeployableLiquidity) = _prepareDeployableLiquidity(
@@ -185,7 +189,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         } else {
             LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction(
                 totalToken0ValueInToken1,
-                totalDeposits[_token1Address()]
+                totalDeposits[config.token1]
             );
             (token0TotalDeployableLiquidity, token1TotalDeployableLiquidity) = _prepareDeployableLiquidity(
                 LiquidityDeployerMath.neutralFraction(),
@@ -201,24 +205,24 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         for (uint i; i < depositors.tokenDepositors.length; i++) {
             address tokenDepositor = depositors.tokenDepositors[i];
             uint token0DeployableLiquidity = _computeDeployableLiquidity(
-                _token0Address(),
+                config.token0,
                 tokenDepositor,
                 token0AdjustmentFactor
             );
-            lastDeployedLiquidity[_token0Address()][tokenDepositor] = token0DeployableLiquidity;
+            lastDeployedLiquidity[config.token0][tokenDepositor] = token0DeployableLiquidity;
             if (token0DeployableLiquidity > 0) {
-                userTokenBalance[tokenDepositor][_token0Address()] -= token0DeployableLiquidity;
+                userTokenBalance[tokenDepositor][config.token0] -= token0DeployableLiquidity;
                 token0TotalDeployableLiquidity += token0DeployableLiquidity;
             }
 
             uint token1DeployableLiquidity = _computeDeployableLiquidity(
-                _token1Address(),
+                config.token1,
                 tokenDepositor,
                 token1AdjustmentFactor
             );
-            lastDeployedLiquidity[_token1Address()][tokenDepositor] = token1DeployableLiquidity;
+            lastDeployedLiquidity[config.token1][tokenDepositor] = token1DeployableLiquidity;
             if (token1DeployableLiquidity > 0) {
-                userTokenBalance[tokenDepositor][_token1Address()] -= token1DeployableLiquidity;
+                userTokenBalance[tokenDepositor][config.token1] -= token1DeployableLiquidity;
                 token1TotalDeployableLiquidity += token1DeployableLiquidity;
             }
         }
@@ -266,15 +270,15 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     function _allowUniProxyToSpendDeployableLiquidity() internal {
-        config.token0.approve(address(config.uniProxy), lastTotalDeployedLiquidity[_token0Address()]);
-        config.token1.approve(address(config.uniProxy), lastTotalDeployedLiquidity[_token1Address()]);
+        IERC20(config.token0).approve(config.uniProxy, lastTotalDeployedLiquidity[config.token0]);
+        IERC20(config.token1).approve(config.uniProxy, lastTotalDeployedLiquidity[config.token1]);
     }
 
     function _depositToUniProxy() internal returns (uint lpTokens) {
         return
-            config.uniProxy.deposit(
-                lastTotalDeployedLiquidity[_token0Address()],
-                lastTotalDeployedLiquidity[_token1Address()],
+            IUniProxy(config.uniProxy).deposit(
+                lastTotalDeployedLiquidity[config.token0],
+                lastTotalDeployedLiquidity[config.token1],
                 address(this),
                 config.gammaVault,
                 _uniProxyMinIn()
@@ -284,7 +288,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     function _prepareLPTokensOwed(uint lpTokens) internal {
         uint remainingLpTokens = lpTokens;
         uint totalLiquidityInToken1 = _totalToken0DeployedLiquidityInToken1() +
-            lastTotalDeployedLiquidity[_token1Address()];
+            lastTotalDeployedLiquidity[config.token1];
 
         for (uint i; i < depositors.tokenDepositors.length; i++) {
             address tokenDepositor = depositors.tokenDepositors[i];
@@ -308,42 +312,26 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     function _totalDeployableLiquidityInToken1ForDepositor(address depositor) internal view returns (uint) {
-        uint token0DeployableLiquidity = lastDeployedLiquidity[_token0Address()][depositor];
-        uint token1DeployableLiquidity = lastDeployedLiquidity[_token1Address()][depositor];
+        uint token0DeployableLiquidity = lastDeployedLiquidity[config.token0][depositor];
+        uint token1DeployableLiquidity = lastDeployedLiquidity[config.token1][depositor];
         uint token0DeployableLiquidityInToken1 = _convertToken0ToToken1(token0DeployableLiquidity);
 
         return token0DeployableLiquidityInToken1 + token1DeployableLiquidity;
     }
 
     function _totalToken0DeployedLiquidityInToken1() internal view returns (uint) {
-        return _convertToken0ToToken1(lastTotalDeployedLiquidity[_token0Address()]);
+        return _convertToken0ToToken1(lastTotalDeployedLiquidity[config.token0]);
     }
 
     function _convertToken0ToToken1(uint token0Amount) internal view returns (uint) {
         return
             LiquidityDeployerMath.convertTokenValue(
-                _token0Decimals(),
-                _token1Decimals(),
+                config.token0Decimals,
+                config.token1Decimals,
                 config.conversionRate,
                 config.conversionRateDecimals,
                 token0Amount
             );
-    }
-
-    function _token0Decimals() internal view returns (uint8) {
-        return IERC20Metadata(address(config.token0)).decimals();
-    }
-
-    function _token1Decimals() internal view returns (uint8) {
-        return IERC20Metadata(address(config.token1)).decimals();
-    }
-
-    function _token0Address() internal view returns (address) {
-        return address(config.token0);
-    }
-
-    function _token1Address() internal view returns (address) {
-        return address(config.token1);
     }
 
     function _uniProxyMinIn() internal pure returns (uint[4] memory) {

@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../../interfaces/liquidity-deployer/IUniProxy.sol";
-
 library LiquidityDeployerDataTypes {
     struct Config {
-        IERC20 token0;
-        IERC20 token1;
+        address token0;
+        address token1;
         address gammaVault;
-        IUniProxy uniProxy;
+        address uniProxy;
         uint conversionRate;
         uint8 conversionRateDecimals;
+        uint8 token0Decimals;
+        uint8 token1Decimals;
     }
 
     struct Depositors {
