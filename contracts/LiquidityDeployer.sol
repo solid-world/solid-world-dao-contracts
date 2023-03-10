@@ -61,6 +61,12 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         config.conversionRateDecimals = conversionRateDecimals;
         config.token0Decimals = IERC20Metadata(token0).decimals();
         config.token1Decimals = IERC20Metadata(token1).decimals();
+        config.minConvertibleToken0Amount = LiquidityDeployerMath.minConvertibleToken0Amount(
+            config.token0Decimals,
+            config.token1Decimals,
+            conversionRate,
+            conversionRateDecimals
+        );
     }
 
     /// @inheritdoc ILiquidityDeployer
@@ -120,6 +126,11 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     /// @inheritdoc ILiquidityDeployer
     function getConversionRateDecimals() external view returns (uint8) {
         return config.conversionRateDecimals;
+    }
+
+    /// @inheritdoc ILiquidityDeployer
+    function getMinConvertibleToken0Amount() external view returns (uint) {
+        return config.minConvertibleToken0Amount;
     }
 
     function token0BalanceOf(address account) external view returns (uint) {

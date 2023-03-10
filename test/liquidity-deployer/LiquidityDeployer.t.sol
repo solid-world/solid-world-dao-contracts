@@ -11,6 +11,10 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
         assertEq(liquidityDeployer.getUniProxy(), uniProxy);
         assertEq(liquidityDeployer.getConversionRate(), conversionRate);
         assertEq(liquidityDeployer.getConversionRateDecimals(), conversionRateDecimals);
+        assertEq(
+            liquidityDeployer.getMinConvertibleToken0Amount(),
+            LiquidityDeployerMath.minConvertibleToken0Amount(18, 6, conversionRate, conversionRateDecimals)
+        );
     }
 
     function testDepositMustBeGreaterThan0ForToken0() public {
@@ -278,9 +282,15 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
     }
 
     function testDeployLiquidity_revertsIfToken0TotalDepositsInToken1Are0() public {
-        _doDeposits(0.039215686273e12, 50e6, 1, 100e6);
+        uint minConvertibleToken0Amount = LiquidityDeployerMath.minConvertibleToken0Amount(
+            18,
+            6,
+            conversionRate,
+            conversionRateDecimals
+        );
+        _doDeposits(minConvertibleToken0Amount - 2, 50e6, 1, 100e6);
 
-        _expectRevert_NotEnoughDeposits(0.039215686274e12, 150e6); // 0.039215686275e12 is the minimum
+        _expectRevert_NotEnoughDeposits(minConvertibleToken0Amount - 1, 150e6);
         liquidityDeployer.deployLiquidity();
     }
 

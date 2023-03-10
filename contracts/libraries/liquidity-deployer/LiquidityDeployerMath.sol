@@ -26,6 +26,18 @@ library LiquidityDeployerMath {
         );
     }
 
+    /// @dev Returns the minimum amount of token0 that can be converted to token1
+    function minConvertibleToken0Amount(
+        uint currentDecimals,
+        uint newDecimals,
+        uint conversionRate,
+        uint conversionRateDecimals
+    ) internal pure returns (uint) {
+        return
+            1 +
+            Math.mulDiv(1, 10**(currentDecimals + conversionRateDecimals), 10**newDecimals * conversionRate);
+    }
+
     function neutralFraction() internal pure returns (LiquidityDeployerDataTypes.Fraction memory) {
         return LiquidityDeployerDataTypes.Fraction(1, 1);
     }

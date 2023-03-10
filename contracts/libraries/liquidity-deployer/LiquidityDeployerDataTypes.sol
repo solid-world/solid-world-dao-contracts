@@ -8,6 +8,7 @@ library LiquidityDeployerDataTypes {
         address gammaVault;
         address uniProxy;
         uint conversionRate;
+        uint minConvertibleToken0Amount;
         uint8 conversionRateDecimals;
         uint8 token0Decimals;
         uint8 token1Decimals;

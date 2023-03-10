@@ -93,7 +93,7 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         TestDataTypes.TestScenario storage testScenario = testScenarios[testScenariosCount];
         testScenario.account0Token0Deposit = 1e12;
         testScenario.account0Token1Deposit = 50e6;
-        testScenario.account1Token0Deposit = 0.999999999999e12;
+        testScenario.account1Token0Deposit = liquidityDeployer.getMinConvertibleToken0Amount() - 1;
         testScenario.account1Token1Deposit = 0;
         testScenario.account0Token0Deployable = 1e12;
         testScenario.account1Token0Deployable = 0;

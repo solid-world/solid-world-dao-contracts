@@ -6,6 +6,38 @@ import "../../contracts/libraries/liquidity-deployer/LiquidityDeployerMath.sol";
 import "../../contracts/libraries/liquidity-deployer/LiquidityDeployerDataTypes.sol";
 
 contract LiquidityDeployerMathTest is BaseTest {
+    function testMinConvertibleToken0Amount() public {
+        uint token0Decimals = 18;
+        uint token1Decimals = 6;
+        uint conversionRate = 255;
+        uint conversionRateDecimals = 1;
+
+        assertEq(
+            LiquidityDeployerMath.minConvertibleToken0Amount(
+                token0Decimals,
+                token1Decimals,
+                conversionRate,
+                conversionRateDecimals
+            ),
+            0.039215686275e12
+        );
+
+        token0Decimals = 6;
+        token1Decimals = 18;
+        conversionRate = 255;
+        conversionRateDecimals = 1;
+
+        assertEq(
+            LiquidityDeployerMath.minConvertibleToken0Amount(
+                token0Decimals,
+                token1Decimals,
+                conversionRate,
+                conversionRateDecimals
+            ),
+            1
+        );
+    }
+
     function testConvertTokenValue() public {
         uint token0Decimals = 18;
         uint token1Decimals = 6;

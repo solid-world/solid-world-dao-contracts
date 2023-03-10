@@ -43,6 +43,9 @@ interface ILiquidityDeployer {
     /// e.g. to express 1 token0 = 0.000001 token1, conversion rate is 1 and decimals is 6
     function getConversionRateDecimals() external view returns (uint8);
 
+    /// @dev Returns the minimum amount of token0 that can be converted to token1
+    function getMinConvertibleToken0Amount() external view returns (uint);
+
     function token0BalanceOf(address account) external view returns (uint);
 
     function token1BalanceOf(address account) external view returns (uint);
