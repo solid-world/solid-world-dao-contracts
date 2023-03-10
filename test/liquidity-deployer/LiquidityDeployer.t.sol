@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./BaseLiquidityDeployer.t.sol";
+import "./LiquidityDeployerTestScenarios.sol";
 
-contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
+contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
     function testInitializesWithSpecifiedValues() public {
         assertEq(liquidityDeployer.getToken0(), token0);
         assertEq(liquidityDeployer.getToken1(), token1);
@@ -284,158 +284,27 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         liquidityDeployer.deployLiquidity();
     }
 
-    function testDeployLiquidity_lastDeployableLiquidity_totalDepositOfToken0IsBigger_bothAccountsDepositBothTokens()
-        public
-    {
-        _doDeposits(5e18, 50e6, 3e18, 100e6);
-
-        // totalToken0 = 204e6 (converted to token1)
-        // adjustmentFactor = 150e6/204e6 = 0.735294117647058823529411764705
-
-        uint account0Token0Deployable = 3.676470588235294117e18; // account0Token0Deposit * adjustmentFactor
-        uint account1Token0Deployable = 2.205882352941176470e18; // account1Token0Deposit * adjustmentFactor
-        uint account0Token1Deployable = 50e6;
-        uint account1Token1Deployable = 100e6;
-
-        liquidityDeployer.deployLiquidity();
-
-        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount0), account0Token0Deployable);
-        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount1), account1Token0Deployable);
-        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount0), account0Token1Deployable);
-        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount1), account1Token1Deployable);
-    }
-
-    function testDeployLiquidity_lastDeployableLiquidity_totalDepositOfToken1IsBigger_bothAccountsDepositBothTokens()
-        public
-    {
-        _doDeposits(5e18, 250e6, 3e18, 100e6);
-
-        // totalToken0 = 204e6 (converted to token1)
-        // adjustmentFactor = 204e6/350e6 = 0.582857142857142857142857142857
-
-        uint account0Token0Deployable = 5e18;
-        uint account1Token0Deployable = 3e18;
-        uint account0Token1Deployable = 145.714285e6; // account0Token1Deposit * adjustmentFactor
-        uint account1Token1Deployable = 58.285714e6; // account1Token1Deposit * adjustmentFactor
-
-        liquidityDeployer.deployLiquidity();
-
-        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount0), account0Token0Deployable);
-        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount1), account1Token0Deployable);
-        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount0), account0Token1Deployable);
-        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount1), account1Token1Deployable);
-    }
-
-    function testDeployLiquidity_lastDeployableLiquidity_totalDepositOfToken0IsBigger_account0DepositsBothTokens_account1DepositsToken0()
-        public
-    {
-        _doDeposits(5e18, 50e6, 3e18, 0);
-
-        // totalToken0 = 204e6 (converted to token1)
-        // adjustmentFactor = 50e6/204e6 = 0.245098039215686274509803921568
-
-        uint account0Token0Deployable = 1.225490196078431372e18; // account0Token0Deposit * adjustmentFactor
-        uint account1Token0Deployable = 0.735294117647058823e18; // account1Token0Deposit * adjustmentFactor
-        uint account0Token1Deployable = 50e6;
-        uint account1Token1Deployable = 0;
-
-        liquidityDeployer.deployLiquidity();
-
-        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount0), account0Token0Deployable);
-        assertEq(liquidityDeployer.getLastToken0LiquidityDeployed(testAccount1), account1Token0Deployable);
-        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount0), account0Token1Deployable);
-        assertEq(liquidityDeployer.getLastToken1LiquidityDeployed(testAccount1), account1Token1Deployable);
+    function testDeployLiquidity_lastDeployableLiquidity() public {
+        _runWithTestScenarios(_testDeployLiquidity_lastDeployableLiquidity);
     }
 
     function testDeployLiquidity_lastTotalDeployedLiquidity() public {
-        _doDeposits(5e18, 50e6, 3e18, 100e6);
-
-        uint account0Token0Deployable = 3.676470588235294117e18;
-        uint account1Token0Deployable = 2.205882352941176470e18;
-        uint account0Token1Deployable = 50e6;
-        uint account1Token1Deployable = 100e6;
-
-        liquidityDeployer.deployLiquidity();
-
-        (uint lastToken0DeployedLiquidity, uint lastToken1DeployedLiquidity) = liquidityDeployer
-            .getLastTotalDeployedLiquidity();
-
-        assertEq(lastToken0DeployedLiquidity, account0Token0Deployable + account1Token0Deployable);
-        assertEq(lastToken1DeployedLiquidity, account0Token1Deployable + account1Token1Deployable);
+        _runWithTestScenarios(_testDeployLiquidity_lastTotalDeployedLiquidity);
     }
 
     function testDeployLiquidity_approvesUniProxyToSpendDeployableTokens() public {
-        _doDeposits(5e18, 50e6, 3e18, 100e6);
-
-        uint account0Token0Deployable = 3.676470588235294117e18;
-        uint account1Token0Deployable = 2.205882352941176470e18;
-        uint account0Token1Deployable = 50e6;
-        uint account1Token1Deployable = 100e6;
-
-        liquidityDeployer.deployLiquidity();
-
-        assertEq(
-            IERC20(token0).allowance(address(liquidityDeployer), address(uniProxy)),
-            account0Token0Deployable + account1Token0Deployable
-        );
-        assertEq(
-            IERC20(token1).allowance(address(liquidityDeployer), address(uniProxy)),
-            account0Token1Deployable + account1Token1Deployable
-        );
+        _runWithTestScenarios(_testDeployLiquidity_approvesUniProxyToSpendDeployableTokens);
     }
 
     function testDeployLiquidity_calls_UniProxy_deposit() public {
-        _doDeposits(5e18, 50e6, 3e18, 100e6);
-
-        uint account0Token0Deployable = 3.676470588235294117e18;
-        uint account1Token0Deployable = 2.205882352941176470e18;
-        uint account0Token1Deployable = 50e6;
-        uint account1Token1Deployable = 100e6;
-
-        _expectDepositIsCalledOnUniProxy(
-            account0Token0Deployable + account1Token0Deployable,
-            account0Token1Deployable + account1Token1Deployable,
-            address(liquidityDeployer),
-            gammaVault
-        );
-        liquidityDeployer.deployLiquidity();
+        _runWithTestScenarios(_testDeployLiquidity_calls_UniProxy_deposit);
     }
 
     function testDeployLiquidity_computesHowMuchEachLiquidityProviderIsOwed() public {
-        _doDeposits(5e18, 50e6, 3e18, 100e6);
-
-        // user0 total liquidity value = 143.749985e6
-        // user1 total liquidity value = 156.249991e6
-        // total liquidity value = 299.999976e6
-        // user0 percentage = 143.749985e6 / 299.999976e6 = 0.479166654999999066666591999994
-        // user1 percentage = 156.249991e6 / 299.999976e6 = 0.520833345000000933333408000005
-        // lp tokens = 1_000_000e18
-        // user0 owed = 1_000_000e18 * 0.479166654999999066666591999994 = 479166.654999999066666591e18
-        // user1 owed = 1_000_000e18 * 0.520833345000000933333408000005 = 520833.345000000933333408e18
-
-        liquidityDeployer.deployLiquidity();
-
-        uint user0LPTokens = liquidityDeployer.getLastLPTokensOwed(testAccount0);
-        uint user1LPTokens = liquidityDeployer.getLastLPTokensOwed(testAccount1);
-
-        assertEq(user0LPTokens, 479166.654999999066666591e18);
-        assertEq(user1LPTokens, 520833.345000000933333408e18);
-        assertApproxEqAbs(user0LPTokens + user1LPTokens, 1_000_000e18, 1); // dust
+        _runWithTestScenarios(_testDeployLiquidity_computesHowMuchEachLiquidityProviderIsOwed);
     }
 
     function testDeployLiquidity_updatesUserTokenBalances() public {
-        _doDeposits(5e18, 50e6, 3e18, 100e6);
-
-        uint account0Token0Deployable = 3.676470588235294117e18;
-        uint account1Token0Deployable = 2.205882352941176470e18;
-        uint account0Token1Deployable = 50e6;
-        uint account1Token1Deployable = 100e6;
-
-        liquidityDeployer.deployLiquidity();
-
-        assertEq(liquidityDeployer.token0BalanceOf(testAccount0), 5e18 - account0Token0Deployable);
-        assertEq(liquidityDeployer.token0BalanceOf(testAccount1), 3e18 - account1Token0Deployable);
-        assertEq(liquidityDeployer.token1BalanceOf(testAccount0), 50e6 - account0Token1Deployable);
-        assertEq(liquidityDeployer.token1BalanceOf(testAccount1), 100e6 - account1Token1Deployable);
+        _runWithTestScenarios(_testDeployLiquidity_updatesUserTokenBalances);
     }
 }

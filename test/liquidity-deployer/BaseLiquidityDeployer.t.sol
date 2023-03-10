@@ -2,8 +2,9 @@
 pragma solidity 0.8.16;
 
 import "../BaseTest.sol";
-import "../../contracts/LiquidityDeployer.sol";
 import "./TestToken.sol";
+import "./TestDataTypes.sol";
+import "../../contracts/LiquidityDeployer.sol";
 
 abstract contract BaseLiquidityDeployerTest is BaseTest {
     uint constant INITIAL_TOKEN_BALANCE = 1_000_000e18;
@@ -27,7 +28,7 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     event TokenDeposited(address indexed token, address indexed depositor, uint indexed amount);
     event TokenWithdrawn(address indexed token, address indexed withdrawer, uint indexed amount);
 
-    function setUp() public {
+    function setUp() public virtual {
         token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         token1 = address(new TestToken("USD Coin", "USDC", 6));
         lpToken = new TestToken("Gamma LP Token", "MCBT-USDC", 18);
@@ -98,6 +99,15 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
             liquidityDeployer.depositToken1(account1Token1Deposit);
         }
         vm.stopPrank();
+    }
+
+    function _doDeposits(TestDataTypes.TestScenario storage testScenario) internal {
+        _doDeposits(
+            testScenario.account0Token0Deposit,
+            testScenario.account0Token1Deposit,
+            testScenario.account1Token0Deposit,
+            testScenario.account1Token1Deposit
+        );
     }
 
     function _mockUniProxy_deposit() internal {
