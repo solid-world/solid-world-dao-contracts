@@ -278,9 +278,9 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
     }
 
     function testDeployLiquidity_revertsIfToken0TotalDepositsInToken1Are0() public {
-        _doDeposits(0.999999999998e12, 50e6, 1, 100e6);
+        _doDeposits(0.039215686273e12, 50e6, 1, 100e6);
 
-        _expectRevert_NotEnoughDeposits(0.999999999999e12, 150e6); // 1e12 is the minimum
+        _expectRevert_NotEnoughDeposits(0.039215686274e12, 150e6); // 0.039215686275e12 is the minimum
         liquidityDeployer.deployLiquidity();
     }
 

@@ -6,14 +6,6 @@ import "../../contracts/libraries/liquidity-deployer/LiquidityDeployerMath.sol";
 import "../../contracts/libraries/liquidity-deployer/LiquidityDeployerDataTypes.sol";
 
 contract LiquidityDeployerMathTest is BaseTest {
-    function testConvertTokenDecimals() public {
-        uint token0Decimals = 18;
-        uint token1Decimals = 6;
-
-        assertEq(LiquidityDeployerMath.convertTokenDecimals(token0Decimals, token1Decimals, 1e12), 1);
-        assertEq(LiquidityDeployerMath.convertTokenDecimals(token0Decimals, token1Decimals, 100e18), 100e6);
-    }
-
     function testConvertTokenValue() public {
         uint token0Decimals = 18;
         uint token1Decimals = 6;

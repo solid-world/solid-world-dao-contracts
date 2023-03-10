@@ -14,59 +14,106 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
     }
 
     function _initializeTestScenarios() private {
-        testScenarios[testScenariosCount].account0Token0Deposit = 5e18;
-        testScenarios[testScenariosCount].account0Token1Deposit = 50e6;
-        testScenarios[testScenariosCount].account1Token0Deposit = 3e18;
-        testScenarios[testScenariosCount].account1Token1Deposit = 100e6;
-        testScenarios[testScenariosCount].account0Token0Deployable = 3.676470588235294117e18;
-        testScenarios[testScenariosCount].account1Token0Deployable = 2.205882352941176470e18;
-        testScenarios[testScenariosCount].account0Token1Deployable = 50e6;
-        testScenarios[testScenariosCount].account1Token1Deployable = 100e6;
-        testScenarios[testScenariosCount].lastToken0DeployedLiquidity = 5.882352941176470587e18;
-        testScenarios[testScenariosCount].lastToken1DeployedLiquidity = 150e6;
-        testScenarios[testScenariosCount].account0LPTokensOwed = 479166.654999999066666591e18;
-        testScenarios[testScenariosCount].account1LPTokensOwed = 520833.345000000933333408e18;
-        testScenarios[testScenariosCount].account0RemainingToken0Balance = 1.323529411764705883e18;
-        testScenarios[testScenariosCount].account1RemainingToken0Balance = 0.79411764705882353e18;
-        testScenarios[testScenariosCount].account0RemainingToken1Balance = 0;
-        testScenarios[testScenariosCount].account1RemainingToken1Balance = 0;
-        testScenariosCount++;
+        _initializeTestScenario0();
+        _initializeTestScenario1();
+        _initializeTestScenario2();
+        //        _initializeTestScenario3();
+    }
 
-        testScenarios[testScenariosCount].account0Token0Deposit = 5e18;
-        testScenarios[testScenariosCount].account0Token1Deposit = 250e6;
-        testScenarios[testScenariosCount].account1Token0Deposit = 3e18;
-        testScenarios[testScenariosCount].account1Token1Deposit = 100e6;
-        testScenarios[testScenariosCount].account0Token0Deployable = 5e18;
-        testScenarios[testScenariosCount].account1Token0Deployable = 3e18;
-        testScenarios[testScenariosCount].account0Token1Deployable = 145.714285e6;
-        testScenarios[testScenariosCount].account1Token1Deployable = 58.285714e6;
-        testScenarios[testScenariosCount].lastToken0DeployedLiquidity = 8e18;
-        testScenarios[testScenariosCount].lastToken1DeployedLiquidity = 203.999999e6;
-        testScenarios[testScenariosCount].account0LPTokensOwed = 669642.857033438375081956e18;
-        testScenarios[testScenariosCount].account1LPTokensOwed = 330357.142966561624918043e18;
-        testScenarios[testScenariosCount].account0RemainingToken0Balance = 0;
-        testScenarios[testScenariosCount].account1RemainingToken0Balance = 0;
-        testScenarios[testScenariosCount].account0RemainingToken1Balance = 104.285715e6;
-        testScenarios[testScenariosCount].account1RemainingToken1Balance = 41.714286e6;
-        testScenariosCount++;
+    function _initializeTestScenario0() private {
+        TestDataTypes.TestScenario storage testScenario = testScenarios[testScenariosCount];
+        testScenario.account0Token0Deposit = 5e18;
+        testScenario.account0Token1Deposit = 50e6;
+        testScenario.account1Token0Deposit = 3e18;
+        testScenario.account1Token1Deposit = 100e6;
+        testScenario.account0Token0Deployable = 3.676470588235294117e18;
+        testScenario.account1Token0Deployable = 2.205882352941176470e18;
+        testScenario.account0Token1Deployable = 50e6;
+        testScenario.account1Token1Deployable = 100e6;
+        testScenario.lastToken0DeployedLiquidity = 5.882352941176470587e18;
+        testScenario.lastToken1DeployedLiquidity = 150e6;
+        testScenario.account0LPTokensOwed = 479166.664930555549768518e18;
+        testScenario.account1LPTokensOwed = 520833.331736111105787037e18;
+        testScenario.account0RemainingToken0Balance = 1.323529411764705883e18;
+        testScenario.account1RemainingToken0Balance = 0.79411764705882353e18;
+        testScenario.account0RemainingToken1Balance = 0;
+        testScenario.account1RemainingToken1Balance = 0;
 
-        testScenarios[testScenariosCount].account0Token0Deposit = 5e18;
-        testScenarios[testScenariosCount].account0Token1Deposit = 50e6;
-        testScenarios[testScenariosCount].account1Token0Deposit = 3e18;
-        testScenarios[testScenariosCount].account1Token1Deposit = 0e6;
-        testScenarios[testScenariosCount].account0Token0Deployable = 1.225490196078431372e18;
-        testScenarios[testScenariosCount].account1Token0Deployable = 0.735294117647058823e18;
-        testScenarios[testScenariosCount].account0Token1Deployable = 50e6;
-        testScenarios[testScenariosCount].account1Token1Deployable = 0e6;
-        testScenarios[testScenariosCount].lastToken0DeployedLiquidity = 1.960784313725490195e18;
-        testScenarios[testScenariosCount].lastToken1DeployedLiquidity = 50e6;
-        testScenarios[testScenariosCount].account0LPTokensOwed = 812500.015000001200000096e18;
-        testScenarios[testScenariosCount].account1LPTokensOwed = 187499.984999998799999903e18;
-        testScenarios[testScenariosCount].account0RemainingToken0Balance = 3.774509803921568628e18;
-        testScenarios[testScenariosCount].account1RemainingToken0Balance = 2.264705882352941177e18;
-        testScenarios[testScenariosCount].account0RemainingToken1Balance = 0;
-        testScenarios[testScenariosCount].account1RemainingToken1Balance = 0;
+        testScenario.account0LPTokensOwed += _lpTokensDust(testScenario);
         testScenariosCount++;
+    }
+
+    function _initializeTestScenario1() private {
+        TestDataTypes.TestScenario storage testScenario = testScenarios[testScenariosCount];
+        testScenario.account0Token0Deposit = 5e18;
+        testScenario.account0Token1Deposit = 250e6;
+        testScenario.account1Token0Deposit = 3e18;
+        testScenario.account1Token1Deposit = 100e6;
+        testScenario.account0Token0Deployable = 5e18;
+        testScenario.account1Token0Deployable = 3e18;
+        testScenario.account0Token1Deployable = 145.714285e6;
+        testScenario.account1Token1Deployable = 58.285714e6;
+        testScenario.lastToken0DeployedLiquidity = 8e18;
+        testScenario.lastToken1DeployedLiquidity = 203.999999e6;
+        testScenario.account0LPTokensOwed = 669642.857033438375081956e18;
+        testScenario.account1LPTokensOwed = 330357.142966561624918043e18;
+        testScenario.account0RemainingToken0Balance = 0;
+        testScenario.account1RemainingToken0Balance = 0;
+        testScenario.account0RemainingToken1Balance = 104.285715e6;
+        testScenario.account1RemainingToken1Balance = 41.714286e6;
+
+        testScenario.account0LPTokensOwed += _lpTokensDust(testScenario);
+        testScenariosCount++;
+    }
+
+    function _initializeTestScenario2() private {
+        TestDataTypes.TestScenario storage testScenario = testScenarios[testScenariosCount];
+        testScenario.account0Token0Deposit = 5e18;
+        testScenario.account0Token1Deposit = 50e6;
+        testScenario.account1Token0Deposit = 3e18;
+        testScenario.account1Token1Deposit = 0;
+        testScenario.account0Token0Deployable = 1.225490196078431372e18;
+        testScenario.account1Token0Deployable = 0.735294117647058823e18;
+        testScenario.account0Token1Deployable = 50e6;
+        testScenario.account1Token1Deployable = 0;
+        testScenario.lastToken0DeployedLiquidity = 1.960784313725490195e18;
+        testScenario.lastToken1DeployedLiquidity = 50e6;
+        testScenario.account0LPTokensOwed = 812500.008125000081250001e18;
+        testScenario.account1LPTokensOwed = 187499.991874999918749999e18;
+        testScenario.account0RemainingToken0Balance = 3.774509803921568628e18;
+        testScenario.account1RemainingToken0Balance = 2.264705882352941177e18;
+        testScenario.account0RemainingToken1Balance = 0;
+        testScenario.account1RemainingToken1Balance = 0;
+
+        testScenario.account0LPTokensOwed += _lpTokensDust(testScenario);
+        testScenariosCount++;
+    }
+
+    function _initializeTestScenario3() private {
+        TestDataTypes.TestScenario storage testScenario = testScenarios[testScenariosCount];
+        testScenario.account0Token0Deposit = 1e12;
+        testScenario.account0Token1Deposit = 50e6;
+        testScenario.account1Token0Deposit = 0.999999999999e12;
+        testScenario.account1Token1Deposit = 0;
+        testScenario.account0Token0Deployable = 1e12;
+        testScenario.account1Token0Deployable = 0;
+        testScenario.account0Token1Deployable = 25;
+        testScenario.account1Token1Deployable = 0;
+        testScenario.lastToken0DeployedLiquidity = 1e12;
+        testScenario.lastToken1DeployedLiquidity = 25;
+        testScenario.account0LPTokensOwed = MINTED_LP_TOKENS;
+        testScenario.account1LPTokensOwed = 0;
+        testScenario.account0RemainingToken0Balance = 0;
+        testScenario.account1RemainingToken0Balance = 0.999999999999e12;
+        testScenario.account0RemainingToken1Balance = 49.999975e6;
+        testScenario.account1RemainingToken1Balance = 0;
+
+        testScenario.account0LPTokensOwed += _lpTokensDust(testScenario);
+        testScenariosCount++;
+    }
+
+    function _lpTokensDust(TestDataTypes.TestScenario storage testScenario) private view returns (uint) {
+        return MINTED_LP_TOKENS - testScenario.account0LPTokensOwed - testScenario.account1LPTokensOwed;
     }
 
     function _runWithTestScenarios(function(TestDataTypes.TestScenario storage) test) internal {
@@ -159,7 +206,7 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
 
         assertEq(user0LPTokens, testScenario.account0LPTokensOwed);
         assertEq(user1LPTokens, testScenario.account1LPTokensOwed);
-        assertApproxEqAbs(user0LPTokens + user1LPTokens, MINTED_LP_TOKENS, 1); // dust
+        assertEq(user0LPTokens + user1LPTokens, MINTED_LP_TOKENS);
     }
 
     function _testDeployLiquidity_updatesUserTokenBalances(TestDataTypes.TestScenario storage testScenario)

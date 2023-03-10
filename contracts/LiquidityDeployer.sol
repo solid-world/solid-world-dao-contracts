@@ -282,17 +282,15 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     function _prepareLPTokensOwed(uint lpTokens) internal {
+        uint remainingLpTokens = lpTokens;
         uint totalLiquidityInToken1 = _totalToken0DeployedLiquidityInToken1() +
             lastTotalDeployedLiquidity[_token1Address()];
 
         for (uint i; i < depositors.tokenDepositors.length; i++) {
             address tokenDepositor = depositors.tokenDepositors[i];
-            uint token0DeployableLiquidity = lastDeployedLiquidity[_token0Address()][tokenDepositor];
-            uint token1DeployableLiquidity = lastDeployedLiquidity[_token1Address()][tokenDepositor];
-            uint token0DeployableLiquidityInToken1 = _convertToken0ToToken1(token0DeployableLiquidity);
-
-            uint totalLiquidityInToken1ForDepositor = token0DeployableLiquidityInToken1 +
-                token1DeployableLiquidity;
+            uint totalLiquidityInToken1ForDepositor = _totalDeployableLiquidityInToken1ForDepositor(
+                tokenDepositor
+            );
             uint lpTokensOwed = Math.mulDiv(
                 lpTokens,
                 totalLiquidityInToken1ForDepositor,
@@ -300,7 +298,21 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
             );
 
             lastLPTokensOwed[tokenDepositor] = lpTokensOwed;
+            remainingLpTokens -= lpTokensOwed;
         }
+
+        if (remainingLpTokens > 0) {
+            // distribute dust to first depositor
+            lastLPTokensOwed[depositors.tokenDepositors[0]] += remainingLpTokens;
+        }
+    }
+
+    function _totalDeployableLiquidityInToken1ForDepositor(address depositor) internal view returns (uint) {
+        uint token0DeployableLiquidity = lastDeployedLiquidity[_token0Address()][depositor];
+        uint token1DeployableLiquidity = lastDeployedLiquidity[_token1Address()][depositor];
+        uint token0DeployableLiquidityInToken1 = _convertToken0ToToken1(token0DeployableLiquidity);
+
+        return token0DeployableLiquidityInToken1 + token1DeployableLiquidity;
     }
 
     function _totalToken0DeployedLiquidityInToken1() internal view returns (uint) {

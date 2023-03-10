@@ -8,16 +8,6 @@ import "./LiquidityDeployerDataTypes.sol";
 library LiquidityDeployerMath {
     error InvalidFraction(uint numerator, uint denominator);
 
-    /// @return tokenAmountConvertedDecimals = tokenAmount * 10**newDecimals / 10**currentDecimals
-    function convertTokenDecimals(
-        uint currentDecimals,
-        uint newDecimals,
-        uint tokenAmount
-    ) internal pure returns (uint tokenAmountConvertedDecimals) {
-        tokenAmountConvertedDecimals = Math.mulDiv(tokenAmount, 10**newDecimals, 10**currentDecimals);
-    }
-
-    /// @return tokenConverted = tokenAmountConvertedDecimals * conversionRate / 10 ** conversionRateDecimals
     function convertTokenValue(
         uint currentDecimals,
         uint newDecimals,
@@ -29,15 +19,10 @@ library LiquidityDeployerMath {
             tokenConverted = 0;
         }
 
-        uint tokenAmountConvertedDecimals = convertTokenDecimals(currentDecimals, newDecimals, tokenAmount);
-        if (tokenAmountConvertedDecimals == 0) {
-            tokenConverted = 0;
-        }
-
         tokenConverted = Math.mulDiv(
-            tokenAmountConvertedDecimals,
-            conversionRate,
-            10**conversionRateDecimals
+            tokenAmount,
+            10**newDecimals * conversionRate,
+            10**(currentDecimals + conversionRateDecimals)
         );
     }
 
