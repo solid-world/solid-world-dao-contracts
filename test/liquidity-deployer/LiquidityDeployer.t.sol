@@ -422,4 +422,20 @@ contract LiquidityDeployerTest is BaseLiquidityDeployerTest {
         assertEq(user1LPTokens, 520833.345000000933333408e18);
         assertApproxEqAbs(user0LPTokens + user1LPTokens, 1_000_000e18, 1); // dust
     }
+
+    function testDeployLiquidity_updatesUserTokenBalances() public {
+        _doDeposits(5e18, 50e6, 3e18, 100e6);
+
+        uint account0Token0Deployable = 3.676470588235294117e18;
+        uint account1Token0Deployable = 2.205882352941176470e18;
+        uint account0Token1Deployable = 50e6;
+        uint account1Token1Deployable = 100e6;
+
+        liquidityDeployer.deployLiquidity();
+
+        assertEq(liquidityDeployer.token0BalanceOf(testAccount0), 5e18 - account0Token0Deployable);
+        assertEq(liquidityDeployer.token0BalanceOf(testAccount1), 3e18 - account1Token0Deployable);
+        assertEq(liquidityDeployer.token1BalanceOf(testAccount0), 50e6 - account0Token1Deployable);
+        assertEq(liquidityDeployer.token1BalanceOf(testAccount1), 100e6 - account1Token1Deployable);
+    }
 }

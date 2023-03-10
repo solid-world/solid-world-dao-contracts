@@ -206,7 +206,10 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
                 token0AdjustmentFactor
             );
             lastDeployedLiquidity[_token0Address()][tokenDepositor] = token0DeployableLiquidity;
-            token0TotalDeployableLiquidity += token0DeployableLiquidity;
+            if (token0DeployableLiquidity > 0) {
+                userTokenBalance[tokenDepositor][_token0Address()] -= token0DeployableLiquidity;
+                token0TotalDeployableLiquidity += token0DeployableLiquidity;
+            }
 
             uint token1DeployableLiquidity = _computeDeployableLiquidity(
                 _token1Address(),
@@ -214,7 +217,10 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
                 token1AdjustmentFactor
             );
             lastDeployedLiquidity[_token1Address()][tokenDepositor] = token1DeployableLiquidity;
-            token1TotalDeployableLiquidity += token1DeployableLiquidity;
+            if (token1DeployableLiquidity > 0) {
+                userTokenBalance[tokenDepositor][_token1Address()] -= token1DeployableLiquidity;
+                token1TotalDeployableLiquidity += token1DeployableLiquidity;
+            }
         }
     }
 
