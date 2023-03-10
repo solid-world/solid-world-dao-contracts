@@ -267,21 +267,10 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
         liquidityDeployer.withdrawToken1(amount);
     }
 
-    function testDeployLiquidity_revertsIfNotEnoughDeposits() public {
-        _expectRevert_NotEnoughDeposits(0, 0);
-        liquidityDeployer.deployLiquidity();
-
-        liquidityDeployer.depositToken0(1);
-        _expectRevert_NotEnoughDeposits(1, 0);
-        liquidityDeployer.deployLiquidity();
-
-        liquidityDeployer.depositToken1(1);
-        liquidityDeployer.withdrawToken0(1);
-        _expectRevert_NotEnoughDeposits(0, 1);
-        liquidityDeployer.deployLiquidity();
-    }
-
     function testDeployLiquidity_revertsIfToken0TotalDepositsInToken1Are0() public {
+        _expectRevert_NotEnoughAvailableLiquidity(0, 0);
+        liquidityDeployer.deployLiquidity();
+
         uint minConvertibleToken0Amount = LiquidityDeployerMath.minConvertibleToken0Amount(
             18,
             6,
@@ -290,8 +279,12 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
         );
         _doDeposits(minConvertibleToken0Amount - 2, 50e6, 1, 100e6);
 
-        _expectRevert_NotEnoughDeposits(minConvertibleToken0Amount - 1, 150e6);
+        _expectRevert_NotEnoughAvailableLiquidity(0, 150e6);
         liquidityDeployer.deployLiquidity();
+    }
+
+    function testDeployLiquidity_lastAvailableLiquidity() public {
+        _runWithTestScenarios(_testDeployLiquidity_lastAvailableLiquidity);
     }
 
     function testDeployLiquidity_lastDeployableLiquidity() public {
@@ -316,5 +309,9 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
 
     function testDeployLiquidity_updatesUserTokenBalances() public {
         _runWithTestScenarios(_testDeployLiquidity_updatesUserTokenBalances);
+    }
+
+    function testDeployLiquidity_updatesTotalDeposits() public {
+        _runWithTestScenarios(_testDeployLiquidity_updatesTotalDeposits);
     }
 }

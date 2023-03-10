@@ -149,12 +149,12 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         );
     }
 
-    function _expectRevert_NotEnoughDeposits(uint token0Deposits, uint token1Deposits) internal {
+    function _expectRevert_NotEnoughAvailableLiquidity(uint token0Liquidity, uint token1Liquidity) internal {
         vm.expectRevert(
             abi.encodeWithSelector(
-                ILiquidityDeployer.NotEnoughDeposits.selector,
-                token0Deposits,
-                token1Deposits
+                ILiquidityDeployer.NotEnoughAvailableLiquidity.selector,
+                token0Liquidity,
+                token1Liquidity
             )
         );
     }

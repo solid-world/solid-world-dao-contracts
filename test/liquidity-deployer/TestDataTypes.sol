@@ -19,5 +19,7 @@ contract TestDataTypes {
         uint account1RemainingToken0Balance;
         uint account0RemainingToken1Balance;
         uint account1RemainingToken1Balance;
+        uint lastToken0AvailableLiquidity;
+        uint lastToken1AvailableLiquidity;
     }
 }

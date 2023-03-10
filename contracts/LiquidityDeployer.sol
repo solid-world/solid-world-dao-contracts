@@ -17,30 +17,23 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     LiquidityDeployerDataTypes.Config internal config;
     LiquidityDeployerDataTypes.Depositors internal depositors;
 
+    /// @dev Account => Token => Balance
+    mapping(address => mapping(address => uint)) internal userTokenBalance;
+
     /// @dev Token => Account => Amount
     mapping(address => mapping(address => uint)) internal lastDeployedLiquidity;
     /// @dev Token => Amount
     mapping(address => uint) internal lastTotalDeployedLiquidity;
     /// @dev Token => Amount
-    mapping(address => uint) internal totalDeposits;
-    /// @dev Account => Token => Balance
-    mapping(address => mapping(address => uint)) internal userTokenBalance;
+    mapping(address => uint) internal lastAvailableLiquidity;
     /// @dev Account => Amount
     mapping(address => uint) internal lastLPTokensOwed;
+    /// @dev Token => Amount
+    mapping(address => uint) internal totalDeposits;
 
     modifier validTokenAmount(uint amount) {
         if (amount == 0) {
             revert InvalidInput();
-        }
-        _;
-    }
-
-    modifier sufficientDeposits() {
-        uint token0Deposits = totalDeposits[config.token0];
-        uint token1Deposits = totalDeposits[config.token1];
-
-        if (token0Deposits == 0 || token1Deposits == 0) {
-            revert NotEnoughDeposits(token0Deposits, token1Deposits);
         }
         _;
     }
@@ -88,7 +81,12 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     /// @inheritdoc ILiquidityDeployer
-    function deployLiquidity() external nonReentrant sufficientDeposits {
+    function deployLiquidity() external nonReentrant {
+        (
+            lastAvailableLiquidity[config.token0],
+            lastAvailableLiquidity[config.token1]
+        ) = _computeAvailableLiquidity();
+
         (
             lastTotalDeployedLiquidity[config.token0],
             lastTotalDeployedLiquidity[config.token1]
@@ -154,6 +152,16 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     /// @inheritdoc ILiquidityDeployer
+    function getLastToken0AvailableLiquidity() external view returns (uint) {
+        return lastAvailableLiquidity[config.token0];
+    }
+
+    /// @inheritdoc ILiquidityDeployer
+    function getLastToken1AvailableLiquidity() external view returns (uint) {
+        return lastAvailableLiquidity[config.token1];
+    }
+
+    /// @inheritdoc ILiquidityDeployer
     function getLastToken0LiquidityDeployed(address liquidityProvider)
         external
         view
@@ -179,19 +187,43 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         return lastLPTokensOwed[liquidityProvider];
     }
 
+    function _computeAvailableLiquidity()
+        internal
+        view
+        returns (uint token0AvailableLiquidity, uint token1AvailableLiquidity)
+    {
+        for (uint i; i < depositors.tokenDepositors.length; i++) {
+            address depositor = depositors.tokenDepositors[i];
+            uint token0Balance = userTokenBalance[depositor][config.token0];
+            uint token1Balance = userTokenBalance[depositor][config.token1];
+
+            if (token0Balance >= config.minConvertibleToken0Amount) {
+                token0AvailableLiquidity += token0Balance;
+            }
+            if (token1Balance > 0) {
+                token1AvailableLiquidity += token1Balance;
+            }
+        }
+    }
+
     function _prepareDeployableLiquidity()
         internal
         returns (uint token0TotalDeployableLiquidity, uint token1TotalDeployableLiquidity)
     {
-        uint totalToken0ValueInToken1 = _convertToken0ToToken1(totalDeposits[config.token0]);
-        if (totalToken0ValueInToken1 == 0) {
-            revert NotEnoughDeposits(totalDeposits[config.token0], totalDeposits[config.token1]);
+        uint lastAvailableLiquidityToken0ValueInToken1 = _convertToken0ToToken1(
+            lastAvailableLiquidity[config.token0]
+        );
+        if (lastAvailableLiquidityToken0ValueInToken1 == 0 || lastAvailableLiquidity[config.token1] == 0) {
+            revert NotEnoughAvailableLiquidity(
+                lastAvailableLiquidity[config.token0],
+                lastAvailableLiquidity[config.token1]
+            );
         }
 
-        if (totalToken0ValueInToken1 > totalDeposits[config.token1]) {
+        if (lastAvailableLiquidityToken0ValueInToken1 > lastAvailableLiquidity[config.token1]) {
             LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction(
-                totalDeposits[config.token1],
-                totalToken0ValueInToken1
+                lastAvailableLiquidity[config.token1],
+                lastAvailableLiquidityToken0ValueInToken1
             );
             (token0TotalDeployableLiquidity, token1TotalDeployableLiquidity) = _prepareDeployableLiquidity(
                 adjustmentFactor,
@@ -199,8 +231,8 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
             );
         } else {
             LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction(
-                totalToken0ValueInToken1,
-                totalDeposits[config.token1]
+                lastAvailableLiquidityToken0ValueInToken1,
+                lastAvailableLiquidity[config.token1]
             );
             (token0TotalDeployableLiquidity, token1TotalDeployableLiquidity) = _prepareDeployableLiquidity(
                 LiquidityDeployerMath.neutralFraction(),
@@ -220,9 +252,13 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
                 tokenDepositor,
                 token0AdjustmentFactor
             );
+            token0DeployableLiquidity = token0DeployableLiquidity < config.minConvertibleToken0Amount
+                ? 0
+                : token0DeployableLiquidity;
             lastDeployedLiquidity[config.token0][tokenDepositor] = token0DeployableLiquidity;
             if (token0DeployableLiquidity > 0) {
                 userTokenBalance[tokenDepositor][config.token0] -= token0DeployableLiquidity;
+                totalDeposits[config.token0] -= token0DeployableLiquidity;
                 token0TotalDeployableLiquidity += token0DeployableLiquidity;
             }
 
@@ -234,6 +270,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
             lastDeployedLiquidity[config.token1][tokenDepositor] = token1DeployableLiquidity;
             if (token1DeployableLiquidity > 0) {
                 userTokenBalance[tokenDepositor][config.token1] -= token1DeployableLiquidity;
+                totalDeposits[config.token1] -= token1DeployableLiquidity;
                 token1TotalDeployableLiquidity += token1DeployableLiquidity;
             }
         }
@@ -306,6 +343,11 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
             uint totalLiquidityInToken1ForDepositor = _totalDeployableLiquidityInToken1ForDepositor(
                 tokenDepositor
             );
+
+            if (totalLiquidityInToken1ForDepositor == 0) {
+                continue;
+            }
+
             uint lpTokensOwed = Math.mulDiv(
                 lpTokens,
                 totalLiquidityInToken1ForDepositor,
@@ -335,6 +377,10 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     function _convertToken0ToToken1(uint token0Amount) internal view returns (uint) {
+        if (token0Amount < config.minConvertibleToken0Amount) {
+            return 0;
+        }
+
         return
             LiquidityDeployerMath.convertTokenValue(
                 config.token0Decimals,

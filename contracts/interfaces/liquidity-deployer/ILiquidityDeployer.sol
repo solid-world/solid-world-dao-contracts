@@ -5,7 +5,7 @@ pragma solidity 0.8.16;
 interface ILiquidityDeployer {
     error InvalidInput();
     error InsufficientTokenBalance(address token, address account, uint balance, uint withdrawAmount);
-    error NotEnoughDeposits(uint token0Deposits, uint token1Deposits);
+    error NotEnoughAvailableLiquidity(uint token0Liquidity, uint token1Liquidity);
 
     event TokenDeposited(address indexed token, address indexed depositor, uint indexed amount);
     event TokenWithdrawn(address indexed token, address indexed withdrawer, uint indexed amount);
@@ -53,6 +53,12 @@ interface ILiquidityDeployer {
     function getTotalDeposits() external view returns (uint token0Amount, uint token1Amount);
 
     function getTokenDepositors() external view returns (address[] memory);
+
+    /// @dev returns the total amount of token0 that was available to be deployed (excludes deposits not convertible to token1)
+    function getLastToken0AvailableLiquidity() external view returns (uint);
+
+    /// @dev returns the total amount of token1 that was available to be deployed
+    function getLastToken1AvailableLiquidity() external view returns (uint);
 
     /// @param liquidityProvider account that contributed liquidity
     /// @return lastDeployedAmount amount of token0 liquidity that was

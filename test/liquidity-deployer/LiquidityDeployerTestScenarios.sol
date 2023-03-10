@@ -17,7 +17,7 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         _initializeTestScenario0();
         _initializeTestScenario1();
         _initializeTestScenario2();
-        //        _initializeTestScenario3();
+        _initializeTestScenario3();
     }
 
     function _initializeTestScenario0() private {
@@ -38,6 +38,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken0Balance = 0.79411764705882353e18;
         testScenario.account0RemainingToken1Balance = 0;
         testScenario.account1RemainingToken1Balance = 0;
+        testScenario.lastToken0AvailableLiquidity = 8e18;
+        testScenario.lastToken1AvailableLiquidity = 150e6;
 
         testScenario.account0LPTokensOwed += _lpTokensDust(testScenario);
         testScenariosCount++;
@@ -61,6 +63,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken0Balance = 0;
         testScenario.account0RemainingToken1Balance = 104.285715e6;
         testScenario.account1RemainingToken1Balance = 41.714286e6;
+        testScenario.lastToken0AvailableLiquidity = 8e18;
+        testScenario.lastToken1AvailableLiquidity = 350e6;
 
         testScenario.account0LPTokensOwed += _lpTokensDust(testScenario);
         testScenariosCount++;
@@ -84,6 +88,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken0Balance = 2.264705882352941177e18;
         testScenario.account0RemainingToken1Balance = 0;
         testScenario.account1RemainingToken1Balance = 0;
+        testScenario.lastToken0AvailableLiquidity = 8e18;
+        testScenario.lastToken1AvailableLiquidity = 50e6;
 
         testScenario.account0LPTokensOwed += _lpTokensDust(testScenario);
         testScenariosCount++;
@@ -104,9 +110,11 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account0LPTokensOwed = MINTED_LP_TOKENS;
         testScenario.account1LPTokensOwed = 0;
         testScenario.account0RemainingToken0Balance = 0;
-        testScenario.account1RemainingToken0Balance = 0.999999999999e12;
+        testScenario.account1RemainingToken0Balance = liquidityDeployer.getMinConvertibleToken0Amount() - 1;
         testScenario.account0RemainingToken1Balance = 49.999975e6;
         testScenario.account1RemainingToken1Balance = 0;
+        testScenario.lastToken0AvailableLiquidity = 1e12;
+        testScenario.lastToken1AvailableLiquidity = 50e6;
 
         testScenario.account0LPTokensOwed += _lpTokensDust(testScenario);
         testScenariosCount++;
@@ -122,6 +130,23 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
             test(testScenarios[i]);
             vm.revertTo(snapshotId);
         }
+    }
+
+    function _testDeployLiquidity_lastAvailableLiquidity(TestDataTypes.TestScenario storage testScenario)
+        internal
+    {
+        _doDeposits(testScenario);
+
+        liquidityDeployer.deployLiquidity();
+
+        assertEq(
+            liquidityDeployer.getLastToken0AvailableLiquidity(),
+            testScenario.lastToken0AvailableLiquidity
+        );
+        assertEq(
+            liquidityDeployer.getLastToken1AvailableLiquidity(),
+            testScenario.lastToken1AvailableLiquidity
+        );
     }
 
     function _testDeployLiquidity_lastDeployableLiquidity(TestDataTypes.TestScenario storage testScenario)
@@ -231,6 +256,32 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         assertEq(
             liquidityDeployer.token1BalanceOf(testAccount1),
             testScenario.account1RemainingToken1Balance
+        );
+    }
+
+    function _testDeployLiquidity_updatesTotalDeposits(TestDataTypes.TestScenario storage testScenario)
+        internal
+    {
+        _doDeposits(testScenario);
+
+        liquidityDeployer.deployLiquidity();
+
+        (uint token0TotalDeposits, uint token1TotalDeposits) = liquidityDeployer.getTotalDeposits();
+
+        assertEq(
+            token0TotalDeposits,
+            testScenario.account0Token0Deposit +
+                testScenario.account1Token0Deposit -
+                testScenario.account0Token0Deployable -
+                testScenario.account1Token0Deployable
+        );
+
+        assertEq(
+            token1TotalDeposits,
+            testScenario.account0Token1Deposit +
+                testScenario.account1Token1Deposit -
+                testScenario.account0Token1Deployable -
+                testScenario.account1Token1Deployable
         );
     }
 }
