@@ -7,7 +7,7 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
     function testInitializesWithSpecifiedValues() public {
         assertEq(liquidityDeployer.getToken0(), token0);
         assertEq(liquidityDeployer.getToken1(), token1);
-        assertEq(liquidityDeployer.getGammaVault(), gammaVault);
+        assertEq(liquidityDeployer.getGammaVault(), address(lpToken));
         assertEq(liquidityDeployer.getUniProxy(), uniProxy);
         assertEq(liquidityDeployer.getConversionRate(), conversionRate);
         assertEq(liquidityDeployer.getConversionRateDecimals(), conversionRateDecimals);
@@ -283,6 +283,18 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
         liquidityDeployer.deployLiquidity();
     }
 
+    function testWithdrawLpTokens_revertsIfWithdrawAmountIs0() public {
+        _expectRevert_InvalidInput();
+        liquidityDeployer.withdrawLpTokens(0);
+    }
+
+    function testWithdrawLpTokens_revertsForInsufficientLpTokenBalance() public {
+        uint withdrawAmount = 1;
+
+        _expectRevert_InsufficientLpTokenBalance(address(this), 0, withdrawAmount);
+        liquidityDeployer.withdrawLpTokens(withdrawAmount);
+    }
+
     function testDeployLiquidity_lastAvailableLiquidity() public {
         _runWithTestScenarios(_testDeployLiquidity_lastAvailableLiquidity);
     }
@@ -323,5 +335,21 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
 
     function testDeployLiquidity_subsequentCall() public {
         _runWithTestScenarios(_testDeployLiquidity_subsequentCall);
+    }
+
+    function testWithdrawLpTokens_decreasesLpTokensOwedToUser() public {
+        _runWithTestScenarios(_testWithdrawLpTokens_decreasesLpTokensOwedToUser);
+    }
+
+    function testWithdrawLpTokens_transfersLpTokensToUser() public {
+        _runWithTestScenarios(_testWithdrawLpTokens_transfersLpTokensToUser);
+    }
+
+    function testWithdrawLpTokens_emitsWithdrawEvent() public {
+        _runWithTestScenarios(_testWithdrawLpTokens_emitsWithdrawEvent);
+    }
+
+    function testWithdrawLpTokens_subsequentCall() public {
+        _runWithTestScenarios(_testWithdrawLpTokens_subsequentCall);
     }
 }

@@ -12,7 +12,6 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
 
     address token0;
     address token1;
-    address gammaVault = vm.addr(3);
     address uniProxy = vm.addr(4);
     uint conversionRate;
     uint8 conversionRateDecimals;
@@ -27,6 +26,7 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
 
     event TokenDeposited(address indexed token, address indexed depositor, uint indexed amount);
     event TokenWithdrawn(address indexed token, address indexed withdrawer, uint indexed amount);
+    event LpTokenWithdrawn(address indexed withdrawer, uint indexed amount);
 
     function setUp() public virtual {
         lpToken = new TestToken("Gamma LP Token", "MCBT-USDC", 18);
@@ -54,7 +54,7 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         liquidityDeployer = new LiquidityDeployer(
             token0,
             token1,
-            gammaVault,
+            address(lpToken),
             uniProxy,
             conversionRate,
             conversionRateDecimals
@@ -71,7 +71,6 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         vm.label(token0, TestToken(token0).symbol());
         vm.label(token1, TestToken(token1).symbol());
         vm.label(address(lpToken), "LP Token");
-        vm.label(gammaVault, "Gamma Vault");
         vm.label(uniProxy, "UniProxy");
         vm.label(address(liquidityDeployer), "Liquidity Deployer");
         vm.label(testAccount0, "Test Account 0");
@@ -182,6 +181,21 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         );
     }
 
+    function _expectRevert_InsufficientLpTokenBalance(
+        address account,
+        uint balance,
+        uint withdrawAmount
+    ) internal {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ILiquidityDeployer.InsufficientLpTokenBalance.selector,
+                account,
+                balance,
+                withdrawAmount
+            )
+        );
+    }
+
     function _expectEmit_TokenDeposited(
         address token,
         address depositor,
@@ -198,5 +212,10 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     ) internal {
         vm.expectEmit(true, true, true, true, address(liquidityDeployer));
         emit TokenWithdrawn(token, withdrawer, amount);
+    }
+
+    function _expectEmit_LpTokenWithdrawn(address withdrawer, uint amount) internal {
+        vm.expectEmit(true, true, true, false, address(liquidityDeployer));
+        emit LpTokenWithdrawn(withdrawer, amount);
     }
 }

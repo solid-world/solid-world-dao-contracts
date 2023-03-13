@@ -27,7 +27,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     /// @dev Token => Amount
     mapping(address => uint) internal lastAvailableLiquidity;
     /// @dev Account => Amount
-    mapping(address => uint) internal lastLPTokensOwed;
+    mapping(address => uint) internal lPTokensOwed;
     /// @dev Token => Amount
     mapping(address => uint) internal totalDeposits;
 
@@ -96,6 +96,17 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         uint lpTokens = _depositToUniProxy();
 
         _prepareLPTokensOwed(lpTokens);
+    }
+
+    function withdrawLpTokens(uint amount) external nonReentrant validTokenAmount(amount) {
+        if (amount > lPTokensOwed[msg.sender]) {
+            revert InsufficientLpTokenBalance(msg.sender, lPTokensOwed[msg.sender], amount);
+        }
+
+        lPTokensOwed[msg.sender] -= amount;
+        IERC20(config.gammaVault).safeTransfer(msg.sender, amount);
+
+        emit LpTokenWithdrawn(msg.sender, amount);
     }
 
     function getToken0() external view returns (address) {
@@ -183,8 +194,8 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         return (lastTotalDeployedLiquidity[config.token0], lastTotalDeployedLiquidity[config.token1]);
     }
 
-    function getLastLPTokensOwed(address liquidityProvider) external view returns (uint) {
-        return lastLPTokensOwed[liquidityProvider];
+    function getLPTokensOwed(address liquidityProvider) external view returns (uint) {
+        return lPTokensOwed[liquidityProvider];
     }
 
     function _computeAvailableLiquidity()
@@ -354,13 +365,13 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
                 totalLiquidityInToken1
             );
 
-            lastLPTokensOwed[tokenDepositor] = lpTokensOwed;
+            lPTokensOwed[tokenDepositor] += lpTokensOwed;
             remainingLpTokens -= lpTokensOwed;
         }
 
         if (remainingLpTokens > 0) {
             // distribute dust to first depositor
-            lastLPTokensOwed[depositors.tokenDepositors[0]] += remainingLpTokens;
+            lPTokensOwed[depositors.tokenDepositors[0]] += remainingLpTokens;
         }
     }
 

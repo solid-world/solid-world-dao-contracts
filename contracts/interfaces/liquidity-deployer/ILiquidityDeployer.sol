@@ -6,9 +6,11 @@ interface ILiquidityDeployer {
     error InvalidInput();
     error InsufficientTokenBalance(address token, address account, uint balance, uint withdrawAmount);
     error NotEnoughAvailableLiquidity(uint token0Liquidity, uint token1Liquidity);
+    error InsufficientLpTokenBalance(address account, uint balance, uint withdrawAmount);
 
     event TokenDeposited(address indexed token, address indexed depositor, uint indexed amount);
     event TokenWithdrawn(address indexed token, address indexed withdrawer, uint indexed amount);
+    event LpTokenWithdrawn(address indexed withdrawer, uint indexed amount);
 
     /// @notice The caller must approve the contract to spend `amount` of token0
     function depositToken0(uint amount) external;
@@ -24,6 +26,8 @@ interface ILiquidityDeployer {
     /// the available liquidity to the Gamma Vault, and distributes the LP tokens to
     /// the depositors proportionally
     function deployLiquidity() external;
+
+    function withdrawLpTokens(uint amount) external;
 
     function getToken0() external view returns (address);
 
@@ -78,5 +82,5 @@ interface ILiquidityDeployer {
 
     function getLastTotalDeployedLiquidity() external view returns (uint, uint);
 
-    function getLastLPTokensOwed(address liquidityProvider) external view returns (uint);
+    function getLPTokensOwed(address liquidityProvider) external view returns (uint);
 }
