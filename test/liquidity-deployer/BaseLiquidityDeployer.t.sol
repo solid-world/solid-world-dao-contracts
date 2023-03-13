@@ -29,17 +29,25 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     event TokenWithdrawn(address indexed token, address indexed withdrawer, uint indexed amount);
 
     function setUp() public virtual {
-        token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
-        token1 = address(new TestToken("USD Coin", "USDC", 6));
         lpToken = new TestToken("Gamma LP Token", "MCBT-USDC", 18);
         testAccount0 = address(this);
+
+        address defaultToken0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
+        address defaultToken1 = address(new TestToken("USD Coin", "USDC", 6));
         uint defaultConversionRate = 255;
         uint8 defaultConversionRateDecimals = 1;
 
-        _init(defaultConversionRate, defaultConversionRateDecimals);
+        _init(defaultToken0, defaultToken1, defaultConversionRate, defaultConversionRateDecimals);
     }
 
-    function _init(uint conversionRate_, uint8 conversionRateDecimals_) internal {
+    function _init(
+        address token0_,
+        address token1_,
+        uint conversionRate_,
+        uint8 conversionRateDecimals_
+    ) internal {
+        token0 = token0_;
+        token1 = token1_;
         conversionRate = conversionRate_;
         conversionRateDecimals = conversionRateDecimals_;
 
@@ -60,8 +68,8 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     }
 
     function _labelAccounts() private {
-        vm.label(token0, "MCBT");
-        vm.label(token1, "USDC");
+        vm.label(token0, TestToken(token0).symbol());
+        vm.label(token1, TestToken(token1).symbol());
         vm.label(address(lpToken), "LP Token");
         vm.label(gammaVault, "Gamma Vault");
         vm.label(uniProxy, "UniProxy");
