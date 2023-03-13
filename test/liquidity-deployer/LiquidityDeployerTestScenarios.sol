@@ -19,6 +19,7 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         _initializeTestScenario_account1DoesntDepositToken1_token0ValueIsBigger();
         _initializeTestScenario_account1DepositsLessThanMinimumToken0();
         _initializeTestScenario_accountsDepositBothTokens_minimumTokenValues();
+        _initializeTestScenario_subunitConversionRate();
     }
 
     function _initializeTestScenario_accountsDepositBothTokens_token0ValueIsBigger() private {
@@ -41,6 +42,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 0;
         testScenario.lastToken0AvailableLiquidity = 8e18;
         testScenario.lastToken1AvailableLiquidity = 150e6;
+        testScenario.conversionRate = 255;
+        testScenario.conversionRateDecimals = 1;
         testScenario.subsequentValues.account0LPTokensOwed = 479166.664930555549768518e18;
         testScenario.subsequentValues.account1LPTokensOwed = 520833.331736111105787037e18;
         testScenario.subsequentValues.account0RemainingToken0Balance = 2.647058823529411765e18;
@@ -73,6 +76,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 41.714286e6;
         testScenario.lastToken0AvailableLiquidity = 8e18;
         testScenario.lastToken1AvailableLiquidity = 350e6;
+        testScenario.conversionRate = 255;
+        testScenario.conversionRateDecimals = 1;
         testScenario.subsequentValues.account0LPTokensOwed = 669642.857033438375081956e18;
         testScenario.subsequentValues.account1LPTokensOwed = 330357.142966561624918043e18;
         testScenario.subsequentValues.account0RemainingToken0Balance = 0;
@@ -105,6 +110,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 0;
         testScenario.lastToken0AvailableLiquidity = 8e18;
         testScenario.lastToken1AvailableLiquidity = 50e6;
+        testScenario.conversionRate = 255;
+        testScenario.conversionRateDecimals = 1;
         testScenario.subsequentValues.account0LPTokensOwed = 812500.008125000081250001e18;
         testScenario.subsequentValues.account1LPTokensOwed = 187499.991874999918749999e18;
         testScenario.subsequentValues.account0RemainingToken0Balance = 7.549019607843137256e18;
@@ -137,6 +144,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 0;
         testScenario.lastToken0AvailableLiquidity = 1e12;
         testScenario.lastToken1AvailableLiquidity = 50e6;
+        testScenario.conversionRate = 255;
+        testScenario.conversionRateDecimals = 1;
         testScenario.subsequentValues.account0LPTokensOwed = 962962.962962962962962962e18;
         testScenario.subsequentValues.account1LPTokensOwed = 18518.518518518518518518e18;
         testScenario.subsequentValues.account0RemainingToken0Balance = 0;
@@ -169,12 +178,48 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 0;
         testScenario.lastToken0AvailableLiquidity = liquidityDeployer.getMinConvertibleToken0Amount();
         testScenario.lastToken1AvailableLiquidity = 1;
+        testScenario.conversionRate = 255;
+        testScenario.conversionRateDecimals = 1;
         testScenario.subsequentValues.account0LPTokensOwed = MINTED_LP_TOKENS / 2;
         testScenario.subsequentValues.account1LPTokensOwed = MINTED_LP_TOKENS / 2;
         testScenario.subsequentValues.account0RemainingToken0Balance = 0;
         testScenario.subsequentValues.account1RemainingToken0Balance = 0;
         testScenario.subsequentValues.account0RemainingToken1Balance = 0;
         testScenario.subsequentValues.account1RemainingToken1Balance = 0;
+
+        testScenario.account0LPTokensOwed += _lpTokensDust(testScenario);
+        testScenario.subsequentValues.account0LPTokensOwed += _lpTokensDust_subsequent(testScenario);
+        testScenariosCount++;
+    }
+
+    function _initializeTestScenario_subunitConversionRate() private {
+        TestDataTypes.TestScenario storage testScenario = testScenarios[testScenariosCount];
+        testScenario.account0Token0Deposit = 50000e18;
+        testScenario.account0Token1Deposit = 5e6;
+        testScenario.account1Token0Deposit = 30000e18;
+        testScenario.account1Token1Deposit = 10e6;
+        testScenario.account0Token0Deployable = 50000e18;
+        testScenario.account1Token0Deployable = 30000e18;
+        testScenario.account0Token1Deployable = 2.666666e6;
+        testScenario.account1Token1Deployable = 5.333333e6;
+        testScenario.lastToken0DeployedLiquidity = 80000e18;
+        testScenario.lastToken1DeployedLiquidity = 7.999999e6;
+        testScenario.account0LPTokensOwed = 479166.654947915934244745e18;
+        testScenario.account1LPTokensOwed = 520833.345052084065755254e18;
+        testScenario.account0RemainingToken0Balance = 0;
+        testScenario.account1RemainingToken0Balance = 0;
+        testScenario.account0RemainingToken1Balance = 2.333334e6;
+        testScenario.account1RemainingToken1Balance = 4.666667e6;
+        testScenario.lastToken0AvailableLiquidity = 80000e18;
+        testScenario.lastToken1AvailableLiquidity = 15e6;
+        testScenario.conversionRate = 1;
+        testScenario.conversionRateDecimals = 4;
+        testScenario.subsequentValues.account0LPTokensOwed = 479166.654947915934244745e18;
+        testScenario.subsequentValues.account1LPTokensOwed = 520833.345052084065755254e18;
+        testScenario.subsequentValues.account0RemainingToken0Balance = 0;
+        testScenario.subsequentValues.account1RemainingToken0Balance = 0;
+        testScenario.subsequentValues.account0RemainingToken1Balance = 4.666668e6;
+        testScenario.subsequentValues.account1RemainingToken1Balance = 9.333334e6;
 
         testScenario.account0LPTokensOwed += _lpTokensDust(testScenario);
         testScenario.subsequentValues.account0LPTokensOwed += _lpTokensDust_subsequent(testScenario);
@@ -198,8 +243,10 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
 
     function _runWithTestScenarios(function(TestDataTypes.TestScenario storage) test) internal {
         for (uint i = 0; i < testScenariosCount; i++) {
+            TestDataTypes.TestScenario storage testScenario = testScenarios[i];
             uint snapshotId = vm.snapshot();
-            test(testScenarios[i]);
+            _init(testScenario.conversionRate, testScenario.conversionRateDecimals);
+            test(testScenario);
             vm.revertTo(snapshotId);
         }
     }

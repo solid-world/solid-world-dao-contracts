@@ -14,8 +14,8 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     address token1;
     address gammaVault = vm.addr(3);
     address uniProxy = vm.addr(4);
-    uint conversionRate = 255;
-    uint8 conversionRateDecimals = 1;
+    uint conversionRate;
+    uint8 conversionRateDecimals;
 
     ILiquidityDeployer liquidityDeployer;
 
@@ -33,6 +33,15 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         token1 = address(new TestToken("USD Coin", "USDC", 6));
         lpToken = new TestToken("Gamma LP Token", "MCBT-USDC", 18);
         testAccount0 = address(this);
+        uint defaultConversionRate = 255;
+        uint8 defaultConversionRateDecimals = 1;
+
+        _init(defaultConversionRate, defaultConversionRateDecimals);
+    }
+
+    function _init(uint conversionRate_, uint8 conversionRateDecimals_) internal {
+        conversionRate = conversionRate_;
+        conversionRateDecimals = conversionRateDecimals_;
 
         liquidityDeployer = new LiquidityDeployer(
             token0,

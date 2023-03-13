@@ -21,6 +21,8 @@ contract TestDataTypes {
         uint account1RemainingToken1Balance;
         uint lastToken0AvailableLiquidity;
         uint lastToken1AvailableLiquidity;
+        uint conversionRate;
+        uint8 conversionRateDecimals;
         SubsequentValues subsequentValues;
     }
 
