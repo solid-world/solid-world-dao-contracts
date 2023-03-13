@@ -314,4 +314,14 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
     function testDeployLiquidity_updatesTotalDeposits() public {
         _runWithTestScenarios(_testDeployLiquidity_updatesTotalDeposits);
     }
+
+    function testDeployLiquidity_token0DeployedLiquidityIsCloseInValueToToken1DeployedLiquidity() public {
+        _runWithTestScenarios(
+            _testDeployLiquidity_token0DeployedLiquidityIsCloseInValueToToken1DeployedLiquidity
+        );
+    }
+
+    function testDeployLiquidity_subsequentCall() public {
+        _runWithTestScenarios(_testDeployLiquidity_subsequentCall);
+    }
 }

@@ -21,5 +21,16 @@ contract TestDataTypes {
         uint account1RemainingToken1Balance;
         uint lastToken0AvailableLiquidity;
         uint lastToken1AvailableLiquidity;
+        SubsequentValues subsequentValues;
+    }
+
+    /// @dev values obtained after two `deposit() + deployLiquidity()` calls
+    struct SubsequentValues {
+        uint account0LPTokensOwed;
+        uint account1LPTokensOwed;
+        uint account0RemainingToken0Balance;
+        uint account1RemainingToken0Balance;
+        uint account0RemainingToken1Balance;
+        uint account1RemainingToken1Balance;
     }
 }

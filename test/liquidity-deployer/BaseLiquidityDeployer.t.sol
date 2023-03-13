@@ -90,11 +90,17 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         uint account1Token0Deposit,
         uint account1Token1Deposit
     ) internal {
-        liquidityDeployer.depositToken0(account0Token0Deposit);
-        liquidityDeployer.depositToken1(account0Token1Deposit);
+        if (account0Token0Deposit > 0) {
+            liquidityDeployer.depositToken0(account0Token0Deposit);
+        }
+        if (account0Token1Deposit > 0) {
+            liquidityDeployer.depositToken1(account0Token1Deposit);
+        }
 
         vm.startPrank(testAccount1);
-        liquidityDeployer.depositToken0(account1Token0Deposit);
+        if (account1Token0Deposit > 0) {
+            liquidityDeployer.depositToken0(account1Token0Deposit);
+        }
         if (account1Token1Deposit > 0) {
             liquidityDeployer.depositToken1(account1Token1Deposit);
         }
