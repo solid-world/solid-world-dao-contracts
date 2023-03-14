@@ -1,3 +1,6 @@
+const { getCurrentGasFees } = require('@solid-world/gas-station')
+const { setupEnvForGasStation } = require('../deploy-helpers/gas-station-env')
+
 const deployMockPoolAndFactory = async (deployer, deployments) => {
   const Pool = await deployments.deploy('MockUniswapV3Pool', {
     from: deployer,
@@ -54,8 +57,9 @@ task('deploy-reward-oracle', 'Deploys a reward price oracle contract')
   .setAction(
     async (
       { owner, factory, baseToken, quoteToken, fee, secondsAgo },
-      { getNamedAccounts, deployments, network }
+      { getNamedAccounts, deployments, network, getChainId, ethers }
     ) => {
+      await setupEnvForGasStation(network, getChainId)
       const { deployer, contractsOwner } = await getNamedAccounts()
 
       let actualOwner = owner ?? contractsOwner
@@ -69,9 +73,21 @@ task('deploy-reward-oracle', 'Deploys a reward price oracle contract')
         actualQuoteToken ??= await deployMockERC20(deployer, deployments)
       }
 
+      const deploymentName = await makeDeploymentName(
+        actualBaseToken,
+        actualQuoteToken,
+        fee,
+        ethers
+      )
       const UniswapEACAggregatorProxyAdapter = await deployments.deploy(
-        'UniswapEACAggregatorProxyAdapter',
+        deploymentName,
         {
+          ...(await getCurrentGasFees()),
+          // manual gas limit, because on goerli sometimes the deployment fails with
+          // "contract creation code storage out of gas" during `eth_estimategas`.
+          // I couldn't figure out why.
+          gasLimit: 1011930,
+          contract: 'UniswapEACAggregatorProxyAdapter',
           from: deployer,
           args: [
             actualOwner,
@@ -91,6 +107,25 @@ task('deploy-reward-oracle', 'Deploys a reward price oracle contract')
       )
     }
   )
+async function getTokenSymbol(tokenAddress, ethers) {
+  const symbolAbi = ['function symbol() external view returns (string memory)']
+
+  const baseTokenContract = await ethers.getContractAt(symbolAbi, tokenAddress)
+
+  return baseTokenContract.symbol()
+}
+
+async function makeDeploymentName(
+  baseTokenAddress,
+  quoteTokenAddress,
+  fee,
+  ethers
+) {
+  const baseTokenSymbol = await getTokenSymbol(baseTokenAddress, ethers)
+  const quoteTokenSymbol = await getTokenSymbol(quoteTokenAddress, ethers)
+
+  return `UniswapEACAggregatorProxyAdapter_${baseTokenSymbol}_${quoteTokenSymbol}_${fee}`
+}
 
 function isLocalhost(networkName) {
   return ['localhost'].includes(networkName)
