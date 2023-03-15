@@ -662,6 +662,17 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         assertEq(lpToken.balanceOf(testAccount1), testScenario.subsequentValues.account1LPTokensOwed);
     }
 
+    function _testDeployLiquidity_emitsEvent(TestDataTypes.TestScenario storage testScenario) internal {
+        _doDeposits(testScenario);
+
+        _expectEmit_LiquidityDeployed(
+            testScenario.lastToken0DeployedLiquidity,
+            testScenario.lastToken1DeployedLiquidity,
+            MINTED_LP_TOKENS
+        );
+        liquidityDeployer.deployLiquidity();
+    }
+
     function _computeToken0AvailableLiquidity(uint token0Amount) private view returns (uint) {
         return token0Amount > liquidityDeployer.getMinConvertibleToken0Amount() ? token0Amount : 0;
     }

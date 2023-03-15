@@ -27,6 +27,11 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     event TokenDeposited(address indexed token, address indexed depositor, uint indexed amount);
     event TokenWithdrawn(address indexed token, address indexed withdrawer, uint indexed amount);
     event LpTokenWithdrawn(address indexed withdrawer, uint indexed amount);
+    event LiquidityDeployed(
+        uint indexed token0DeployedAmount,
+        uint indexed token1DeployedAmount,
+        uint indexed lpTokensReceived
+    );
 
     function setUp() public virtual {
         lpToken = new TestToken("Gamma LP Token", "MCBT-USDC", 18);
@@ -217,5 +222,14 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
     function _expectEmit_LpTokenWithdrawn(address withdrawer, uint amount) internal {
         vm.expectEmit(true, true, true, false, address(liquidityDeployer));
         emit LpTokenWithdrawn(withdrawer, amount);
+    }
+
+    function _expectEmit_LiquidityDeployed(
+        uint token0DeployedAmount,
+        uint token1DeployedAmount,
+        uint lpTokensReceived
+    ) internal {
+        vm.expectEmit(true, true, true, true, address(liquidityDeployer));
+        emit LiquidityDeployed(token0DeployedAmount, token1DeployedAmount, lpTokensReceived);
     }
 }

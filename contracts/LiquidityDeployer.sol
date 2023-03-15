@@ -98,7 +98,11 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
 
         _prepareLPTokensOwed(lpTokens);
 
-        //TODO emit event
+        emit LiquidityDeployed(
+            lastTotalDeployedLiquidity[config.token0],
+            lastTotalDeployedLiquidity[config.token1],
+            lpTokens
+        );
     }
 
     function withdrawLpTokens() external nonReentrant {

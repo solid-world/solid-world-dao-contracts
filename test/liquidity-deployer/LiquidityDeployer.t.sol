@@ -371,4 +371,8 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
     function testWithdrawLpTokens_subsequentCall() public {
         _runWithTestScenarios(_testWithdrawLpTokens_subsequentCall);
     }
+
+    function testDeployLiquidity_emitsEvent() public {
+        _runWithTestScenarios(_testDeployLiquidity_emitsEvent);
+    }
 }
