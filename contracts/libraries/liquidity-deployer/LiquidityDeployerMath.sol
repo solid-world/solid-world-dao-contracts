@@ -16,7 +16,7 @@ library LiquidityDeployerMath {
         uint tokenAmount
     ) internal pure returns (uint tokenConverted) {
         if (tokenAmount == 0) {
-            tokenConverted = 0;
+            return 0;
         }
 
         tokenConverted = Math.mulDiv(
