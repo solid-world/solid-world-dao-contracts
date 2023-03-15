@@ -46,6 +46,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         uint conversionRate,
         uint8 conversionRateDecimals
     ) {
+        //TODO revert if token0 and token1 don't match the gamma vault
         config.token0 = token0;
         config.token1 = token1;
         config.gammaVault = gammaVault;
@@ -96,17 +97,16 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         uint lpTokens = _depositToUniProxy();
 
         _prepareLPTokensOwed(lpTokens);
+
+        //TODO emit event
     }
 
-    function withdrawLpTokens(uint amount) external nonReentrant validTokenAmount(amount) {
-        if (amount > lPTokensOwed[msg.sender]) {
-            revert InsufficientLpTokenBalance(msg.sender, lPTokensOwed[msg.sender], amount);
-        }
+    function withdrawLpTokens() external nonReentrant {
+        _withdrawLpTokens(lPTokensOwed[msg.sender]);
+    }
 
-        lPTokensOwed[msg.sender] -= amount;
-        IERC20(config.gammaVault).safeTransfer(msg.sender, amount);
-
-        emit LpTokenWithdrawn(msg.sender, amount);
+    function withdrawLpTokens(uint amount) external nonReentrant {
+        _withdrawLpTokens(amount);
     }
 
     function getToken0() external view returns (address) {
@@ -326,6 +326,17 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         IERC20(token).safeTransfer(msg.sender, amount);
 
         emit TokenWithdrawn(token, msg.sender, amount);
+    }
+
+    function _withdrawLpTokens(uint amount) internal validTokenAmount(amount) {
+        if (amount > lPTokensOwed[msg.sender]) {
+            revert InsufficientLpTokenBalance(msg.sender, lPTokensOwed[msg.sender], amount);
+        }
+
+        lPTokensOwed[msg.sender] -= amount;
+        IERC20(config.gammaVault).safeTransfer(msg.sender, amount);
+
+        emit LpTokenWithdrawn(msg.sender, amount);
     }
 
     function _allowUniProxyToSpendDeployableLiquidity() internal {

@@ -29,6 +29,8 @@ interface ILiquidityDeployer {
 
     function withdrawLpTokens(uint amount) external;
 
+    function withdrawLpTokens() external;
+
     function getToken0() external view returns (address);
 
     function getToken1() external view returns (address);

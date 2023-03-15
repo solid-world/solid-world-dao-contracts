@@ -288,11 +288,30 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
         liquidityDeployer.withdrawLpTokens(0);
     }
 
+    function testWithdrawLpTokens_noParams_revertsIfNoOwedTokens() public {
+        _expectRevert_InvalidInput();
+        liquidityDeployer.withdrawLpTokens();
+    }
+
     function testWithdrawLpTokens_revertsForInsufficientLpTokenBalance() public {
         uint withdrawAmount = 1;
 
         _expectRevert_InsufficientLpTokenBalance(address(this), 0, withdrawAmount);
         liquidityDeployer.withdrawLpTokens(withdrawAmount);
+    }
+
+    function testWithdrawLpTokens_noParams_withdrawsEverything() public {
+        uint token0Deposit = liquidityDeployer.getMinConvertibleToken0Amount();
+        uint token1Deposit = 1;
+
+        liquidityDeployer.depositToken0(token0Deposit);
+        liquidityDeployer.depositToken1(token1Deposit);
+        liquidityDeployer.deployLiquidity();
+
+        assertEq(liquidityDeployer.getLPTokensOwed(address(this)), MINTED_LP_TOKENS);
+
+        liquidityDeployer.withdrawLpTokens();
+        assertEq(liquidityDeployer.getLPTokensOwed(address(this)), 0);
     }
 
     function testDeployLiquidity_lastAvailableLiquidity() public {
