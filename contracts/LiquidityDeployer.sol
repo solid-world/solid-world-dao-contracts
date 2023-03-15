@@ -9,6 +9,7 @@ import "./interfaces/liquidity-deployer/IUniProxy.sol";
 import "./libraries/liquidity-deployer/LiquidityDeployerDataTypes.sol";
 import "./libraries/liquidity-deployer/LiquidityDeployerMath.sol";
 import "./libraries/GPv2SafeERC20.sol";
+import "./interfaces/liquidity-deployer/IHypervisor.sol";
 
 /// @author Solid World
 contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
@@ -38,6 +39,19 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         _;
     }
 
+    modifier tokensMatch(
+        address token0,
+        address token1,
+        address _gammaVault
+    ) {
+        IHypervisor gammaVault = IHypervisor(_gammaVault);
+
+        if (token0 != gammaVault.token0() || token1 != gammaVault.token1()) {
+            revert TokensMismatch();
+        }
+        _;
+    }
+
     constructor(
         address token0,
         address token1,
@@ -45,8 +59,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         address uniProxy,
         uint conversionRate,
         uint8 conversionRateDecimals
-    ) {
-        //TODO revert if token0 and token1 don't match the gamma vault
+    ) tokensMatch(token0, token1, gammaVault) {
         config.token0 = token0;
         config.token1 = token1;
         config.gammaVault = gammaVault;

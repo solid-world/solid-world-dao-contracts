@@ -4,6 +4,7 @@ pragma solidity 0.8.16;
 /// @author Solid World
 interface ILiquidityDeployer {
     error InvalidInput();
+    error TokensMismatch();
     error InsufficientTokenBalance(address token, address account, uint balance, uint withdrawAmount);
     error NotEnoughAvailableLiquidity(uint token0Liquidity, uint token1Liquidity);
     error InsufficientLpTokenBalance(address account, uint balance, uint withdrawAmount);

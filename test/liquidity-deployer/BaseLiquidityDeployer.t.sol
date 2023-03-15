@@ -5,6 +5,7 @@ import "../BaseTest.sol";
 import "./TestToken.sol";
 import "./TestDataTypes.sol";
 import "../../contracts/LiquidityDeployer.sol";
+import "../../contracts/interfaces/liquidity-deployer/IHypervisor.sol";
 
 abstract contract BaseLiquidityDeployerTest is BaseTest {
     uint constant INITIAL_TOKEN_BALANCE = 1_000_000e18;
@@ -55,6 +56,9 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         token1 = token1_;
         conversionRate = conversionRate_;
         conversionRateDecimals = conversionRateDecimals_;
+
+        _mockLpToken_token0(token0);
+        _mockLpToken_token1(token1);
 
         liquidityDeployer = new LiquidityDeployer(
             token0,
@@ -145,6 +149,22 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         );
     }
 
+    function _mockLpToken_token0(address token0_) internal {
+        vm.mockCall(
+            address(lpToken),
+            abi.encodeWithSelector(IHypervisor.token0.selector),
+            abi.encode(token0_)
+        );
+    }
+
+    function _mockLpToken_token1(address token1_) internal {
+        vm.mockCall(
+            address(lpToken),
+            abi.encodeWithSelector(IHypervisor.token1.selector),
+            abi.encode(token1_)
+        );
+    }
+
     function _expectDepositIsCalledOnUniProxy(
         uint deposit0,
         uint deposit1,
@@ -157,6 +177,10 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
 
     function _expectRevert_InvalidInput() internal {
         vm.expectRevert(abi.encodeWithSelector(ILiquidityDeployer.InvalidInput.selector));
+    }
+
+    function _expectRevert_TokensMismatch() internal {
+        vm.expectRevert(abi.encodeWithSelector(ILiquidityDeployer.TokensMismatch.selector));
     }
 
     function _expectRevert_InsufficientTokenBalance(

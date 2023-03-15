@@ -4,6 +4,32 @@ pragma solidity 0.8.16;
 import "./LiquidityDeployerTestScenarios.sol";
 
 contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
+    function testInitialization_failsIfSpecifiedTokensDontMatchGammaVaultTokens() public {
+        _mockLpToken_token0(token1);
+        _mockLpToken_token1(token1);
+        _expectRevert_TokensMismatch();
+        new LiquidityDeployer(
+            token0,
+            token1,
+            address(lpToken),
+            uniProxy,
+            conversionRate,
+            conversionRateDecimals
+        );
+
+        _mockLpToken_token0(token0);
+        _mockLpToken_token1(token0);
+        _expectRevert_TokensMismatch();
+        new LiquidityDeployer(
+            token0,
+            token1,
+            address(lpToken),
+            uniProxy,
+            conversionRate,
+            conversionRateDecimals
+        );
+    }
+
     function testInitializesWithSpecifiedValues() public {
         assertEq(liquidityDeployer.getToken0(), token0);
         assertEq(liquidityDeployer.getToken1(), token1);
