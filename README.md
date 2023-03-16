@@ -25,6 +25,8 @@ yarn hardhat verify --network goerli <SolidWorldManager_Implementation address>
 ```
 (the second command is required because there's currently a [bug](https://github.com/wighawag/hardhat-deploy/issues/253) that prevents verification of contracts with linked libraries)
 
+## Hardhat Tasks
+
 ▶ To deploy a new reward price oracle run:
 ```shell
 yarn hardhat --network localhost deploy-reward-oracle [OPTIONS] 
@@ -39,7 +41,21 @@ OPTIONS:
 - `--fee`         Pool fee (default: 500)
 - `--seconds-ago` Seconds ago to calculate the time-weighted means (default: 300)
 
-## Hardhat Tasks
+
+▶ To deploy a new LiquidityDeployer contract run:
+
+```shell
+yarn hardhat --network localhost deploy-liquidity-deployer [OPTIONS] 
+```
+
+OPTIONS:
+
+- `--token0`                   The address of token0.
+- `--token1`                   The address of token1.
+- `--gamma-vault`              The address of the GammaVault contract.
+- `--uni-proxy`                The address of the UniProxy contract.
+- `--conversion-rate`          The conversion rate between token0 and token1.
+- `--conversion-rate-decimals` The number of decimals of the conversion rate.
 
 ▶ Deploying ERC-20 tokens with hardhat
 
