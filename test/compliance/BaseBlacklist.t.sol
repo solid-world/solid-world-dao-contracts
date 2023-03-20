@@ -4,6 +4,8 @@ pragma solidity 0.8.16;
 import "../BaseTest.sol";
 import "../../contracts/compliance/Blacklist.sol";
 
+contract BasicBlacklist is Blacklist {}
+
 abstract contract BaseBlacklistTest is BaseTest {
     IBlacklist blacklist;
 
@@ -11,7 +13,7 @@ abstract contract BaseBlacklistTest is BaseTest {
     event Blacklisted(address indexed subject);
 
     function setUp() public {
-        blacklist = new Blacklist();
+        blacklist = new BasicBlacklist();
     }
 
     function _expectRevert_InvalidInput() internal {

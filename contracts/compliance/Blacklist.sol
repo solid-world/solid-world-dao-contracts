@@ -4,7 +4,8 @@ pragma solidity 0.8.16;
 import "../interfaces/compliance/IBlacklist.sol";
 
 /// @author Solid World
-contract Blacklist is IBlacklist {
+/// @dev Abstract base contract for a blacklist. Function restrictions should be implemented by derived contracts.
+abstract contract Blacklist is IBlacklist {
     address internal blacklister;
 
     mapping(address => bool) internal blacklisted;
