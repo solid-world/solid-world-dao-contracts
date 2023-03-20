@@ -12,7 +12,7 @@ abstract contract KYCRegistry is IKYCRegistry {
 
     function setVerifier(address newVerifier) public virtual {
         if (newVerifier == address(0)) {
-            revert InvalidInput();
+            revert InvalidVerifier();
         }
 
         _setVerifier(newVerifier);

@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 /// @author Solid World
 interface IBlacklist {
-    error InvalidInput();
+    error InvalidBlacklister();
 
     event BlacklisterUpdated(address indexed oldBlacklister, address indexed newBlacklister);
     event Blacklisted(address indexed subject);

@@ -10,7 +10,7 @@ contract KYCRegistryTest is BaseKYCRegistryTest {
     }
 
     function testSetVerifier_revertsIfVerifierIsZeroAddress() public {
-        _expectRevert_InvalidInput();
+        _expectRevert_InvalidVerifier();
         kycRegistry.setVerifier(address(0));
     }
 

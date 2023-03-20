@@ -17,8 +17,8 @@ abstract contract BaseBlacklistTest is BaseTest {
         blacklist = new BasicBlacklist();
     }
 
-    function _expectRevert_InvalidInput() internal {
-        vm.expectRevert(abi.encodeWithSelector(IBlacklist.InvalidInput.selector));
+    function _expectRevert_InvalidBlacklister() internal {
+        vm.expectRevert(abi.encodeWithSelector(IBlacklist.InvalidBlacklister.selector));
     }
 
     function _expectEmit_BlacklisterUpdated(address oldBlacklister, address newBlacklister) internal {

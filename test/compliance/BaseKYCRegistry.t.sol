@@ -17,8 +17,8 @@ abstract contract BaseKYCRegistryTest is BaseTest {
         kycRegistry = new BasicKYCRegistry();
     }
 
-    function _expectRevert_InvalidInput() internal {
-        vm.expectRevert(abi.encodeWithSelector(IKYCRegistry.InvalidInput.selector));
+    function _expectRevert_InvalidVerifier() internal {
+        vm.expectRevert(abi.encodeWithSelector(IKYCRegistry.InvalidVerifier.selector));
     }
 
     function _expectEmit_VerifierUpdated(address oldVerifier, address newVerifier) internal {
