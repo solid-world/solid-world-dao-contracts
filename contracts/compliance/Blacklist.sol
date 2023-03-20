@@ -30,7 +30,7 @@ abstract contract Blacklist is IBlacklist {
         return blacklister;
     }
 
-    function isBlacklisted(address subject) public view returns (bool) {
+    function isBlacklisted(address subject) public view virtual returns (bool) {
         return blacklisted[subject];
     }
 

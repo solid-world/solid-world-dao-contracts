@@ -30,7 +30,7 @@ abstract contract KYCRegistry is IKYCRegistry {
         return verifier;
     }
 
-    function isVerified(address subject) public view returns (bool) {
+    function isVerified(address subject) public view virtual returns (bool) {
         return verified[subject];
     }
 
