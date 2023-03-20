@@ -123,4 +123,24 @@ contract VerificationRegistryTest is BaseVerificationRegistryTest {
         _expectRevertWithMessage("Ownable: caller is not the owner");
         verificationRegistry.setVerifier(verifier);
     }
+
+    function testIsVerifiedAndNotBlacklisted() public {
+        address subject1 = address(1);
+        address subject2 = address(2);
+        address subject3 = address(3);
+        address subject4 = address(4);
+
+        verificationRegistry.registerVerification(subject1);
+        verificationRegistry.registerVerification(subject2);
+        verificationRegistry.registerVerification(subject3);
+        verificationRegistry.registerVerification(subject4);
+
+        verificationRegistry.blacklist(subject2);
+        verificationRegistry.blacklist(subject4);
+
+        assertTrue(verificationRegistry.isVerifiedAndNotBlacklisted(subject1));
+        assertFalse(verificationRegistry.isVerifiedAndNotBlacklisted(subject2));
+        assertTrue(verificationRegistry.isVerifiedAndNotBlacklisted(subject3));
+        assertFalse(verificationRegistry.isVerifiedAndNotBlacklisted(subject4));
+    }
 }

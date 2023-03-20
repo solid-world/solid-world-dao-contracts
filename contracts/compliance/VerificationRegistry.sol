@@ -51,4 +51,8 @@ contract VerificationRegistry is Initializable, OwnableUpgradeable, Blacklist, K
     function revokeVerification(address subject) public override authorizedVerifier {
         super.revokeVerification(subject);
     }
+
+    function isVerifiedAndNotBlacklisted(address subject) external view returns (bool) {
+        return isVerified(subject) && !isBlacklisted(subject);
+    }
 }

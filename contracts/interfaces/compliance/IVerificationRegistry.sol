@@ -6,5 +6,5 @@ import "./IKYCRegistry.sol";
 
 /// @author Solid World
 interface IVerificationRegistry is IBlacklist, IKYCRegistry {
-
+    function isVerifiedAndNotBlacklisted(address subject) external view returns (bool);
 }
