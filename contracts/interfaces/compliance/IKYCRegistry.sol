@@ -10,4 +10,6 @@ interface IKYCRegistry {
     function setVerifier(address newVerifier) external;
 
     function getVerifier() external view returns (address);
+
+    function isVerified(address subject) external view returns (bool);
 }

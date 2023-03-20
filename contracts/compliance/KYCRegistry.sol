@@ -7,6 +7,8 @@ import "../interfaces/compliance/IKYCRegistry.sol";
 contract KYCRegistry is IKYCRegistry {
     address internal verifier;
 
+    mapping(address => bool) internal verified;
+
     function setVerifier(address newVerifier) public virtual {
         if (newVerifier == address(0)) {
             revert InvalidInput();
@@ -17,6 +19,10 @@ contract KYCRegistry is IKYCRegistry {
 
     function getVerifier() external view returns (address) {
         return verifier;
+    }
+
+    function isVerified(address subject) external view returns (bool) {
+        return verified[subject];
     }
 
     function _setVerifier(address newVerifier) internal {

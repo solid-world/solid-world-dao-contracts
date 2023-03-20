@@ -27,4 +27,10 @@ contract KYCRegistryTest is BaseKYCRegistryTest {
         _expectEmit_VerifierUpdated(address(0), newVerifier);
         kycRegistry.setVerifier(newVerifier);
     }
+
+    function testIsVerified() public {
+        address subject = vm.addr(1);
+
+        assertEq(kycRegistry.isVerified(subject), false);
+    }
 }
