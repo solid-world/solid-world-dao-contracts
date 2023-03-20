@@ -28,6 +28,14 @@ contract VerificationRegistry is Initializable, OwnableUpgradeable, Blacklist, K
         transferOwnership(owner);
     }
 
+    function setBlacklister(address newBlacklister) public override onlyOwner {
+        super.setBlacklister(newBlacklister);
+    }
+
+    function setVerifier(address newVerifier) public override onlyOwner {
+        super.setVerifier(newVerifier);
+    }
+
     function blacklist(address subject) public override authorizedBlacklister {
         super.blacklist(subject);
     }
