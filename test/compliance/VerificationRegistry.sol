@@ -19,6 +19,7 @@ contract VerificationRegistryTest is BaseVerificationRegistryTest {
         address blacklister = address(3);
 
         verificationRegistry.setBlacklister(blacklister);
+
         vm.prank(blacklister);
         verificationRegistry.blacklist(addressToBlacklist1);
         assertTrue(verificationRegistry.isBlacklisted(addressToBlacklist1));
@@ -42,6 +43,7 @@ contract VerificationRegistryTest is BaseVerificationRegistryTest {
         address blacklister = address(3);
 
         verificationRegistry.setBlacklister(blacklister);
+
         verificationRegistry.blacklist(addressToBlacklist1);
         verificationRegistry.blacklist(addressToBlacklist2);
 
@@ -51,5 +53,29 @@ contract VerificationRegistryTest is BaseVerificationRegistryTest {
 
         verificationRegistry.unBlacklist(addressToBlacklist2);
         assertFalse(verificationRegistry.isBlacklisted(addressToBlacklist2));
+    }
+
+    function testRegisterVerification_revertsIfNotVerifierOrOwner() public {
+        address subject = address(1);
+        address arbitraryCaller = address(2);
+
+        vm.prank(arbitraryCaller);
+        _expectRevert_VerificationNotAuthorized(arbitraryCaller);
+        verificationRegistry.registerVerification(subject);
+    }
+
+    function testRegisterVerification_registersVerificationIfAuthorized() public {
+        address subject1 = address(1);
+        address subject2 = address(2);
+        address verifier = address(3);
+
+        verificationRegistry.setVerifier(verifier);
+
+        vm.prank(verifier);
+        verificationRegistry.registerVerification(subject1);
+        assertTrue(verificationRegistry.isVerified(subject1));
+
+        verificationRegistry.registerVerification(subject2);
+        assertTrue(verificationRegistry.isVerified(subject2));
     }
 }

@@ -16,6 +16,13 @@ contract VerificationRegistry is Initializable, OwnableUpgradeable, Blacklist, K
         _;
     }
 
+    modifier authorizedVerifier() {
+        if (msg.sender != getVerifier() && msg.sender != owner()) {
+            revert VerificationNotAuthorized(msg.sender);
+        }
+        _;
+    }
+
     function initialize(address owner) public initializer {
         __Ownable_init();
         transferOwnership(owner);
@@ -27,5 +34,9 @@ contract VerificationRegistry is Initializable, OwnableUpgradeable, Blacklist, K
 
     function unBlacklist(address subject) public override authorizedBlacklister {
         super.unBlacklist(subject);
+    }
+
+    function registerVerification(address subject) public override authorizedVerifier {
+        super.registerVerification(subject);
     }
 }

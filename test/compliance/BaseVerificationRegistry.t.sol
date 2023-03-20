@@ -18,4 +18,8 @@ contract BaseVerificationRegistryTest is BaseTest {
     function _expectRevert_BlacklistingNotAuthorized(address caller) internal {
         vm.expectRevert(abi.encodeWithSelector(IBlacklist.BlacklistingNotAuthorized.selector, caller));
     }
+
+    function _expectRevert_VerificationNotAuthorized(address caller) internal {
+        vm.expectRevert(abi.encodeWithSelector(IKYCRegistry.VerificationNotAuthorized.selector, caller));
+    }
 }
