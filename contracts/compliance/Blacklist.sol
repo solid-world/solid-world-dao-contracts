@@ -6,9 +6,9 @@ import "../interfaces/compliance/IBlacklist.sol";
 /// @author Solid World
 /// @dev Abstract base contract for a blacklist. Function restrictions should be implemented by derived contracts.
 abstract contract Blacklist is IBlacklist {
-    address internal blacklister;
+    address private blacklister;
 
-    mapping(address => bool) internal blacklisted;
+    mapping(address => bool) private blacklisted;
 
     function setBlacklister(address newBlacklister) public virtual {
         if (newBlacklister == address(0)) {
