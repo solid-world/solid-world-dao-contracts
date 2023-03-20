@@ -78,4 +78,31 @@ contract VerificationRegistryTest is BaseVerificationRegistryTest {
         verificationRegistry.registerVerification(subject2);
         assertTrue(verificationRegistry.isVerified(subject2));
     }
+
+    function testRevokeVerification_revertsIfNotVerifierOrOwner() public {
+        address subject = address(1);
+        address arbitraryCaller = address(2);
+
+        vm.prank(arbitraryCaller);
+        _expectRevert_VerificationNotAuthorized(arbitraryCaller);
+        verificationRegistry.revokeVerification(subject);
+    }
+
+    function testRevokeVerification_revokesVerificationIfAuthorized() public {
+        address subject1 = address(1);
+        address subject2 = address(2);
+        address verifier = address(3);
+
+        verificationRegistry.setVerifier(verifier);
+
+        verificationRegistry.registerVerification(subject1);
+        verificationRegistry.registerVerification(subject2);
+
+        vm.prank(verifier);
+        verificationRegistry.revokeVerification(subject1);
+        assertFalse(verificationRegistry.isVerified(subject1));
+
+        verificationRegistry.revokeVerification(subject2);
+        assertFalse(verificationRegistry.isVerified(subject2));
+    }
 }

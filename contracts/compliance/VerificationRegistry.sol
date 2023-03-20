@@ -39,4 +39,8 @@ contract VerificationRegistry is Initializable, OwnableUpgradeable, Blacklist, K
     function registerVerification(address subject) public override authorizedVerifier {
         super.registerVerification(subject);
     }
+
+    function revokeVerification(address subject) public override authorizedVerifier {
+        super.revokeVerification(subject);
+    }
 }
