@@ -7,6 +7,7 @@ import "./KYCRegistry.sol";
 import "./Blacklist.sol";
 
 /// @author Solid World
+/// @notice A contract for maintaining a registry of KYCed and blacklisted addresses.
 /// @dev does not inherit from IVerificationRegistry because of https://github.com/ethereum/solidity/issues/12554
 contract VerificationRegistry is Initializable, OwnableUpgradeable, Blacklist, KYCRegistry {
     modifier authorizedBlacklister() {
