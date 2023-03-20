@@ -4,7 +4,8 @@ pragma solidity 0.8.16;
 import "../interfaces/compliance/IKYCRegistry.sol";
 
 /// @author Solid World
-contract KYCRegistry is IKYCRegistry {
+/// @dev Abstract base contract for a KYC registry. Function restrictions should be implemented by derived contracts.
+abstract contract KYCRegistry is IKYCRegistry {
     address internal verifier;
 
     mapping(address => bool) internal verified;
@@ -15,6 +16,10 @@ contract KYCRegistry is IKYCRegistry {
         }
 
         _setVerifier(newVerifier);
+    }
+
+    function registerVerification(address subject) public virtual {
+        _registerVerification(subject);
     }
 
     function getVerifier() external view returns (address) {
@@ -30,5 +35,11 @@ contract KYCRegistry is IKYCRegistry {
         verifier = newVerifier;
 
         emit VerifierUpdated(oldVerifier, newVerifier);
+    }
+
+    function _registerVerification(address subject) internal {
+        verified[subject] = true;
+
+        emit Verified(subject);
     }
 }

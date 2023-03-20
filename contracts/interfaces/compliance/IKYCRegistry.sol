@@ -6,8 +6,11 @@ interface IKYCRegistry {
     error InvalidInput();
 
     event VerifierUpdated(address indexed oldVerifier, address indexed newVerifier);
+    event Verified(address indexed subject);
 
     function setVerifier(address newVerifier) external;
+
+    function registerVerification(address subject) external;
 
     function getVerifier() external view returns (address);
 

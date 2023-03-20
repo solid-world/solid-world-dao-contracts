@@ -33,4 +33,18 @@ contract KYCRegistryTest is BaseKYCRegistryTest {
 
         assertEq(kycRegistry.isVerified(subject), false);
     }
+
+    function testRegisterVerification_verifiesSubject() public {
+        address subject = vm.addr(1);
+
+        kycRegistry.registerVerification(subject);
+        assertEq(kycRegistry.isVerified(subject), true);
+    }
+
+    function testRegisterVerification_emitsEvent() public {
+        address subject = vm.addr(1);
+
+        _expectEmit_Verified(subject);
+        kycRegistry.registerVerification(subject);
+    }
 }

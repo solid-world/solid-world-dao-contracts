@@ -10,6 +10,7 @@ abstract contract BaseKYCRegistryTest is BaseTest {
     IKYCRegistry kycRegistry;
 
     event VerifierUpdated(address indexed oldVerifier, address indexed newVerifier);
+    event Verified(address indexed subject);
 
     function setUp() public {
         kycRegistry = new BasicKYCRegistry();
@@ -22,5 +23,10 @@ abstract contract BaseKYCRegistryTest is BaseTest {
     function _expectEmit_VerifierUpdated(address oldVerifier, address newVerifier) internal {
         vm.expectEmit(true, true, true, false, address(kycRegistry));
         emit VerifierUpdated(oldVerifier, newVerifier);
+    }
+
+    function _expectEmit_Verified(address subject) internal {
+        vm.expectEmit(true, true, false, false, address(kycRegistry));
+        emit Verified(subject);
     }
 }
