@@ -26,11 +26,11 @@ abstract contract Blacklist is IBlacklist {
         _unBlacklist(subject);
     }
 
-    function getBlacklister() external view returns (address) {
+    function getBlacklister() public view returns (address) {
         return blacklister;
     }
 
-    function isBlacklisted(address subject) external view returns (bool) {
+    function isBlacklisted(address subject) public view returns (bool) {
         return blacklisted[subject];
     }
 
