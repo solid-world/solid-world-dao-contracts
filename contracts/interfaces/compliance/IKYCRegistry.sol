@@ -7,10 +7,13 @@ interface IKYCRegistry {
 
     event VerifierUpdated(address indexed oldVerifier, address indexed newVerifier);
     event Verified(address indexed subject);
+    event VerificationRevoked(address indexed subject);
 
     function setVerifier(address newVerifier) external;
 
     function registerVerification(address subject) external;
+
+    function revokeVerification(address subject) external;
 
     function getVerifier() external view returns (address);
 

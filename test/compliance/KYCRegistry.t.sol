@@ -47,4 +47,20 @@ contract KYCRegistryTest is BaseKYCRegistryTest {
         _expectEmit_Verified(subject);
         kycRegistry.registerVerification(subject);
     }
+
+    function testRevokeVerification_revokesVerification() public {
+        address subject = vm.addr(1);
+
+        kycRegistry.registerVerification(subject);
+        kycRegistry.revokeVerification(subject);
+
+        assertEq(kycRegistry.isVerified(subject), false);
+    }
+
+    function testRevokeVerification_emitsEvent() public {
+        address subject = vm.addr(1);
+
+        _expectEmit_VerificationRevoked(subject);
+        kycRegistry.revokeVerification(subject);
+    }
 }
