@@ -5,18 +5,23 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./KYCRegistry.sol";
 import "./Blacklist.sol";
-import "../interfaces/compliance/IVerificationRegistry.sol";
 
 /// @author Solid World
-contract VerificationRegistry is
-    Initializable,
-    OwnableUpgradeable,
-    IVerificationRegistry,
-    Blacklist,
-    KYCRegistry
-{
+/// @dev does not inherit from IVerificationRegistry because of https://github.com/ethereum/solidity/issues/12554
+contract VerificationRegistry is Initializable, OwnableUpgradeable, Blacklist, KYCRegistry {
+    modifier authorizedBlacklister() {
+        if (msg.sender != getBlacklister() && msg.sender != owner()) {
+            revert BlacklistingNotAuthorized(msg.sender);
+        }
+        _;
+    }
+
     function initialize(address owner) public initializer {
         __Ownable_init();
         transferOwnership(owner);
+    }
+
+    function blacklist(address subject) public override authorizedBlacklister {
+        super.blacklist(subject);
     }
 }
