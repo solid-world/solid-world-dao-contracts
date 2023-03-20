@@ -11,6 +11,7 @@ abstract contract BaseBlacklistTest is BaseTest {
 
     event BlacklisterUpdated(address indexed oldBlacklister, address indexed newBlacklister);
     event Blacklisted(address indexed subject);
+    event UnBlacklisted(address indexed subject);
 
     function setUp() public {
         blacklist = new BasicBlacklist();
@@ -28,5 +29,10 @@ abstract contract BaseBlacklistTest is BaseTest {
     function _expectEmit_Blacklisted(address subject) internal {
         vm.expectEmit(true, true, false, false, address(blacklist));
         emit Blacklisted(subject);
+    }
+
+    function _expectEmit_UnBlacklisted(address subject) internal {
+        vm.expectEmit(true, true, false, false, address(blacklist));
+        emit UnBlacklisted(subject);
     }
 }

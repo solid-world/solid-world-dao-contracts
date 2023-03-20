@@ -48,4 +48,20 @@ contract BlacklistTest is BaseBlacklistTest {
         _expectEmit_Blacklisted(subject);
         blacklist.blacklist(subject);
     }
+
+    function testUnBlacklist_unblacklistsSubject() public {
+        address subject = vm.addr(1);
+
+        blacklist.blacklist(subject);
+        blacklist.unBlacklist(subject);
+
+        assertEq(blacklist.isBlacklisted(subject), false);
+    }
+
+    function testUnBlacklist_emitsEvent() public {
+        address subject = vm.addr(1);
+
+        _expectEmit_UnBlacklisted(subject);
+        blacklist.unBlacklist(subject);
+    }
 }

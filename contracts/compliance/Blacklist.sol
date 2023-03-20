@@ -22,6 +22,10 @@ abstract contract Blacklist is IBlacklist {
         _blacklist(subject);
     }
 
+    function unBlacklist(address subject) public virtual {
+        _unBlacklist(subject);
+    }
+
     function getBlacklister() external view returns (address) {
         return blacklister;
     }
@@ -41,5 +45,11 @@ abstract contract Blacklist is IBlacklist {
         blacklisted[subject] = true;
 
         emit Blacklisted(subject);
+    }
+
+    function _unBlacklist(address subject) internal {
+        blacklisted[subject] = false;
+
+        emit UnBlacklisted(subject);
     }
 }
