@@ -26,11 +26,11 @@ abstract contract KYCRegistry is IKYCRegistry {
         _revokeVerification(subject);
     }
 
-    function getVerifier() external view returns (address) {
+    function getVerifier() public view returns (address) {
         return verifier;
     }
 
-    function isVerified(address subject) external view returns (bool) {
+    function isVerified(address subject) public view returns (bool) {
         return verified[subject];
     }
 
