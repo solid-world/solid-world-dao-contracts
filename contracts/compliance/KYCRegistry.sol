@@ -6,9 +6,9 @@ import "../interfaces/compliance/IKYCRegistry.sol";
 /// @author Solid World
 /// @dev Abstract base contract for a KYC registry. Function restrictions should be implemented by derived contracts.
 abstract contract KYCRegistry is IKYCRegistry {
-    address internal verifier;
+    address private verifier;
 
-    mapping(address => bool) internal verified;
+    mapping(address => bool) private verified;
 
     function setVerifier(address newVerifier) public virtual {
         if (newVerifier == address(0)) {
