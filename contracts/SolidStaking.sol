@@ -9,8 +9,9 @@ import "./interfaces/ISolidStaking.sol";
 import "./interfaces/rewards/IRewardsController.sol";
 import "./PostConstruct.sol";
 import "./libraries/GPv2SafeERC20.sol";
+import "./compliance/RegulatoryCompliant.sol";
 
-contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct {
+contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct, RegulatoryCompliant {
     using GPv2SafeERC20 for IERC20;
 
     /// @dev All stakable lp tokens.
@@ -32,6 +33,8 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
         }
         _;
     }
+
+    constructor(address _verificationRegistry) RegulatoryCompliant(_verificationRegistry) {}
 
     function setup(IRewardsController _rewardsController, address owner) external postConstruct {
         rewardsController = _rewardsController;

@@ -10,7 +10,7 @@ contract BasicRegulatoryCompliant is RegulatoryCompliant {
     constructor(address _verificationRegistry) RegulatoryCompliant(_verificationRegistry) {}
 }
 
-contract BaseRegulatoryCompliantTest is BaseTest {
+abstract contract BaseRegulatoryCompliantTest is BaseTest {
     IVerificationRegistry verificationRegistry;
     IRegulatoryCompliant regulatoryCompliant;
 

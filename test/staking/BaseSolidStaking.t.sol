@@ -4,11 +4,13 @@ pragma solidity 0.8.16;
 import "../BaseTest.sol";
 import "../../contracts/SolidStaking.sol";
 import "../../contracts/CollateralizedBasketToken.sol";
+import "../../contracts/compliance/VerificationRegistry.sol";
 
 abstract contract BaseSolidStakingTest is BaseTest {
     address emissionManager;
     address rewardsController;
     address carbonRewardsManager;
+    address verificationRegistry;
     SolidStaking solidStaking;
 
     address ownerAccount = address(this);
@@ -24,11 +26,20 @@ abstract contract BaseSolidStakingTest is BaseTest {
         carbonRewardsManager = vm.addr(4);
         emissionManager = vm.addr(5);
 
-        solidStaking = new SolidStaking();
+        _initVerificationRegistry();
+
+        solidStaking = new SolidStaking(verificationRegistry);
         solidStaking.setup(IRewardsController(rewardsController), ownerAccount);
 
         _installMocks();
         _labelAccounts();
+    }
+
+    function _initVerificationRegistry() private {
+        VerificationRegistry _verificationRegistry = new VerificationRegistry();
+        _verificationRegistry.initialize(address(this));
+
+        verificationRegistry = address(_verificationRegistry);
     }
 
     function _installMocks() private {
@@ -49,6 +60,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
         vm.label(emissionManager, "Emission manager");
         vm.label(rewardsController, "Rewards controller");
         vm.label(carbonRewardsManager, "Carbon rewards manager");
+        vm.label(verificationRegistry, "Verification registry");
         vm.label(address(solidStaking), "Solid staking");
         vm.label(ownerAccount, "Owner account");
         vm.label(testAccount, "Test account");

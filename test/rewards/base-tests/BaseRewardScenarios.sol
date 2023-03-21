@@ -6,6 +6,7 @@ import "../../../contracts/rewards/RewardsController.sol";
 import "../../../contracts/SolidStaking.sol";
 import "../../../contracts/rewards/EmissionManager.sol";
 import "../../../contracts/SolidWorldManager.sol";
+import "../../../contracts/compliance/VerificationRegistry.sol";
 
 abstract contract BaseRewardScenariosTest is BaseTest {
     uint constant MANGROVE_CATEGORY_ID = 1;
@@ -49,7 +50,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         vm.warp(PRESET_CURRENT_DATE);
 
         rewardsController = new RewardsController();
-        solidStaking = new SolidStaking();
+        solidStaking = new SolidStaking(address(new VerificationRegistry()));
         emissionManager = new EmissionManager();
         solidWorldManager = new SolidWorldManager();
         forwardContractBatch = new ForwardContractBatchToken("");
