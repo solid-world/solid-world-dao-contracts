@@ -68,7 +68,12 @@ This command deploys 3 ERC-20 tokens on the localhost network, owned by the addr
 - `--quantity` flag specifies the number of tokens to deploy (Default: 1)
 - `--owner` flag specifies the owner of the tokens (Default: OWNER_ADDRESS)
 
+## Upgradable contracts
+- SolidWorldManager
+- VerificationRegistry
 
+Note: Our upgradable contracts are managed by a `DefaultProxyAdmin` contract. 
+This means that the owner of the `DefaultProxyAdmin` contract is authorized to upgrade both contracts.
 
 ## How to export addresses and ABI?
 

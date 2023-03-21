@@ -21,12 +21,21 @@ const {
   setupForwardContractBatchToken
 } = require('../deploy-helpers/forward-contract-batch-token')
 const { setupEnvForGasStation } = require('../deploy-helpers/gas-station-env')
+const {
+  deployVerificationRegistry
+} = require('../deploy-helpers/verification-registry')
 
 const func = async ({ getNamedAccounts, deployments, getChainId, network }) => {
   await setupEnvForGasStation(network, getChainId)
   const { deployer, contractsOwner, rewardsVault } = await getNamedAccounts()
 
   await ensureDeployerHasFunds(deployer, await getChainId())
+
+  const VerificationRegistry = await deployVerificationRegistry(
+    deployments,
+    deployer,
+    contractsOwner
+  )
 
   const ForwardContractBatchToken = await deployForwardContractBatchToken(
     deployments,
