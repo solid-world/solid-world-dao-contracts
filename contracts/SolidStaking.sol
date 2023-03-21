@@ -62,6 +62,10 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
         emit KYCRequiredSet(token, _kycRequired);
     }
 
+    function setVerificationRegistry(address _verificationRegistry) public override onlyOwner {
+        super.setVerificationRegistry(_verificationRegistry);
+    }
+
     /// @inheritdoc ISolidStakingActions
     function stake(address token, uint amount) external nonReentrant validToken(token) {
         uint oldUserStake = _balanceOf(token, msg.sender);
