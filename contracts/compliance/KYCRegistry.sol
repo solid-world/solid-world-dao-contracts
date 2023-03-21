@@ -12,7 +12,7 @@ abstract contract KYCRegistry is IKYCRegistry {
 
     function setVerifier(address newVerifier) public virtual {
         if (newVerifier == address(0)) {
-            revert InvalidInput();
+            revert InvalidVerifier();
         }
 
         _setVerifier(newVerifier);
@@ -30,7 +30,7 @@ abstract contract KYCRegistry is IKYCRegistry {
         return verifier;
     }
 
-    function isVerified(address subject) public view returns (bool) {
+    function isVerified(address subject) public view virtual returns (bool) {
         return verified[subject];
     }
 

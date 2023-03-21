@@ -12,7 +12,7 @@ abstract contract Blacklist is IBlacklist {
 
     function setBlacklister(address newBlacklister) public virtual {
         if (newBlacklister == address(0)) {
-            revert InvalidInput();
+            revert InvalidBlacklister();
         }
 
         _setBlacklister(newBlacklister);
@@ -30,7 +30,7 @@ abstract contract Blacklist is IBlacklist {
         return blacklister;
     }
 
-    function isBlacklisted(address subject) public view returns (bool) {
+    function isBlacklisted(address subject) public view virtual returns (bool) {
         return blacklisted[subject];
     }
 

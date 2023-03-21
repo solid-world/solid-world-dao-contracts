@@ -3,7 +3,8 @@ pragma solidity 0.8.16;
 
 /// @author Solid World
 interface IKYCRegistry {
-    error InvalidInput();
+    error InvalidVerifier();
+    error VerificationNotAuthorized(address caller);
 
     event VerifierUpdated(address indexed oldVerifier, address indexed newVerifier);
     event Verified(address indexed subject);

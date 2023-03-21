@@ -10,7 +10,7 @@ contract BlacklistTest is BaseBlacklistTest {
     }
 
     function testSetBlacklister_revertsIfBlacklisterIsZeroAddress() public {
-        _expectRevert_InvalidInput();
+        _expectRevert_InvalidBlacklister();
         blacklist.setBlacklister(address(0));
     }
 
