@@ -2,6 +2,7 @@
 pragma solidity 0.8.16;
 
 import "../interfaces/compliance/IRegulatoryCompliant.sol";
+import "../interfaces/compliance/IVerificationRegistry.sol";
 
 /// @author Solid World
 /// @notice A contract that can integrate a verification registry, and offer a uniform way to
@@ -32,6 +33,16 @@ abstract contract RegulatoryCompliant is IRegulatoryCompliant {
 
     function getVerificationRegistry() external view returns (address) {
         return verificationRegistry;
+    }
+
+    /// @inheritdoc IRegulatoryCompliant
+    function isValidCounterparty(address counterparty, bool _kycRequired) public view returns (bool) {
+        IVerificationRegistry registry = IVerificationRegistry(verificationRegistry);
+        if (_kycRequired) {
+            return registry.isVerifiedAndNotBlacklisted(counterparty);
+        }
+
+        return !registry.isBlacklisted(counterparty);
     }
 
     function _setVerificationRegistry(address _verificationRegistry) internal {

@@ -14,10 +14,15 @@ contract BaseRegulatoryCompliantTest is BaseTest {
     IVerificationRegistry verificationRegistry;
     IRegulatoryCompliant regulatoryCompliant;
 
+    address counterparty1 = address(1);
+    address counterparty2 = address(2);
+    address counterparty3 = address(3);
+
     event VerificationRegistryUpdated(address indexed verificationRegistry);
 
     function setUp() public {
         initVerificationRegistry();
+        setupCounterparties();
 
         regulatoryCompliant = new BasicRegulatoryCompliant(address(verificationRegistry));
     }
@@ -27,6 +32,11 @@ contract BaseRegulatoryCompliantTest is BaseTest {
         _verificationRegistry.initialize(address(this));
 
         verificationRegistry = IVerificationRegistry(address(_verificationRegistry));
+    }
+
+    function setupCounterparties() private {
+        verificationRegistry.registerVerification(counterparty1);
+        verificationRegistry.blacklist(counterparty3);
     }
 
     function _expectRevert_InvalidVerificationRegistry() internal {

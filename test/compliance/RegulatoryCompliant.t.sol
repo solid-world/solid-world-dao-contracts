@@ -34,4 +34,17 @@ contract RegulatoryCompliantTest is BaseRegulatoryCompliantTest {
         _expectEmit_VerificationRegistryUpdated(newVerificationRegistry);
         regulatoryCompliant.setVerificationRegistry(newVerificationRegistry);
     }
+
+    function testIsValidCounterparty() public {
+        bool kycRequired = true;
+        bool kycNotRequired = false;
+
+        assertTrue(regulatoryCompliant.isValidCounterparty(counterparty1, kycNotRequired));
+        assertTrue(regulatoryCompliant.isValidCounterparty(counterparty2, kycNotRequired));
+        assertFalse(regulatoryCompliant.isValidCounterparty(counterparty3, kycNotRequired));
+
+        assertTrue(regulatoryCompliant.isValidCounterparty(counterparty1, kycRequired));
+        assertFalse(regulatoryCompliant.isValidCounterparty(counterparty2, kycRequired));
+        assertFalse(regulatoryCompliant.isValidCounterparty(counterparty3, kycRequired));
+    }
 }
