@@ -10,7 +10,33 @@ import "../interfaces/compliance/IRegulatoryCompliant.sol";
 abstract contract RegulatoryCompliant is IRegulatoryCompliant {
     address private verificationRegistry;
 
-    constructor(address _verificationRegistry) {
+    modifier validVerificationRegistry(address _verificationRegistry) {
+        if (_verificationRegistry == address(0)) {
+            revert InvalidVerificationRegistry();
+        }
+
+        _;
+    }
+
+    constructor(address _verificationRegistry) validVerificationRegistry(_verificationRegistry) {
+        _setVerificationRegistry(_verificationRegistry);
+    }
+
+    function setVerificationRegistry(address _verificationRegistry)
+        public
+        virtual
+        validVerificationRegistry(_verificationRegistry)
+    {
+        _setVerificationRegistry(_verificationRegistry);
+    }
+
+    function getVerificationRegistry() external view returns (address) {
+        return verificationRegistry;
+    }
+
+    function _setVerificationRegistry(address _verificationRegistry) internal {
         verificationRegistry = _verificationRegistry;
+
+        emit VerificationRegistryUpdated(_verificationRegistry);
     }
 }

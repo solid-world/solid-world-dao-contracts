@@ -14,6 +14,8 @@ contract BaseRegulatoryCompliantTest is BaseTest {
     IVerificationRegistry verificationRegistry;
     IRegulatoryCompliant regulatoryCompliant;
 
+    event VerificationRegistryUpdated(address indexed verificationRegistry);
+
     function setUp() public {
         initVerificationRegistry();
 
@@ -25,5 +27,14 @@ contract BaseRegulatoryCompliantTest is BaseTest {
         _verificationRegistry.initialize(address(this));
 
         verificationRegistry = IVerificationRegistry(address(_verificationRegistry));
+    }
+
+    function _expectRevert_InvalidVerificationRegistry() internal {
+        vm.expectRevert(abi.encodeWithSelector(IRegulatoryCompliant.InvalidVerificationRegistry.selector));
+    }
+
+    function _expectEmit_VerificationRegistryUpdated(address _verificationRegistry) internal {
+        vm.expectEmit(true, true, false, false, address(regulatoryCompliant));
+        emit VerificationRegistryUpdated(_verificationRegistry);
     }
 }
