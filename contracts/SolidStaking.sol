@@ -17,12 +17,14 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
     /// @dev All stakable lp tokens.
     address[] public tokens;
 
-    /// @dev Mapping with added tokens.
     mapping(address => bool) public tokenAdded;
 
     /// @dev Mapping with the staked amount of each account for each token.
     /// @dev token => user => amount
     mapping(address => mapping(address => uint)) public userStake;
+
+    /// @dev token => requires KYC
+    mapping(address => bool) private kycRequired;
 
     /// @dev Main contract used for interacting with rewards mechanism.
     IRewardsController public rewardsController;
@@ -51,6 +53,13 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
         tokenAdded[token] = true;
 
         emit TokenAdded(token);
+    }
+
+    /// @inheritdoc ISolidStakingOwnerActions
+    function setKYCRequired(address token, bool _kycRequired) external onlyOwner {
+        kycRequired[token] = _kycRequired;
+
+        emit KYCRequiredSet(token, _kycRequired);
     }
 
     /// @inheritdoc ISolidStakingActions
@@ -95,6 +104,11 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
     /// @inheritdoc ISolidStakingViewActions
     function getTokens() external view returns (address[] memory _tokens) {
         _tokens = tokens;
+    }
+
+    /// @inheritdoc ISolidStakingViewActions
+    function isKYCRequired(address token) external view returns (bool) {
+        return kycRequired[token];
     }
 
     function _balanceOf(address token, address account) internal view returns (uint) {

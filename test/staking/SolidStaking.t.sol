@@ -170,4 +170,31 @@ contract SolidStakingTest is BaseSolidStakingTest {
         assertEq(tokens[1], tokenAddress2);
         assertEq(tokens[2], tokenAddress3);
     }
+
+    function testIsKYCRequired() public {
+        address asset = vm.addr(1);
+        assertFalse(solidStaking.isKYCRequired(asset));
+    }
+
+    function testSetKYCRequired() public {
+        address asset = vm.addr(1);
+
+        solidStaking.setKYCRequired(asset, true);
+        assertTrue(solidStaking.isKYCRequired(asset));
+    }
+
+    function testSetKYCRequired_revertsIfNotOwner() public {
+        address asset = vm.addr(1);
+
+        vm.prank(testAccount);
+        _expectRevertWithMessage("Ownable: caller is not the owner");
+        solidStaking.setKYCRequired(asset, true);
+    }
+
+    function testSetKYCRequired_emitsEvent() public {
+        address asset = vm.addr(1);
+
+        _expectEmit_KYCRequiredSet(asset, true);
+        solidStaking.setKYCRequired(asset, true);
+    }
 }

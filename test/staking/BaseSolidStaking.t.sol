@@ -20,6 +20,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
     event Stake(address indexed account, address indexed token, uint indexed amount);
     event Withdraw(address indexed account, address indexed token, uint indexed amount);
     event TokenAdded(address indexed token);
+    event KYCRequiredSet(address indexed token, bool indexed kycRequired);
 
     function setUp() public {
         rewardsController = vm.addr(3);
@@ -88,6 +89,11 @@ abstract contract BaseSolidStakingTest is BaseTest {
     ) internal {
         vm.expectEmit(true, true, true, false, address(solidStaking));
         emit Withdraw(account, tokenAddress, amount);
+    }
+
+    function _expectEmit_KYCRequiredSet(address _token, bool _kycRequired) internal {
+        vm.expectEmit(true, true, true, false, address(solidStaking));
+        emit KYCRequiredSet(_token, _kycRequired);
     }
 
     function _expectRevert_AlreadyInitialized() internal {
