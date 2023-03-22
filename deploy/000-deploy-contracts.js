@@ -39,7 +39,8 @@ const func = async ({ getNamedAccounts, deployments, getChainId, network }) => {
 
   const ForwardContractBatchToken = await deployForwardContractBatchToken(
     deployments,
-    deployer
+    deployer,
+    VerificationRegistry.address
   )
   const RewardsController = await deployRewardsController(deployments, deployer)
   const SolidStaking = await deploySolidStaking(

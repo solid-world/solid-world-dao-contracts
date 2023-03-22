@@ -1,10 +1,14 @@
 const { getCurrentGasFees } = require('@solid-world/gas-station')
 
-async function deployForwardContractBatchToken(deployments, deployer) {
+async function deployForwardContractBatchToken(
+  deployments,
+  deployer,
+  verificationRegistry
+) {
   return deployments.deploy('ForwardContractBatchToken', {
     ...(await getCurrentGasFees()),
     from: deployer,
-    args: ['https://solid.world/FCBT/{id}.json'],
+    args: ['https://solid.world/FCBT/{id}.json', verificationRegistry],
     log: true
   })
 }
