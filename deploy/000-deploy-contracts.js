@@ -42,7 +42,11 @@ const func = async ({ getNamedAccounts, deployments, getChainId, network }) => {
     deployer
   )
   const RewardsController = await deployRewardsController(deployments, deployer)
-  const SolidStaking = await deploySolidStaking(deployments, deployer)
+  const SolidStaking = await deploySolidStaking(
+    deployments,
+    deployer,
+    VerificationRegistry.address
+  )
   const EmissionManager = await deployEmissionManager(deployments, deployer)
   const SolidWorldManager = await deploySolidWorldManager(
     deployments,
