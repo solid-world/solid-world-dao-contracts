@@ -18,6 +18,10 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
         RegulatoryCompliant(_verificationRegistry)
     {}
 
+    function setVerificationRegistry(address _verificationRegistry) public override onlyOwner {
+        super.setVerificationRegistry(_verificationRegistry);
+    }
+
     function setKYCRequired(uint batchId, bool _kycRequired) external onlyOwner {
         kycRequired[batchId] = _kycRequired;
 

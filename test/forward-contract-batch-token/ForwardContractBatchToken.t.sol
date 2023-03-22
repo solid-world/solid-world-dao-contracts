@@ -30,4 +30,19 @@ contract ForwardContractBatchTokenTest is BaseForwardContractBatchTokenTest {
         _expectEmit_KYCRequiredSet(batchId, true);
         forwardContractBatchToken.setKYCRequired(batchId, true);
     }
+
+    function testSetVerificationRegistry_revertsIfNotOwner() public {
+        address verificationRegistry = vm.addr(1);
+
+        vm.prank(testAccount);
+        _expectRevertWithMessage("Ownable: caller is not the owner");
+        forwardContractBatchToken.setVerificationRegistry(verificationRegistry);
+    }
+
+    function testSetVerificationRegistry_setsRegistry() public {
+        address verificationRegistry = vm.addr(1);
+
+        forwardContractBatchToken.setVerificationRegistry(verificationRegistry);
+        assertEq(forwardContractBatchToken.getVerificationRegistry(), verificationRegistry);
+    }
 }
