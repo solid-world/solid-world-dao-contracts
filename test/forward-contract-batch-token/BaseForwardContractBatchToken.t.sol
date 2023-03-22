@@ -70,6 +70,10 @@ abstract contract BaseForwardContractBatchTokenTest is BaseTest, IERC1155Receive
         );
     }
 
+    function _expectRevert_Blacklisted(address subject) internal {
+        vm.expectRevert(abi.encodeWithSelector(ForwardContractBatchToken.Blacklisted.selector, subject));
+    }
+
     function onERC1155Received(
         address,
         address,

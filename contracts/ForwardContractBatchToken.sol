@@ -12,6 +12,7 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
     mapping(uint => bool) private kycRequired;
 
     error NotRegulatoryCompliant(uint batchId, address subject);
+    error Blacklisted(address subject);
 
     event KYCRequiredSet(uint indexed batchId, bool indexed kycRequired);
 
@@ -23,6 +24,14 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
     modifier batchRegulatoryCompliant(uint[] memory batchIds, address subject) {
         for (uint i; i < batchIds.length; i++) {
             _checkValidCounterparty(batchIds[i], subject);
+        }
+        _;
+    }
+
+    modifier notBlacklisted(address subject) {
+        bool _kycRequired = false;
+        if (!isValidCounterparty(subject, _kycRequired)) {
+            revert Blacklisted(subject);
         }
         _;
     }
@@ -44,6 +53,15 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
 
     function isKYCRequired(uint batchId) external view returns (bool) {
         return kycRequired[batchId];
+    }
+
+    function setApprovalForAll(address operator, bool approved)
+        public
+        override
+        notBlacklisted(msg.sender)
+        notBlacklisted(operator)
+    {
+        super.setApprovalForAll(operator, approved);
     }
 
     function safeTransferFrom(
