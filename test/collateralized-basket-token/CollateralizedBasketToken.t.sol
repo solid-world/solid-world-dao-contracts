@@ -63,12 +63,12 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
     function testTransferFrom_revertsIfComplianceCheckFails_fromAddress() public {
         uint transferAmount = 100;
 
+        vm.prank(testAccount1);
+        collateralizedBasketToken.approve(testAccount0, transferAmount);
+
         collateralizedBasketToken.setKYCRequired(true);
         verificationRegistry.registerVerification(testAccount0);
         verificationRegistry.registerVerification(testAccount2);
-
-        vm.prank(testAccount1);
-        collateralizedBasketToken.approve(testAccount0, transferAmount);
 
         vm.prank(testAccount0);
         _expectRevert_NotRegulatoryCompliant(testAccount1);
@@ -78,12 +78,12 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
     function testTransferFrom_revertsIfComplianceCheckFails_toAddress() public {
         uint transferAmount = 100;
 
+        vm.prank(testAccount1);
+        collateralizedBasketToken.approve(testAccount0, transferAmount);
+
         collateralizedBasketToken.setKYCRequired(true);
         verificationRegistry.registerVerification(testAccount0);
         verificationRegistry.registerVerification(testAccount1);
-
-        vm.prank(testAccount1);
-        collateralizedBasketToken.approve(testAccount0, transferAmount);
 
         vm.prank(testAccount0);
         _expectRevert_NotRegulatoryCompliant(testAccount2);
@@ -93,15 +93,37 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
     function testTransferFrom_revertsIfComplianceCheckFails_spender() public {
         uint transferAmount = 100;
 
+        vm.prank(testAccount1);
+        collateralizedBasketToken.approve(testAccount0, transferAmount);
+
         collateralizedBasketToken.setKYCRequired(true);
         verificationRegistry.registerVerification(testAccount1);
         verificationRegistry.registerVerification(testAccount2);
 
-        vm.prank(testAccount1);
-        collateralizedBasketToken.approve(testAccount0, transferAmount);
-
         vm.prank(testAccount0);
         _expectRevert_NotRegulatoryCompliant(testAccount0);
         collateralizedBasketToken.transferFrom(testAccount1, testAccount2, transferAmount);
+    }
+
+    function testApprove_revertsIfComplianceCheckFails_spender() public {
+        uint transferAmount = 100;
+
+        collateralizedBasketToken.setKYCRequired(true);
+        verificationRegistry.registerVerification(testAccount0);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(testAccount1);
+        collateralizedBasketToken.approve(testAccount1, transferAmount);
+    }
+
+    function testApprove_revertsIfComplianceCheckFails_caller() public {
+        uint transferAmount = 100;
+
+        collateralizedBasketToken.setKYCRequired(true);
+        verificationRegistry.registerVerification(testAccount1);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(testAccount0);
+        collateralizedBasketToken.approve(testAccount1, transferAmount);
     }
 }
