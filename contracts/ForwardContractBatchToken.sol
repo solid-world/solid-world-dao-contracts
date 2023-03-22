@@ -16,8 +16,13 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
     event KYCRequiredSet(uint indexed batchId, bool indexed kycRequired);
 
     modifier regulatoryCompliant(uint batchId, address subject) {
-        if (!isValidCounterparty(subject, kycRequired[batchId])) {
-            revert NotRegulatoryCompliant(batchId, subject);
+        _checkValidCounterparty(batchId, subject);
+        _;
+    }
+
+    modifier batchRegulatoryCompliant(uint[] memory batchIds, address subject) {
+        for (uint i; i < batchIds.length; i++) {
+            _checkValidCounterparty(batchIds[i], subject);
         }
         _;
     }
@@ -51,6 +56,16 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
         super.safeTransferFrom(from, to, id, amount, data);
     }
 
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) public override batchRegulatoryCompliant(ids, from) batchRegulatoryCompliant(ids, to) {
+        super.safeBatchTransferFrom(from, to, ids, amounts, data);
+    }
+
     /// @dev only owner
     /// @param to address of the owner of new token
     /// @param id id of new token
@@ -75,5 +90,11 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
         uint amount
     ) public onlyOwner {
         _burn(account, id, amount);
+    }
+
+    function _checkValidCounterparty(uint batchId, address subject) private view {
+        if (!isValidCounterparty(subject, kycRequired[batchId])) {
+            revert NotRegulatoryCompliant(batchId, subject);
+        }
     }
 }

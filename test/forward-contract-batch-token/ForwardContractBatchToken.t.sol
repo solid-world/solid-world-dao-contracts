@@ -71,4 +71,63 @@ contract ForwardContractBatchTokenTest is BaseForwardContractBatchTokenTest {
         _expectRevert_NotRegulatoryCompliant(batchId1, testAccount1);
         forwardContractBatchToken.safeTransferFrom(testAccount0, testAccount1, batchId1, transferAmount, "");
     }
+
+    function testSafeBatchTransferFrom_revertsIfComplianceCheckFails_fromAddress() public {
+        uint[] memory batchIds = _toArray(batchId0, batchId1);
+        uint[] memory transferAmounts = _toArray(100, 200);
+
+        forwardContractBatchToken.setKYCRequired(batchId1, true);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(batchId1, testAccount0);
+        forwardContractBatchToken.safeBatchTransferFrom(
+            testAccount0,
+            testAccount1,
+            batchIds,
+            transferAmounts,
+            ""
+        );
+
+        verificationRegistry.blacklist(testAccount0);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(batchId0, testAccount0);
+        forwardContractBatchToken.safeBatchTransferFrom(
+            testAccount0,
+            testAccount1,
+            batchIds,
+            transferAmounts,
+            ""
+        );
+    }
+
+    function testSafeBatchTransferFrom_revertsIfComplianceCheckFails_toAddress() public {
+        uint[] memory batchIds = _toArray(batchId0, batchId1);
+        uint[] memory transferAmounts = _toArray(100, 200);
+
+        forwardContractBatchToken.setKYCRequired(batchId1, true);
+        verificationRegistry.registerVerification(testAccount0);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(batchId1, testAccount1);
+        forwardContractBatchToken.safeBatchTransferFrom(
+            testAccount0,
+            testAccount1,
+            batchIds,
+            transferAmounts,
+            ""
+        );
+
+        verificationRegistry.blacklist(testAccount1);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(batchId0, testAccount1);
+        forwardContractBatchToken.safeBatchTransferFrom(
+            testAccount0,
+            testAccount1,
+            batchIds,
+            transferAmounts,
+            ""
+        );
+    }
 }
