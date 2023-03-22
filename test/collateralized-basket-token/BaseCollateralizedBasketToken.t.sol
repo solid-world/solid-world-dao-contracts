@@ -10,6 +10,11 @@ abstract contract BaseCollateralizedBasketTokenTest is BaseTest {
     IVerificationRegistry verificationRegistry;
     CollateralizedBasketToken collateralizedBasketToken;
 
+    address testAccount0 = vm.addr(1);
+    address testAccount1 = vm.addr(2);
+
+    event KYCRequiredSet(bool indexed kycRequired);
+
     function setUp() public {
         _initVerificationRegistry();
 
@@ -25,5 +30,10 @@ abstract contract BaseCollateralizedBasketTokenTest is BaseTest {
         _verificationRegistry.initialize(address(this));
 
         verificationRegistry = IVerificationRegistry(address(_verificationRegistry));
+    }
+
+    function _expectEmit_KYCRequiredSet(bool _kycRequired) internal {
+        vm.expectEmit(true, true, false, false, address(collateralizedBasketToken));
+        emit KYCRequiredSet(_kycRequired);
     }
 }
