@@ -103,6 +103,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
         external
         nonReentrant
         validToken(token)
+        regulatoryCompliant(token, msg.sender)
     {
         _withdraw(token, amount);
         _claimRewards(token);

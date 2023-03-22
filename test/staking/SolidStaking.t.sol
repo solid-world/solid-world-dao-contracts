@@ -154,6 +154,39 @@ contract SolidStakingTest is BaseSolidStakingTest {
         solidStaking.withdrawStakeAndClaimRewards(invalidTokenAddress, 100);
     }
 
+    function testWithdrawStakeAndClaimRewards_revertsIfComplianceCheckFails() public {
+        uint amountToStake = 100;
+        uint amountToWithdraw = 50;
+        (, address token0Address) = _configuredTestToken();
+        (, address token1Address) = _configuredTestToken();
+
+        vm.prank(testAccount);
+        solidStaking.stake(token0Address, amountToStake);
+        vm.prank(testAccount);
+        solidStaking.stake(token1Address, amountToStake);
+
+        solidStaking.setKYCRequired(token1Address, true);
+
+        vm.prank(testAccount);
+        solidStaking.withdrawStakeAndClaimRewards(token0Address, amountToWithdraw);
+
+        vm.prank(testAccount);
+        _expectRevert_NotRegulatoryCompliant(token1Address, testAccount);
+        solidStaking.withdrawStakeAndClaimRewards(token1Address, amountToWithdraw);
+
+        verificationRegistry.registerVerification(testAccount);
+        vm.prank(testAccount);
+        solidStaking.withdrawStakeAndClaimRewards(token0Address, amountToWithdraw);
+
+        verificationRegistry.blacklist(testAccount);
+
+        vm.startPrank(testAccount);
+        _expectRevert_NotRegulatoryCompliant(token0Address, testAccount);
+        solidStaking.withdrawStakeAndClaimRewards(token0Address, amountToWithdraw);
+        _expectRevert_NotRegulatoryCompliant(token1Address, testAccount);
+        solidStaking.withdrawStakeAndClaimRewards(token1Address, amountToWithdraw);
+    }
+
     function testBalanceOf() public {
         uint amountToStake = 100;
         (, address tokenAddress) = _configuredTestToken();
