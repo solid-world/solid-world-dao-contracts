@@ -23,6 +23,14 @@ abstract contract BaseCollateralizedBasketTokenTest is BaseTest {
             "MCBT",
             address(verificationRegistry)
         );
+
+        _mintInitialTokens();
+    }
+
+    function _mintInitialTokens() private {
+        collateralizedBasketToken.mint(testAccount0, 10000);
+        collateralizedBasketToken.mint(testAccount1, 10000);
+        collateralizedBasketToken.mint(address(this), 10000);
     }
 
     function _initVerificationRegistry() private {
@@ -35,5 +43,11 @@ abstract contract BaseCollateralizedBasketTokenTest is BaseTest {
     function _expectEmit_KYCRequiredSet(bool _kycRequired) internal {
         vm.expectEmit(true, true, false, false, address(collateralizedBasketToken));
         emit KYCRequiredSet(_kycRequired);
+    }
+
+    function _expectRevert_NotRegulatoryCompliant(address subject) internal {
+        vm.expectRevert(
+            abi.encodeWithSelector(CollateralizedBasketToken.NotRegulatoryCompliant.selector, subject)
+        );
     }
 }

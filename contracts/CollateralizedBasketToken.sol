@@ -10,7 +10,16 @@ import "./compliance/RegulatoryCompliant.sol";
 contract CollateralizedBasketToken is ERC20Burnable, Ownable, RegulatoryCompliant {
     bool private kycRequired;
 
+    error NotRegulatoryCompliant(address subject);
+
     event KYCRequiredSet(bool indexed kycRequired);
+
+    modifier regulatoryCompliant(address subject) {
+        if (!isValidCounterparty(subject, kycRequired)) {
+            revert NotRegulatoryCompliant(subject);
+        }
+        _;
+    }
 
     constructor(
         string memory name,
@@ -30,6 +39,16 @@ contract CollateralizedBasketToken is ERC20Burnable, Ownable, RegulatoryComplian
 
     function isKYCRequired() external view returns (bool) {
         return kycRequired;
+    }
+
+    function transfer(address to, uint256 amount)
+        public
+        override
+        regulatoryCompliant(msg.sender)
+        regulatoryCompliant(to)
+        returns (bool)
+    {
+        return super.transfer(to, amount);
     }
 
     function mint(address account, uint amount) public onlyOwner {
