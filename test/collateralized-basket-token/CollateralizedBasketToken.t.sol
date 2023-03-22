@@ -59,4 +59,49 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
         _expectRevert_NotRegulatoryCompliant(testAccount1);
         collateralizedBasketToken.transfer(testAccount1, transferAmount);
     }
+
+    function testTransferFrom_revertsIfComplianceCheckFails_fromAddress() public {
+        uint transferAmount = 100;
+
+        collateralizedBasketToken.setKYCRequired(true);
+        verificationRegistry.registerVerification(testAccount0);
+        verificationRegistry.registerVerification(testAccount2);
+
+        vm.prank(testAccount1);
+        collateralizedBasketToken.approve(testAccount0, transferAmount);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(testAccount1);
+        collateralizedBasketToken.transferFrom(testAccount1, testAccount2, transferAmount);
+    }
+
+    function testTransferFrom_revertsIfComplianceCheckFails_toAddress() public {
+        uint transferAmount = 100;
+
+        collateralizedBasketToken.setKYCRequired(true);
+        verificationRegistry.registerVerification(testAccount0);
+        verificationRegistry.registerVerification(testAccount1);
+
+        vm.prank(testAccount1);
+        collateralizedBasketToken.approve(testAccount0, transferAmount);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(testAccount2);
+        collateralizedBasketToken.transferFrom(testAccount1, testAccount2, transferAmount);
+    }
+
+    function testTransferFrom_revertsIfComplianceCheckFails_spender() public {
+        uint transferAmount = 100;
+
+        collateralizedBasketToken.setKYCRequired(true);
+        verificationRegistry.registerVerification(testAccount1);
+        verificationRegistry.registerVerification(testAccount2);
+
+        vm.prank(testAccount1);
+        collateralizedBasketToken.approve(testAccount0, transferAmount);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(testAccount0);
+        collateralizedBasketToken.transferFrom(testAccount1, testAccount2, transferAmount);
+    }
 }
