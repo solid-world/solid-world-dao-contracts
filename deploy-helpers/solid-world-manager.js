@@ -70,6 +70,8 @@ async function deploySolidWorldManager(
       DecollateralizationManager: DecollateralizationManager.address
     },
     proxy: {
+      // owner of the proxy (a.k.a address authorized to perform upgrades)
+      // in our case, it refers to the owner of the DefaultAdminProxy contract
       owner: contractsOwner,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
