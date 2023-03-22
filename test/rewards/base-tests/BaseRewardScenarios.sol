@@ -53,7 +53,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         solidStaking = new SolidStaking(address(new VerificationRegistry()));
         emissionManager = new EmissionManager();
         solidWorldManager = new SolidWorldManager();
-        forwardContractBatch = new ForwardContractBatchToken("");
+        forwardContractBatch = new ForwardContractBatchToken("", address(new VerificationRegistry()));
         rewardsVault = vm.addr(1);
         feeReceiver = vm.addr(2);
         user0 = vm.addr(4);
