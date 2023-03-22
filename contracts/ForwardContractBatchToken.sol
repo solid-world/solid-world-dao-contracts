@@ -76,7 +76,7 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
         uint id,
         uint amount,
         bytes memory data
-    ) public onlyOwner {
+    ) public onlyOwner regulatoryCompliant(id, to) {
         _mint(to, id, amount, data);
     }
 

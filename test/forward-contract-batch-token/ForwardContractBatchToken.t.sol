@@ -130,4 +130,18 @@ contract ForwardContractBatchTokenTest is BaseForwardContractBatchTokenTest {
             ""
         );
     }
+
+    function testMint_revertsIfComplianceCheckFails_toAddress() public {
+        uint amount = 100;
+
+        forwardContractBatchToken.setKYCRequired(batchId0, true);
+
+        _expectRevert_NotRegulatoryCompliant(batchId0, testAccount0);
+        forwardContractBatchToken.mint(testAccount0, batchId0, amount, "");
+
+        verificationRegistry.blacklist(testAccount0);
+
+        _expectRevert_NotRegulatoryCompliant(batchId1, testAccount0);
+        forwardContractBatchToken.mint(testAccount0, batchId1, amount, "");
+    }
 }
