@@ -11,7 +11,16 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
     /// @dev batchId => requires KYC
     mapping(uint => bool) private kycRequired;
 
+    error NotRegulatoryCompliant(uint batchId, address subject);
+
     event KYCRequiredSet(uint indexed batchId, bool indexed kycRequired);
+
+    modifier regulatoryCompliant(uint batchId, address subject) {
+        if (!isValidCounterparty(subject, kycRequired[batchId])) {
+            revert NotRegulatoryCompliant(batchId, subject);
+        }
+        _;
+    }
 
     constructor(string memory uri, address _verificationRegistry)
         ERC1155(uri)
@@ -30,6 +39,16 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
 
     function isKYCRequired(uint batchId) external view returns (bool) {
         return kycRequired[batchId];
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) public override regulatoryCompliant(id, from) regulatoryCompliant(id, to) {
+        super.safeTransferFrom(from, to, id, amount, data);
     }
 
     /// @dev only owner
