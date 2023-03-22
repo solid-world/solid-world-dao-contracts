@@ -6,4 +6,5 @@ pragma solidity 0.8.16;
 interface ISolidStakingErrors {
     error InvalidTokenAddress(address token);
     error TokenAlreadyAdded(address token);
+    error NotRegulatoryCompliant(address token, address subject);
 }

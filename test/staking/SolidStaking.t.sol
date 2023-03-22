@@ -43,6 +43,32 @@ contract SolidStakingTest is BaseSolidStakingTest {
         );
     }
 
+    function testStake_revertsIfComplianceCheckFails() public {
+        uint stakeAmount = 100;
+        (, address token0Address) = _configuredTestToken();
+        (, address token1Address) = _configuredTestToken();
+
+        solidStaking.setKYCRequired(token1Address, true);
+
+        vm.prank(testAccount);
+        solidStaking.stake(token0Address, stakeAmount);
+
+        vm.prank(testAccount);
+        _expectRevert_NotRegulatoryCompliant(token1Address, testAccount);
+        solidStaking.stake(token1Address, stakeAmount);
+
+        verificationRegistry.registerVerification(testAccount);
+        vm.prank(testAccount);
+        solidStaking.stake(token1Address, stakeAmount);
+
+        verificationRegistry.blacklist(testAccount2);
+        vm.startPrank(testAccount2);
+        _expectRevert_NotRegulatoryCompliant(token0Address, testAccount2);
+        solidStaking.stake(token0Address, stakeAmount);
+        _expectRevert_NotRegulatoryCompliant(token1Address, testAccount2);
+        solidStaking.stake(token1Address, stakeAmount);
+    }
+
     function testStake_failsForInvalidTokenAddress() public {
         address invalidTokenAddress = vm.addr(777);
 

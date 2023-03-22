@@ -10,7 +10,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
     address emissionManager;
     address rewardsController;
     address carbonRewardsManager;
-    address verificationRegistry;
+    IVerificationRegistry verificationRegistry;
     SolidStaking solidStaking;
 
     address ownerAccount = address(this);
@@ -29,7 +29,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
 
         _initVerificationRegistry();
 
-        solidStaking = new SolidStaking(verificationRegistry);
+        solidStaking = new SolidStaking(address(verificationRegistry));
         solidStaking.setup(IRewardsController(rewardsController), ownerAccount);
 
         _installMocks();
@@ -40,7 +40,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
         VerificationRegistry _verificationRegistry = new VerificationRegistry();
         _verificationRegistry.initialize(address(this));
 
-        verificationRegistry = address(_verificationRegistry);
+        verificationRegistry = IVerificationRegistry(address(_verificationRegistry));
     }
 
     function _installMocks() private {
@@ -61,7 +61,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
         vm.label(emissionManager, "Emission manager");
         vm.label(rewardsController, "Rewards controller");
         vm.label(carbonRewardsManager, "Carbon rewards manager");
-        vm.label(verificationRegistry, "Verification registry");
+        vm.label(address(verificationRegistry), "Verification registry");
         vm.label(address(solidStaking), "Solid staking");
         vm.label(ownerAccount, "Owner account");
         vm.label(testAccount, "Test account");
@@ -107,6 +107,12 @@ abstract contract BaseSolidStakingTest is BaseTest {
     function _expectRevert_InvalidTokenAddress(address tokenAddress) internal {
         vm.expectRevert(
             abi.encodeWithSelector(ISolidStakingErrors.InvalidTokenAddress.selector, tokenAddress)
+        );
+    }
+
+    function _expectRevert_NotRegulatoryCompliant(address token, address subject) internal {
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolidStakingErrors.NotRegulatoryCompliant.selector, token, subject)
         );
     }
 

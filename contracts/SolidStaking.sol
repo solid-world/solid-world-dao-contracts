@@ -11,6 +11,7 @@ import "./PostConstruct.sol";
 import "./libraries/GPv2SafeERC20.sol";
 import "./compliance/RegulatoryCompliant.sol";
 
+/// @author Solid World
 contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct, RegulatoryCompliant {
     using GPv2SafeERC20 for IERC20;
 
@@ -32,6 +33,13 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
     modifier validToken(address token) {
         if (!tokenAdded[token]) {
             revert InvalidTokenAddress(token);
+        }
+        _;
+    }
+
+    modifier regulatoryCompliant(address token, address subject) {
+        if (!isValidCounterparty(subject, kycRequired[token])) {
+            revert NotRegulatoryCompliant(token, subject);
         }
         _;
     }
@@ -67,7 +75,12 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
     }
 
     /// @inheritdoc ISolidStakingActions
-    function stake(address token, uint amount) external nonReentrant validToken(token) {
+    function stake(address token, uint amount)
+        external
+        nonReentrant
+        validToken(token)
+        regulatoryCompliant(token, msg.sender)
+    {
         uint oldUserStake = _balanceOf(token, msg.sender);
         uint oldTotalStake = _totalStaked(token);
 
