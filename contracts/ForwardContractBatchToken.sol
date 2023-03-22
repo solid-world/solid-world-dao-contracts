@@ -8,10 +8,25 @@ import "./compliance/RegulatoryCompliant.sol";
 /// @notice ERC-1155 for working with forward contract batch tokens
 /// @author Solid World DAO
 contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
+    /// @dev batchId => requires KYC
+    mapping(uint => bool) private kycRequired;
+
+    event KYCRequiredSet(uint indexed batchId, bool indexed kycRequired);
+
     constructor(string memory uri, address _verificationRegistry)
         ERC1155(uri)
         RegulatoryCompliant(_verificationRegistry)
     {}
+
+    function setKYCRequired(uint batchId, bool _kycRequired) external onlyOwner {
+        kycRequired[batchId] = _kycRequired;
+
+        emit KYCRequiredSet(batchId, _kycRequired);
+    }
+
+    function isKYCRequired(uint batchId) external view returns (bool) {
+        return kycRequired[batchId];
+    }
 
     /// @dev only owner
     /// @param to address of the owner of new token

@@ -10,6 +10,10 @@ abstract contract BaseForwardContractBatchTokenTest is BaseTest {
     IVerificationRegistry verificationRegistry;
     ForwardContractBatchToken forwardContractBatchToken;
 
+    address testAccount = vm.addr(1);
+
+    event KYCRequiredSet(uint indexed batchId, bool indexed kycRequired);
+
     function setUp() public {
         _initVerificationRegistry();
         forwardContractBatchToken = new ForwardContractBatchToken("", address(verificationRegistry));
@@ -20,5 +24,10 @@ abstract contract BaseForwardContractBatchTokenTest is BaseTest {
         _verificationRegistry.initialize(address(this));
 
         verificationRegistry = IVerificationRegistry(address(_verificationRegistry));
+    }
+
+    function _expectEmit_KYCRequiredSet(uint batchId, bool _kycRequired) internal {
+        vm.expectEmit(true, true, true, false, address(forwardContractBatchToken));
+        emit KYCRequiredSet(batchId, _kycRequired);
     }
 }
