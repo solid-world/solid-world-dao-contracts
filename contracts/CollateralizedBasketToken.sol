@@ -18,6 +18,10 @@ contract CollateralizedBasketToken is ERC20Burnable, Ownable, RegulatoryComplian
         address _verificationRegistry
     ) ERC20(name, symbol) RegulatoryCompliant(_verificationRegistry) {}
 
+    function setVerificationRegistry(address _verificationRegistry) public override onlyOwner {
+        super.setVerificationRegistry(_verificationRegistry);
+    }
+
     function setKYCRequired(bool _kycRequired) external onlyOwner {
         kycRequired = _kycRequired;
 

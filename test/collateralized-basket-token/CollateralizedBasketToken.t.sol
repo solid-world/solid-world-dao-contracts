@@ -23,4 +23,19 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
         _expectEmit_KYCRequiredSet(true);
         collateralizedBasketToken.setKYCRequired(true);
     }
+
+    function testSetVerificationRegistry_revertsIfNotOwner() public {
+        address _verificationRegistry = vm.addr(1);
+
+        vm.prank(testAccount0);
+        _expectRevertWithMessage("Ownable: caller is not the owner");
+        collateralizedBasketToken.setVerificationRegistry(_verificationRegistry);
+    }
+
+    function testSetVerificationRegistry_setsRegistry() public {
+        address _verificationRegistry = vm.addr(1);
+
+        collateralizedBasketToken.setVerificationRegistry(_verificationRegistry);
+        assertEq(collateralizedBasketToken.getVerificationRegistry(), _verificationRegistry);
+    }
 }
