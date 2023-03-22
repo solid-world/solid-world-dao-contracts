@@ -93,6 +93,11 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
     }
 
     function _checkValidCounterparty(uint batchId, address subject) private view {
+        // owner is whitelisted
+        if (subject == owner()) {
+            return;
+        }
+
         if (!isValidCounterparty(subject, kycRequired[batchId])) {
             revert NotRegulatoryCompliant(batchId, subject);
         }

@@ -144,4 +144,21 @@ contract ForwardContractBatchTokenTest is BaseForwardContractBatchTokenTest {
         _expectRevert_NotRegulatoryCompliant(batchId1, testAccount0);
         forwardContractBatchToken.mint(testAccount0, batchId1, amount, "");
     }
+
+    function testCompliance_ownerIsWhitelisted() public {
+        forwardContractBatchToken.setKYCRequired(batchId0, true);
+        verificationRegistry.registerVerification(testAccount0);
+
+        forwardContractBatchToken.safeTransferFrom(address(this), testAccount0, batchId0, 100, "");
+
+        verificationRegistry.blacklist(address(this));
+
+        forwardContractBatchToken.safeBatchTransferFrom(
+            address(this),
+            testAccount0,
+            _toArray(batchId0),
+            _toArray(100),
+            ""
+        );
+    }
 }

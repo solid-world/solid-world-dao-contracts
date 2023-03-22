@@ -6,7 +6,7 @@ import "../../contracts/ForwardContractBatchToken.sol";
 import "../../contracts/compliance/VerificationRegistry.sol";
 import "../../contracts/interfaces/compliance/IVerificationRegistry.sol";
 
-abstract contract BaseForwardContractBatchTokenTest is BaseTest {
+abstract contract BaseForwardContractBatchTokenTest is BaseTest, IERC1155Receiver {
     IVerificationRegistry verificationRegistry;
     ForwardContractBatchToken forwardContractBatchToken;
 
@@ -38,6 +38,9 @@ abstract contract BaseForwardContractBatchTokenTest is BaseTest {
 
         forwardContractBatchToken.mint(testAccount0, batchId1, 10000, "");
         forwardContractBatchToken.mint(testAccount1, batchId1, 10000, "");
+
+        forwardContractBatchToken.mint(address(this), batchId0, 10000, "");
+        forwardContractBatchToken.mint(address(this), batchId1, 10000, "");
     }
 
     function _expectEmit_KYCRequiredSet(uint batchId, bool _kycRequired) internal {
@@ -53,5 +56,29 @@ abstract contract BaseForwardContractBatchTokenTest is BaseTest {
                 subject
             )
         );
+    }
+
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes calldata
+    ) external pure override returns (bytes4) {
+        return this.onERC1155Received.selector;
+    }
+
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] calldata,
+        uint256[] calldata,
+        bytes calldata
+    ) external pure override returns (bytes4) {
+        return this.onERC1155BatchReceived.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+        return interfaceId == 0x01ffc9a7 || interfaceId == 0x4e2312e0;
     }
 }
