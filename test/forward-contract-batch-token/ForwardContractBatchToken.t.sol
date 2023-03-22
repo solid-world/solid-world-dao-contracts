@@ -43,16 +43,15 @@ contract ForwardContractBatchTokenTest is BaseForwardContractBatchTokenTest {
         uint transferAmount = 100;
 
         forwardContractBatchToken.setKYCRequired(batchId0, true);
+        verificationRegistry.registerVerification(testAccount0);
+        verificationRegistry.registerVerification(testAccount2);
+
+        vm.prank(testAccount1);
+        forwardContractBatchToken.setApprovalForAll(testAccount0, true);
 
         vm.prank(testAccount0);
-        _expectRevert_NotRegulatoryCompliant(batchId0, testAccount0);
-        forwardContractBatchToken.safeTransferFrom(testAccount0, testAccount1, batchId0, transferAmount, "");
-
-        verificationRegistry.blacklist(testAccount0);
-
-        vm.prank(testAccount0);
-        _expectRevert_NotRegulatoryCompliant(batchId1, testAccount0);
-        forwardContractBatchToken.safeTransferFrom(testAccount0, testAccount1, batchId1, transferAmount, "");
+        _expectRevert_NotRegulatoryCompliant(batchId0, testAccount1);
+        forwardContractBatchToken.safeTransferFrom(testAccount1, testAccount2, batchId0, transferAmount, "");
     }
 
     function testSafeTransferFrom_revertsIfComplianceCheckFails_toAddress() public {
@@ -60,16 +59,29 @@ contract ForwardContractBatchTokenTest is BaseForwardContractBatchTokenTest {
 
         forwardContractBatchToken.setKYCRequired(batchId0, true);
         verificationRegistry.registerVerification(testAccount0);
+        verificationRegistry.registerVerification(testAccount1);
+
+        vm.prank(testAccount1);
+        forwardContractBatchToken.setApprovalForAll(testAccount0, true);
 
         vm.prank(testAccount0);
-        _expectRevert_NotRegulatoryCompliant(batchId0, testAccount1);
-        forwardContractBatchToken.safeTransferFrom(testAccount0, testAccount1, batchId0, transferAmount, "");
+        _expectRevert_NotRegulatoryCompliant(batchId0, testAccount2);
+        forwardContractBatchToken.safeTransferFrom(testAccount1, testAccount2, batchId0, transferAmount, "");
+    }
 
-        verificationRegistry.blacklist(testAccount1);
+    function testSafeTransferFrom_revertsIfComplianceCheckFails_spender() public {
+        uint transferAmount = 100;
+
+        forwardContractBatchToken.setKYCRequired(batchId0, true);
+        verificationRegistry.registerVerification(testAccount1);
+        verificationRegistry.registerVerification(testAccount2);
+
+        vm.prank(testAccount1);
+        forwardContractBatchToken.setApprovalForAll(testAccount0, true);
 
         vm.prank(testAccount0);
-        _expectRevert_NotRegulatoryCompliant(batchId1, testAccount1);
-        forwardContractBatchToken.safeTransferFrom(testAccount0, testAccount1, batchId1, transferAmount, "");
+        _expectRevert_NotRegulatoryCompliant(batchId0, testAccount0);
+        forwardContractBatchToken.safeTransferFrom(testAccount1, testAccount2, batchId0, transferAmount, "");
     }
 
     function testSafeBatchTransferFrom_revertsIfComplianceCheckFails_fromAddress() public {

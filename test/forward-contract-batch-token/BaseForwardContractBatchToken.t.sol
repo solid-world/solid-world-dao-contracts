@@ -12,6 +12,7 @@ abstract contract BaseForwardContractBatchTokenTest is BaseTest, IERC1155Receive
 
     address testAccount0 = vm.addr(1);
     address testAccount1 = vm.addr(2);
+    address testAccount2 = vm.addr(3);
 
     uint batchId0 = 1;
     uint batchId1 = 2;
@@ -22,6 +23,7 @@ abstract contract BaseForwardContractBatchTokenTest is BaseTest, IERC1155Receive
         _initVerificationRegistry();
         forwardContractBatchToken = new ForwardContractBatchToken("", address(verificationRegistry));
 
+        _labelAccounts();
         _mintInitialTokens();
     }
 
@@ -32,14 +34,24 @@ abstract contract BaseForwardContractBatchTokenTest is BaseTest, IERC1155Receive
         verificationRegistry = IVerificationRegistry(address(_verificationRegistry));
     }
 
+    function _labelAccounts() private {
+        vm.label(testAccount0, "testAccount0");
+        vm.label(testAccount1, "testAccount1");
+        vm.label(testAccount2, "testAccount2");
+        vm.label(address(this), "FCBTTest");
+        vm.label(address(forwardContractBatchToken), "FCBT");
+        vm.label(address(verificationRegistry), "Verification Registry");
+    }
+
     function _mintInitialTokens() private {
         forwardContractBatchToken.mint(testAccount0, batchId0, 10000, "");
         forwardContractBatchToken.mint(testAccount1, batchId0, 10000, "");
+        forwardContractBatchToken.mint(testAccount2, batchId0, 10000, "");
+        forwardContractBatchToken.mint(address(this), batchId0, 10000, "");
 
         forwardContractBatchToken.mint(testAccount0, batchId1, 10000, "");
         forwardContractBatchToken.mint(testAccount1, batchId1, 10000, "");
-
-        forwardContractBatchToken.mint(address(this), batchId0, 10000, "");
+        forwardContractBatchToken.mint(testAccount2, batchId1, 10000, "");
         forwardContractBatchToken.mint(address(this), batchId1, 10000, "");
     }
 
