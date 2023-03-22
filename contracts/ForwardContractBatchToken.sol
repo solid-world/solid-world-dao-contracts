@@ -68,7 +68,13 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) public override batchRegulatoryCompliant(ids, from) batchRegulatoryCompliant(ids, to) {
+    )
+        public
+        override
+        batchRegulatoryCompliant(ids, msg.sender)
+        batchRegulatoryCompliant(ids, from)
+        batchRegulatoryCompliant(ids, to)
+    {
         super.safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
