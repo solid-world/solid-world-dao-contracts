@@ -3,5 +3,5 @@ pragma solidity 0.8.16;
 
 /// @author Solid World
 interface IRegulatoryComplianceManager {
-
+    function setCategoryKYCRequired(uint categoryId, bool isKYCRequired) external;
 }

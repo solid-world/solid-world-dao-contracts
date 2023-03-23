@@ -59,6 +59,9 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
         _expectRevert_NotOwner();
         manager.setBatchCertificationDate(1, 1);
 
+        _expectRevert_NotOwner();
+        manager.setCategoryKYCRequired(CATEGORY_ID, true);
+
         vm.stopPrank();
     }
 

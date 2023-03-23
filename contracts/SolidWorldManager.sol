@@ -231,6 +231,10 @@ contract SolidWorldManager is
         _setFeeReceiver(feeReceiver);
     }
 
+    function setCategoryKYCRequired(uint categoryId, bool isKYCRequired) external onlyOwner {
+        _storage.setCategoryKYCRequired(categoryId, isKYCRequired);
+    }
+
     /// @dev accept transfers from this contract only
     function onERC1155Received(
         address operator,

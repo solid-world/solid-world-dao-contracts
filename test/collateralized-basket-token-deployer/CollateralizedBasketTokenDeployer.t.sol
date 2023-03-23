@@ -22,4 +22,9 @@ contract CollateralizedBasketTokenDeployerTest is BaseCollateralizedBasketTokenD
         deployer.setVerificationRegistry(_verificationRegistry);
         assertEq(deployer.getVerificationRegistry(), _verificationRegistry);
     }
+
+    function testDeploy_theERC20HasTheExpectedVerificationRegistry() public {
+        CollateralizedBasketToken cbt = deployer.deploy("", "");
+        assertEq(cbt.getVerificationRegistry(), verificationRegistry);
+    }
 }
