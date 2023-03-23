@@ -49,6 +49,16 @@ async function deploySolidWorldManager(
     }
   )
 
+  const RegulatoryComplianceManager = await deployments.deploy(
+    'RegulatoryComplianceManager',
+    {
+      ...(await getCurrentGasFees()),
+      from: deployer,
+      args: [],
+      log: true
+    }
+  )
+
   return deployments.deploy('SolidWorldManager', {
     ...(await getCurrentGasFees()),
     from: deployer,
@@ -58,7 +68,8 @@ async function deploySolidWorldManager(
       WeeklyCarbonRewards: WeeklyCarbonRewards.address,
       CarbonDomainRepository: CarbonDomainRepository.address,
       CollateralizationManager: CollateralizationManager.address,
-      DecollateralizationManager: DecollateralizationManager.address
+      DecollateralizationManager: DecollateralizationManager.address,
+      RegulatoryComplianceManager: RegulatoryComplianceManager.address
     },
     proxy: {
       // owner of the proxy (a.k.a address authorized to perform upgrades)
