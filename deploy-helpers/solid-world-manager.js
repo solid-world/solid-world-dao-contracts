@@ -9,7 +9,8 @@ async function deploySolidWorldManager(
   deployer,
   contractsOwner,
   ForwardContractBatchToken,
-  EmissionManager
+  EmissionManager,
+  CollateralizedBasketTokenDeployer
 ) {
   const WeeklyCarbonRewards = await deployments.deploy('WeeklyCarbonRewards', {
     ...(await getCurrentGasFees()),
@@ -48,16 +49,6 @@ async function deploySolidWorldManager(
     }
   )
 
-  const CollateralizedBasketTokenDeployer = await deployments.deploy(
-    'CollateralizedBasketTokenDeployer',
-    {
-      ...(await getCurrentGasFees()),
-      from: deployer,
-      args: [],
-      log: true
-    }
-  )
-
   return deployments.deploy('SolidWorldManager', {
     ...(await getCurrentGasFees()),
     from: deployer,
@@ -78,7 +69,7 @@ async function deploySolidWorldManager(
         init: {
           methodName: 'initialize',
           args: [
-            CollateralizedBasketTokenDeployer.address,
+            CollateralizedBasketTokenDeployer,
             ForwardContractBatchToken,
             INITIAL_COLLATERALIZATION_FEE,
             INITIAL_DECOLLATERALIZATION_FEE,

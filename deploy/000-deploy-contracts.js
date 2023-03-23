@@ -24,6 +24,10 @@ const { setupEnvForGasStation } = require('../deploy-helpers/gas-station-env')
 const {
   deployVerificationRegistry
 } = require('../deploy-helpers/verification-registry')
+const {
+  deployCollateralizedBasketTokenDeployer,
+  setupCollateralizedBasketTokenDeployer
+} = require('../deploy-helpers/collateralized-basket-token-deployer')
 
 const func = async ({ getNamedAccounts, deployments, getChainId, network }) => {
   await setupEnvForGasStation(network, getChainId)
@@ -42,6 +46,12 @@ const func = async ({ getNamedAccounts, deployments, getChainId, network }) => {
     deployer,
     VerificationRegistry.address
   )
+  const CollateralizedBasketTokenDeployer =
+    await deployCollateralizedBasketTokenDeployer(
+      deployments,
+      deployer,
+      VerificationRegistry.address
+    )
   const RewardsController = await deployRewardsController(deployments, deployer)
   const SolidStaking = await deploySolidStaking(
     deployments,
@@ -54,11 +64,20 @@ const func = async ({ getNamedAccounts, deployments, getChainId, network }) => {
     deployer,
     contractsOwner,
     ForwardContractBatchToken.address,
-    EmissionManager.address
+    EmissionManager.address,
+    CollateralizedBasketTokenDeployer.address
   )
 
   if (ForwardContractBatchToken.newlyDeployed) {
     await setupForwardContractBatchToken(
+      deployments,
+      deployer,
+      SolidWorldManager.address
+    )
+  }
+
+  if (CollateralizedBasketTokenDeployer.newlyDeployed) {
+    await setupCollateralizedBasketTokenDeployer(
       deployments,
       deployer,
       SolidWorldManager.address
