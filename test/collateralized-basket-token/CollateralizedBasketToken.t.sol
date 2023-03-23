@@ -168,6 +168,30 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
         collateralizedBasketToken.mint(testAccount0, 100);
     }
 
+    function testBurnFrom_revertsIfComplianceCheckFails_fromAddress() public {
+        vm.prank(testAccount0);
+        collateralizedBasketToken.approve(testAccount1, 100);
+
+        collateralizedBasketToken.setKYCRequired(true);
+        verificationRegistry.registerVerification(testAccount1);
+
+        vm.prank(testAccount1);
+        _expectRevert_NotRegulatoryCompliant(testAccount0);
+        collateralizedBasketToken.burnFrom(testAccount0, 100);
+    }
+
+    function testBurnFrom_revertsIfComplianceCheckFails_caller() public {
+        vm.prank(testAccount0);
+        collateralizedBasketToken.approve(testAccount1, 100);
+
+        collateralizedBasketToken.setKYCRequired(true);
+        verificationRegistry.registerVerification(testAccount0);
+
+        vm.prank(testAccount1);
+        _expectRevert_NotRegulatoryCompliant(testAccount1);
+        collateralizedBasketToken.burnFrom(testAccount0, 100);
+    }
+
     function testCompliance_ownerIsWhitelisted() public {
         uint transferAmount = 100;
 
@@ -176,10 +200,11 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
         verificationRegistry.blacklist(address(this));
 
         vm.prank(testAccount0);
-        collateralizedBasketToken.approve(address(this), transferAmount);
+        collateralizedBasketToken.approve(address(this), transferAmount * 2);
 
         collateralizedBasketToken.transfer(testAccount0, transferAmount);
         collateralizedBasketToken.transferFrom(testAccount0, address(this), transferAmount);
+        collateralizedBasketToken.burnFrom(testAccount0, transferAmount);
         collateralizedBasketToken.increaseAllowance(testAccount0, transferAmount);
         collateralizedBasketToken.decreaseAllowance(testAccount0, transferAmount);
     }

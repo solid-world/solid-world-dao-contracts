@@ -98,6 +98,15 @@ contract CollateralizedBasketToken is ERC20Burnable, Ownable, RegulatoryComplian
         _mint(to, amount);
     }
 
+    function burnFrom(address from, uint amount)
+        public
+        override
+        regulatoryCompliant(msg.sender)
+        regulatoryCompliant(from)
+    {
+        super.burnFrom(from, amount);
+    }
+
     function _checkValidCounterparty(address subject) internal view {
         // owner is whitelisted
         if (subject == owner()) {
