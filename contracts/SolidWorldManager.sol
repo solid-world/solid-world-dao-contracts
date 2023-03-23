@@ -235,6 +235,13 @@ contract SolidWorldManager is
         _storage.setCategoryKYCRequired(categoryId, isKYCRequired);
     }
 
+    function setCategoryVerificationRegistry(uint categoryId, address verificationRegistry)
+        external
+        onlyOwner
+    {
+        _storage.setCategoryVerificationRegistry(categoryId, verificationRegistry);
+    }
+
     /// @dev accept transfers from this contract only
     function onERC1155Received(
         address operator,

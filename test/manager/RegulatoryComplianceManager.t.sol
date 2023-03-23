@@ -16,6 +16,18 @@ contract RegulatoryComplianceManagerTest is BaseSolidWorldManager {
         assertTrue(manager.getCategoryToken(CATEGORY_ID).isKYCRequired());
     }
 
+    function testSetCategoryVerificationRegistry_revertsIfCategoryDoesNotExist() public {
+        _expectRevert_InvalidCategoryId(CATEGORY_ID);
+        manager.setCategoryVerificationRegistry(CATEGORY_ID, vm.addr(1));
+    }
+
+    function testSetCategoryVerificationRegistry() public {
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + 1, 10000);
+
+        manager.setCategoryVerificationRegistry(CATEGORY_ID, vm.addr(1));
+        assertEq(manager.getCategoryToken(CATEGORY_ID).getVerificationRegistry(), vm.addr(1));
+    }
+
     function _expectRevert_InvalidCategoryId(uint categoryId) private {
         vm.expectRevert(
             abi.encodeWithSelector(RegulatoryComplianceManager.InvalidCategoryId.selector, categoryId)

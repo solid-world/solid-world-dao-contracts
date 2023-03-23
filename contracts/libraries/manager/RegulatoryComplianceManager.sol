@@ -18,4 +18,16 @@ library RegulatoryComplianceManager {
 
         _storage.categoryToken[categoryId].setKYCRequired(isKYCRequired);
     }
+
+    function setCategoryVerificationRegistry(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint categoryId,
+        address verificationRegistry
+    ) external {
+        if (!_storage.categoryCreated[categoryId]) {
+            revert InvalidCategoryId(categoryId);
+        }
+
+        _storage.categoryToken[categoryId].setVerificationRegistry(verificationRegistry);
+    }
 }
