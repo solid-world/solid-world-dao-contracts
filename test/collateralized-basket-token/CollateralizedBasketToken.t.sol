@@ -192,6 +192,14 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
         collateralizedBasketToken.burnFrom(testAccount0, 100);
     }
 
+    function testBurn_revertsIfComplianceCheckFails_caller() public {
+        collateralizedBasketToken.setKYCRequired(true);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(testAccount0);
+        collateralizedBasketToken.burn(100);
+    }
+
     function testCompliance_ownerIsWhitelisted() public {
         uint transferAmount = 100;
 
@@ -207,5 +215,6 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
         collateralizedBasketToken.burnFrom(testAccount0, transferAmount);
         collateralizedBasketToken.increaseAllowance(testAccount0, transferAmount);
         collateralizedBasketToken.decreaseAllowance(testAccount0, transferAmount);
+        collateralizedBasketToken.burn(transferAmount);
     }
 }
