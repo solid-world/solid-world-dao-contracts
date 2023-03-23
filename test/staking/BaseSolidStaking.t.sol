@@ -144,7 +144,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
     }
 
     function _createTestToken() internal returns (CollateralizedBasketToken token, address tokenAddress) {
-        token = new CollateralizedBasketToken("Test Token", "TT");
+        token = new CollateralizedBasketToken("Test Token", "TT", address(verificationRegistry));
         tokenAddress = address(token);
         vm.label(tokenAddress, "Test token");
     }

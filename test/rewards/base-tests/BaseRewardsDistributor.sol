@@ -5,6 +5,7 @@ import "../../BaseTest.sol";
 import "../../../contracts/interfaces/rewards/IRewardsDistributor.sol";
 import "../../../contracts/rewards/RewardsController.sol";
 import "../../../contracts/CollateralizedBasketToken.sol";
+import "../../../contracts/compliance/VerificationRegistry.sol";
 
 abstract contract BaseRewardsDistributor is BaseTest {
     event Accrued(
@@ -54,6 +55,7 @@ abstract contract BaseRewardsDistributor is BaseTest {
     address emissionManager;
     address rewardsVault;
     address rewardOracle;
+    address verificationRegistry = address(new VerificationRegistry());
 
     function setUp() public {
         vm.warp(PRESET_CURRENT_DATE);
@@ -106,11 +108,11 @@ abstract contract BaseRewardsDistributor is BaseTest {
         preset.totalStaked = 500e18;
         preset.accruingPeriod = 5 seconds;
         preset.updateTimestamp = PRESET_CURRENT_DATE + preset.accruingPeriod;
-        preset.asset0 = address(new CollateralizedBasketToken("", ""));
-        preset.asset1 = address(new CollateralizedBasketToken("", ""));
-        preset.reward00 = address(new CollateralizedBasketToken("", ""));
-        preset.reward01 = address(new CollateralizedBasketToken("", ""));
-        preset.reward1 = address(new CollateralizedBasketToken("", ""));
+        preset.asset0 = address(new CollateralizedBasketToken("", "", verificationRegistry));
+        preset.asset1 = address(new CollateralizedBasketToken("", "", verificationRegistry));
+        preset.reward00 = address(new CollateralizedBasketToken("", "", verificationRegistry));
+        preset.reward01 = address(new CollateralizedBasketToken("", "", verificationRegistry));
+        preset.reward1 = address(new CollateralizedBasketToken("", "", verificationRegistry));
         preset.emissionPerSecond00 = 100;
         preset.emissionPerSecond01 = 200;
         preset.emissionPerSecond1 = 300;

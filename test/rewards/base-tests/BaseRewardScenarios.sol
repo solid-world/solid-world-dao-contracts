@@ -31,6 +31,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
     EmissionManager emissionManager;
     SolidWorldManager solidWorldManager;
     ForwardContractBatchToken forwardContractBatch;
+    address verificationRegistry = address(new VerificationRegistry());
 
     uint mangroveInitialBalance;
     uint reforestationInitialBalance;
@@ -59,9 +60,13 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         user0 = vm.addr(4);
         user1 = vm.addr(5);
         rewardOracle = vm.addr(6);
-        usdcToken = address(new CollateralizedBasketToken("USDC", "USDC"));
-        assetMangrove = address(new CollateralizedBasketToken("Mangrove hypervisor", "MH"));
-        assetReforestation = address(new CollateralizedBasketToken("Reforestation hypervisor", "RH"));
+        usdcToken = address(new CollateralizedBasketToken("USDC", "USDC", verificationRegistry));
+        assetMangrove = address(
+            new CollateralizedBasketToken("Mangrove hypervisor", "MH", verificationRegistry)
+        );
+        assetReforestation = address(
+            new CollateralizedBasketToken("Reforestation hypervisor", "RH", verificationRegistry)
+        );
 
         _initializeContracts();
 
