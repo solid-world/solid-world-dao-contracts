@@ -1,9 +1,10 @@
 const { getCurrentGasFees } = require('@solid-world/gas-station')
 
-async function deploySolidStaking(deployments, deployer) {
+async function deploySolidStaking(deployments, deployer, verificationRegistry) {
   return deployments.deploy('SolidStaking', {
     ...(await getCurrentGasFees()),
     from: deployer,
+    args: [verificationRegistry],
     log: true
   })
 }

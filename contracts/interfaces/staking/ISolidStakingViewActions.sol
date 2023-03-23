@@ -19,4 +19,7 @@ interface ISolidStakingViewActions {
     /// @dev Returns the list of tokens that can be staked
     /// @return the list of tokens that can be staked
     function getTokens() external view returns (address[] memory);
+
+    /// @return whether the specified token requires msg.sender to be KYCed before staking
+    function isKYCRequired(address token) external view returns (bool);
 }

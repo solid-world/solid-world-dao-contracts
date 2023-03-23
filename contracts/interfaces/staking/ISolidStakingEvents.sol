@@ -20,4 +20,6 @@ interface ISolidStakingEvents {
     /// @dev Emitted when a new token is added to the staking contract
     /// @param token the token that was added
     event TokenAdded(address indexed token);
+
+    event KYCRequiredSet(address indexed token, bool indexed kycRequired);
 }

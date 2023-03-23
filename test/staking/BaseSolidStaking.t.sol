@@ -4,11 +4,13 @@ pragma solidity 0.8.16;
 import "../BaseTest.sol";
 import "../../contracts/SolidStaking.sol";
 import "../../contracts/CollateralizedBasketToken.sol";
+import "../../contracts/compliance/VerificationRegistry.sol";
 
 abstract contract BaseSolidStakingTest is BaseTest {
     address emissionManager;
     address rewardsController;
     address carbonRewardsManager;
+    IVerificationRegistry verificationRegistry;
     SolidStaking solidStaking;
 
     address ownerAccount = address(this);
@@ -18,17 +20,27 @@ abstract contract BaseSolidStakingTest is BaseTest {
     event Stake(address indexed account, address indexed token, uint indexed amount);
     event Withdraw(address indexed account, address indexed token, uint indexed amount);
     event TokenAdded(address indexed token);
+    event KYCRequiredSet(address indexed token, bool indexed kycRequired);
 
     function setUp() public {
         rewardsController = vm.addr(3);
         carbonRewardsManager = vm.addr(4);
         emissionManager = vm.addr(5);
 
-        solidStaking = new SolidStaking();
+        _initVerificationRegistry();
+
+        solidStaking = new SolidStaking(address(verificationRegistry));
         solidStaking.setup(IRewardsController(rewardsController), ownerAccount);
 
         _installMocks();
         _labelAccounts();
+    }
+
+    function _initVerificationRegistry() private {
+        VerificationRegistry _verificationRegistry = new VerificationRegistry();
+        _verificationRegistry.initialize(address(this));
+
+        verificationRegistry = IVerificationRegistry(address(_verificationRegistry));
     }
 
     function _installMocks() private {
@@ -49,6 +61,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
         vm.label(emissionManager, "Emission manager");
         vm.label(rewardsController, "Rewards controller");
         vm.label(carbonRewardsManager, "Carbon rewards manager");
+        vm.label(address(verificationRegistry), "Verification registry");
         vm.label(address(solidStaking), "Solid staking");
         vm.label(ownerAccount, "Owner account");
         vm.label(testAccount, "Test account");
@@ -78,6 +91,11 @@ abstract contract BaseSolidStakingTest is BaseTest {
         emit Withdraw(account, tokenAddress, amount);
     }
 
+    function _expectEmit_KYCRequiredSet(address _token, bool _kycRequired) internal {
+        vm.expectEmit(true, true, true, false, address(solidStaking));
+        emit KYCRequiredSet(_token, _kycRequired);
+    }
+
     function _expectRevert_AlreadyInitialized() internal {
         vm.expectRevert(abi.encodeWithSelector(PostConstruct.AlreadyInitialized.selector));
     }
@@ -89,6 +107,12 @@ abstract contract BaseSolidStakingTest is BaseTest {
     function _expectRevert_InvalidTokenAddress(address tokenAddress) internal {
         vm.expectRevert(
             abi.encodeWithSelector(ISolidStakingErrors.InvalidTokenAddress.selector, tokenAddress)
+        );
+    }
+
+    function _expectRevert_NotRegulatoryCompliant(address token, address subject) internal {
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolidStakingErrors.NotRegulatoryCompliant.selector, token, subject)
         );
     }
 

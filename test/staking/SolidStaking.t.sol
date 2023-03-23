@@ -43,6 +43,32 @@ contract SolidStakingTest is BaseSolidStakingTest {
         );
     }
 
+    function testStake_revertsIfComplianceCheckFails() public {
+        uint stakeAmount = 100;
+        (, address token0Address) = _configuredTestToken();
+        (, address token1Address) = _configuredTestToken();
+
+        solidStaking.setKYCRequired(token1Address, true);
+
+        vm.prank(testAccount);
+        solidStaking.stake(token0Address, stakeAmount);
+
+        vm.prank(testAccount);
+        _expectRevert_NotRegulatoryCompliant(token1Address, testAccount);
+        solidStaking.stake(token1Address, stakeAmount);
+
+        verificationRegistry.registerVerification(testAccount);
+        vm.prank(testAccount);
+        solidStaking.stake(token1Address, stakeAmount);
+
+        verificationRegistry.blacklist(testAccount2);
+        vm.startPrank(testAccount2);
+        _expectRevert_NotRegulatoryCompliant(token0Address, testAccount2);
+        solidStaking.stake(token0Address, stakeAmount);
+        _expectRevert_NotRegulatoryCompliant(token1Address, testAccount2);
+        solidStaking.stake(token1Address, stakeAmount);
+    }
+
     function testStake_failsForInvalidTokenAddress() public {
         address invalidTokenAddress = vm.addr(777);
 
@@ -128,6 +154,39 @@ contract SolidStakingTest is BaseSolidStakingTest {
         solidStaking.withdrawStakeAndClaimRewards(invalidTokenAddress, 100);
     }
 
+    function testWithdrawStakeAndClaimRewards_revertsIfComplianceCheckFails() public {
+        uint amountToStake = 100;
+        uint amountToWithdraw = 50;
+        (, address token0Address) = _configuredTestToken();
+        (, address token1Address) = _configuredTestToken();
+
+        vm.prank(testAccount);
+        solidStaking.stake(token0Address, amountToStake);
+        vm.prank(testAccount);
+        solidStaking.stake(token1Address, amountToStake);
+
+        solidStaking.setKYCRequired(token1Address, true);
+
+        vm.prank(testAccount);
+        solidStaking.withdrawStakeAndClaimRewards(token0Address, amountToWithdraw);
+
+        vm.prank(testAccount);
+        _expectRevert_NotRegulatoryCompliant(token1Address, testAccount);
+        solidStaking.withdrawStakeAndClaimRewards(token1Address, amountToWithdraw);
+
+        verificationRegistry.registerVerification(testAccount);
+        vm.prank(testAccount);
+        solidStaking.withdrawStakeAndClaimRewards(token0Address, amountToWithdraw);
+
+        verificationRegistry.blacklist(testAccount);
+
+        vm.startPrank(testAccount);
+        _expectRevert_NotRegulatoryCompliant(token0Address, testAccount);
+        solidStaking.withdrawStakeAndClaimRewards(token0Address, amountToWithdraw);
+        _expectRevert_NotRegulatoryCompliant(token1Address, testAccount);
+        solidStaking.withdrawStakeAndClaimRewards(token1Address, amountToWithdraw);
+    }
+
     function testBalanceOf() public {
         uint amountToStake = 100;
         (, address tokenAddress) = _configuredTestToken();
@@ -169,5 +228,47 @@ contract SolidStakingTest is BaseSolidStakingTest {
         assertEq(tokens[0], tokenAddress1);
         assertEq(tokens[1], tokenAddress2);
         assertEq(tokens[2], tokenAddress3);
+    }
+
+    function testIsKYCRequired() public {
+        address asset = vm.addr(1);
+        assertFalse(solidStaking.isKYCRequired(asset));
+    }
+
+    function testSetKYCRequired() public {
+        address asset = vm.addr(1);
+
+        solidStaking.setKYCRequired(asset, true);
+        assertTrue(solidStaking.isKYCRequired(asset));
+    }
+
+    function testSetKYCRequired_revertsIfNotOwner() public {
+        address asset = vm.addr(1);
+
+        vm.prank(testAccount);
+        _expectRevertWithMessage("Ownable: caller is not the owner");
+        solidStaking.setKYCRequired(asset, true);
+    }
+
+    function testSetKYCRequired_emitsEvent() public {
+        address asset = vm.addr(1);
+
+        _expectEmit_KYCRequiredSet(asset, true);
+        solidStaking.setKYCRequired(asset, true);
+    }
+
+    function testSetVerificationRegistry_revertsIfNotOwner() public {
+        address verificationRegistry = vm.addr(1);
+
+        vm.prank(testAccount);
+        _expectRevertWithMessage("Ownable: caller is not the owner");
+        solidStaking.setVerificationRegistry(verificationRegistry);
+    }
+
+    function testSetVerificationRegistry_setsRegistry() public {
+        address verificationRegistry = vm.addr(1);
+
+        solidStaking.setVerificationRegistry(verificationRegistry);
+        assertEq(solidStaking.getVerificationRegistry(), verificationRegistry);
     }
 }

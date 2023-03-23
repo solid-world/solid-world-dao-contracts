@@ -9,19 +9,23 @@ import "./interfaces/ISolidStaking.sol";
 import "./interfaces/rewards/IRewardsController.sol";
 import "./PostConstruct.sol";
 import "./libraries/GPv2SafeERC20.sol";
+import "./compliance/RegulatoryCompliant.sol";
 
-contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct {
+/// @author Solid World
+contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct, RegulatoryCompliant {
     using GPv2SafeERC20 for IERC20;
 
     /// @dev All stakable lp tokens.
     address[] public tokens;
 
-    /// @dev Mapping with added tokens.
     mapping(address => bool) public tokenAdded;
 
     /// @dev Mapping with the staked amount of each account for each token.
     /// @dev token => user => amount
     mapping(address => mapping(address => uint)) public userStake;
+
+    /// @dev token => requires KYC
+    mapping(address => bool) private kycRequired;
 
     /// @dev Main contract used for interacting with rewards mechanism.
     IRewardsController public rewardsController;
@@ -32,6 +36,15 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
         }
         _;
     }
+
+    modifier regulatoryCompliant(address token, address subject) {
+        if (!isValidCounterparty(subject, kycRequired[token])) {
+            revert NotRegulatoryCompliant(token, subject);
+        }
+        _;
+    }
+
+    constructor(address _verificationRegistry) RegulatoryCompliant(_verificationRegistry) {}
 
     function setup(IRewardsController _rewardsController, address owner) external postConstruct {
         rewardsController = _rewardsController;
@@ -50,8 +63,24 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
         emit TokenAdded(token);
     }
 
+    /// @inheritdoc ISolidStakingOwnerActions
+    function setKYCRequired(address token, bool _kycRequired) external onlyOwner {
+        kycRequired[token] = _kycRequired;
+
+        emit KYCRequiredSet(token, _kycRequired);
+    }
+
+    function setVerificationRegistry(address _verificationRegistry) public override onlyOwner {
+        super.setVerificationRegistry(_verificationRegistry);
+    }
+
     /// @inheritdoc ISolidStakingActions
-    function stake(address token, uint amount) external nonReentrant validToken(token) {
+    function stake(address token, uint amount)
+        external
+        nonReentrant
+        validToken(token)
+        regulatoryCompliant(token, msg.sender)
+    {
         uint oldUserStake = _balanceOf(token, msg.sender);
         uint oldTotalStake = _totalStaked(token);
 
@@ -74,6 +103,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
         external
         nonReentrant
         validToken(token)
+        regulatoryCompliant(token, msg.sender)
     {
         _withdraw(token, amount);
         _claimRewards(token);
@@ -92,6 +122,11 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct 
     /// @inheritdoc ISolidStakingViewActions
     function getTokens() external view returns (address[] memory _tokens) {
         _tokens = tokens;
+    }
+
+    /// @inheritdoc ISolidStakingViewActions
+    function isKYCRequired(address token) external view returns (bool) {
+        return kycRequired[token];
     }
 
     function _balanceOf(address token, address account) internal view returns (uint) {
