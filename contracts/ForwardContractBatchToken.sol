@@ -96,11 +96,6 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
         super.safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
-    /// @dev only owner
-    /// @param to address of the owner of new token
-    /// @param id id of new token
-    /// @param amount amount of new token
-    /// @param data external data
     function mint(
         address to,
         uint id,
@@ -110,16 +105,12 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
         _mint(to, id, amount, data);
     }
 
-    /// @dev only owner
-    /// @param account address of the owner of token what is burned
-    /// @param id id of token what is burned
-    /// @param amount amount of token what is burned
     function burn(
-        address account,
+        address from,
         uint id,
         uint amount
     ) public onlyOwner {
-        _burn(account, id, amount);
+        _burn(from, id, amount);
     }
 
     function _checkValidCounterparty(uint batchId, address subject) private view {
