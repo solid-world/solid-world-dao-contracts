@@ -76,7 +76,7 @@ contract CollateralizedBasketToken is ERC20Burnable, Ownable, RegulatoryComplian
         return super.transferFrom(from, to, amount);
     }
 
-    function mint(address account, uint amount) public onlyOwner {
-        _mint(account, amount);
+    function mint(address to, uint amount) public onlyOwner regulatoryCompliant(to) {
+        _mint(to, amount);
     }
 }

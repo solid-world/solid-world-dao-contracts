@@ -126,4 +126,11 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
         _expectRevert_NotRegulatoryCompliant(testAccount0);
         collateralizedBasketToken.approve(testAccount1, transferAmount);
     }
+
+    function testMint_revertsIfComplianceCheckFails_toAddress() public {
+        collateralizedBasketToken.setKYCRequired(true);
+
+        _expectRevert_NotRegulatoryCompliant(testAccount0);
+        collateralizedBasketToken.mint(testAccount0, 100);
+    }
 }

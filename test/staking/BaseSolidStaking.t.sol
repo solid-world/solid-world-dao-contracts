@@ -17,8 +17,6 @@ abstract contract BaseSolidStakingTest is BaseTest {
     address testAccount = vm.addr(1);
     address testAccount2 = vm.addr(2);
 
-    address verificationRegistry = address(new VerificationRegistry());
-
     event Stake(address indexed account, address indexed token, uint indexed amount);
     event Withdraw(address indexed account, address indexed token, uint indexed amount);
     event TokenAdded(address indexed token);
@@ -146,7 +144,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
     }
 
     function _createTestToken() internal returns (CollateralizedBasketToken token, address tokenAddress) {
-        token = new CollateralizedBasketToken("Test Token", "TT", verificationRegistry);
+        token = new CollateralizedBasketToken("Test Token", "TT", address(verificationRegistry));
         tokenAddress = address(token);
         vm.label(tokenAddress, "Test token");
     }
