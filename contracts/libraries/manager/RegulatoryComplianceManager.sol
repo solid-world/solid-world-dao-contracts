@@ -43,4 +43,11 @@ library RegulatoryComplianceManager {
 
         _storage.categoryToken[categoryId].setVerificationRegistry(verificationRegistry);
     }
+
+    function setForwardsVerificationRegistry(
+        SolidWorldManagerStorage.Storage storage _storage,
+        address verificationRegistry
+    ) external {
+        _storage._forwardContractBatch.setVerificationRegistry(verificationRegistry);
+    }
 }

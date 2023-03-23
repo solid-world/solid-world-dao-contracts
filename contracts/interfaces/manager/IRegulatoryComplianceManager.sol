@@ -8,4 +8,6 @@ interface IRegulatoryComplianceManager {
     function setBatchKYCRequired(uint batchId, bool isKYCRequired) external;
 
     function setCategoryVerificationRegistry(uint categoryId, address verificationRegistry) external;
+
+    function setForwardsVerificationRegistry(address verificationRegistry) external;
 }

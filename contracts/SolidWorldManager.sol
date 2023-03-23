@@ -246,6 +246,10 @@ contract SolidWorldManager is
         _storage.setCategoryVerificationRegistry(categoryId, verificationRegistry);
     }
 
+    function setForwardsVerificationRegistry(address verificationRegistry) external onlyOwner {
+        _storage.setForwardsVerificationRegistry(verificationRegistry);
+    }
+
     /// @dev accept transfers from this contract only
     function onERC1155Received(
         address operator,

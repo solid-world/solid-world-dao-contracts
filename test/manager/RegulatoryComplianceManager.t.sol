@@ -40,6 +40,11 @@ contract RegulatoryComplianceManagerTest is BaseSolidWorldManager {
         assertEq(manager.getCategoryToken(CATEGORY_ID).getVerificationRegistry(), vm.addr(1));
     }
 
+    function testSetForwardsVerificationRegistry() public {
+        manager.setForwardsVerificationRegistry(vm.addr(1));
+        assertEq(manager.forwardContractBatch().getVerificationRegistry(), vm.addr(1));
+    }
+
     function _expectRevert_InvalidCategoryId(uint categoryId) private {
         vm.expectRevert(
             abi.encodeWithSelector(RegulatoryComplianceManager.InvalidCategoryId.selector, categoryId)
