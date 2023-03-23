@@ -30,7 +30,7 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
 
     modifier notBlacklisted(address subject) {
         bool _kycRequired = false;
-        if (!isValidCounterparty(subject, _kycRequired)) {
+        if (!(subject == owner()) && !isValidCounterparty(subject, _kycRequired)) {
             revert Blacklisted(subject);
         }
         _;
