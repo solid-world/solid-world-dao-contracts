@@ -71,6 +71,9 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
         _expectRevert_NotOwner();
         manager.setForwardsVerificationRegistry(vm.addr(1));
 
+        _expectRevert_NotOwner();
+        manager.setCollateralizedBasketTokenDeployerVerificationRegistry(vm.addr(1));
+
         vm.stopPrank();
     }
 

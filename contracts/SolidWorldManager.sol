@@ -250,6 +250,13 @@ contract SolidWorldManager is
         _storage.setForwardsVerificationRegistry(verificationRegistry);
     }
 
+    function setCollateralizedBasketTokenDeployerVerificationRegistry(address verificationRegistry)
+        external
+        onlyOwner
+    {
+        _storage.setCollateralizedBasketTokenDeployerVerificationRegistry(verificationRegistry);
+    }
+
     /// @dev accept transfers from this contract only
     function onERC1155Received(
         address operator,

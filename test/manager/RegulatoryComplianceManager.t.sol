@@ -45,6 +45,11 @@ contract RegulatoryComplianceManagerTest is BaseSolidWorldManager {
         assertEq(manager.forwardContractBatch().getVerificationRegistry(), vm.addr(1));
     }
 
+    function testSetCollateralizedBasketTokenDeployerVerificationRegistry() public {
+        manager.setCollateralizedBasketTokenDeployerVerificationRegistry(vm.addr(1));
+        assertEq(manager.collateralizedBasketTokenDeployer().getVerificationRegistry(), vm.addr(1));
+    }
+
     function _expectRevert_InvalidCategoryId(uint categoryId) private {
         vm.expectRevert(
             abi.encodeWithSelector(RegulatoryComplianceManager.InvalidCategoryId.selector, categoryId)

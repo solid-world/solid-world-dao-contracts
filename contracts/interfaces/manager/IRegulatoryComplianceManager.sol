@@ -10,4 +10,6 @@ interface IRegulatoryComplianceManager {
     function setCategoryVerificationRegistry(uint categoryId, address verificationRegistry) external;
 
     function setForwardsVerificationRegistry(address verificationRegistry) external;
+
+    function setCollateralizedBasketTokenDeployerVerificationRegistry(address verificationRegistry) external;
 }

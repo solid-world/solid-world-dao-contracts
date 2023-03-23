@@ -50,4 +50,11 @@ library RegulatoryComplianceManager {
     ) external {
         _storage._forwardContractBatch.setVerificationRegistry(verificationRegistry);
     }
+
+    function setCollateralizedBasketTokenDeployerVerificationRegistry(
+        SolidWorldManagerStorage.Storage storage _storage,
+        address verificationRegistry
+    ) external {
+        _storage._collateralizedBasketTokenDeployer.setVerificationRegistry(verificationRegistry);
+    }
 }
