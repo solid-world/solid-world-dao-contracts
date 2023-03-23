@@ -63,6 +63,9 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
         manager.setCategoryKYCRequired(CATEGORY_ID, true);
 
         _expectRevert_NotOwner();
+        manager.setBatchKYCRequired(BATCH_ID, true);
+
+        _expectRevert_NotOwner();
         manager.setCategoryVerificationRegistry(CATEGORY_ID, vm.addr(1));
 
         vm.stopPrank();

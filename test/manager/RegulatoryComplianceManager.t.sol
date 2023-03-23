@@ -16,6 +16,18 @@ contract RegulatoryComplianceManagerTest is BaseSolidWorldManager {
         assertTrue(manager.getCategoryToken(CATEGORY_ID).isKYCRequired());
     }
 
+    function testSetBatchKYCRequired_revertsIfBatchDoesNotExist() public {
+        _expectRevert_InvalidBatchId(BATCH_ID);
+        manager.setBatchKYCRequired(BATCH_ID, true);
+    }
+
+    function testSetBatchKYCRequired() public {
+        _addBatchWithDependencies(PRESET_CURRENT_DATE + 1, 10000);
+
+        manager.setBatchKYCRequired(BATCH_ID, true);
+        assertTrue(manager.forwardContractBatch().isKYCRequired(BATCH_ID));
+    }
+
     function testSetCategoryVerificationRegistry_revertsIfCategoryDoesNotExist() public {
         _expectRevert_InvalidCategoryId(CATEGORY_ID);
         manager.setCategoryVerificationRegistry(CATEGORY_ID, vm.addr(1));
@@ -32,5 +44,9 @@ contract RegulatoryComplianceManagerTest is BaseSolidWorldManager {
         vm.expectRevert(
             abi.encodeWithSelector(RegulatoryComplianceManager.InvalidCategoryId.selector, categoryId)
         );
+    }
+
+    function _expectRevert_InvalidBatchId(uint batchId) private {
+        vm.expectRevert(abi.encodeWithSelector(RegulatoryComplianceManager.InvalidBatchId.selector, batchId));
     }
 }

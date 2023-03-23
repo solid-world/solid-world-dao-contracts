@@ -235,6 +235,10 @@ contract SolidWorldManager is
         _storage.setCategoryKYCRequired(categoryId, isKYCRequired);
     }
 
+    function setBatchKYCRequired(uint batchId, bool isKYCRequired) external onlyOwner {
+        _storage.setBatchKYCRequired(batchId, isKYCRequired);
+    }
+
     function setCategoryVerificationRegistry(uint categoryId, address verificationRegistry)
         external
         onlyOwner

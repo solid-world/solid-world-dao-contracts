@@ -6,6 +6,7 @@ import "../../SolidWorldManagerStorage.sol";
 /// @author Solid World
 library RegulatoryComplianceManager {
     error InvalidCategoryId(uint categoryId);
+    error InvalidBatchId(uint batchId);
 
     function setCategoryKYCRequired(
         SolidWorldManagerStorage.Storage storage _storage,
@@ -17,6 +18,18 @@ library RegulatoryComplianceManager {
         }
 
         _storage.categoryToken[categoryId].setKYCRequired(isKYCRequired);
+    }
+
+    function setBatchKYCRequired(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint batchId,
+        bool isKYCRequired
+    ) external {
+        if (!_storage.batchCreated[batchId]) {
+            revert InvalidBatchId(batchId);
+        }
+
+        _storage._forwardContractBatch.setKYCRequired(batchId, isKYCRequired);
     }
 
     function setCategoryVerificationRegistry(
