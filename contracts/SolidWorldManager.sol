@@ -13,11 +13,13 @@ import "./interfaces/manager/IWeeklyCarbonRewardsManager.sol";
 import "./interfaces/manager/ICarbonDomainRepository.sol";
 import "./interfaces/manager/ICollateralizationManager.sol";
 import "./interfaces/manager/IDecollateralizationManager.sol";
+import "./interfaces/manager/IRegulatoryComplianceManager.sol";
 import "./libraries/DomainDataTypes.sol";
 import "./libraries/manager/WeeklyCarbonRewards.sol";
 import "./libraries/manager/CarbonDomainRepository.sol";
 import "./libraries/manager/CollateralizationManager.sol";
 import "./libraries/manager/DecollateralizationManager.sol";
+import "./libraries/manager/RegulatoryComplianceManager.sol";
 
 contract SolidWorldManager is
     Initializable,
@@ -29,12 +31,14 @@ contract SolidWorldManager is
     ICollateralizationManager,
     IDecollateralizationManager,
     ICarbonDomainRepository,
+    IRegulatoryComplianceManager,
     SolidWorldManagerStorage
 {
     using WeeklyCarbonRewards for SolidWorldManagerStorage.Storage;
     using CarbonDomainRepository for SolidWorldManagerStorage.Storage;
     using CollateralizationManager for SolidWorldManagerStorage.Storage;
     using DecollateralizationManager for SolidWorldManagerStorage.Storage;
+    using RegulatoryComplianceManager for SolidWorldManagerStorage.Storage;
 
     event FeeReceiverUpdated(address indexed feeReceiver);
 
@@ -225,6 +229,32 @@ contract SolidWorldManager is
 
     function setFeeReceiver(address feeReceiver) external onlyOwner {
         _setFeeReceiver(feeReceiver);
+    }
+
+    function setCategoryKYCRequired(uint categoryId, bool isKYCRequired) external onlyOwner {
+        _storage.setCategoryKYCRequired(categoryId, isKYCRequired);
+    }
+
+    function setBatchKYCRequired(uint batchId, bool isKYCRequired) external onlyOwner {
+        _storage.setBatchKYCRequired(batchId, isKYCRequired);
+    }
+
+    function setCategoryVerificationRegistry(uint categoryId, address verificationRegistry)
+        external
+        onlyOwner
+    {
+        _storage.setCategoryVerificationRegistry(categoryId, verificationRegistry);
+    }
+
+    function setForwardsVerificationRegistry(address verificationRegistry) external onlyOwner {
+        _storage.setForwardsVerificationRegistry(verificationRegistry);
+    }
+
+    function setCollateralizedBasketTokenDeployerVerificationRegistry(address verificationRegistry)
+        external
+        onlyOwner
+    {
+        _storage.setCollateralizedBasketTokenDeployerVerificationRegistry(verificationRegistry);
     }
 
     /// @dev accept transfers from this contract only

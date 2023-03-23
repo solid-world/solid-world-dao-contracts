@@ -15,7 +15,7 @@ contract ForwardContractBatchTokenTest is BaseForwardContractBatchTokenTest {
 
     function testSetKYCRequired_revertsIfNotOwner() public {
         vm.prank(testAccount0);
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         forwardContractBatchToken.setKYCRequired(batchId0, true);
     }
 
@@ -28,7 +28,7 @@ contract ForwardContractBatchTokenTest is BaseForwardContractBatchTokenTest {
         address verificationRegistry = vm.addr(1);
 
         vm.prank(testAccount0);
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         forwardContractBatchToken.setVerificationRegistry(verificationRegistry);
     }
 

@@ -31,7 +31,7 @@ abstract contract RegulatoryCompliant is IRegulatoryCompliant {
         _setVerificationRegistry(_verificationRegistry);
     }
 
-    function getVerificationRegistry() external view returns (address) {
+    function getVerificationRegistry() public view returns (address) {
         return verificationRegistry;
     }
 

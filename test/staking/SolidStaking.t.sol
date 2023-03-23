@@ -246,7 +246,7 @@ contract SolidStakingTest is BaseSolidStakingTest {
         address asset = vm.addr(1);
 
         vm.prank(testAccount);
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         solidStaking.setKYCRequired(asset, true);
     }
 
@@ -261,7 +261,7 @@ contract SolidStakingTest is BaseSolidStakingTest {
         address verificationRegistry = vm.addr(1);
 
         vm.prank(testAccount);
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         solidStaking.setVerificationRegistry(verificationRegistry);
     }
 

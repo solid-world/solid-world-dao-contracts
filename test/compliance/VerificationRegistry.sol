@@ -111,7 +111,7 @@ contract VerificationRegistryTest is BaseVerificationRegistryTest {
         address arbitraryCaller = address(2);
 
         vm.prank(arbitraryCaller);
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         verificationRegistry.setBlacklister(blacklister);
     }
 
@@ -120,7 +120,7 @@ contract VerificationRegistryTest is BaseVerificationRegistryTest {
         address arbitraryCaller = address(2);
 
         vm.prank(arbitraryCaller);
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         verificationRegistry.setVerifier(verifier);
     }
 

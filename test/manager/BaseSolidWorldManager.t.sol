@@ -14,6 +14,7 @@ abstract contract BaseSolidWorldManager is BaseTest {
 
     SolidWorldManager manager;
     ForwardContractBatchToken forwardContractBatch;
+    address verificationRegistry = address(new VerificationRegistry());
     address root = address(this);
     address testAccount = vm.addr(1);
     address feeReceiver = vm.addr(2);
@@ -32,7 +33,7 @@ abstract contract BaseSolidWorldManager is BaseTest {
         vm.warp(PRESET_CURRENT_DATE);
 
         manager = new SolidWorldManager();
-        forwardContractBatch = new ForwardContractBatchToken("", address(new VerificationRegistry()));
+        forwardContractBatch = new ForwardContractBatchToken("", verificationRegistry);
         forwardContractBatch.transferOwnership(address(manager));
 
         _labelAccounts();
@@ -41,7 +42,7 @@ abstract contract BaseSolidWorldManager is BaseTest {
         forwardContractBatch.setApprovalForAll(address(manager), true);
 
         manager.initialize(
-            new CollateralizedBasketTokenDeployer(),
+            _configuredCBTDeployer(address(manager)),
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,
@@ -58,6 +59,14 @@ abstract contract BaseSolidWorldManager is BaseTest {
         vm.label(testAccount, "Test account");
         vm.label(feeReceiver, "Protocol fee receiver");
         vm.label(weeklyRewardsMinter, "Weekly rewards minter");
+    }
+
+    function _configuredCBTDeployer(address owner)
+        private
+        returns (CollateralizedBasketTokenDeployer deployer)
+    {
+        deployer = new CollateralizedBasketTokenDeployer(verificationRegistry);
+        deployer.transferOwnership(owner);
     }
 
     function _addBatchWithDependencies(uint certificationDate, uint mintableAmount) internal {

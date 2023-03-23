@@ -9,7 +9,8 @@ async function deploySolidWorldManager(
   deployer,
   contractsOwner,
   ForwardContractBatchToken,
-  EmissionManager
+  EmissionManager,
+  CollateralizedBasketTokenDeployer
 ) {
   const WeeklyCarbonRewards = await deployments.deploy('WeeklyCarbonRewards', {
     ...(await getCurrentGasFees()),
@@ -48,8 +49,8 @@ async function deploySolidWorldManager(
     }
   )
 
-  const CollateralizedBasketTokenDeployer = await deployments.deploy(
-    'CollateralizedBasketTokenDeployer',
+  const RegulatoryComplianceManager = await deployments.deploy(
+    'RegulatoryComplianceManager',
     {
       ...(await getCurrentGasFees()),
       from: deployer,
@@ -67,7 +68,8 @@ async function deploySolidWorldManager(
       WeeklyCarbonRewards: WeeklyCarbonRewards.address,
       CarbonDomainRepository: CarbonDomainRepository.address,
       CollateralizationManager: CollateralizationManager.address,
-      DecollateralizationManager: DecollateralizationManager.address
+      DecollateralizationManager: DecollateralizationManager.address,
+      RegulatoryComplianceManager: RegulatoryComplianceManager.address
     },
     proxy: {
       // owner of the proxy (a.k.a address authorized to perform upgrades)
@@ -78,7 +80,7 @@ async function deploySolidWorldManager(
         init: {
           methodName: 'initialize',
           args: [
-            CollateralizedBasketTokenDeployer.address,
+            CollateralizedBasketTokenDeployer,
             ForwardContractBatchToken,
             INITIAL_COLLATERALIZATION_FEE,
             INITIAL_DECOLLATERALIZATION_FEE,

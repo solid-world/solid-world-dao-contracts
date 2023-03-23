@@ -15,7 +15,7 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
 
     function testSetKYCRequired_revertsIfNotOwner() public {
         vm.prank(testAccount0);
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         collateralizedBasketToken.setKYCRequired(true);
     }
 
@@ -28,7 +28,7 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
         address _verificationRegistry = vm.addr(1);
 
         vm.prank(testAccount0);
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         collateralizedBasketToken.setVerificationRegistry(_verificationRegistry);
     }
 
