@@ -105,12 +105,15 @@ contract ForwardContractBatchToken is ERC1155, Ownable, RegulatoryCompliant {
         _mint(to, id, amount, data);
     }
 
-    function burn(
-        address from,
-        uint id,
-        uint amount
-    ) public onlyOwner {
-        _burn(from, id, amount);
+    function burn(uint id, uint amount) public regulatoryCompliant(id, msg.sender) {
+        _burn(msg.sender, id, amount);
+    }
+
+    function burnBatch(uint[] memory ids, uint[] memory amounts)
+        public
+        batchRegulatoryCompliant(ids, msg.sender)
+    {
+        _burnBatch(msg.sender, ids, amounts);
     }
 
     function _checkValidCounterparty(uint batchId, address subject) private view {
