@@ -137,7 +137,7 @@ contract EmissionManagerTest is BaseEmissionManagerTest {
         address claimer = vm.addr(115);
         address user = vm.addr(116);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         vm.prank(emissionAdmin);
         emissionManager.setClaimer(user, claimer);
     }
@@ -154,7 +154,7 @@ contract EmissionManagerTest is BaseEmissionManagerTest {
     function testSetEmissionManager_failsIfNotCalledByOwner() public {
         address newEmissionManager = vm.addr(115);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         vm.prank(emissionAdmin);
         emissionManager.setEmissionManager(newEmissionManager);
     }
@@ -170,7 +170,7 @@ contract EmissionManagerTest is BaseEmissionManagerTest {
     function testSetEmissionAdmin_failsIfNotCalledByOwner() public {
         address reward = vm.addr(116);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         vm.prank(emissionAdmin);
         emissionManager.setEmissionAdmin(reward, emissionAdmin);
     }
@@ -188,7 +188,7 @@ contract EmissionManagerTest is BaseEmissionManagerTest {
     function testSetRewardsController_failsIfNotCalledByOwner() public {
         address newController = vm.addr(115);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         vm.prank(emissionAdmin);
         emissionManager.setRewardsController(newController);
     }
@@ -206,7 +206,7 @@ contract EmissionManagerTest is BaseEmissionManagerTest {
     function testCarbonRewardsManager_failsIfNotCalledByOwner() public {
         address newCarbonRewardsManager = vm.addr(115);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         vm.prank(emissionAdmin);
         emissionManager.setCarbonRewardsManager(newCarbonRewardsManager);
     }

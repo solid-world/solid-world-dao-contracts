@@ -12,7 +12,7 @@ contract CollateralizedBasketTokenDeployerTest is BaseCollateralizedBasketTokenD
         address _verificationRegistry = vm.addr(1);
 
         vm.prank(testAccount0);
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         deployer.setVerificationRegistry(_verificationRegistry);
     }
 

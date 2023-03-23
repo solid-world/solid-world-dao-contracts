@@ -17,6 +17,10 @@ abstract contract BaseTest is Test {
         vm.expectRevert(stdError.arithmeticError);
     }
 
+    function _expectRevert_NotOwner() internal {
+        _expectRevertWithMessage("Ownable: caller is not the owner");
+    }
+
     function assertNotEq(address a, address b) internal {
         if (a == b) {
             emit log("Error: a != b not satisfied [address]");

@@ -7,16 +7,16 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
     function testAuthorization() public {
         vm.startPrank(vm.addr(77));
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.addCategory(3, "", "", INITIAL_CATEGORY_TA);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.updateCategory(CATEGORY_ID, 0, 0, 0);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.addProject(3, 5);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.addBatch(
             DomainDataTypes.Batch({
                 id: 7,
@@ -32,31 +32,31 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
             10000
         );
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.setWeeklyRewardsMinter(vm.addr(1234));
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.setCollateralizationFee(1);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.setDecollateralizationFee(1);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.setRewardsFee(1);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.setFeeReceiver(vm.addr(1234));
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.pause();
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.unpause();
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.setBatchAccumulating(1, true);
 
-        _expectRevertWithMessage("Ownable: caller is not the owner");
+        _expectRevert_NotOwner();
         manager.setBatchCertificationDate(1, 1);
 
         vm.stopPrank();
