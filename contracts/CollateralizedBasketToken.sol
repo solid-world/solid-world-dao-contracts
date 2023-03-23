@@ -15,9 +15,7 @@ contract CollateralizedBasketToken is ERC20Burnable, Ownable, RegulatoryComplian
     event KYCRequiredSet(bool indexed kycRequired);
 
     modifier regulatoryCompliant(address subject) {
-        if (!isValidCounterparty(subject, kycRequired)) {
-            revert NotRegulatoryCompliant(subject);
-        }
+        _checkValidCounterparty(subject);
         _;
     }
 
@@ -98,5 +96,16 @@ contract CollateralizedBasketToken is ERC20Burnable, Ownable, RegulatoryComplian
 
     function mint(address to, uint amount) public onlyOwner regulatoryCompliant(to) {
         _mint(to, amount);
+    }
+
+    function _checkValidCounterparty(address subject) internal view {
+        // owner is whitelisted
+        if (subject == owner()) {
+            return;
+        }
+
+        if (!isValidCounterparty(subject, kycRequired)) {
+            revert NotRegulatoryCompliant(subject);
+        }
     }
 }
