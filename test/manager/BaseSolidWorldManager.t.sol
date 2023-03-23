@@ -3,6 +3,7 @@ pragma solidity 0.8.16;
 
 import "../BaseTest.sol";
 import "../../contracts/SolidWorldManager.sol";
+import "../../contracts/compliance/VerificationRegistry.sol";
 
 abstract contract BaseSolidWorldManager is BaseTest {
     event CategoryRebalanced(
@@ -31,7 +32,7 @@ abstract contract BaseSolidWorldManager is BaseTest {
         vm.warp(PRESET_CURRENT_DATE);
 
         manager = new SolidWorldManager();
-        forwardContractBatch = new ForwardContractBatchToken("");
+        forwardContractBatch = new ForwardContractBatchToken("", address(new VerificationRegistry()));
         forwardContractBatch.transferOwnership(address(manager));
 
         _labelAccounts();
