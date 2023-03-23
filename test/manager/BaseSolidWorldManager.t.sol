@@ -14,6 +14,7 @@ abstract contract BaseSolidWorldManager is BaseTest {
 
     SolidWorldManager manager;
     ForwardContractBatchToken forwardContractBatch;
+    address verificationRegistry = address(new VerificationRegistry());
     address root = address(this);
     address testAccount = vm.addr(1);
     address feeReceiver = vm.addr(2);
@@ -32,7 +33,7 @@ abstract contract BaseSolidWorldManager is BaseTest {
         vm.warp(PRESET_CURRENT_DATE);
 
         manager = new SolidWorldManager();
-        forwardContractBatch = new ForwardContractBatchToken("", address(new VerificationRegistry()));
+        forwardContractBatch = new ForwardContractBatchToken("", verificationRegistry);
         forwardContractBatch.transferOwnership(address(manager));
 
         _labelAccounts();
@@ -41,7 +42,7 @@ abstract contract BaseSolidWorldManager is BaseTest {
         forwardContractBatch.setApprovalForAll(address(manager), true);
 
         manager.initialize(
-            new CollateralizedBasketTokenDeployer(),
+            new CollateralizedBasketTokenDeployer(verificationRegistry),
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,

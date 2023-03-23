@@ -91,7 +91,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         solidStaking.setup(rewardsController, address(this));
         emissionManager.setup(address(solidWorldManager), address(rewardsController), address(this));
         solidWorldManager.initialize(
-            new CollateralizedBasketTokenDeployer(),
+            new CollateralizedBasketTokenDeployer(verificationRegistry),
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,
