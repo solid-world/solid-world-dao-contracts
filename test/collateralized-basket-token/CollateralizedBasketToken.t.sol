@@ -117,14 +117,30 @@ contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
     }
 
     function testApprove_revertsIfComplianceCheckFails_caller() public {
-        uint transferAmount = 100;
-
         collateralizedBasketToken.setKYCRequired(true);
         verificationRegistry.registerVerification(testAccount1);
 
         vm.prank(testAccount0);
         _expectRevert_NotRegulatoryCompliant(testAccount0);
-        collateralizedBasketToken.approve(testAccount1, transferAmount);
+        collateralizedBasketToken.approve(testAccount1, 100);
+    }
+
+    function testIncreaseAllowance_revertsIfComplianceCheckFails_spender() public {
+        collateralizedBasketToken.setKYCRequired(true);
+        verificationRegistry.registerVerification(testAccount0);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(testAccount1);
+        collateralizedBasketToken.increaseAllowance(testAccount1, 100);
+    }
+
+    function testIncreaseAllowance_revertsIfComplianceCheckFails_caller() public {
+        collateralizedBasketToken.setKYCRequired(true);
+        verificationRegistry.registerVerification(testAccount1);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(testAccount0);
+        collateralizedBasketToken.increaseAllowance(testAccount1, 100);
     }
 
     function testMint_revertsIfComplianceCheckFails_toAddress() public {

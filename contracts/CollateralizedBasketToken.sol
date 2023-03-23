@@ -51,6 +51,16 @@ contract CollateralizedBasketToken is ERC20Burnable, Ownable, RegulatoryComplian
         return super.approve(spender, amount);
     }
 
+    function increaseAllowance(address spender, uint addedValue)
+        public
+        override
+        regulatoryCompliant(msg.sender)
+        regulatoryCompliant(spender)
+        returns (bool)
+    {
+        return super.increaseAllowance(spender, addedValue);
+    }
+
     function transfer(address to, uint256 amount)
         public
         override
