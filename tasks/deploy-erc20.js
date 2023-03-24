@@ -32,6 +32,12 @@ task('deploy-erc20', 'Deploys a ERC-20 token')
     }
   )
 
+async function getVerificationRegistryAddress(deployments) {
+  const verificationRegistry = await deployments.get('VerificationRegistry')
+
+  return verificationRegistry.address
+}
+
 async function deployERC20(
   ethers,
   deployer,
@@ -40,7 +46,14 @@ async function deployERC20(
   ownerAddr
 ) {
   const Token = await ethers.getContractFactory('CollateralizedBasketToken')
-  const token = await Token.deploy(tokenSymbol, tokenSymbol)
+  const verificationRegistryAddress = await getVerificationRegistryAddress(
+    deployments
+  )
+  const token = await Token.deploy(
+    tokenSymbol,
+    tokenSymbol,
+    verificationRegistryAddress
+  )
   await token.deployed()
 
   const tx = await token.transferOwnership(ownerAddr)
