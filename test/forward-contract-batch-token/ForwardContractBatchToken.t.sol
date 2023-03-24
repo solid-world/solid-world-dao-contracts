@@ -180,6 +180,57 @@ contract ForwardContractBatchTokenTest is BaseForwardContractBatchTokenTest {
         forwardContractBatchToken.setApprovalForAll(testAccount1, true);
     }
 
+    function testBurn_revertsIfComplianceCheckFails_callerAddress() public {
+        uint amount = 100;
+
+        forwardContractBatchToken.setKYCRequired(batchId0, true);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(batchId0, testAccount0);
+        forwardContractBatchToken.burn(batchId0, amount);
+    }
+
+    function testBurn_burnsTokensFromCaller() public {
+        uint amount = 100;
+
+        uint balanceBefore = forwardContractBatchToken.balanceOf(testAccount0, batchId0);
+
+        vm.prank(testAccount0);
+        forwardContractBatchToken.burn(batchId0, amount);
+
+        uint balanceAfter = forwardContractBatchToken.balanceOf(testAccount0, batchId0);
+
+        assertEq(balanceAfter, balanceBefore - amount);
+    }
+
+    function testBurnBatch_revertsIfComplianceCheckFails_callerAddress() public {
+        uint[] memory batchIds = _toArray(batchId0, batchId1);
+        uint[] memory amounts = _toArray(100, 150);
+
+        forwardContractBatchToken.setKYCRequired(batchId1, true);
+
+        vm.prank(testAccount0);
+        _expectRevert_NotRegulatoryCompliant(batchId1, testAccount0);
+        forwardContractBatchToken.burnBatch(batchIds, amounts);
+    }
+
+    function testBurnBatch_burnsTokensFromCaller() public {
+        uint[] memory batchIds = _toArray(batchId0, batchId1);
+        uint[] memory amounts = _toArray(100, 150);
+
+        uint balanceBefore0 = forwardContractBatchToken.balanceOf(testAccount0, batchId0);
+        uint balanceBefore1 = forwardContractBatchToken.balanceOf(testAccount0, batchId1);
+
+        vm.prank(testAccount0);
+        forwardContractBatchToken.burnBatch(batchIds, amounts);
+
+        uint balanceAfter0 = forwardContractBatchToken.balanceOf(testAccount0, batchId0);
+        uint balanceAfter1 = forwardContractBatchToken.balanceOf(testAccount0, batchId1);
+
+        assertEq(balanceAfter0, balanceBefore0 - amounts[0]);
+        assertEq(balanceAfter1, balanceBefore1 - amounts[1]);
+    }
+
     function testCompliance_ownerIsWhitelisted() public {
         forwardContractBatchToken.setKYCRequired(batchId0, true);
         verificationRegistry.registerVerification(testAccount0);
@@ -195,5 +246,8 @@ contract ForwardContractBatchTokenTest is BaseForwardContractBatchTokenTest {
             _toArray(100),
             ""
         );
+
+        forwardContractBatchToken.burn(batchId0, 100);
+        forwardContractBatchToken.burnBatch(_toArray(batchId0), _toArray(100));
     }
 }
