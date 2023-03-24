@@ -17,12 +17,26 @@ const deployMockPoolAndFactory = async (deployer, deployments) => {
   return Factory.address
 }
 
+async function getVerificationRegistryAddress(deployments) {
+  const verificationRegistry = await deployments.get('VerificationRegistry')
+
+  return verificationRegistry.address
+}
+
 const deployMockERC20 = async (deployer, deployments) => {
+  const verificationRegistryAddress = await getVerificationRegistryAddress(
+    deployments
+  )
+
   const CollateralizedBasketToken = await deployments.deploy(
     'CollateralizedBasketToken',
     {
       from: deployer,
-      args: ['Mock Collateralized Basket Token', 'MockCBT'],
+      args: [
+        'Mock Collateralized Basket Token',
+        'MockCBT',
+        verificationRegistryAddress
+      ],
       log: true
     }
   )
