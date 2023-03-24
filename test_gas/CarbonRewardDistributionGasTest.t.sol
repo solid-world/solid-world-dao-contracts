@@ -12,22 +12,22 @@ contract CarbonRewardDistributionGasTest is GasTest {
     uint constant CATEGORY_ID = 1;
     uint constant PROJECT_ID = 3;
     uint constant BATCH_ID = 5;
-    uint constant ONE_YEAR = 1 weeks * 52;
 
     SolidWorldManager manager;
     SolidStaking staking;
     EmissionManager emissionManager;
     RewardsController rewardsController;
+    address verificationRegistry = address(new VerificationRegistry());
 
     address rewardsVault;
     address feeReceiver;
     address rewardOracle;
 
     function setUp() public {
-        vm.warp(CURRENT_DATE);
+        vm.warp(PRESET_CURRENT_DATE);
 
         manager = new SolidWorldManager();
-        staking = new SolidStaking();
+        staking = new SolidStaking(verificationRegistry);
         emissionManager = new EmissionManager();
         rewardsController = new RewardsController();
 
@@ -35,9 +35,14 @@ contract CarbonRewardDistributionGasTest is GasTest {
         feeReceiver = vm.addr(2);
         rewardOracle = vm.addr(7);
 
-        ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken("");
+        ForwardContractBatchToken forwardContractBatch = new ForwardContractBatchToken(
+            "",
+            verificationRegistry
+        );
         forwardContractBatch.transferOwnership(address(manager));
-        CollateralizedBasketTokenDeployer collateralizedBasketTokenDeployer = new CollateralizedBasketTokenDeployer();
+        CollateralizedBasketTokenDeployer collateralizedBasketTokenDeployer = new CollateralizedBasketTokenDeployer(
+                verificationRegistry
+            );
         manager.initialize(
             collateralizedBasketTokenDeployer,
             forwardContractBatch,
@@ -105,7 +110,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
                     status: 0,
                     projectId: PROJECT_ID + (i % rewards),
                     collateralizedCredits: 10000,
-                    certificationDate: uint32(CURRENT_DATE + _yearsToSeconds(10)),
+                    certificationDate: uint32(PRESET_CURRENT_DATE + _yearsToSeconds(10)),
                     vintage: 2022,
                     batchTA: 0,
                     supplier: vm.addr(13),
@@ -122,7 +127,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
         );
 
         for (uint i = 0; i < rewards; i++) {
-            assets[i] = address(new CollateralizedBasketToken("", ""));
+            assets[i] = address(new CollateralizedBasketToken("", "", verificationRegistry));
             categoryIds[i] = CATEGORY_ID + i;
 
             emissionManager.setEmissionAdmin(
@@ -135,7 +140,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
             config[i].asset = assets[i];
             config[i].reward = address(manager.getCategoryToken(CATEGORY_ID + i));
             config[i].rewardOracle = IEACAggregatorProxy(rewardOracle);
-            config[i].distributionEnd = CURRENT_DATE;
+            config[i].distributionEnd = PRESET_CURRENT_DATE;
         }
 
         emissionManager.configureAssets(config);
