@@ -8,6 +8,7 @@ const { ethers } = require('ethers')
 require('./tasks')
 
 const {
+  CELOSCAN_KEY = '',
   POLYGONSCAN_KEY = '',
   ETHERSCAN_KEY = '',
   INFURA_KEY = '',
@@ -85,6 +86,26 @@ module.exports = {
         }
       }
     },
+    celo: {
+      url: 'https://celo-mainnet.infura.io/v3/' + INFURA_KEY,
+      timeout: 100000,
+      verify: {
+        etherscan: {
+          apiKey: CELOSCAN_KEY,
+          apiUrl: 'https://api.celoscan.io/'
+        }
+      }
+    },
+    celo_stage: {
+      url: 'https://celo-mainnet.infura.io/v3/' + INFURA_KEY,
+      timeout: 100000,
+      verify: {
+        etherscan: {
+          apiKey: CELOSCAN_KEY,
+          apiUrl: 'https://api.celoscan.io/'
+        }
+      }
+    },
     localhost: {
       url: 'http://127.0.0.1:8545',
       timeout: 10000
@@ -94,8 +115,19 @@ module.exports = {
     apiKey: {
       goerli: ETHERSCAN_KEY,
       polygonMumbai: POLYGONSCAN_KEY,
-      polygon: POLYGONSCAN_KEY
-    }
+      polygon: POLYGONSCAN_KEY,
+      celo: CELOSCAN_KEY
+    },
+    customChains: [
+      {
+        network: 'celo',
+        chainId: 42220,
+        urls: {
+          apiURL: 'https://api.celoscan.io/api',
+          browserURL: 'https://celoscan.io'
+        }
+      }
+    ]
   },
   namedAccounts: {
     deployer: DEPLOYER_PRIVATE_KEY
