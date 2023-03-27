@@ -17,7 +17,7 @@
     "url": "git+https://github.com/solid-world/solid-world-dao-contracts.git"
   },
   "author": "Solid World DAO",
-  "license": "MIT",
+  "license": "BUSL-1.1",
   "bugs": {
     "url": "https://github.com/solid-world/solid-world-dao-contracts/issues"
   },
