@@ -1,11 +1,11 @@
 const { BigNumber } = require('ethers')
-const { getCurrentGasFees } = require('@solid-world/gas-station')
 const INITIAL_COLLATERALIZATION_FEE = BigNumber.from(30) // 0.3%
 const INITIAL_DECOLLATERALIZATION_FEE = BigNumber.from(500) // 5.0%
 const INITIAL_REWARDS_FEE = BigNumber.from(200) // 2.0%
 
 async function deploySolidWorldManager(
   deployments,
+  gasStation,
   deployer,
   contractsOwner,
   ForwardContractBatchToken,
@@ -13,7 +13,7 @@ async function deploySolidWorldManager(
   CollateralizedBasketTokenDeployer
 ) {
   const WeeklyCarbonRewards = await deployments.deploy('WeeklyCarbonRewards', {
-    ...(await getCurrentGasFees()),
+    ...(await gasStation.getCurrentFees()),
     from: deployer,
     args: [],
     log: true
@@ -22,7 +22,7 @@ async function deploySolidWorldManager(
   const CarbonDomainRepository = await deployments.deploy(
     'CarbonDomainRepository',
     {
-      ...(await getCurrentGasFees()),
+      ...(await gasStation.getCurrentFees()),
       from: deployer,
       args: [],
       log: true
@@ -32,7 +32,7 @@ async function deploySolidWorldManager(
   const CollateralizationManager = await deployments.deploy(
     'CollateralizationManager',
     {
-      ...(await getCurrentGasFees()),
+      ...(await gasStation.getCurrentFees()),
       from: deployer,
       args: [],
       log: true
@@ -42,7 +42,7 @@ async function deploySolidWorldManager(
   const DecollateralizationManager = await deployments.deploy(
     'DecollateralizationManager',
     {
-      ...(await getCurrentGasFees()),
+      ...(await gasStation.getCurrentFees()),
       from: deployer,
       args: [],
       log: true
@@ -52,7 +52,7 @@ async function deploySolidWorldManager(
   const RegulatoryComplianceManager = await deployments.deploy(
     'RegulatoryComplianceManager',
     {
-      ...(await getCurrentGasFees()),
+      ...(await gasStation.getCurrentFees()),
       from: deployer,
       args: [],
       log: true
@@ -60,7 +60,7 @@ async function deploySolidWorldManager(
   )
 
   return deployments.deploy('SolidWorldManager', {
-    ...(await getCurrentGasFees()),
+    ...(await gasStation.getCurrentFees()),
     from: deployer,
     args: [],
     log: true,

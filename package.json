@@ -27,7 +27,7 @@
     "@nomiclabs/hardhat-etherscan": "^3.1.4",
     "@openzeppelin/contracts": "^4.7.3",
     "@openzeppelin/contracts-upgradeable": "^4.7.3",
-    "@solid-world/gas-station": "^0.1.0",
+    "@solid-world/gas-station": "0.2.0",
     "@uniswap/v3-core": "^1.0.1",
     "@uniswap/v3-periphery": "^1.4.3",
     "dotenv": "^16.0.0",

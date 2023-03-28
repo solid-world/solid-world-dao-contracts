@@ -1,8 +1,6 @@
-const { getCurrentGasFees } = require('@solid-world/gas-station')
-
-async function deployEmissionManager(deployments, deployer) {
+async function deployEmissionManager(deployments, gasStation, deployer) {
   return deployments.deploy('EmissionManager', {
-    ...(await getCurrentGasFees()),
+    ...(await gasStation.getCurrentFees()),
     from: deployer,
     args: [],
     log: true
@@ -11,6 +9,7 @@ async function deployEmissionManager(deployments, deployer) {
 
 async function setupEmissionManager(
   deployments,
+  gasStation,
   deployer,
   SolidWorldManager,
   RewardsController,
@@ -18,7 +17,7 @@ async function setupEmissionManager(
 ) {
   return deployments.execute(
     'EmissionManager',
-    { ...(await getCurrentGasFees()), from: deployer, log: true },
+    { ...(await gasStation.getCurrentFees()), from: deployer, log: true },
     'setup',
     SolidWorldManager,
     RewardsController,

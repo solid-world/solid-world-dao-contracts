@@ -1,12 +1,11 @@
-const { getCurrentGasFees } = require('@solid-world/gas-station')
-
 async function deployCollateralizedBasketTokenDeployer(
   deployments,
+  gasStation,
   deployer,
   VerificationRegistry
 ) {
   return deployments.deploy('CollateralizedBasketTokenDeployer', {
-    ...(await getCurrentGasFees()),
+    ...(await gasStation.getCurrentFees()),
     from: deployer,
     args: [VerificationRegistry],
     log: true
@@ -15,12 +14,13 @@ async function deployCollateralizedBasketTokenDeployer(
 
 async function setupCollateralizedBasketTokenDeployer(
   deployments,
+  gasStation,
   deployer,
   SolidWorldManager
 ) {
   return deployments.execute(
     'CollateralizedBasketTokenDeployer',
-    { ...(await getCurrentGasFees()), from: deployer, log: true },
+    { ...(await gasStation.getCurrentFees()), from: deployer, log: true },
     'transferOwnership',
     SolidWorldManager
   )
