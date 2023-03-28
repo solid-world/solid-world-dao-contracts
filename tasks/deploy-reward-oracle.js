@@ -1,5 +1,4 @@
-const { getCurrentGasFees } = require('@solid-world/gas-station')
-const { setupEnvForGasStation } = require('../deploy-helpers/gas-station-env')
+const { getGasStation } = require('../deploy-helpers/gas-station')
 
 const deployMockPoolAndFactory = async (deployer, deployments) => {
   const Pool = await deployments.deploy('MockUniswapV3Pool', {
@@ -71,9 +70,9 @@ task('deploy-reward-oracle', 'Deploys a reward price oracle contract')
   .setAction(
     async (
       { owner, factory, baseToken, quoteToken, fee, secondsAgo },
-      { getNamedAccounts, deployments, network, getChainId, ethers }
+      { getNamedAccounts, deployments, network, ethers }
     ) => {
-      await setupEnvForGasStation(network, getChainId)
+      const gasStation = await getGasStation(network)
       const { deployer, contractsOwner } = await getNamedAccounts()
 
       let actualOwner = owner ?? contractsOwner
@@ -96,7 +95,7 @@ task('deploy-reward-oracle', 'Deploys a reward price oracle contract')
       const UniswapEACAggregatorProxyAdapter = await deployments.deploy(
         deploymentName,
         {
-          ...(await getCurrentGasFees()),
+          ...(await gasStation.getCurrentFees()),
           // manual gas limit, because on goerli sometimes the deployment fails with
           // "contract creation code storage out of gas" during `eth_estimategas`.
           // I couldn't figure out why.

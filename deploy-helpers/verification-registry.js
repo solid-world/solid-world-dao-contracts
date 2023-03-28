@@ -1,12 +1,11 @@
-const { getCurrentGasFees } = require('@solid-world/gas-station')
-
 async function deployVerificationRegistry(
   deployments,
+  gasStation,
   deployer,
   contractsOwner
 ) {
   return deployments.deploy('VerificationRegistry', {
-    ...(await getCurrentGasFees()),
+    ...(await gasStation.getCurrentFees()),
     from: deployer,
     args: [],
     log: true,

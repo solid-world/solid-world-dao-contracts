@@ -1,8 +1,11 @@
-const { getCurrentGasFees } = require('@solid-world/gas-station')
-
-async function deploySolidStaking(deployments, deployer, verificationRegistry) {
+async function deploySolidStaking(
+  deployments,
+  gasStation,
+  deployer,
+  verificationRegistry
+) {
   return deployments.deploy('SolidStaking', {
-    ...(await getCurrentGasFees()),
+    ...(await gasStation.getCurrentFees()),
     from: deployer,
     args: [verificationRegistry],
     log: true
@@ -11,6 +14,7 @@ async function deploySolidStaking(deployments, deployer, verificationRegistry) {
 
 async function setupSolidStaking(
   deployments,
+  gasStation,
   deployer,
   RewardsController,
   contractsOwner
@@ -18,7 +22,7 @@ async function setupSolidStaking(
   return deployments.execute(
     'SolidStaking',
     {
-      ...(await getCurrentGasFees()),
+      ...(await gasStation.getCurrentFees()),
       from: deployer,
       log: true
     },
