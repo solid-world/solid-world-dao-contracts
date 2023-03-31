@@ -1,4 +1,4 @@
-const { getGasStation } = require('../deploy-helpers/gas-station')
+const { initializeGasStation } = require('@solid-world/gas-station')
 
 const deployMockPoolAndFactory = async (deployer, deployments) => {
   const Pool = await deployments.deploy('MockUniswapV3Pool', {
@@ -72,7 +72,7 @@ task('deploy-reward-oracle', 'Deploys a reward price oracle contract')
       { owner, factory, baseToken, quoteToken, fee, secondsAgo },
       { getNamedAccounts, deployments, network, ethers }
     ) => {
-      const gasStation = await getGasStation(network)
+      const gasStation = await initializeGasStation(ethers.provider)
       const { deployer, contractsOwner } = await getNamedAccounts()
 
       let actualOwner = owner ?? contractsOwner
