@@ -1,4 +1,4 @@
-const { getGasStation } = require('../deploy-helpers/gas-station')
+const { initializeGasStation } = require('@solid-world/gas-station')
 
 task('deploy-liquidity-deployer', 'Deploys a LiquidityDeployer contract')
   .addParam('token0', 'The address of token0.')
@@ -23,9 +23,9 @@ task('deploy-liquidity-deployer', 'Deploys a LiquidityDeployer contract')
         conversionRate,
         conversionRateDecimals
       },
-      { getNamedAccounts, deployments, network, ethers }
+      { getNamedAccounts, deployments, ethers }
     ) => {
-      const gasStation = await getGasStation(network)
+      const gasStation = await initializeGasStation(ethers.provider)
       const { deployer } = await getNamedAccounts()
 
       const deploymentName = await makeDeploymentName(

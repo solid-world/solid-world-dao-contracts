@@ -770,10 +770,10 @@
     "@sentry/types" "5.30.0"
     tslib "^1.9.3"
 
-"@solid-world/gas-station@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@solid-world/gas-station/-/gas-station-0.2.0.tgz#c1bfa76cd5002d0819dee4b9473285595288c5de"
-  integrity sha512-q5+ukB6z6+U0m1C00vnbaK6nhfoAJ/i4pY/6vpKfgnqS0TEKqEgM+f+loy+wuXHI1S9PvaWpYiHYeKHUxuxswg==
+"@solid-world/gas-station@0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@solid-world/gas-station/-/gas-station-0.3.0.tgz#a1d0861ef64ece3a11e6b9ce9cacf38512ad9eb0"
+  integrity sha512-xrfRoglWo5qoEV6KrDJ35z3ZtX+GLLktAlQmjFHSLmtrutOBSgxN4lhLu5Ia4crPLsMNM3hQOb9FzqpRKeapRQ==
   dependencies:
     "@ethersproject/providers" "5.7.1"
     ethers "5.7.1"

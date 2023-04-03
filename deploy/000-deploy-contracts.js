@@ -27,10 +27,10 @@ const {
   deployCollateralizedBasketTokenDeployer,
   setupCollateralizedBasketTokenDeployer
 } = require('../deploy-helpers/collateralized-basket-token-deployer')
-const { getGasStation } = require('../deploy-helpers/gas-station')
+const { initializeGasStation } = require('@solid-world/gas-station')
 
-const func = async ({ getNamedAccounts, deployments, getChainId, network }) => {
-  const gasStation = await getGasStation(network)
+const func = async ({ getNamedAccounts, deployments, getChainId, ethers }) => {
+  const gasStation = await initializeGasStation(ethers.provider)
   const { deployer, contractsOwner, rewardsVault } = await getNamedAccounts()
 
   await ensureDeployerHasFunds(deployer, await getChainId())
