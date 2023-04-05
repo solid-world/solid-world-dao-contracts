@@ -110,11 +110,13 @@ abstract contract BaseSolidWorldManager is BaseTest {
         uint initialCategoryTa
     ) internal {
         manager.addCategory(categoryId, "", "", uint24(initialCategoryTa));
+        CollateralizedBasketToken cbt = manager.getCategoryToken(categoryId);
+        vm.label(address(cbt), "Test CBT");
+
         manager.addProject(categoryId, projectId);
 
-        vm.startPrank(testAccount);
-        manager.getCategoryToken(categoryId).approve(address(manager), type(uint).max);
-        vm.stopPrank();
+        vm.prank(testAccount);
+        cbt.approve(address(manager), type(uint).max);
     }
 
     function _addBatch(uint certificationDate, uint mintableAmount) internal {

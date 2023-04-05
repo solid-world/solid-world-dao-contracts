@@ -194,6 +194,15 @@ contract SolidWorldManager is
     }
 
     /// @inheritdoc IDecollateralizationManager
+    function simulateReverseDecollateralization(uint batchId, uint forwardCreditsAmount)
+        external
+        view
+        returns (uint minCbt, uint minCbtDaoCut)
+    {
+        return _storage.simulateReverseDecollateralization(batchId, forwardCreditsAmount);
+    }
+
+    /// @inheritdoc IDecollateralizationManager
     function getBatchesDecollateralizationInfo(uint projectId, uint vintage)
         external
         view

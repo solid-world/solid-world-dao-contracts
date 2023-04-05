@@ -404,6 +404,61 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(manager.getFeeReceiver(), newFeeReceiver);
     }
 
+    function testSimulateReverseDecollateralization_revertsForInvalidBatchId() public {
+        _expectRevert_InvalidBatchId(BATCH_ID);
+        manager.simulateReverseDecollateralization(BATCH_ID, 10000);
+    }
+
+    function testSimulateReverseDecollateralization() public {
+        _addCategoryAndProjectWithApprovedSpending(CATEGORY_ID, PROJECT_ID, TIME_APPRECIATION);
+        _addBatchWithVintageToProject(BATCH_ID, PROJECT_ID, 2023);
+
+        vm.prank(testAccount);
+        manager.collateralizeBatch(BATCH_ID, 10000, 8100e18);
+
+        uint forwardCreditsAmount = 5000;
+
+        (uint minCbt, uint minCbtDaoCut) = manager.simulateReverseDecollateralization(
+            BATCH_ID,
+            forwardCreditsAmount
+        );
+
+        assertApproxEqAbs(minCbt, 5000e18, 1.438888888888888888e18);
+        assertApproxEqAbs(minCbtDaoCut, 500e18, 0.143888888888888888e18);
+    }
+
+    function testSimulateReverseDecollateralization_resultSatisfiesActualDecollateralization() public {
+        _addCategoryAndProjectWithApprovedSpending(CATEGORY_ID, PROJECT_ID, TIME_APPRECIATION);
+        _addBatchWithVintageToProject(BATCH_ID, PROJECT_ID, 2023);
+        CollateralizedBasketToken cbt = manager.getCategoryToken(CATEGORY_ID);
+
+        vm.startPrank(testAccount);
+        manager.collateralizeBatch(BATCH_ID, 10000, 8100e18);
+
+        uint forwardCreditsAmount = 5000;
+
+        (uint minCbt, uint minCbtDaoCut) = manager.simulateReverseDecollateralization(
+            BATCH_ID,
+            forwardCreditsAmount
+        );
+
+        (uint _forwardCreditsAmount, uint _minCbt, uint _minCbtDaoCut) = manager.simulateDecollateralization(
+            BATCH_ID,
+            minCbt
+        );
+
+        assertEq(_forwardCreditsAmount, forwardCreditsAmount);
+        assertEq(_minCbt, minCbt);
+        assertEq(_minCbtDaoCut, minCbtDaoCut);
+
+        uint totalFeesCollectedBefore = cbt.balanceOf(manager.getFeeReceiver());
+        manager.decollateralizeTokens(BATCH_ID, minCbt, forwardCreditsAmount);
+        uint totalFeesCollectedAfter = cbt.balanceOf(manager.getFeeReceiver());
+
+        assertEq(manager.forwardContractBatch().balanceOf(testAccount, BATCH_ID), forwardCreditsAmount);
+        assertEq(totalFeesCollectedAfter - totalFeesCollectedBefore, minCbtDaoCut);
+    }
+
     function _addBatchWithVintageToProject(
         uint batchId,
         uint projectId,
