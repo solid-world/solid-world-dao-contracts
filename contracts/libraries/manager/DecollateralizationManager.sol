@@ -106,6 +106,30 @@ library DecollateralizationManager {
         return _simulateDecollateralization(_storage, batchId, amountIn);
     }
 
+    /// @dev Computes the `minCbt` ERC20 tokens that needs to be decollateralized to obtain `forwardCreditsAmount` ERC1155 tokens
+    /// @param _storage Struct containing the current state used or modified by this function
+    /// @param batchId id of the batch
+    /// @param forwardCreditsAmount ERC1155 tokens to be received
+    /// @return minCbt minimum amount of ERC20 tokens that needs to be decollateralized
+    /// @return minCbtDaoCut amount of ERC20 tokens to be received by `feeReceiver` for decollateralizing `minCbt` ERC20 tokens
+    function simulateReverseDecollateralization(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint batchId,
+        uint forwardCreditsAmount
+    ) external view returns (uint minCbt, uint minCbtDaoCut) {
+        if (!_storage.batchCreated[batchId]) {
+            revert InvalidBatchId(batchId);
+        }
+
+        (minCbt, minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
+            _storage.batches[batchId].certificationDate,
+            forwardCreditsAmount,
+            _storage.batches[batchId].batchTA,
+            _storage.decollateralizationFee,
+            _getCollateralizedTokenForBatchId(_storage, batchId).decimals()
+        );
+    }
+
     /// @dev Computes relevant info for the decollateralization process involving batches
     /// that match the specified `projectId` and `vintage`
     /// @param _storage Struct containing the current state used or modified by this function

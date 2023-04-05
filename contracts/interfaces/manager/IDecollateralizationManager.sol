@@ -44,9 +44,9 @@ interface IDecollateralizationManager {
     /// @dev Simulates decollateralization of `amountIn` ERC20 tokens for ERC1155 tokens with id `batchId`
     /// @param batchId id of the batch
     /// @param amountIn ERC20 tokens to decollateralize
-    /// @return amountOut ERC1155 tokens to be received by msg.sender
+    /// @return amountOut ERC1155 tokens to be received
     /// @return minAmountIn minimum amount of ERC20 tokens to decollateralize `amountOut` ERC1155 tokens with id `batchId`
-    /// @return minCbtDaoCut ERC20 tokens to be received by feeReceiver for decollateralizing minAmountIn ERC20 tokens
+    /// @return minCbtDaoCut ERC20 tokens to be received by `feeReceiver` for decollateralizing `minAmountIn` ERC20 tokens
     function simulateDecollateralization(uint batchId, uint amountIn)
         external
         view
@@ -55,6 +55,16 @@ interface IDecollateralizationManager {
             uint minAmountIn,
             uint minCbtDaoCut
         );
+
+    /// @dev Computes the `minCbt` ERC20 tokens that needs to be decollateralized to obtain `forwardCreditsAmount` ERC1155 tokens
+    /// @param batchId id of the batch
+    /// @param forwardCreditsAmount ERC1155 tokens to be received
+    /// @return minCbt minimum amount of ERC20 tokens that needs to be decollateralized
+    /// @return minCbtDaoCut amount of ERC20 tokens to be received by `feeReceiver` for decollateralizing `minCbt` ERC20 tokens
+    function simulateReverseDecollateralization(uint batchId, uint forwardCreditsAmount)
+        external
+        view
+        returns (uint minCbt, uint minCbtDaoCut);
 
     /// @dev Computes relevant info for the decollateralization process involving batches
     /// that match the specified `projectId` and `vintage`
