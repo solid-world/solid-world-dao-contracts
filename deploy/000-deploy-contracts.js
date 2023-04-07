@@ -1,3 +1,4 @@
+const { initializeGasStation } = require('@solid-world/gas-station')
 const {
   ensureDeployerHasFunds
 } = require('../deploy-helpers/ensure-deployer-has-funds')
@@ -27,13 +28,23 @@ const {
   deployCollateralizedBasketTokenDeployer,
   setupCollateralizedBasketTokenDeployer
 } = require('../deploy-helpers/collateralized-basket-token-deployer')
-const { initializeGasStation } = require('@solid-world/gas-station')
+const {
+  deployTimelockController
+} = require('../deploy-helpers/timelock-controller')
 
 const func = async ({ getNamedAccounts, deployments, getChainId, ethers }) => {
+  const chainId = await getChainId()
   const gasStation = await initializeGasStation(ethers.provider)
   const { deployer, contractsOwner, rewardsVault } = await getNamedAccounts()
 
-  await ensureDeployerHasFunds(deployer, await getChainId())
+  await ensureDeployerHasFunds(deployer, chainId)
+
+  const TimelockController = await deployTimelockController(
+    deployments,
+    gasStation,
+    deployer,
+    contractsOwner
+  )
 
   const VerificationRegistry = await deployVerificationRegistry(
     deployments,
