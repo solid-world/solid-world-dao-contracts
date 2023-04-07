@@ -328,8 +328,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
         uint16 newRewardsFee = 1234;
 
         vm.prank(timelockController);
-        vm.expectEmit(true, false, false, false, address(manager));
-        emit RewardsFeeUpdated(newRewardsFee);
+        _expectEmit_RewardsFeeUpdated(newRewardsFee);
         manager.setRewardsFee(newRewardsFee);
         assertEq(manager.getRewardsFee(), newRewardsFee);
     }
@@ -337,8 +336,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     function testSetWeeklyRewardsMinter() public {
         address newWeeklyRewardsMinter = vm.addr(1234);
 
-        vm.expectEmit(true, false, false, false, address(manager));
-        emit RewardsMinterUpdated(newWeeklyRewardsMinter);
+        _expectEmit_RewardsMinterUpdated(newWeeklyRewardsMinter);
         manager.setWeeklyRewardsMinter(newWeeklyRewardsMinter);
         assertEq(manager.getWeeklyRewardsMinter(), newWeeklyRewardsMinter);
     }
@@ -355,6 +353,16 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     function _expectEmitWeeklyRewardMinted(address rewardToken, uint amount) private {
         vm.expectEmit(true, true, false, true, address(manager));
         emit WeeklyRewardMinted(rewardToken, amount);
+    }
+
+    function _expectEmit_RewardsFeeUpdated(uint16 newRewardsFee) private {
+        vm.expectEmit(true, true, false, false, address(manager));
+        emit RewardsFeeUpdated(newRewardsFee);
+    }
+
+    function _expectEmit_RewardsMinterUpdated(address newWeeklyRewardsMinter) private {
+        vm.expectEmit(true, true, false, false, address(manager));
+        emit RewardsMinterUpdated(newWeeklyRewardsMinter);
     }
 
     function _expectRevert_InvalidInput() private {
