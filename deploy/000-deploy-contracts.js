@@ -89,7 +89,8 @@ const func = async ({ getNamedAccounts, deployments, getChainId, ethers }) => {
     contractsOwner,
     ForwardContractBatchToken.address,
     EmissionManager.address,
-    CollateralizedBasketTokenDeployer.address
+    CollateralizedBasketTokenDeployer.address,
+    TimelockController.address
   )
 
   if (ForwardContractBatchToken.newlyDeployed) {
