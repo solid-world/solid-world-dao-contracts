@@ -60,7 +60,7 @@ abstract contract SolidWorldManagerStorage {
         uint16 rewardsFee;
     }
 
-    Storage _storage;
+    Storage internal _storage;
 
     function isCategoryCreated(uint categoryId) external view returns (bool) {
         return _storage.categoryCreated[categoryId];

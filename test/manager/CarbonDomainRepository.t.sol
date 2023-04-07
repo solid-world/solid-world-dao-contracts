@@ -31,6 +31,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
     }
 
     function testUpdateCategory_failsForInvalidCategoryId() public {
+        vm.prank(timelockController);
         _expectRevert_InvalidCategoryId(CATEGORY_ID);
         manager.updateCategory(CATEGORY_ID, 0, 0, 0);
     }
@@ -38,6 +39,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
     function testUpdateCategory_failsForInvalidInput() public {
         manager.addCategory(CATEGORY_ID, "", "", INITIAL_CATEGORY_TA);
 
+        vm.prank(timelockController);
         _expectRevert_InvalidInput();
         manager.updateCategory(CATEGORY_ID, 0, 0, 0);
     }
@@ -51,6 +53,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         // 1% yearly rate
 
         vm.warp(PRESET_CURRENT_DATE + 2 days);
+        vm.prank(timelockController);
         _expectEmitCategoryUpdated(
             CATEGORY_ID,
             volumeCoefficientInput0,
@@ -78,6 +81,7 @@ contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
         // 2% yearly rate
 
         vm.warp(PRESET_CURRENT_DATE + 4 days);
+        vm.prank(timelockController);
         _expectEmitCategoryUpdated(
             CATEGORY_ID,
             volumeCoefficientInput1,

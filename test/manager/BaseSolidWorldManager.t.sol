@@ -176,4 +176,8 @@ abstract contract BaseSolidWorldManager is BaseTest {
     function _expectRevert_Paused() internal {
         vm.expectRevert(abi.encodeWithSelector(Pausable.Paused.selector));
     }
+
+    function _expectRevert_NotTimelockController(address caller) internal {
+        vm.expectRevert(abi.encodeWithSelector(SolidWorldManager.NotTimelockController.selector, caller));
+    }
 }

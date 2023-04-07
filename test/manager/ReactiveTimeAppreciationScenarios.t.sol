@@ -34,6 +34,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     function testReactiveTAOutcomes_updatedCategoryParams_batch1YearFromCertification() public {
         _addBatchWithDependencies(PRESET_CURRENT_DATE + ONE_YEAR + 5 days, 50000);
 
+        vm.prank(timelockController);
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
 
@@ -82,6 +83,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             0
         );
 
+        vm.prank(timelockController);
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 20);
         // 5% decay per day
 
@@ -98,6 +100,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             0
         );
 
+        vm.prank(timelockController);
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 0);
         // 0% decay per day
 
@@ -114,6 +117,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     function testReactiveTAOutcomes_updatedCategoryParams_batch7YearFromCertification() public {
         _addBatchWithDependencies(PRESET_CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
 
+        vm.prank(timelockController);
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
 
@@ -143,6 +147,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
     {
         _addBatchWithDependencies(PRESET_CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
 
+        vm.prank(timelockController);
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
 
@@ -177,6 +182,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             _addBatch(BATCH_ID + i, PRESET_CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
+        vm.prank(timelockController);
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
 
@@ -204,6 +210,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             _addBatch(BATCH_ID + i, PRESET_CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
+        vm.prank(timelockController);
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
 
@@ -235,6 +242,7 @@ contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
             _addBatch(BATCH_ID + i, PRESET_CURRENT_DATE + _yearsToSeconds(7) + 5 days, 50000);
         }
 
+        vm.prank(timelockController);
         manager.updateCategory(CATEGORY_ID, 10000, 57870, 10);
         // 5% decay per day
 

@@ -41,6 +41,14 @@ contract SolidWorldManager is
     using RegulatoryComplianceManager for SolidWorldManagerStorage.Storage;
 
     event FeeReceiverUpdated(address indexed feeReceiver);
+    error NotTimelockController(address caller);
+
+    modifier onlyTimelockController() {
+        if (msg.sender != _storage.timelockController) {
+            revert NotTimelockController(msg.sender);
+        }
+        _;
+    }
 
     function initialize(
         CollateralizedBasketTokenDeployer collateralizedBasketTokenDeployer,
@@ -85,7 +93,7 @@ contract SolidWorldManager is
         uint volumeCoefficient,
         uint40 decayPerSecond,
         uint16 maxDepreciation
-    ) external onlyOwner {
+    ) external onlyTimelockController {
         _storage.updateCategory(categoryId, volumeCoefficient, decayPerSecond, maxDepreciation);
     }
 

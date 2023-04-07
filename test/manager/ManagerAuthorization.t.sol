@@ -11,9 +11,6 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
         manager.addCategory(3, "", "", INITIAL_CATEGORY_TA);
 
         _expectRevert_NotOwner();
-        manager.updateCategory(CATEGORY_ID, 0, 0, 0);
-
-        _expectRevert_NotOwner();
         manager.addProject(3, 5);
 
         _expectRevert_NotOwner();

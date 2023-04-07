@@ -7,4 +7,9 @@ contract TimelockedManager is BaseSolidWorldManager {
     function testGetTimelockController() public {
         assertEq(manager.getTimelockController(), timelockController);
     }
+
+    function testUpdateCategory_onlyTimelockController() public {
+        _expectRevert_NotTimelockController(address(this));
+        manager.updateCategory(CATEGORY_ID, 0, 0, 0);
+    }
 }
