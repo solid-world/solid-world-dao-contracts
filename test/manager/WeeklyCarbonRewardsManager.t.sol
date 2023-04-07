@@ -327,6 +327,7 @@ contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
     function testSetRewardsFee() public {
         uint16 newRewardsFee = 1234;
 
+        vm.prank(timelockController);
         vm.expectEmit(true, false, false, false, address(manager));
         emit RewardsFeeUpdated(newRewardsFee);
         manager.setRewardsFee(newRewardsFee);

@@ -111,6 +111,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     function testCollateralizeBatchWorksWhenCollateralizationFeeIs0() public {
         _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 100);
 
+        vm.prank(timelockController);
         manager.setCollateralizationFee(0);
 
         uint cbtUserCut = 90e18;
@@ -199,6 +200,7 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
     function testSetCollateralizationFee() public {
         uint16 newCollateralizationFee = 1234;
 
+        vm.prank(timelockController);
         _expectEmitFeeUpdated(newCollateralizationFee);
         manager.setCollateralizationFee(newCollateralizationFee);
         assertEq(manager.getCollateralizationFee(), newCollateralizationFee);

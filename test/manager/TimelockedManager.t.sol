@@ -12,4 +12,29 @@ contract TimelockedManager is BaseSolidWorldManager {
         _expectRevert_NotTimelockController(address(this));
         manager.updateCategory(CATEGORY_ID, 0, 0, 0);
     }
+
+    function testSetCollateralizationFee_onlyTimelockController() public {
+        _expectRevert_NotTimelockController(address(this));
+        manager.setCollateralizationFee(0);
+    }
+
+    function testSetDecollateralizationFee_onlyTimelockController() public {
+        _expectRevert_NotTimelockController(address(this));
+        manager.setDecollateralizationFee(0);
+    }
+
+    function testSetRewardsFee_onlyTimelockController() public {
+        _expectRevert_NotTimelockController(address(this));
+        manager.setRewardsFee(0);
+    }
+
+    function testSetCategoryKYCRequired_onlyTimelockController() public {
+        _expectRevert_NotTimelockController(address(this));
+        manager.setCategoryKYCRequired(CATEGORY_ID, true);
+    }
+
+    function testSetBatchKYCRequired_onlyTimelockController() public {
+        _expectRevert_NotTimelockController(address(this));
+        manager.setBatchKYCRequired(BATCH_ID, true);
+    }
 }
