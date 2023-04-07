@@ -51,6 +51,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
             1000,
             feeReceiver,
             address(emissionManager),
+            address(this),
             address(this)
         );
 

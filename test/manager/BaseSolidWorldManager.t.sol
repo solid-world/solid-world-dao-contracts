@@ -19,6 +19,7 @@ abstract contract BaseSolidWorldManager is BaseTest {
     address testAccount = vm.addr(1);
     address feeReceiver = vm.addr(2);
     address weeklyRewardsMinter = vm.addr(3);
+    address timelockController = vm.addr(4);
 
     uint constant CATEGORY_ID = 1;
     uint constant PROJECT_ID = 3;
@@ -49,7 +50,8 @@ abstract contract BaseSolidWorldManager is BaseTest {
             REWARDS_FEE,
             feeReceiver,
             weeklyRewardsMinter,
-            address(this)
+            address(this),
+            timelockController
         );
     }
 
@@ -59,6 +61,7 @@ abstract contract BaseSolidWorldManager is BaseTest {
         vm.label(testAccount, "Test account");
         vm.label(feeReceiver, "Protocol fee receiver");
         vm.label(weeklyRewardsMinter, "Weekly rewards minter");
+        vm.label(timelockController, "Timelock controller");
     }
 
     function _configuredCBTDeployer(address owner)

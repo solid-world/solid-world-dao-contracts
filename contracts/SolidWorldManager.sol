@@ -50,7 +50,8 @@ contract SolidWorldManager is
         uint16 rewardsFee,
         address feeReceiver,
         address weeklyRewardsMinter,
-        address owner
+        address owner,
+        address timelockController
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -64,6 +65,7 @@ contract SolidWorldManager is
         _storage.setDecollateralizationFee(decollateralizationFee);
         _storage.setRewardsFee(rewardsFee);
         _setFeeReceiver(feeReceiver);
+        _setTimelockController(timelockController);
         _storage.setWeeklyRewardsMinter(weeklyRewardsMinter);
     }
 
@@ -305,5 +307,9 @@ contract SolidWorldManager is
         _storage.feeReceiver = feeReceiver;
 
         emit FeeReceiverUpdated(feeReceiver);
+    }
+
+    function _setTimelockController(address timelockController) internal {
+        _storage.timelockController = timelockController;
     }
 }

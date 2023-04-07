@@ -50,6 +50,8 @@ abstract contract SolidWorldManagerStorage {
         address weeklyRewardsMinter;
         /// @notice The account where all protocol fees are captured.
         address feeReceiver;
+        /// @notice The address controlling timelocked functions (e.g. changing fees)
+        address timelockController;
         /// @notice Fee charged by DAO when collateralizing forward contract batch tokens.
         uint16 collateralizationFee;
         /// @notice Fee charged by DAO when decollateralizing collateralized basket tokens.
@@ -114,6 +116,10 @@ abstract contract SolidWorldManagerStorage {
 
     function getFeeReceiver() external view returns (address) {
         return _storage.feeReceiver;
+    }
+
+    function getTimelockController() external view returns (address) {
+        return _storage.timelockController;
     }
 
     function getCollateralizationFee() external view returns (uint16) {

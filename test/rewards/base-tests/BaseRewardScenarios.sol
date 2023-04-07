@@ -98,6 +98,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
             REWARDS_FEE,
             feeReceiver,
             address(emissionManager),
+            address(this),
             address(this)
         );
     }
