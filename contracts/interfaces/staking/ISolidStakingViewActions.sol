@@ -22,4 +22,7 @@ interface ISolidStakingViewActions {
 
     /// @return whether the specified token requires msg.sender to be KYCed before staking
     function isKYCRequired(address token) external view returns (bool);
+
+    /// @return The address controlling timelocked functions (e.g. KYC requirement changes)
+    function getTimelockController() external view returns (address);
 }

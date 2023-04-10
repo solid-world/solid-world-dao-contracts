@@ -2,12 +2,13 @@ async function deploySolidStaking(
   deployments,
   gasStation,
   deployer,
-  verificationRegistry
+  verificationRegistry,
+  timelockController
 ) {
   return deployments.deploy('SolidStaking', {
     ...(await gasStation.getCurrentFees()),
     from: deployer,
-    args: [verificationRegistry],
+    args: [verificationRegistry, timelockController],
     log: true
   })
 }

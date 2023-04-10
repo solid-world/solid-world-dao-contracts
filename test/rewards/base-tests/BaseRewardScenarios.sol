@@ -32,6 +32,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
     SolidWorldManager solidWorldManager;
     ForwardContractBatchToken forwardContractBatch;
     address verificationRegistry = address(new VerificationRegistry());
+    address timelockController = vm.addr(13);
 
     uint mangroveInitialBalance;
     uint reforestationInitialBalance;
@@ -51,7 +52,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         vm.warp(PRESET_CURRENT_DATE);
 
         rewardsController = new RewardsController();
-        solidStaking = new SolidStaking(address(new VerificationRegistry()));
+        solidStaking = new SolidStaking(address(new VerificationRegistry()), timelockController);
         emissionManager = new EmissionManager();
         solidWorldManager = new SolidWorldManager();
         forwardContractBatch = new ForwardContractBatchToken("", address(new VerificationRegistry()));
@@ -131,6 +132,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
         vm.label(reforestationRewardToken, "ReforestationRewardToken");
         vm.label(usdcToken, "UsdcToken");
         vm.label(rewardOracle, "RewardOracle");
+        vm.label(timelockController, "TimelockController");
     }
 
     function _configureEmissionAdmin() private {

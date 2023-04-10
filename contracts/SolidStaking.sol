@@ -30,6 +30,16 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
     /// @dev Main contract used for interacting with rewards mechanism.
     IRewardsController public rewardsController;
 
+    /// @dev Address controlling timelocked functions (e.g. KYC requirement changes)
+    address internal immutable timelockController;
+
+    modifier onlyTimelockController() {
+        if (msg.sender != timelockController) {
+            revert NotTimelockController(msg.sender);
+        }
+        _;
+    }
+
     modifier validToken(address token) {
         if (!tokenAdded[token]) {
             revert InvalidTokenAddress(token);
@@ -44,7 +54,11 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
         _;
     }
 
-    constructor(address _verificationRegistry) RegulatoryCompliant(_verificationRegistry) {}
+    constructor(address _verificationRegistry, address _timelockController)
+        RegulatoryCompliant(_verificationRegistry)
+    {
+        timelockController = _timelockController;
+    }
 
     function setup(IRewardsController _rewardsController, address owner) external postConstruct {
         rewardsController = _rewardsController;
@@ -64,7 +78,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
     }
 
     /// @inheritdoc ISolidStakingOwnerActions
-    function setKYCRequired(address token, bool _kycRequired) external onlyOwner {
+    function setKYCRequired(address token, bool _kycRequired) external onlyTimelockController {
         kycRequired[token] = _kycRequired;
 
         emit KYCRequiredSet(token, _kycRequired);
@@ -107,6 +121,11 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
     {
         _withdraw(token, amount);
         _claimRewards(token);
+    }
+
+    /// @inheritdoc ISolidStakingViewActions
+    function getTimelockController() external view returns (address) {
+        return timelockController;
     }
 
     /// @inheritdoc ISolidStakingViewActions

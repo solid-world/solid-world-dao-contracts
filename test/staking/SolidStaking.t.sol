@@ -9,6 +9,15 @@ contract SolidStakingTest is BaseSolidStakingTest {
         solidStaking.setup(IRewardsController(rewardsController), ownerAccount);
     }
 
+    function testGetTimelockController() public {
+        assertEq(solidStaking.getTimelockController(), timelockController);
+    }
+
+    function testSetKYCRequired_onlyTimelockController() public {
+        _expectRevert_NotTimelockController(address(this));
+        solidStaking.setKYCRequired(address(0), true);
+    }
+
     function testAddToken() public {
         (, address tokenAddress) = _createTestToken();
 
@@ -48,6 +57,7 @@ contract SolidStakingTest is BaseSolidStakingTest {
         (, address token0Address) = _configuredTestToken();
         (, address token1Address) = _configuredTestToken();
 
+        vm.prank(timelockController);
         solidStaking.setKYCRequired(token1Address, true);
 
         vm.prank(testAccount);
@@ -165,6 +175,7 @@ contract SolidStakingTest is BaseSolidStakingTest {
         vm.prank(testAccount);
         solidStaking.stake(token1Address, amountToStake);
 
+        vm.prank(timelockController);
         solidStaking.setKYCRequired(token1Address, true);
 
         vm.prank(testAccount);
@@ -238,21 +249,15 @@ contract SolidStakingTest is BaseSolidStakingTest {
     function testSetKYCRequired() public {
         address asset = vm.addr(1);
 
+        vm.prank(timelockController);
         solidStaking.setKYCRequired(asset, true);
         assertTrue(solidStaking.isKYCRequired(asset));
-    }
-
-    function testSetKYCRequired_revertsIfNotOwner() public {
-        address asset = vm.addr(1);
-
-        vm.prank(testAccount);
-        _expectRevert_NotOwner();
-        solidStaking.setKYCRequired(asset, true);
     }
 
     function testSetKYCRequired_emitsEvent() public {
         address asset = vm.addr(1);
 
+        vm.prank(timelockController);
         _expectEmit_KYCRequiredSet(asset, true);
         solidStaking.setKYCRequired(asset, true);
     }
