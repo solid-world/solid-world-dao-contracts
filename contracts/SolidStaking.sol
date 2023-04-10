@@ -33,6 +33,13 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
     /// @dev Address controlling timelocked functions (e.g. KYC requirement changes)
     address internal immutable timelockController;
 
+    modifier onlyTimelockController() {
+        if (msg.sender != timelockController) {
+            revert NotTimelockController(msg.sender);
+        }
+        _;
+    }
+
     modifier validToken(address token) {
         if (!tokenAdded[token]) {
             revert InvalidTokenAddress(token);
@@ -71,7 +78,7 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
     }
 
     /// @inheritdoc ISolidStakingOwnerActions
-    function setKYCRequired(address token, bool _kycRequired) external onlyOwner {
+    function setKYCRequired(address token, bool _kycRequired) external onlyTimelockController {
         kycRequired[token] = _kycRequired;
 
         emit KYCRequiredSet(token, _kycRequired);

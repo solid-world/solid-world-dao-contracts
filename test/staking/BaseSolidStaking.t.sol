@@ -118,6 +118,10 @@ abstract contract BaseSolidStakingTest is BaseTest {
         );
     }
 
+    function _expectRevert_NotTimelockController(address caller) internal {
+        vm.expectRevert(abi.encodeWithSelector(ISolidStakingErrors.NotTimelockController.selector, caller));
+    }
+
     function _expectCall_RewardsController_handleUserStakeChanged(address tokenAddress) internal {
         uint oldUserStake = 0;
         uint oldTotalStaked = 0;
