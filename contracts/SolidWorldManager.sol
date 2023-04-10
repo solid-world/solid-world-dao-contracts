@@ -41,6 +41,14 @@ contract SolidWorldManager is
     using RegulatoryComplianceManager for SolidWorldManagerStorage.Storage;
 
     event FeeReceiverUpdated(address indexed feeReceiver);
+    error NotTimelockController(address caller);
+
+    modifier onlyTimelockController() {
+        if (msg.sender != _storage.timelockController) {
+            revert NotTimelockController(msg.sender);
+        }
+        _;
+    }
 
     function initialize(
         CollateralizedBasketTokenDeployer collateralizedBasketTokenDeployer,
@@ -50,7 +58,8 @@ contract SolidWorldManager is
         uint16 rewardsFee,
         address feeReceiver,
         address weeklyRewardsMinter,
-        address owner
+        address owner,
+        address timelockController
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -64,6 +73,7 @@ contract SolidWorldManager is
         _storage.setDecollateralizationFee(decollateralizationFee);
         _storage.setRewardsFee(rewardsFee);
         _setFeeReceiver(feeReceiver);
+        _setTimelockController(timelockController);
         _storage.setWeeklyRewardsMinter(weeklyRewardsMinter);
     }
 
@@ -83,7 +93,7 @@ contract SolidWorldManager is
         uint volumeCoefficient,
         uint40 decayPerSecond,
         uint16 maxDepreciation
-    ) external onlyOwner {
+    ) external onlyTimelockController {
         _storage.updateCategory(categoryId, volumeCoefficient, decayPerSecond, maxDepreciation);
     }
 
@@ -222,17 +232,17 @@ contract SolidWorldManager is
     }
 
     /// @inheritdoc ICollateralizationManager
-    function setCollateralizationFee(uint16 collateralizationFee) external onlyOwner {
+    function setCollateralizationFee(uint16 collateralizationFee) external onlyTimelockController {
         _storage.setCollateralizationFee(collateralizationFee);
     }
 
     /// @inheritdoc IDecollateralizationManager
-    function setDecollateralizationFee(uint16 decollateralizationFee) external onlyOwner {
+    function setDecollateralizationFee(uint16 decollateralizationFee) external onlyTimelockController {
         _storage.setDecollateralizationFee(decollateralizationFee);
     }
 
     /// @inheritdoc IWeeklyCarbonRewardsManager
-    function setRewardsFee(uint16 rewardsFee) external onlyOwner {
+    function setRewardsFee(uint16 rewardsFee) external onlyTimelockController {
         _storage.setRewardsFee(rewardsFee);
     }
 
@@ -240,11 +250,11 @@ contract SolidWorldManager is
         _setFeeReceiver(feeReceiver);
     }
 
-    function setCategoryKYCRequired(uint categoryId, bool isKYCRequired) external onlyOwner {
+    function setCategoryKYCRequired(uint categoryId, bool isKYCRequired) external onlyTimelockController {
         _storage.setCategoryKYCRequired(categoryId, isKYCRequired);
     }
 
-    function setBatchKYCRequired(uint batchId, bool isKYCRequired) external onlyOwner {
+    function setBatchKYCRequired(uint batchId, bool isKYCRequired) external onlyTimelockController {
         _storage.setBatchKYCRequired(batchId, isKYCRequired);
     }
 
@@ -305,5 +315,9 @@ contract SolidWorldManager is
         _storage.feeReceiver = feeReceiver;
 
         emit FeeReceiverUpdated(feeReceiver);
+    }
+
+    function _setTimelockController(address timelockController) internal {
+        _storage.timelockController = timelockController;
     }
 }

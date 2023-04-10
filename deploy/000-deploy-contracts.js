@@ -75,7 +75,8 @@ const func = async ({ getNamedAccounts, deployments, getChainId, ethers }) => {
     deployments,
     gasStation,
     deployer,
-    VerificationRegistry.address
+    VerificationRegistry.address,
+    TimelockController.address
   )
   const EmissionManager = await deployEmissionManager(
     deployments,
@@ -89,7 +90,8 @@ const func = async ({ getNamedAccounts, deployments, getChainId, ethers }) => {
     contractsOwner,
     ForwardContractBatchToken.address,
     EmissionManager.address,
-    CollateralizedBasketTokenDeployer.address
+    CollateralizedBasketTokenDeployer.address,
+    TimelockController.address
   )
 
   if (ForwardContractBatchToken.newlyDeployed) {

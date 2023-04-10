@@ -5,6 +5,7 @@ import "./BaseSolidWorldManager.t.sol";
 
 contract RegulatoryComplianceManagerTest is BaseSolidWorldManager {
     function testSetCategoryKYCRequired_revertsIfCategoryDoesNotExist() public {
+        vm.prank(timelockController);
         _expectRevert_InvalidCategoryId(CATEGORY_ID);
         manager.setCategoryKYCRequired(CATEGORY_ID, true);
     }
@@ -12,11 +13,13 @@ contract RegulatoryComplianceManagerTest is BaseSolidWorldManager {
     function testSetCategoryKYCRequired() public {
         _addBatchWithDependencies(PRESET_CURRENT_DATE + 1, 10000);
 
+        vm.prank(timelockController);
         manager.setCategoryKYCRequired(CATEGORY_ID, true);
         assertTrue(manager.getCategoryToken(CATEGORY_ID).isKYCRequired());
     }
 
     function testSetBatchKYCRequired_revertsIfBatchDoesNotExist() public {
+        vm.prank(timelockController);
         _expectRevert_InvalidBatchId(BATCH_ID);
         manager.setBatchKYCRequired(BATCH_ID, true);
     }
@@ -24,6 +27,7 @@ contract RegulatoryComplianceManagerTest is BaseSolidWorldManager {
     function testSetBatchKYCRequired() public {
         _addBatchWithDependencies(PRESET_CURRENT_DATE + 1, 10000);
 
+        vm.prank(timelockController);
         manager.setBatchKYCRequired(BATCH_ID, true);
         assertTrue(manager.forwardContractBatch().isKYCRequired(BATCH_ID));
     }

@@ -7,4 +7,5 @@ interface ISolidStakingErrors {
     error InvalidTokenAddress(address token);
     error TokenAlreadyAdded(address token);
     error NotRegulatoryCompliant(address token, address subject);
+    error NotTimelockController(address caller);
 }

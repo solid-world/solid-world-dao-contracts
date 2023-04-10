@@ -391,6 +391,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     function testSetDecollateralizationFee() public {
         uint16 newDecollateralizationFee = 1234;
 
+        vm.prank(timelockController);
         _expectEmitDecollateralizationFeeUpdated(newDecollateralizationFee);
         manager.setDecollateralizationFee(newDecollateralizationFee);
         assertEq(manager.getDecollateralizationFee(), newDecollateralizationFee);

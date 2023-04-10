@@ -16,6 +16,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
     address ownerAccount = address(this);
     address testAccount = vm.addr(1);
     address testAccount2 = vm.addr(2);
+    address timelockController = vm.addr(13);
 
     event Stake(address indexed account, address indexed token, uint indexed amount);
     event Withdraw(address indexed account, address indexed token, uint indexed amount);
@@ -29,7 +30,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
 
         _initVerificationRegistry();
 
-        solidStaking = new SolidStaking(address(verificationRegistry));
+        solidStaking = new SolidStaking(address(verificationRegistry), timelockController);
         solidStaking.setup(IRewardsController(rewardsController), ownerAccount);
 
         _installMocks();
@@ -66,6 +67,7 @@ abstract contract BaseSolidStakingTest is BaseTest {
         vm.label(ownerAccount, "Owner account");
         vm.label(testAccount, "Test account");
         vm.label(testAccount2, "Test account 2");
+        vm.label(timelockController, "Timelock controller");
     }
 
     function _expectEmit_tokenAdded(address tokenAddress) internal {
@@ -114,6 +116,10 @@ abstract contract BaseSolidStakingTest is BaseTest {
         vm.expectRevert(
             abi.encodeWithSelector(ISolidStakingErrors.NotRegulatoryCompliant.selector, token, subject)
         );
+    }
+
+    function _expectRevert_NotTimelockController(address caller) internal {
+        vm.expectRevert(abi.encodeWithSelector(ISolidStakingErrors.NotTimelockController.selector, caller));
     }
 
     function _expectCall_RewardsController_handleUserStakeChanged(address tokenAddress) internal {

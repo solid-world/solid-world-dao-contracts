@@ -11,9 +11,6 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
         manager.addCategory(3, "", "", INITIAL_CATEGORY_TA);
 
         _expectRevert_NotOwner();
-        manager.updateCategory(CATEGORY_ID, 0, 0, 0);
-
-        _expectRevert_NotOwner();
         manager.addProject(3, 5);
 
         _expectRevert_NotOwner();
@@ -36,15 +33,6 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
         manager.setWeeklyRewardsMinter(vm.addr(1234));
 
         _expectRevert_NotOwner();
-        manager.setCollateralizationFee(1);
-
-        _expectRevert_NotOwner();
-        manager.setDecollateralizationFee(1);
-
-        _expectRevert_NotOwner();
-        manager.setRewardsFee(1);
-
-        _expectRevert_NotOwner();
         manager.setFeeReceiver(vm.addr(1234));
 
         _expectRevert_NotOwner();
@@ -58,12 +46,6 @@ contract ManagerAuthorizationTest is BaseSolidWorldManager {
 
         _expectRevert_NotOwner();
         manager.setBatchCertificationDate(1, 1);
-
-        _expectRevert_NotOwner();
-        manager.setCategoryKYCRequired(CATEGORY_ID, true);
-
-        _expectRevert_NotOwner();
-        manager.setBatchKYCRequired(BATCH_ID, true);
 
         _expectRevert_NotOwner();
         manager.setCategoryVerificationRegistry(CATEGORY_ID, vm.addr(1));
