@@ -75,7 +75,8 @@ const func = async ({ getNamedAccounts, deployments, getChainId, ethers }) => {
     deployments,
     gasStation,
     deployer,
-    VerificationRegistry.address
+    VerificationRegistry.address,
+    TimelockController.address
   )
   const EmissionManager = await deployEmissionManager(
     deployments,
