@@ -9,6 +9,10 @@ contract SolidStakingTest is BaseSolidStakingTest {
         solidStaking.setup(IRewardsController(rewardsController), ownerAccount);
     }
 
+    function testGetTimelockController() public {
+        assertEq(solidStaking.getTimelockController(), timelockController);
+    }
+
     function testAddToken() public {
         (, address tokenAddress) = _createTestToken();
 
