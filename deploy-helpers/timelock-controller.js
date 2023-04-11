@@ -1,5 +1,3 @@
-const TimelockController = require('@openzeppelin/contracts/build/contracts/TimelockController.json')
-
 async function deployTimelockController(
   deployments,
   gasStation,
@@ -13,10 +11,7 @@ async function deployTimelockController(
 
   return deployments.deploy('TimelockController', {
     ...(await gasStation.getCurrentFees()),
-    contract: {
-      abi: TimelockController.abi,
-      bytecode: TimelockController.bytecode
-    },
+    contract: 'contracts/TimelockController.sol:TimelockController',
     from: deployer,
     args: [minDelay, proposers, executors, admin],
     log: true
