@@ -14,6 +14,7 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     );
     event FeeReceiverUpdated(address indexed feeReceiver);
     event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
+    event BoostedDecollateralizationFeeUpdated(uint indexed boostedDecollateralizationFee);
 
     function testDecollateralizeTokens_inputAmountIs0() public {
         _expectRevert_InvalidInput();
@@ -401,6 +402,15 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(manager.getDecollateralizationFee(), newDecollateralizationFee);
     }
 
+    function testSetBoostedDecollateralizationFee() public {
+        uint16 newBoostedDecollateralizationFee = 1234;
+
+        vm.prank(timelockController);
+        _expectEmitBoostedDecollateralizationFeeUpdated(newBoostedDecollateralizationFee);
+        manager.setBoostedDecollateralizationFee(newBoostedDecollateralizationFee);
+        assertEq(manager.getBoostedDecollateralizationFee(), newBoostedDecollateralizationFee);
+    }
+
     function testSetFeeReceiver() public {
         address newFeeReceiver = vm.addr(1234);
 
@@ -505,8 +515,15 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
     }
 
     function _expectEmitDecollateralizationFeeUpdated(uint16 newDecollateralizationFee) private {
-        vm.expectEmit(true, false, false, false, address(manager));
+        vm.expectEmit(true, true, false, false, address(manager));
         emit DecollateralizationFeeUpdated(newDecollateralizationFee);
+    }
+
+    function _expectEmitBoostedDecollateralizationFeeUpdated(uint16 newBoostedDecollateralizationFee)
+        private
+    {
+        vm.expectEmit(true, true, false, false, address(manager));
+        emit BoostedDecollateralizationFeeUpdated(newBoostedDecollateralizationFee);
     }
 
     function _expectEmitFeeReceiverUpdated(address newFeeReceiver) private {

@@ -243,6 +243,14 @@ contract SolidWorldManager is
         _storage.setDecollateralizationFee(decollateralizationFee);
     }
 
+    /// @inheritdoc IDecollateralizationManager
+    function setBoostedDecollateralizationFee(uint16 boostedDecollateralizationFee)
+        external
+        onlyTimelockController
+    {
+        _storage.setBoostedDecollateralizationFee(boostedDecollateralizationFee);
+    }
+
     /// @inheritdoc IWeeklyCarbonRewardsManager
     function setRewardsFee(uint16 rewardsFee) external onlyTimelockController {
         _storage.setRewardsFee(rewardsFee);
