@@ -23,6 +23,7 @@ library DecollateralizationManager {
         uint amountOut
     );
     event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
+    event BoostedDecollateralizationFeeUpdated(uint indexed boostedDecollateralizationFee);
 
     error InvalidInput();
     error BatchesNotInSameCategory(uint categoryId1, uint categoryId2);
@@ -185,6 +186,17 @@ library DecollateralizationManager {
         _storage.decollateralizationFee = decollateralizationFee;
 
         emit DecollateralizationFeeUpdated(decollateralizationFee);
+    }
+
+    /// @param _storage Struct containing the current state used or modified by this function
+    /// @param boostedDecollateralizationFee fee for decollateralizing ERC20 tokens in case of a certified batch
+    function setBoostedDecollateralizationFee(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint16 boostedDecollateralizationFee
+    ) external {
+        _storage.boostedDecollateralizationFee = boostedDecollateralizationFee;
+
+        emit BoostedDecollateralizationFeeUpdated(boostedDecollateralizationFee);
     }
 
     function _simulateDecollateralization(

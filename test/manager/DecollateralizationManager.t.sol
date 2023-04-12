@@ -388,6 +388,10 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(info[2].amountOut, 999);
     }
 
+    function testGetBoostedDecollateralizationFee() public {
+        assertEq(manager.getBoostedDecollateralizationFee(), BOOSTED_DECOLLATERALIZATION_FEE);
+    }
+
     function testSetDecollateralizationFee() public {
         uint16 newDecollateralizationFee = 1234;
 

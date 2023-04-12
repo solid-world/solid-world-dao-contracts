@@ -55,6 +55,7 @@ contract SolidWorldManager is
         ForwardContractBatchToken forwardContractBatch,
         uint16 collateralizationFee,
         uint16 decollateralizationFee,
+        uint16 boostedDecollateralizationFee,
         uint16 rewardsFee,
         address feeReceiver,
         address weeklyRewardsMinter,
@@ -71,6 +72,7 @@ contract SolidWorldManager is
 
         _storage.setCollateralizationFee(collateralizationFee);
         _storage.setDecollateralizationFee(decollateralizationFee);
+        _storage.setBoostedDecollateralizationFee(boostedDecollateralizationFee);
         _storage.setRewardsFee(rewardsFee);
         _setFeeReceiver(feeReceiver);
         _setTimelockController(timelockController);

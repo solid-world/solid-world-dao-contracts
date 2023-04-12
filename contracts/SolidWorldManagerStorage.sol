@@ -56,6 +56,9 @@ abstract contract SolidWorldManagerStorage {
         uint16 collateralizationFee;
         /// @notice Fee charged by DAO when decollateralizing collateralized basket tokens.
         uint16 decollateralizationFee;
+        /// @notice Fee charged by DAO when decollateralizing collateralized basket tokens to certified batches.
+        /// @notice This fee incentivizes certified batches to be decollateralize faster.
+        uint16 boostedDecollateralizationFee;
         /// @notice Fee charged by DAO on the weekly carbon rewards.
         uint16 rewardsFee;
     }
@@ -128,6 +131,10 @@ abstract contract SolidWorldManagerStorage {
 
     function getDecollateralizationFee() external view returns (uint16) {
         return _storage.decollateralizationFee;
+    }
+
+    function getBoostedDecollateralizationFee() external view returns (uint16) {
+        return _storage.boostedDecollateralizationFee;
     }
 
     function getRewardsFee() external view returns (uint16) {

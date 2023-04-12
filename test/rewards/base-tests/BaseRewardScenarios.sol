@@ -96,6 +96,7 @@ abstract contract BaseRewardScenariosTest is BaseTest {
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,
+            DECOLLATERALIZATION_FEE,
             REWARDS_FEE,
             feeReceiver,
             address(emissionManager),
