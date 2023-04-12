@@ -122,11 +122,10 @@ library DecollateralizationManager {
             revert InvalidBatchId(batchId);
         }
 
-        (minCbt, minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
-            _storage.batches[batchId].certificationDate,
+        (minCbt, minCbtDaoCut) = _computeDecollateralizationMinAmountInAndDaoCut(
+            _storage,
+            batchId,
             forwardCreditsAmount,
-            _storage.batches[batchId].batchTA,
-            _storage.decollateralizationFee,
             _getCollateralizedTokenForBatchId(_storage, batchId).decimals()
         );
     }
@@ -216,22 +215,15 @@ library DecollateralizationManager {
             revert InvalidBatchId(batchId);
         }
 
-        CollateralizedBasketToken collateralizedToken = _getCollateralizedTokenForBatchId(_storage, batchId);
+        uint cbtDecimals = _getCollateralizedTokenForBatchId(_storage, batchId).decimals();
 
-        (amountOut, , ) = SolidMath.computeDecollateralizationOutcome(
-            _storage.batches[batchId].certificationDate,
-            amountIn,
-            _storage.batches[batchId].batchTA,
-            _storage.decollateralizationFee,
-            collateralizedToken.decimals()
-        );
+        (amountOut, , ) = _computeDecollateralizationOutcome(_storage, batchId, amountIn, cbtDecimals);
 
-        (minAmountIn, minCbtDaoCut) = SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
-            _storage.batches[batchId].certificationDate,
+        (minAmountIn, minCbtDaoCut) = _computeDecollateralizationMinAmountInAndDaoCut(
+            _storage,
+            batchId,
             amountOut,
-            _storage.batches[batchId].batchTA,
-            _storage.decollateralizationFee,
-            collateralizedToken.decimals()
+            cbtDecimals
         );
     }
 
@@ -257,11 +249,10 @@ library DecollateralizationManager {
 
         CollateralizedBasketToken cbt = _getCollateralizedTokenForBatchId(_storage, batchId);
 
-        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = SolidMath.computeDecollateralizationOutcome(
-            _storage.batches[batchId].certificationDate,
+        (uint amountOut, uint cbtDaoCut, uint cbtToBurn) = _computeDecollateralizationOutcome(
+            _storage,
+            batchId,
             amountIn,
-            _storage.batches[batchId].batchTA,
-            _storage.decollateralizationFee,
             cbt.decimals()
         );
 
@@ -308,5 +299,60 @@ library DecollateralizationManager {
         uint categoryId = _storage.projectCategory[projectId];
 
         return _storage.categoryToken[categoryId];
+    }
+
+    function _computeDecollateralizationOutcome(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint batchId,
+        uint cbtAmount,
+        uint cbtDecimals
+    )
+        internal
+        view
+        returns (
+            uint amountOut,
+            uint cbtDaoCut,
+            uint cbtToBurn
+        )
+    {
+        uint fee = _getBatchDecollateralizationFee(_storage, batchId);
+        return
+            SolidMath.computeDecollateralizationOutcome(
+                _storage.batches[batchId].certificationDate,
+                cbtAmount,
+                _storage.batches[batchId].batchTA,
+                fee,
+                cbtDecimals
+            );
+    }
+
+    function _computeDecollateralizationMinAmountInAndDaoCut(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint batchId,
+        uint expectedFcbtAmount,
+        uint cbtDecimals
+    ) internal view returns (uint minAmountIn, uint minCbtDaoCut) {
+        uint fee = _getBatchDecollateralizationFee(_storage, batchId);
+        return
+            SolidMath.computeDecollateralizationMinAmountInAndDaoCut(
+                _storage.batches[batchId].certificationDate,
+                expectedFcbtAmount,
+                _storage.batches[batchId].batchTA,
+                fee,
+                cbtDecimals
+            );
+    }
+
+    function _getBatchDecollateralizationFee(SolidWorldManagerStorage.Storage storage _storage, uint batchId)
+        internal
+        view
+        returns (uint16)
+    {
+        bool isCertified = _storage.batches[batchId].certificationDate <= block.timestamp;
+        if (isCertified) {
+            return _storage.boostedDecollateralizationFee;
+        }
+
+        return _storage.decollateralizationFee;
     }
 }
