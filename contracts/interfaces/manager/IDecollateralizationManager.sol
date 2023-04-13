@@ -13,6 +13,7 @@ interface IDecollateralizationManager {
         uint amountOut
     );
     event DecollateralizationFeeUpdated(uint indexed decollateralizationFee);
+    event BoostedDecollateralizationFeeUpdated(uint indexed boostedDecollateralizationFee);
 
     /// @dev Decollateralizes `amountIn` of ERC20 tokens and sends `amountOut` ERC1155 tokens with id `batchId` to msg.sender
     /// @dev prior to calling, msg.sender must approve SolidWorldManager to spend `amountIn` ERC20 tokens
@@ -78,4 +79,7 @@ interface IDecollateralizationManager {
 
     /// @param decollateralizationFee fee for decollateralizing ERC20 tokens
     function setDecollateralizationFee(uint16 decollateralizationFee) external;
+
+    /// @param boostedDecollateralizationFee fee for decollateralizing ERC20 tokens in case of certified batches
+    function setBoostedDecollateralizationFee(uint16 boostedDecollateralizationFee) external;
 }

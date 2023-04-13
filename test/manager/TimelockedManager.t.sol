@@ -23,6 +23,11 @@ contract TimelockedManager is BaseSolidWorldManager {
         manager.setDecollateralizationFee(0);
     }
 
+    function testSetBoostedDecollateralizationFee_onlyTimelockController() public {
+        _expectRevert_NotTimelockController(address(this));
+        manager.setBoostedDecollateralizationFee(0);
+    }
+
     function testSetRewardsFee_onlyTimelockController() public {
         _expectRevert_NotTimelockController(address(this));
         manager.setRewardsFee(0);

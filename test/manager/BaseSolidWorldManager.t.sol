@@ -28,6 +28,7 @@ abstract contract BaseSolidWorldManager is BaseTest {
 
     uint16 constant COLLATERALIZATION_FEE = 1000; // 10%
     uint16 constant DECOLLATERALIZATION_FEE = 1000; // 10%
+    uint16 constant BOOSTED_DECOLLATERALIZATION_FEE = 100; // 1%
     uint16 constant REWARDS_FEE = 500; // 5%
 
     function setUp() public virtual {
@@ -47,6 +48,7 @@ abstract contract BaseSolidWorldManager is BaseTest {
             forwardContractBatch,
             COLLATERALIZATION_FEE,
             DECOLLATERALIZATION_FEE,
+            BOOSTED_DECOLLATERALIZATION_FEE,
             REWARDS_FEE,
             feeReceiver,
             weeklyRewardsMinter,
