@@ -1,6 +1,7 @@
 const fs = require('node:fs')
 require('@nomiclabs/hardhat-etherscan')
 require('@nomiclabs/hardhat-ethers')
+require('@typechain/hardhat')
 require('hardhat-deploy')
 require('hardhat-deploy-ethers')
 require('dotenv').config()
@@ -139,6 +140,10 @@ module.exports = {
     rewardsVault: {
       default: REWARDS_VAULT_ADDRESS
     }
+  },
+  typechain: {
+    outDir: 'types',
+    target: 'ethers-v5'
   }
 }
 
