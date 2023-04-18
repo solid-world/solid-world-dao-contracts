@@ -10,7 +10,8 @@
     "test:coverage:lcov": "rm -f lcov.info && rm -rf ./report && forge coverage --report lcov && lcov --remove lcov.info -o lcov.info 'test/*' 'test_gas/*' 'contracts/mocks/*' '**/ABDKMath64x64.sol' '**/GPv2SafeERC20.sol' '**/CategoryRebalancer.sol' && genhtml ./lcov.info -o report --branch-coverage && open ./report/index.html",
     "deploy:local": "hardhat deploy --network localhost",
     "export:local": "hardhat export --export - --network localhost",
-    "contracts:validate-size": "forge build --sizes"
+    "contracts:validate-size": "forge build --sizes",
+    "typechain": "hardhat clean && hardhat compile"
   },
   "repository": {
     "type": "git",
@@ -25,9 +26,11 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.4",
-    "@openzeppelin/contracts": "4.8.2",
-    "@openzeppelin/contracts-upgradeable": "4.8.2",
+    "@openzeppelin/contracts": "4.8.3",
+    "@openzeppelin/contracts-upgradeable": "4.8.3",
     "@solid-world/gas-station": "0.3.0",
+    "@typechain/ethers-v5": "10.2.0",
+    "@typechain/hardhat": "6.1.5",
     "@uniswap/v3-core": "^1.0.1",
     "@uniswap/v3-periphery": "^1.4.3",
     "dotenv": "^16.0.0",
@@ -36,6 +39,7 @@
     "hardhat-deploy": "0.11.25",
     "hardhat-deploy-ethers": "^0.3.0-beta.13",
     "prettier": "^2.7.1",
-    "prettier-plugin-solidity": "^v1.0.0-dev.22"
+    "prettier-plugin-solidity": "^v1.0.0-dev.22",
+    "typechain": "8.1.1"
   }
 }

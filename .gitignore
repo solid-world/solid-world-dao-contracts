@@ -31,6 +31,9 @@ node_modules
 # Foundry outputs and cache
 /out
 
+# Typechain outputs
+/types
+
 .idea
 
 /report

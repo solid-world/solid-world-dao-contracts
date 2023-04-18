@@ -144,3 +144,11 @@ However, this assumes that you have the `lcov` package installed globally. If yo
 ```sh
 brew install lcov
 ```
+## Typechain
+
+Typechain is used to generate TypeScript bindings for Solidity smart contracts.
+The types are generated in the `./types` folder by running the following command:
+
+```sh
+yarn typechain
+```
