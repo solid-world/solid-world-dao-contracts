@@ -96,6 +96,67 @@ contract SolidStakingTest is BaseSolidStakingTest {
         solidStaking.stake(tokenAddress, 100);
     }
 
+    function testStake_withRecipient_LPTokensAreSubtractedFromCaller_stakeIsCreditedToRecipient() public {
+        uint stakeAmount = 100;
+        address caller = testAccount2;
+        address recipient = testAccount;
+        (CollateralizedBasketToken token, address tokenAddress) = _configuredTestToken();
+
+        vm.prank(caller);
+        _expectCall_RewardsController_handleUserStakeChanged(tokenAddress);
+        _expectEmit_Stake(recipient, tokenAddress, stakeAmount);
+        solidStaking.stake(tokenAddress, stakeAmount, recipient);
+
+        assertEq(solidStaking.userStake(tokenAddress, caller), 0);
+        assertEq(solidStaking.userStake(tokenAddress, recipient), stakeAmount);
+        assertEq(
+            token.balanceOf(address(solidStaking)),
+            stakeAmount,
+            "SolidStaking contract balance should be updated"
+        );
+        assertEq(
+            token.balanceOf(caller),
+            INITIAL_LP_TOKEN_BALANCE - stakeAmount,
+            "LPTokens should be subtracted from caller"
+        );
+    }
+
+    function testStake_withRecipient_revertsIfComplianceCheckFails() public {
+        uint stakeAmount = 100;
+        address caller = testAccount2;
+        address recipient = testAccount;
+        (, address token0Address) = _configuredTestToken();
+        (, address token1Address) = _configuredTestToken();
+
+        vm.prank(timelockController);
+        solidStaking.setKYCRequired(token1Address, true);
+
+        vm.prank(caller);
+        solidStaking.stake(token0Address, stakeAmount, recipient);
+
+        vm.prank(caller);
+        _expectRevert_NotRegulatoryCompliant(token1Address, recipient);
+        solidStaking.stake(token1Address, stakeAmount, recipient);
+
+        verificationRegistry.registerVerification(recipient);
+        vm.prank(caller);
+        solidStaking.stake(token1Address, stakeAmount, recipient);
+
+        verificationRegistry.blacklist(caller);
+        vm.startPrank(caller);
+        _expectRevert_Blacklisted(caller);
+        solidStaking.stake(token0Address, stakeAmount, recipient);
+        _expectRevert_Blacklisted(caller);
+        solidStaking.stake(token1Address, stakeAmount, recipient);
+    }
+
+    function testStake_withRecipient_failsForInvalidTokenAddress() public {
+        address invalidTokenAddress = vm.addr(777);
+
+        _expectRevert_InvalidTokenAddress(invalidTokenAddress);
+        solidStaking.stake(invalidTokenAddress, 100, testAccount);
+    }
+
     function testWithdraw() public {
         uint amountToStake = 100;
         uint amountToWithdraw = 50;

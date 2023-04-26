@@ -54,6 +54,13 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
         _;
     }
 
+    modifier notBlacklisted(address subject) {
+        if (!isValidCounterparty(subject, false)) {
+            revert Blacklisted(subject);
+        }
+        _;
+    }
+
     constructor(address _verificationRegistry, address _timelockController)
         RegulatoryCompliant(_verificationRegistry)
     {
@@ -95,16 +102,22 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
         validToken(token)
         regulatoryCompliant(token, msg.sender)
     {
-        uint oldUserStake = _balanceOf(token, msg.sender);
-        uint oldTotalStake = _totalStaked(token);
+        _stake(token, amount, msg.sender);
+    }
 
-        userStake[token][msg.sender] = oldUserStake + amount;
-
-        rewardsController.handleUserStakeChanged(token, msg.sender, oldUserStake, oldTotalStake);
-
-        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
-
-        emit Stake(msg.sender, token, amount);
+    /// @inheritdoc ISolidStakingActions
+    function stake(
+        address token,
+        uint amount,
+        address recipient
+    )
+        external
+        nonReentrant
+        validToken(token)
+        notBlacklisted(msg.sender)
+        regulatoryCompliant(token, recipient)
+    {
+        _stake(token, amount, recipient);
     }
 
     /// @inheritdoc ISolidStakingActions
@@ -154,6 +167,23 @@ contract SolidStaking is ISolidStaking, ReentrancyGuard, Ownable, PostConstruct,
 
     function _totalStaked(address token) internal view returns (uint) {
         return IERC20(token).balanceOf(address(this));
+    }
+
+    function _stake(
+        address token,
+        uint amount,
+        address recipient
+    ) internal {
+        uint oldUserStake = _balanceOf(token, recipient);
+        uint oldTotalStake = _totalStaked(token);
+
+        userStake[token][recipient] = oldUserStake + amount;
+
+        rewardsController.handleUserStakeChanged(token, recipient, oldUserStake, oldTotalStake);
+
+        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+
+        emit Stake(recipient, token, amount);
     }
 
     function _withdraw(address token, uint amount) internal {
