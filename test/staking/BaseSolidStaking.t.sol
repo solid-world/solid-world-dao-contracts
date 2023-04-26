@@ -7,6 +7,7 @@ import "../../contracts/CollateralizedBasketToken.sol";
 import "../../contracts/compliance/VerificationRegistry.sol";
 
 abstract contract BaseSolidStakingTest is BaseTest {
+    uint constant INITIAL_LP_TOKEN_BALANCE = 100000;
     address emissionManager;
     address rewardsController;
     address carbonRewardsManager;
@@ -118,6 +119,10 @@ abstract contract BaseSolidStakingTest is BaseTest {
         );
     }
 
+    function _expectRevert_Blacklisted(address subject) internal {
+        vm.expectRevert(abi.encodeWithSelector(ISolidStakingErrors.Blacklisted.selector, subject));
+    }
+
     function _expectRevert_NotTimelockController(address caller) internal {
         vm.expectRevert(abi.encodeWithSelector(ISolidStakingErrors.NotTimelockController.selector, caller));
     }
@@ -161,8 +166,8 @@ abstract contract BaseSolidStakingTest is BaseTest {
     }
 
     function _configureTestToken(CollateralizedBasketToken token, address tokenAddress) internal {
-        token.mint(testAccount, 100000);
-        token.mint(testAccount2, 100000);
+        token.mint(testAccount, INITIAL_LP_TOKEN_BALANCE);
+        token.mint(testAccount2, INITIAL_LP_TOKEN_BALANCE);
 
         vm.prank(testAccount);
         token.approve(address(solidStaking), type(uint).max);

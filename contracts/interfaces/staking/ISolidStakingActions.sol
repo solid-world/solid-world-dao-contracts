@@ -10,6 +10,17 @@ interface ISolidStakingActions {
     /// @param amount the amount to stake
     function stake(address token, uint amount) external;
 
+    /// @notice msg.sender stakes tokens for the recipient into the staking contract
+    /// @dev funds are subtracted from msg.sender, stake is credited to recipient
+    /// @param token the token to stake
+    /// @param amount the amount to stake
+    /// @param recipient the recipient of the stake
+    function stake(
+        address token,
+        uint amount,
+        address recipient
+    ) external;
+
     /// @dev Withdraws tokens for the caller from the staking contract
     /// @param token the token to withdraw
     /// @param amount the amount to withdraw
