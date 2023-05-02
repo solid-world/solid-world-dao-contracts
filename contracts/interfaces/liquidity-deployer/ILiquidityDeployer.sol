@@ -91,4 +91,8 @@ interface ILiquidityDeployer {
     function getLastTotalDeployedLiquidity() external view returns (uint, uint);
 
     function getLPTokensOwed(address liquidityProvider) external view returns (uint);
+
+    /// @return numerator the output amount of token1 that was received for the given amount of token0
+    /// @return denominator the input amount of token0 to receive amount of token1
+    function getLastGammaAdjustmentFactor() external view returns (uint numerator, uint denominator);
 }

@@ -44,6 +44,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 0;
         testScenario.lastToken0AvailableLiquidity = 8e18;
         testScenario.lastToken1AvailableLiquidity = 150e6;
+        testScenario.adjustmentFactorNumerator = 25.5e6;
+        testScenario.adjustmentFactorDenominator = 1e18;
         testScenario.token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         testScenario.token1 = address(new TestToken("USD Coin", "USDC", 6));
         testScenario.conversionRate = 255;
@@ -80,6 +82,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 41.714286e6;
         testScenario.lastToken0AvailableLiquidity = 8e18;
         testScenario.lastToken1AvailableLiquidity = 350e6;
+        testScenario.adjustmentFactorNumerator = 25.5e6;
+        testScenario.adjustmentFactorDenominator = 1e18;
         testScenario.token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         testScenario.token1 = address(new TestToken("USD Coin", "USDC", 6));
         testScenario.conversionRate = 255;
@@ -116,6 +120,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 0;
         testScenario.lastToken0AvailableLiquidity = 8e18;
         testScenario.lastToken1AvailableLiquidity = 50e6;
+        testScenario.adjustmentFactorNumerator = 25.5e6;
+        testScenario.adjustmentFactorDenominator = 1e18;
         testScenario.token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         testScenario.token1 = address(new TestToken("USD Coin", "USDC", 6));
         testScenario.conversionRate = 255;
@@ -152,6 +158,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 0;
         testScenario.lastToken0AvailableLiquidity = 1e12;
         testScenario.lastToken1AvailableLiquidity = 50e6;
+        testScenario.adjustmentFactorNumerator = 25.5e6;
+        testScenario.adjustmentFactorDenominator = 1e18;
         testScenario.token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         testScenario.token1 = address(new TestToken("USD Coin", "USDC", 6));
         testScenario.conversionRate = 255;
@@ -188,6 +196,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 0;
         testScenario.lastToken0AvailableLiquidity = liquidityDeployer.getMinConvertibleToken0Amount();
         testScenario.lastToken1AvailableLiquidity = 1;
+        testScenario.adjustmentFactorNumerator = 25.5e6;
+        testScenario.adjustmentFactorDenominator = 1e18;
         testScenario.token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         testScenario.token1 = address(new TestToken("USD Coin", "USDC", 6));
         testScenario.conversionRate = 255;
@@ -224,6 +234,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 4.666667e6;
         testScenario.lastToken0AvailableLiquidity = 80000e18;
         testScenario.lastToken1AvailableLiquidity = 15e6;
+        testScenario.adjustmentFactorNumerator = 0.0001e6;
+        testScenario.adjustmentFactorDenominator = 1e18;
         testScenario.token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         testScenario.token1 = address(new TestToken("USD Coin", "USDC", 6));
         testScenario.conversionRate = 1;
@@ -260,6 +272,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 0;
         testScenario.lastToken0AvailableLiquidity = 15e6;
         testScenario.lastToken1AvailableLiquidity = 80000e18;
+        testScenario.adjustmentFactorNumerator = 10000e18;
+        testScenario.adjustmentFactorDenominator = 1e6;
         testScenario.token0 = address(new TestToken("USD Coin", "USDC", 6));
         testScenario.token1 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         testScenario.conversionRate = 1e4;
@@ -296,6 +310,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         testScenario.account1RemainingToken1Balance = 4.666666666666666667e18;
         testScenario.lastToken0AvailableLiquidity = 80000e18;
         testScenario.lastToken1AvailableLiquidity = 15e18;
+        testScenario.adjustmentFactorNumerator = 0.0001e18;
+        testScenario.adjustmentFactorDenominator = 1e18;
         testScenario.token0 = address(new TestToken("Mangrove Collateralized Basket Token", "MCBT", 18));
         testScenario.token1 = address(new TestToken("USD Coin", "USDC", 18));
         testScenario.conversionRate = 1;
@@ -335,7 +351,8 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
                 testScenario.token0,
                 testScenario.token1,
                 testScenario.conversionRate,
-                testScenario.conversionRateDecimals
+                testScenario.conversionRateDecimals,
+                testScenario.adjustmentFactorNumerator
             );
             test(testScenario);
             vm.revertTo(snapshotId);
@@ -357,6 +374,20 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
             liquidityDeployer.getLastToken1AvailableLiquidity(),
             testScenario.lastToken1AvailableLiquidity
         );
+    }
+
+    function _testDeployLiquidity_lastGammaAdjustmentFactor(TestDataTypes.TestScenario storage testScenario)
+        internal
+    {
+        _doDeposits(testScenario);
+
+        liquidityDeployer.deployLiquidity();
+
+        (uint numerator, uint denominator) = liquidityDeployer.getLastGammaAdjustmentFactor();
+
+        assertEq(numerator, testScenario.adjustmentFactorNumerator);
+
+        assertEq(denominator, testScenario.adjustmentFactorDenominator);
     }
 
     function _testDeployLiquidity_lastDeployableLiquidity(TestDataTypes.TestScenario storage testScenario)

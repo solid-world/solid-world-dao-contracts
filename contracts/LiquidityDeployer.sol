@@ -17,6 +17,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
 
     LiquidityDeployerDataTypes.Config internal config;
     LiquidityDeployerDataTypes.Depositors internal depositors;
+    LiquidityDeployerDataTypes.Fraction internal lastGammaAdjustmentFactor;
 
     /// @dev Account => Token => Balance
     mapping(address => mapping(address => uint)) internal userTokenBalance;
@@ -215,6 +216,24 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         return lPTokensOwed[liquidityProvider];
     }
 
+    function getLastGammaAdjustmentFactor() external view returns (uint, uint) {
+        return (lastGammaAdjustmentFactor.numerator, lastGammaAdjustmentFactor.denominator);
+    }
+
+    function _loadGammaAdjustmentFactor() internal {
+        uint token0Amount = 10**config.token0Decimals;
+        (uint amountStart, uint amountEnd) = IUniProxy(config.uniProxy).getDepositAmount(
+            config.gammaVault,
+            config.token0,
+            token0Amount
+        );
+
+        uint token1Amount = (amountStart + amountEnd) / 2;
+
+        lastGammaAdjustmentFactor.numerator = token1Amount;
+        lastGammaAdjustmentFactor.denominator = token0Amount;
+    }
+
     function _computeAvailableLiquidity()
         internal
         view
@@ -238,6 +257,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         internal
         returns (uint token0TotalDeployableLiquidity, uint token1TotalDeployableLiquidity)
     {
+        _loadGammaAdjustmentFactor();
         uint lastAvailableLiquidityToken0ValueInToken1 = _convertToken0ToToken1(
             lastAvailableLiquidity[config.token0]
         );
@@ -275,14 +295,10 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     ) internal returns (uint token0TotalDeployableLiquidity, uint token1TotalDeployableLiquidity) {
         for (uint i; i < depositors.tokenDepositors.length; i++) {
             address tokenDepositor = depositors.tokenDepositors[i];
-            uint token0DeployableLiquidity = _computeDeployableLiquidity(
-                config.token0,
-                tokenDepositor,
-                token0AdjustmentFactor
-            );
-            token0DeployableLiquidity = token0DeployableLiquidity < config.minConvertibleToken0Amount
+            uint token0DeployableLiquidity = userTokenBalance[tokenDepositor][config.token0] <
+                config.minConvertibleToken0Amount
                 ? 0
-                : token0DeployableLiquidity;
+                : _computeDeployableLiquidity(config.token0, tokenDepositor, token0AdjustmentFactor);
             lastDeployedLiquidity[config.token0][tokenDepositor] = token0DeployableLiquidity;
             if (token0DeployableLiquidity > 0) {
                 userTokenBalance[tokenDepositor][config.token0] -= token0DeployableLiquidity;
