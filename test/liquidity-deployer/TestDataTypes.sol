@@ -3,6 +3,7 @@ pragma solidity 0.8.16;
 
 contract TestDataTypes {
     struct TestScenario {
+        string id;
         uint account0Token0Deposit;
         uint account0Token1Deposit;
         uint account1Token0Deposit;
