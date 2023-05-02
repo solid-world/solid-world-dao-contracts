@@ -104,7 +104,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         (
             lastTotalDeployedLiquidity[config.token0],
             lastTotalDeployedLiquidity[config.token1]
-        ) = _prepareDeployableLiquidity();
+        ) = _prepareDeployment();
 
         _allowUniProxyToSpendDeployableLiquidity();
         uint lpTokens = _depositToUniProxy();
@@ -234,7 +234,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         }
     }
 
-    function _prepareDeployableLiquidity()
+    function _prepareDeployment()
         internal
         returns (uint token0TotalDeployableLiquidity, uint token1TotalDeployableLiquidity)
     {
@@ -253,7 +253,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
                 lastAvailableLiquidity[config.token1],
                 lastAvailableLiquidityToken0ValueInToken1
             );
-            (token0TotalDeployableLiquidity, token1TotalDeployableLiquidity) = _prepareDeployableLiquidity(
+            (token0TotalDeployableLiquidity, token1TotalDeployableLiquidity) = _prepareDeployment(
                 adjustmentFactor,
                 LiquidityDeployerMath.neutralFraction()
             );
@@ -262,14 +262,14 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
                 lastAvailableLiquidityToken0ValueInToken1,
                 lastAvailableLiquidity[config.token1]
             );
-            (token0TotalDeployableLiquidity, token1TotalDeployableLiquidity) = _prepareDeployableLiquidity(
+            (token0TotalDeployableLiquidity, token1TotalDeployableLiquidity) = _prepareDeployment(
                 LiquidityDeployerMath.neutralFraction(),
                 adjustmentFactor
             );
         }
     }
 
-    function _prepareDeployableLiquidity(
+    function _prepareDeployment(
         LiquidityDeployerDataTypes.Fraction memory token0AdjustmentFactor,
         LiquidityDeployerDataTypes.Fraction memory token1AdjustmentFactor
     ) internal returns (uint token0TotalDeployableLiquidity, uint token1TotalDeployableLiquidity) {

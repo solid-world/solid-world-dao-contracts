@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
 
 library LiquidityDeployerDataTypes {
@@ -7,6 +7,7 @@ library LiquidityDeployerDataTypes {
         address token1;
         address gammaVault;
         address uniProxy;
+        /// @dev 1 token0 = ? token1
         uint conversionRate;
         uint minConvertibleToken0Amount;
         uint8 conversionRateDecimals;
