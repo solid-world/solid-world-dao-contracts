@@ -42,6 +42,18 @@ library LiquidityDeployerMath {
         return LiquidityDeployerDataTypes.Fraction(1, 1);
     }
 
+    function inverseFraction(LiquidityDeployerDataTypes.Fraction memory fraction)
+        internal
+        pure
+        returns (LiquidityDeployerDataTypes.Fraction memory)
+    {
+        if (fraction.denominator == 0) {
+            revert InvalidFraction(fraction.numerator, fraction.denominator);
+        }
+
+        return LiquidityDeployerDataTypes.Fraction(fraction.denominator, fraction.numerator);
+    }
+
     function adjustTokenAmount(uint amount, LiquidityDeployerDataTypes.Fraction memory adjustmentFactor)
         internal
         pure

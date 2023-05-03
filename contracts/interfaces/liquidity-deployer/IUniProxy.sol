@@ -17,4 +17,16 @@ interface IUniProxy {
         address pos,
         uint[4] memory minIn
     ) external returns (uint shares);
+
+    /// @notice Get the amount of token to deposit for the given amount of pair token
+    /// @param pos Hypervisor Address
+    /// @param token Address of token to deposit
+    /// @param depositAmount Amount of token to deposit
+    /// @return amountStart Minimum amounts of the pair token to deposit
+    /// @return amountEnd Maximum amounts of the pair token to deposit
+    function getDepositAmount(
+        address pos,
+        address token,
+        uint depositAmount
+    ) external view returns (uint amountStart, uint amountEnd);
 }

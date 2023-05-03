@@ -96,4 +96,24 @@ contract LiquidityDeployerMathTest is BaseTest {
 
         assertEq(LiquidityDeployerMath.adjustTokenAmount(amount, adjustmentFactor), 66);
     }
+
+    function testInverseFraction() public {
+        LiquidityDeployerDataTypes.Fraction memory fraction = LiquidityDeployerMath.inverseFraction(
+            LiquidityDeployerDataTypes.Fraction(1, 2)
+        );
+        assertEq(fraction.numerator, 2);
+        assertEq(fraction.denominator, 1);
+    }
+
+    function testInverseFraction_revertsForZeroDenominator() public {
+        LiquidityDeployerDataTypes.Fraction memory fraction = LiquidityDeployerDataTypes.Fraction(1, 0);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                LiquidityDeployerMath.InvalidFraction.selector,
+                fraction.numerator,
+                fraction.denominator
+            )
+        );
+        LiquidityDeployerMath.inverseFraction(fraction);
+    }
 }

@@ -17,6 +17,7 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
 
     LiquidityDeployerDataTypes.Config internal config;
     LiquidityDeployerDataTypes.Depositors internal depositors;
+    LiquidityDeployerDataTypes.Fraction internal lastGammaAdjustmentFactor;
 
     /// @dev Account => Token => Balance
     mapping(address => mapping(address => uint)) internal userTokenBalance;
@@ -104,7 +105,9 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         (
             lastTotalDeployedLiquidity[config.token0],
             lastTotalDeployedLiquidity[config.token1]
-        ) = _prepareDeployableLiquidity();
+        ) = _computeTotalDeployableLiquidity();
+
+        _prepareDeployment();
 
         _allowUniProxyToSpendDeployableLiquidity();
         uint lpTokens = _depositToUniProxy();
@@ -215,6 +218,27 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         return lPTokensOwed[liquidityProvider];
     }
 
+    /// @inheritdoc ILiquidityDeployer
+    function getLastGammaAdjustmentFactor() external view returns (uint, uint) {
+        return (lastGammaAdjustmentFactor.numerator, lastGammaAdjustmentFactor.denominator);
+    }
+
+    /// @dev Fetches how many token1 tokens are needed if token0 amount is 10^token0Decimals
+    /// @dev and stores token1amount/token0amount as a fraction for later computation
+    function _loadGammaAdjustmentFactor() internal {
+        uint token0Amount = 10**config.token0Decimals;
+        (uint amountStart, uint amountEnd) = IUniProxy(config.uniProxy).getDepositAmount(
+            config.gammaVault,
+            config.token0,
+            token0Amount
+        );
+
+        uint token1Amount = (amountStart + amountEnd) / 2;
+
+        lastGammaAdjustmentFactor.numerator = token1Amount;
+        lastGammaAdjustmentFactor.denominator = token0Amount;
+    }
+
     function _computeAvailableLiquidity()
         internal
         view
@@ -234,83 +258,85 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
         }
     }
 
-    function _prepareDeployableLiquidity()
+    function _computeTotalDeployableLiquidity()
         internal
         returns (uint token0TotalDeployableLiquidity, uint token1TotalDeployableLiquidity)
     {
-        uint lastAvailableLiquidityToken0ValueInToken1 = _convertToken0ToToken1(
-            lastAvailableLiquidity[config.token0]
-        );
-        if (lastAvailableLiquidityToken0ValueInToken1 == 0 || lastAvailableLiquidity[config.token1] == 0) {
+        if (
+            _convertToken0ToToken1(lastAvailableLiquidity[config.token0]) == 0 ||
+            lastAvailableLiquidity[config.token1] == 0
+        ) {
             revert NotEnoughAvailableLiquidity(
                 lastAvailableLiquidity[config.token0],
                 lastAvailableLiquidity[config.token1]
             );
         }
 
-        if (lastAvailableLiquidityToken0ValueInToken1 > lastAvailableLiquidity[config.token1]) {
-            LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction(
-                lastAvailableLiquidity[config.token1],
-                lastAvailableLiquidityToken0ValueInToken1
-            );
-            (token0TotalDeployableLiquidity, token1TotalDeployableLiquidity) = _prepareDeployableLiquidity(
-                adjustmentFactor,
-                LiquidityDeployerMath.neutralFraction()
-            );
+        _loadGammaAdjustmentFactor();
+
+        uint maxToken1DepositAmount = LiquidityDeployerMath.adjustTokenAmount(
+            lastAvailableLiquidity[config.token0],
+            lastGammaAdjustmentFactor
+        );
+
+        if (maxToken1DepositAmount <= lastAvailableLiquidity[config.token1]) {
+            token0TotalDeployableLiquidity = lastAvailableLiquidity[config.token0];
+            token1TotalDeployableLiquidity = maxToken1DepositAmount;
         } else {
-            LiquidityDeployerDataTypes.Fraction memory adjustmentFactor = LiquidityDeployerDataTypes.Fraction(
-                lastAvailableLiquidityToken0ValueInToken1,
-                lastAvailableLiquidity[config.token1]
+            token0TotalDeployableLiquidity = LiquidityDeployerMath.adjustTokenAmount(
+                lastAvailableLiquidity[config.token1],
+                LiquidityDeployerMath.inverseFraction(lastGammaAdjustmentFactor)
             );
-            (token0TotalDeployableLiquidity, token1TotalDeployableLiquidity) = _prepareDeployableLiquidity(
-                LiquidityDeployerMath.neutralFraction(),
-                adjustmentFactor
-            );
+            token1TotalDeployableLiquidity = lastAvailableLiquidity[config.token1];
         }
     }
 
-    function _prepareDeployableLiquidity(
-        LiquidityDeployerDataTypes.Fraction memory token0AdjustmentFactor,
-        LiquidityDeployerDataTypes.Fraction memory token1AdjustmentFactor
-    ) internal returns (uint token0TotalDeployableLiquidity, uint token1TotalDeployableLiquidity) {
+    function _prepareDeployment() internal {
+        LiquidityDeployerDataTypes.Fraction memory token0AdjustmentFactor = LiquidityDeployerDataTypes
+            .Fraction(lastTotalDeployedLiquidity[config.token0], lastAvailableLiquidity[config.token0]);
+
+        LiquidityDeployerDataTypes.Fraction memory token1AdjustmentFactor = LiquidityDeployerDataTypes
+            .Fraction(lastTotalDeployedLiquidity[config.token1], lastAvailableLiquidity[config.token1]);
+
         for (uint i; i < depositors.tokenDepositors.length; i++) {
             address tokenDepositor = depositors.tokenDepositors[i];
-            uint token0DeployableLiquidity = _computeDeployableLiquidity(
-                config.token0,
-                tokenDepositor,
+            uint token0DeployableLiquidity = _computeToken0DeployableLiquidity(
+                userTokenBalance[tokenDepositor][config.token0],
                 token0AdjustmentFactor
             );
-            token0DeployableLiquidity = token0DeployableLiquidity < config.minConvertibleToken0Amount
-                ? 0
-                : token0DeployableLiquidity;
             lastDeployedLiquidity[config.token0][tokenDepositor] = token0DeployableLiquidity;
             if (token0DeployableLiquidity > 0) {
                 userTokenBalance[tokenDepositor][config.token0] -= token0DeployableLiquidity;
                 totalDeposits[config.token0] -= token0DeployableLiquidity;
-                token0TotalDeployableLiquidity += token0DeployableLiquidity;
             }
 
             uint token1DeployableLiquidity = _computeDeployableLiquidity(
-                config.token1,
-                tokenDepositor,
+                userTokenBalance[tokenDepositor][config.token1],
                 token1AdjustmentFactor
             );
             lastDeployedLiquidity[config.token1][tokenDepositor] = token1DeployableLiquidity;
             if (token1DeployableLiquidity > 0) {
                 userTokenBalance[tokenDepositor][config.token1] -= token1DeployableLiquidity;
                 totalDeposits[config.token1] -= token1DeployableLiquidity;
-                token1TotalDeployableLiquidity += token1DeployableLiquidity;
             }
         }
     }
 
-    function _computeDeployableLiquidity(
-        address token,
-        address depositor,
+    function _computeToken0DeployableLiquidity(
+        uint tokenDepositorBalance,
         LiquidityDeployerDataTypes.Fraction memory adjustmentFactor
     ) internal view returns (uint) {
-        uint tokenDepositorBalance = userTokenBalance[depositor][token];
+        if (tokenDepositorBalance < config.minConvertibleToken0Amount) {
+            return 0;
+        }
 
+        return _computeDeployableLiquidity(tokenDepositorBalance, adjustmentFactor);
+    }
+
+    function _computeDeployableLiquidity(
+        uint tokenDepositorBalance,
+        LiquidityDeployerDataTypes.Fraction memory adjustmentFactor
+    ) internal pure returns (uint) {
         if (tokenDepositorBalance == 0) {
             return 0;
         }
@@ -387,10 +413,12 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
                 continue;
             }
 
-            uint lpTokensOwed = Math.mulDiv(
+            uint lpTokensOwed = LiquidityDeployerMath.adjustTokenAmount(
                 lpTokens,
-                totalLiquidityInToken1ForDepositor,
-                totalLiquidityInToken1
+                LiquidityDeployerDataTypes.Fraction(
+                    totalLiquidityInToken1ForDepositor,
+                    totalLiquidityInToken1
+                )
             );
 
             lPTokensOwed[tokenDepositor] += lpTokensOwed;

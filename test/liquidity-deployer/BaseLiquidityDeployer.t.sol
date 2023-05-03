@@ -42,15 +42,23 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         address defaultToken1 = address(new TestToken("USD Coin", "USDC", 6));
         uint defaultConversionRate = 255;
         uint8 defaultConversionRateDecimals = 1;
+        uint defaultGammaDepositAmountOut = 1e6;
 
-        _init(defaultToken0, defaultToken1, defaultConversionRate, defaultConversionRateDecimals);
+        _init(
+            defaultToken0,
+            defaultToken1,
+            defaultConversionRate,
+            defaultConversionRateDecimals,
+            defaultGammaDepositAmountOut
+        );
     }
 
     function _init(
         address token0_,
         address token1_,
         uint conversionRate_,
-        uint8 conversionRateDecimals_
+        uint8 conversionRateDecimals_,
+        uint gammaDepositAmountOut
     ) internal {
         token0 = token0_;
         token1 = token1_;
@@ -74,6 +82,7 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
         _approveSpending();
 
         _mockUniProxy_deposit();
+        _mockUniProxy_getDepositAmount(gammaDepositAmountOut);
     }
 
     function _labelAccounts() private {
@@ -146,6 +155,14 @@ abstract contract BaseLiquidityDeployerTest is BaseTest {
             uniProxy,
             abi.encodeWithSelector(IUniProxy.deposit.selector),
             abi.encode(MINTED_LP_TOKENS)
+        );
+    }
+
+    function _mockUniProxy_getDepositAmount(uint amountOut) internal {
+        vm.mockCall(
+            uniProxy,
+            abi.encodeWithSelector(IUniProxy.getDepositAmount.selector),
+            abi.encode(amountOut - 10, amountOut + 10) // +/- 10 to account for average
         );
     }
 

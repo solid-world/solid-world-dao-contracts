@@ -344,6 +344,10 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
         _runWithTestScenarios(_testDeployLiquidity_lastAvailableLiquidity);
     }
 
+    function testDeployLiquidity_lastGammaAdjustmentFactor() public {
+        _runWithTestScenarios(_testDeployLiquidity_lastGammaAdjustmentFactor);
+    }
+
     function testDeployLiquidity_lastDeployableLiquidity() public {
         _runWithTestScenarios(_testDeployLiquidity_lastDeployableLiquidity);
     }

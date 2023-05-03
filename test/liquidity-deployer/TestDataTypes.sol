@@ -3,6 +3,7 @@ pragma solidity 0.8.16;
 
 contract TestDataTypes {
     struct TestScenario {
+        string id;
         uint account0Token0Deposit;
         uint account0Token1Deposit;
         uint account1Token0Deposit;
@@ -21,6 +22,8 @@ contract TestDataTypes {
         uint account1RemainingToken1Balance;
         uint lastToken0AvailableLiquidity;
         uint lastToken1AvailableLiquidity;
+        uint adjustmentFactorNumerator; // token1 amount out
+        uint adjustmentFactorDenominator; // token0 amount in
         address token0;
         address token1;
         uint conversionRate;
