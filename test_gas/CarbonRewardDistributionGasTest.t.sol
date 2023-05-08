@@ -18,6 +18,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
     EmissionManager emissionManager;
     RewardsController rewardsController;
     address verificationRegistry = address(new VerificationRegistry());
+    address timelockController = vm.addr(13);
 
     address rewardsVault;
     address feeReceiver;
@@ -27,7 +28,7 @@ contract CarbonRewardDistributionGasTest is GasTest {
         vm.warp(PRESET_CURRENT_DATE);
 
         manager = new SolidWorldManager();
-        staking = new SolidStaking(verificationRegistry);
+        staking = new SolidStaking(verificationRegistry, timelockController);
         emissionManager = new EmissionManager();
         rewardsController = new RewardsController();
 
