@@ -167,6 +167,18 @@ library CollateralizationManager {
         emit CollateralizationFeeUpdated(collateralizationFee);
     }
 
+    /// @param _storage Struct containing the current state used or modified by this function
+    /// @param categoryId id of the category whose parameters are used to compute the reactiveTA
+    /// @param forwardCreditsAmount ERC1155 tokens amount to be collateralized
+    function getReactiveTA(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint categoryId,
+        uint forwardCreditsAmount
+    ) external view returns (uint reactiveTA) {
+        DomainDataTypes.Category storage category = _storage.categories[categoryId];
+        (, reactiveTA) = ReactiveTimeAppreciationMath.computeReactiveTA(category, forwardCreditsAmount);
+    }
+
     function _updateBatchTA(
         SolidWorldManagerStorage.Storage storage _storage,
         uint batchId,

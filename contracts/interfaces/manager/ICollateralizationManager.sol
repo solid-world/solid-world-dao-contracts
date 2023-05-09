@@ -46,4 +46,8 @@ interface ICollateralizationManager {
 
     /// @param collateralizationFee fee for collateralizing ERC1155 tokens
     function setCollateralizationFee(uint16 collateralizationFee) external;
+
+    /// @param categoryId id of the category whose parameters are used to compute the reactiveTA
+    /// @param forwardCreditsAmount ERC1155 tokens amount to be collateralized
+    function getReactiveTA(uint categoryId, uint forwardCreditsAmount) external view returns (uint);
 }
