@@ -206,6 +206,13 @@ contract CollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(manager.getCollateralizationFee(), newCollateralizationFee);
     }
 
+    function testGetReactiveTA() public {
+        _addBatchWithDependencies(TIME_APPRECIATION, PRESET_CURRENT_DATE + ONE_YEAR, 100);
+        uint actual = manager.getReactiveTA(CATEGORY_ID, 100);
+
+        assertEq(actual, TIME_APPRECIATION);
+    }
+
     function _expectEmitCategoryRebalanced(
         uint categoryId,
         uint averageTA,
