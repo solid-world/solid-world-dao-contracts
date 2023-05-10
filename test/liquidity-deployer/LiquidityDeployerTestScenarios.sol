@@ -437,7 +437,7 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         assertEq(lastToken1DeployedLiquidity, testScenario.lastToken1DeployedLiquidity);
     }
 
-    function _testDeployLiquidity_approvesUniProxyToSpendDeployableTokens(
+    function _testDeployLiquidity_approvesGammaVaultToSpendDeployableTokens(
         TestDataTypes.TestScenario storage testScenario
     ) internal {
         _doDeposits(testScenario);
@@ -445,11 +445,11 @@ contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
         liquidityDeployer.deployLiquidity();
 
         assertEq(
-            IERC20(token0).allowance(address(liquidityDeployer), address(uniProxy)),
+            IERC20(token0).allowance(address(liquidityDeployer), address(lpToken)),
             testScenario.lastToken0DeployedLiquidity
         );
         assertEq(
-            IERC20(token1).allowance(address(liquidityDeployer), address(uniProxy)),
+            IERC20(token1).allowance(address(liquidityDeployer), address(lpToken)),
             testScenario.lastToken1DeployedLiquidity
         );
     }

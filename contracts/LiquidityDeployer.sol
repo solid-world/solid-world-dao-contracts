@@ -383,8 +383,8 @@ contract LiquidityDeployer is ILiquidityDeployer, ReentrancyGuard {
     }
 
     function _allowUniProxyToSpendDeployableLiquidity() internal {
-        IERC20(config.token0).approve(config.uniProxy, lastTotalDeployedLiquidity[config.token0]);
-        IERC20(config.token1).approve(config.uniProxy, lastTotalDeployedLiquidity[config.token1]);
+        IERC20(config.token0).approve(config.gammaVault, lastTotalDeployedLiquidity[config.token0]);
+        IERC20(config.token1).approve(config.gammaVault, lastTotalDeployedLiquidity[config.token1]);
     }
 
     function _depositToUniProxy() internal returns (uint lpTokens) {
