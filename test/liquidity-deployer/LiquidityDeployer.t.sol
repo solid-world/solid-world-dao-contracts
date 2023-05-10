@@ -356,8 +356,8 @@ contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
         _runWithTestScenarios(_testDeployLiquidity_lastTotalDeployedLiquidity);
     }
 
-    function testDeployLiquidity_approvesUniProxyToSpendDeployableTokens() public {
-        _runWithTestScenarios(_testDeployLiquidity_approvesUniProxyToSpendDeployableTokens);
+    function testDeployLiquidity_approvesGammaVaultToSpendDeployableTokens() public {
+        _runWithTestScenarios(_testDeployLiquidity_approvesGammaVaultToSpendDeployableTokens);
     }
 
     function testDeployLiquidity_calls_UniProxy_deposit() public {
