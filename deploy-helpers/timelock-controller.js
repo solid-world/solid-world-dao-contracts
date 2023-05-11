@@ -4,7 +4,7 @@ async function deployTimelockController(
   deployer,
   contractsOwner
 ) {
-  const minDelay = 48 * 60 * 60
+  const minDelay = 0
   const proposers = [contractsOwner]
   const executors = [contractsOwner]
   const admin = contractsOwner
