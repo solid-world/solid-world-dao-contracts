@@ -1,11 +1,9 @@
-const fs = require('node:fs')
 require('@nomiclabs/hardhat-etherscan')
 require('@nomiclabs/hardhat-ethers')
 require('@typechain/hardhat')
 require('hardhat-deploy')
 require('hardhat-deploy-ethers')
 require('dotenv').config()
-const { ethers } = require('ethers')
 require('./tasks')
 
 const {
@@ -14,8 +12,6 @@ const {
   ETHERSCAN_KEY = '',
   INFURA_KEY = '',
   DEPLOYER_PRIVATE_KEY,
-  DEPLOYER_JSON,
-  DEPLOYER_PASSWORD,
   OWNER_ADDRESS,
   REWARDS_VAULT_ADDRESS
 } = process.env
@@ -131,9 +127,7 @@ module.exports = {
     ]
   },
   namedAccounts: {
-    deployer: DEPLOYER_PRIVATE_KEY
-      ? buildPrivateKey(DEPLOYER_PRIVATE_KEY)
-      : decodePrivateKey(DEPLOYER_JSON, DEPLOYER_PASSWORD),
+    deployer: buildPrivateKey(DEPLOYER_PRIVATE_KEY),
     contractsOwner: {
       default: OWNER_ADDRESS
     },
@@ -145,13 +139,6 @@ module.exports = {
     outDir: 'types',
     target: 'ethers-v5'
   }
-}
-
-function decodePrivateKey(jsonFile, password) {
-  const json = fs.readFileSync(jsonFile, 'utf8')
-  const wallet = ethers.Wallet.fromEncryptedJsonSync(json, password)
-
-  return buildPrivateKey(wallet.privateKey)
 }
 
 function buildPrivateKey(privateKey) {
