@@ -1,154 +1,142 @@
-# solid-world-dao-contracts
+# Smart Contracts: The Solid World Protocol
 
-[![MythXBadge](https://badgen.net/https/api.mythx.io/v1/projects/c7145fbf-0af1-4614-a82d-e478fb0cdb47/badge/data?cache=300&icon=https://raw.githubusercontent.com/ConsenSys/mythx-github-badge/main/logo_white.svg)](https://docs.mythx.io/dashboard/github-badges)
-
-This repository contains all Solid World DAO Smart Contracts.
-
-For more information about DAO visit our site: https://solid.world
+For more information about the protocol, please visit our website: [solid.world](https://solid.world)
 
 ## Deployment
 
-▶ Copy and populate environment variables:
-```shell
-cp .env.example .env
-```
+To deploy the smart contracts, follow these steps:
 
-▶ In order to deploy to localhost run:
-```shell
-yarn hardhat deploy --network localhost
-```
+1. Copy and populate the environment variables by running the command:
+   ```shell
+   cp .env.example .env
+   ```
 
-▶ To verify the contracts on Etherscan run:
-```shell
-yarn hardhat --network <network> etherscan-verify
-yarn hardhat verify --network goerli <SolidWorldManager_Implementation address>
-```
-(the second command is required because there's currently a [bug](https://github.com/wighawag/hardhat-deploy/issues/253) that prevents verification of contracts with linked libraries)
+2. To deploy to localhost, run the command:
+   ```shell
+   yarn hardhat deploy --network localhost
+   ```
+
+3. To verify the contracts on Etherscan, run the following commands:
+   ```shell
+   yarn hardhat --network <network> etherscan-verify
+   yarn hardhat verify --network goerli <SolidWorldManager_Implementation address>
+   ```
+   (The second command is required due to a [bug](https://github.com/wighawag/hardhat-deploy/issues/253) that prevents contract verification with linked libraries.)
 
 ## Hardhat Tasks
 
-▶ To deploy a new reward price oracle run:
-```shell
-yarn hardhat --network localhost deploy-reward-oracle [OPTIONS] 
-```
+The following tasks are available in Hardhat:
 
-OPTIONS:
+1. Deploy a new reward price oracle:
+   ```shell
+   yarn hardhat --network localhost deploy-reward-oracle [OPTIONS]
+   ```
 
-- `--owner`       The owner of the contract. Defaults to `OWNER_ADDRESS`
-- `--factory`     UniswapV3Factory address. If not provided, a mock factory will be deployed
-- `--base-token`  The base token address. If not provided, a mock token will be deployed
-- `--quote-token` The quote token address. If not provided, a mock token will be deployed
-- `--fee`         Pool fee (default: 500)
-- `--seconds-ago` Seconds ago to calculate the time-weighted means (default: 300)
+   Options:
+    - `--owner`: The owner of the contract. Defaults to `OWNER_ADDRESS`.
+    - `--factory`: UniswapV3Factory address. If not provided, a mock factory will be deployed.
+    - `--base-token`: The base token address. If not provided, a mock token will be deployed.
+    - `--quote-token`: The quote token address. If not provided, a mock token will be deployed.
+    - `--fee`: Pool fee (default: 500).
+    - `--seconds-ago`: Seconds ago to calculate the time-weighted means (default: 300).
 
+2. Deploy a new LiquidityDeployer contract:
+   ```shell
+   yarn hardhat --network localhost deploy-liquidity-deployer [OPTIONS]
+   ```
 
-▶ To deploy a new LiquidityDeployer contract run:
+   Options:
+    - `--token0`: The address of token0.
+    - `--token1`: The address of token1.
+    - `--gamma-vault`: The address of the GammaVault contract.
+    - `--uni-proxy`: The address of the UniProxy contract.
+    - `--conversion-rate`: The conversion rate between token0 and token1.
+    - `--conversion-rate-decimals`: The number of decimals of the conversion rate.
 
-```shell
-yarn hardhat --network localhost deploy-liquidity-deployer [OPTIONS] 
-```
+3. Deploy ERC-20 tokens with Hardhat:
+   ```shell
+   yarn hardhat deploy-erc20 --network localhost --quantity 3 --owner 0xabcde
+   ```
 
-OPTIONS:
+   This command deploys 3 ERC-20 tokens on the localhost network, owned by the address 0xabcde.
 
-- `--token0`                   The address of token0.
-- `--token1`                   The address of token1.
-- `--gamma-vault`              The address of the GammaVault contract.
-- `--uni-proxy`                The address of the UniProxy contract.
-- `--conversion-rate`          The conversion rate between token0 and token1.
-- `--conversion-rate-decimals` The number of decimals of the conversion rate.
+   Flags:
+    - `--quantity`: The number of tokens to deploy (Default: 1).
+    - `--owner`: The owner of the tokens (Default: OWNER_ADDRESS).
 
-▶ Deploying ERC-20 tokens with hardhat
+## Upgradable Contracts
 
-```shell
-yarn hardhat deploy-erc20 --network localhost --quantity 3 --owner 0xabcde
-```
+The following contracts are upgradable and managed by a `DefaultProxyAdmin` contract. The owner of the `DefaultProxyAdmin` contract is authorized to upgrade both contracts.
 
-This command deploys 3 ERC-20 tokens on the localhost network, owned by the address 0xabcde.
-
-- `--quantity` flag specifies the number of tokens to deploy (Default: 1)
-- `--owner` flag specifies the owner of the tokens (Default: OWNER_ADDRESS)
-
-## Upgradable contracts
 - SolidWorldManager
 - VerificationRegistry
 
-Note: Our upgradable contracts are managed by a `DefaultProxyAdmin` contract. 
-This means that the owner of the `DefaultProxyAdmin` contract is authorized to upgrade both contracts.
+## Exporting Addresses and ABI
 
-## How to export addresses and ABI?
-
-In order to export contract addresses and ABI files to _contract-deployment.json_ run:
+To export contract addresses and ABI files to _contract-deployment.json_, run the command:
 ```shell
 yarn hardhat export --export contract-deployment.json --network localhost
 ```
-Supported networks: localhost, goerli, polygon.
 
-## Run unit tests
+## Running Unit Tests
 
-This repository has unit tests that cover all smart contracts features.
+This repository includes unit tests that cover all smart contract features. The tests are built using the Foundry smart contract development toolchain.
 
-You can run unit tests built in solidity using Foundry smart contract development toolchain.
+To run the unit tests, follow these steps:
 
-Instructions for install Foundry can be found in the documentation:
+1. Install Foundry by referring to the documentation: [Foundry Book](https://book.getfoundry.sh/index.html).
 
-- [Foundry Book](https://book.getfoundry.sh/index.html)
+2. Before running the tests, update forge to map forge-std lib:
+   ```shell
+   forge update lib/forge-std
+   ```
 
-Before run tests, update forge to map forge-std lib:
+3. Compile all smart contracts:
+   ```shell
+   forge build
+   ```
 
-```sh
-forge update lib/forge-std
-```
+4. Execute the unit tests:
+   ```shell
+   npm run test
+   ```
 
-To compile all smart contracts run:
+   To see detailed traces, use the following command:
+   ```shell
+   forge test -vvvv
+   ```
 
-```sh
-forge build
-```
+   You can also debug a single test by adding the `--debug` flag followed by the test function name:
+   ```shell
+   forge test --debug functionToDebug
+   ```
 
-After that you can execute unit tests:
+   Unit tests are located in the `./test` and `./test_gas` folders.
 
-```sh
-npm run test
-```
+## Test Coverage
 
-If you want to run the tests and see detailed traces:
+To check the test coverage, you can use the following commands:
 
-```sh
-forge test -vvvv
-```
+- Quick coverage check:
+  ```shell
+  yarn test:coverage
+  ```
 
-You can also debug a single test using the debug flag and the test function name:
+- Detailed coverage report (requires `lcov` package):
+  ```shell
+  yarn test:coverage:lcov
+  ```
 
-```sh
-forge test --debug functionToDebug
-```
+  If you don't have the `lcov` package installed, you can install it using the command:
+  ```shell
+  brew install lcov
+  ```
 
-Unit tests can be found in the folders `./test` and `./test_gas`.
-The output of tests can be found in the folder `./out`.
-
-## Test coverage
-
-A quick but limited way to check the test coverage is to run the following command:
-
-```sh
-yarn test:coverage
-```
-
-A more detailed and focused coverage report can be obtained by running the following command:
-
-```sh
-yarn test:coverage:lcov
-```
-However, this assumes that you have the `lcov` package installed globally. If you don't, you can install it with the following command:
-
-```sh
-brew install lcov
-```
 ## Typechain
 
-Typechain is used to generate TypeScript bindings for Solidity smart contracts.
-The types are generated in the `./types` folder by running the following command:
+Typechain is used to generate TypeScript bindings for Solidity smart contracts. The generated types are located in the `./types` folder.
 
-```sh
+To generate TypeScript bindings, run the following command:
+```shell
 yarn typechain
 ```
