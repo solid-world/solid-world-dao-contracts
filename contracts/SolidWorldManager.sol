@@ -223,6 +223,15 @@ contract SolidWorldManager is
         return _storage.getBatchesDecollateralizationInfo(projectId, vintage);
     }
 
+    /// @inheritdoc IDecollateralizationManager
+    function getBatchesDecollateralizationInfoWithCertificationDate(uint projectId, uint certificationDate)
+        external
+        view
+        returns (DomainDataTypes.TokenDecollateralizationInfo[] memory)
+    {
+        return _storage.getBatchesDecollateralizationInfoWithCertificationDate(projectId, certificationDate);
+    }
+
     /// @inheritdoc ICollateralizationManager
     function getReactiveTA(uint categoryId, uint forwardCreditsAmount) external view returns (uint) {
         return _storage.getReactiveTA(categoryId, forwardCreditsAmount);
