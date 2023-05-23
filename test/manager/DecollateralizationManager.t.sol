@@ -388,6 +388,38 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
         assertEq(info[2].amountOut, 999);
     }
 
+    function testGetBatchesDecollateralizationInfoWithCertificationYear() public {
+        _addCategoryAndProjectWithApprovedSpending(CATEGORY_ID, PROJECT_ID, TIME_APPRECIATION);
+        _addCategoryAndProjectWithApprovedSpending(CATEGORY_ID + 1, PROJECT_ID + 1, TIME_APPRECIATION);
+        _addBatchWithCertificationDateToProject(BATCH_ID, PROJECT_ID, PRESET_CURRENT_DATE + 2 * ONE_YEAR);
+        _addBatchWithCertificationDateToProject(BATCH_ID + 1, PROJECT_ID, PRESET_CURRENT_DATE + ONE_YEAR); // 2023
+        _addBatchWithCertificationDateToProject(BATCH_ID + 2, PROJECT_ID, PRESET_CURRENT_DATE + ONE_YEAR); // 2023
+        _addBatchWithCertificationDateToProject(BATCH_ID + 3, PROJECT_ID + 1, PRESET_CURRENT_DATE + ONE_YEAR);
+        _addBatchWithCertificationDateToProject(BATCH_ID + 4, PROJECT_ID, PRESET_CURRENT_DATE + 3 * ONE_YEAR);
+
+        vm.startPrank(testAccount);
+
+        manager.collateralizeBatch(BATCH_ID, 5000, 0);
+        manager.collateralizeBatch(BATCH_ID + 1, 5100, 0); // 2023
+        manager.collateralizeBatch(BATCH_ID + 2, 5200, 0); // 2023
+        manager.collateralizeBatch(BATCH_ID + 3, 5300, 0);
+        manager.collateralizeBatch(BATCH_ID + 4, 5400, 0);
+
+        vm.stopPrank();
+
+        DomainDataTypes.TokenDecollateralizationInfo[] memory info = manager
+            .getBatchesDecollateralizationInfoWithCertificationYear(PROJECT_ID, 2023);
+
+        assertEq(info.length, 2);
+        assertEq(info[0].batchId, BATCH_ID + 1);
+        assertEq(info[0].availableBatchTokens, 5100);
+        assertEq(info[0].amountOut, 999);
+
+        assertEq(info[1].batchId, BATCH_ID + 2);
+        assertEq(info[1].availableBatchTokens, 5200);
+        assertEq(info[1].amountOut, 999);
+    }
+
     function testGetBoostedDecollateralizationFee() public {
         assertEq(manager.getBoostedDecollateralizationFee(), BOOSTED_DECOLLATERALIZATION_FEE);
     }
@@ -507,6 +539,27 @@ contract DecollateralizationManagerTest is BaseSolidWorldManager {
                 collateralizedCredits: 0,
                 certificationDate: PRESET_CURRENT_DATE + ONE_YEAR,
                 vintage: uint16(vintage),
+                batchTA: 0,
+                supplier: testAccount,
+                isAccumulating: false
+            }),
+            10000
+        );
+    }
+
+    function _addBatchWithCertificationDateToProject(
+        uint batchId,
+        uint projectId,
+        uint32 certificationDate
+    ) private {
+        manager.addBatch(
+            DomainDataTypes.Batch({
+                id: batchId,
+                status: 0,
+                projectId: projectId,
+                collateralizedCredits: 0,
+                certificationDate: certificationDate,
+                vintage: 2025,
                 batchTA: 0,
                 supplier: testAccount,
                 isAccumulating: false
