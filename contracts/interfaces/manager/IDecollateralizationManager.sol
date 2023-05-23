@@ -77,6 +77,16 @@ interface IDecollateralizationManager {
         view
         returns (DomainDataTypes.TokenDecollateralizationInfo[] memory result);
 
+    /// @dev Computes relevant info for the decollateralization process involving batches
+    /// that match the specified `projectId` and `certificationDate`
+    /// @param projectId id of the project the batch belongs to
+    /// @param certificationDate certification date of the batch
+    /// @return result array of relevant info about matching batches
+    function getBatchesDecollateralizationInfoWithCertificationDate(uint projectId, uint certificationDate)
+        external
+        view
+        returns (DomainDataTypes.TokenDecollateralizationInfo[] memory result);
+
     /// @param decollateralizationFee fee for decollateralizing ERC20 tokens
     function setDecollateralizationFee(uint16 decollateralizationFee) external;
 

@@ -176,6 +176,52 @@ library DecollateralizationManager {
         }
     }
 
+    /// @dev Computes relevant info for the decollateralization process involving batches
+    /// that match the specified `projectId` and `certificationDate`
+    /// @param _storage Struct containing the current state used or modified by this function
+    /// @param projectId id of the project the batch belongs to
+    /// @param certificationDate certification date of the batch
+    /// @return result array of relevant info about matching batches
+    function getBatchesDecollateralizationInfoWithCertificationDate(
+        SolidWorldManagerStorage.Storage storage _storage,
+        uint projectId,
+        uint certificationDate
+    ) external view returns (DomainDataTypes.TokenDecollateralizationInfo[] memory result) {
+        DomainDataTypes.TokenDecollateralizationInfo[]
+            memory allInfos = new DomainDataTypes.TokenDecollateralizationInfo[](_storage.batchIds.length);
+        uint infoCount;
+
+        for (uint i; i < _storage.batchIds.length; i++) {
+            uint batchId = _storage.batchIds[i];
+            if (
+                _storage.batches[batchId].projectId != projectId ||
+                _storage.batches[batchId].certificationDate != certificationDate
+            ) {
+                continue;
+            }
+
+            (uint amountOut, uint minAmountIn, uint minCbtDaoCut) = _simulateDecollateralization(
+                _storage,
+                batchId,
+                DECOLLATERALIZATION_SIMULATION_INPUT
+            );
+
+            allInfos[infoCount] = DomainDataTypes.TokenDecollateralizationInfo(
+                batchId,
+                _storage.batches[batchId].collateralizedCredits,
+                amountOut,
+                minAmountIn,
+                minCbtDaoCut
+            );
+            infoCount = infoCount + 1;
+        }
+
+        result = new DomainDataTypes.TokenDecollateralizationInfo[](infoCount);
+        for (uint i; i < infoCount; i++) {
+            result[i] = allInfos[i];
+        }
+    }
+
     /// @param _storage Struct containing the current state used or modified by this function
     /// @param decollateralizationFee fee for decollateralizing ERC20 tokens
     function setDecollateralizationFee(
