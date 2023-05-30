@@ -38,7 +38,7 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
         uint40 decayPerSecond,
         uint lastCollateralizationMomentum,
         uint lastCollateralizationTimestamp
-    ) public {
+    ) public view {
         decayPerSecond = _boundDecayPerSecond(decayPerSecond);
         lastCollateralizationTimestamp = _boundLastCollateralizationTimestamp(lastCollateralizationTimestamp);
         ReactiveTimeAppreciationMath.computeDecayingMomentum(
@@ -279,7 +279,7 @@ contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTes
         uint lastCollateralizationMomentum,
         uint newVolumeCoefficient,
         uint16 newMaxDepreciation
-    ) public {
+    ) public view {
         volumeCoefficient = bound(volumeCoefficient, 0, type(uint256).max / 101 - 1);
         newVolumeCoefficient = _boundNewVolumeCoefficient(newVolumeCoefficient, volumeCoefficient);
         decayPerSecond = _boundDecayPerSecond(decayPerSecond);

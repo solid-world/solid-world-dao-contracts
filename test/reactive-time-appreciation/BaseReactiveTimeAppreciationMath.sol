@@ -24,6 +24,7 @@ contract BaseReactiveTimeAppreciationMathTest is BaseTest {
 
     function _boundNewVolumeCoefficient(uint newVolumeCoefficient, uint volumeCoefficient)
         internal
+        view
         returns (uint)
     {
         return bound(newVolumeCoefficient, 0, volumeCoefficient);
@@ -31,16 +32,17 @@ contract BaseReactiveTimeAppreciationMathTest is BaseTest {
 
     function _boundLastCollateralizationTimestamp(uint lastCollateralizationTimestamp)
         internal
+        view
         returns (uint32)
     {
         return uint32(bound(lastCollateralizationTimestamp, 0, PRESET_CURRENT_DATE));
     }
 
-    function _boundDecayPerSecond(uint40 decayPerSecond) internal returns (uint40) {
+    function _boundDecayPerSecond(uint40 decayPerSecond) internal view returns (uint40) {
         return uint40(bound(decayPerSecond, 0, ReactiveTimeAppreciationMath.DECAY_BASIS_POINTS));
     }
 
-    function _boundAverageTA(uint24 averageTA) internal returns (uint24) {
+    function _boundAverageTA(uint24 averageTA) internal view returns (uint24) {
         return uint24(bound(averageTA, 0, SolidMath.TIME_APPRECIATION_BASIS_POINTS - 1));
     }
 }
