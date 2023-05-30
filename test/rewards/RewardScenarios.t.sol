@@ -244,23 +244,20 @@ contract RewardScenarios is BaseRewardScenariosTest {
 
         vm.warp(INITIAL_CARBON_DISTRIBUTION_END + 2 days);
 
-        (user0ActualBalance, user1ActualBalance) = _usersWithdrawThenClaim(mangroveEmissionPerSecond);
+        (user0ActualBalance, user1ActualBalance) = _usersWithdrawThenClaim();
         assertApproxEqAbs(user0ActualBalance, user0ExpectedBalance, DELTA);
         assertApproxEqAbs(user1ActualBalance, user1ExpectedBalance, DELTA);
 
-        (user0ActualBalance, user1ActualBalance) = _usersClaimThenWithdraw(mangroveEmissionPerSecond);
+        (user0ActualBalance, user1ActualBalance) = _usersClaimThenWithdraw();
         assertApproxEqAbs(user0ActualBalance, user0ExpectedBalance, DELTA);
         assertApproxEqAbs(user1ActualBalance, user1ExpectedBalance, DELTA);
 
-        (user0ActualBalance, user1ActualBalance) = _mixUsersClaimAndWithdraw(mangroveEmissionPerSecond);
+        (user0ActualBalance, user1ActualBalance) = _mixUsersClaimAndWithdraw();
         assertApproxEqAbs(user0ActualBalance, user0ExpectedBalance, DELTA);
         assertApproxEqAbs(user1ActualBalance, user1ExpectedBalance, DELTA);
     }
 
-    function _usersWithdrawThenClaim(uint rewardsPerSecond)
-        private
-        returns (uint user0Balance, uint user1Balance)
-    {
+    function _usersWithdrawThenClaim() private returns (uint user0Balance, uint user1Balance) {
         uint snapshotId = vm.snapshot();
         vm.prank(user0);
         solidStaking.withdrawStakeAndClaimRewards(assetMangrove, 5000e18);
@@ -282,10 +279,7 @@ contract RewardScenarios is BaseRewardScenariosTest {
         vm.revertTo(snapshotId);
     }
 
-    function _usersClaimThenWithdraw(uint rewardsPerSecond)
-        private
-        returns (uint user0Balance, uint user1Balance)
-    {
+    function _usersClaimThenWithdraw() private returns (uint user0Balance, uint user1Balance) {
         uint snapshotId = vm.snapshot();
 
         _userClaimsThenWithdraws(user0);
@@ -306,10 +300,7 @@ contract RewardScenarios is BaseRewardScenariosTest {
         vm.revertTo(snapshotId);
     }
 
-    function _mixUsersClaimAndWithdraw(uint rewardsPerSecond)
-        private
-        returns (uint user0Balance, uint user1Balance)
-    {
+    function _mixUsersClaimAndWithdraw() private returns (uint user0Balance, uint user1Balance) {
         uint snapshotId = vm.snapshot();
 
         _userClaimsThenWithdraws(user0);
