@@ -26,9 +26,8 @@ abstract contract BaseSolidZapStaker is BaseTest {
 
         zapStaker = new SolidZapStaker(ROUTER, IUNIPROXY, SOLIDSTAKING);
 
-        inputToken.mint(testAccount0, 1000000);
-
         _labelAccounts();
+        _prepareZap();
     }
 
     function _expectCall_ERC20_transferFrom(address from, uint amount) internal {
@@ -36,6 +35,14 @@ abstract contract BaseSolidZapStaker is BaseTest {
             address(inputToken),
             abi.encodeCall(IERC20.transferFrom, (from, address(zapStaker), amount))
         );
+    }
+
+    function _expectCall_ERC20_approve_maxUint(address spender) internal {
+        vm.expectCall(address(inputToken), abi.encodeCall(IERC20.approve, (spender, type(uint256).max)));
+    }
+
+    function _doNotExpectCall_ERC20_approve_maxUint(address spender) internal {
+        vm.expectCall(address(inputToken), abi.encodeCall(IERC20.approve, (spender, type(uint256).max)), 0);
     }
 
     function _labelAccounts() private {
@@ -46,5 +53,12 @@ abstract contract BaseSolidZapStaker is BaseTest {
         vm.label(address(inputToken), "InputToken");
         vm.label(address(hypervisor), "Hypervisor");
         vm.label(address(zapStaker), "ZapStaker");
+    }
+
+    function _prepareZap() private {
+        inputToken.mint(testAccount0, 1000000);
+
+        vm.prank(testAccount0);
+        inputToken.approve(address(zapStaker), 1000000);
     }
 }
