@@ -35,6 +35,14 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
     ) external nonReentrant returns (uint) {
         IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
 
+        _approveTokenSpendingIfNeeded(inputToken, router);
+
         return 0;
+    }
+
+    function _approveTokenSpendingIfNeeded(address token, address spender) private {
+        if (IERC20(token).allowance(address(this), spender) == 0) {
+            IERC20(token).approve(spender, type(uint).max);
+        }
     }
 }
