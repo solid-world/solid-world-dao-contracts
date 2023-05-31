@@ -16,5 +16,15 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         assertEq(zapStaker.solidStaking(), SOLIDSTAKING);
     }
 
-    function testStakeDoubleSwap() public {}
+    function testStakeDoubleSwap_transfersOverTheInputTokenAmount() public {
+        bytes memory swap1 = new bytes(0);
+        bytes memory swap2 = new bytes(0);
+        uint minShares = 0;
+
+        vm.startPrank(testAccount0);
+        inputToken.approve(address(zapStaker), 1000);
+
+        _expectCall_ERC20_transferFrom(testAccount0, 1000);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+    }
 }
