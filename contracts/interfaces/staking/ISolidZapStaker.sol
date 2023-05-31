@@ -3,6 +3,8 @@ pragma solidity 0.8.18;
 
 /// @author Solid World
 interface ISolidZapStaker {
+    error GenericSwapError();
+
     function router() external view returns (address);
 
     function iUniProxy() external view returns (address);
