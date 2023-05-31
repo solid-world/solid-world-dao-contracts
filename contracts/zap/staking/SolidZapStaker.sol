@@ -37,6 +37,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
 
         _approveTokenSpendingIfNeeded(inputToken, router);
         _swapViaRouter(swap1);
+        _swapViaRouter(swap2);
 
         return 0;
     }
@@ -51,11 +52,11 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         (bool success, bytes memory retData) = router.call(encodedSwap);
 
         if (!success) {
-            _propagateError(success, retData);
+            _propagateError(retData);
         }
     }
 
-    function _propagateError(bool success, bytes memory revertReason) private pure {
+    function _propagateError(bytes memory revertReason) private pure {
         if (revertReason.length == 0) {
             revert GenericSwapError();
         }
