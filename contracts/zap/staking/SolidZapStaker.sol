@@ -4,6 +4,7 @@ pragma solidity 0.8.18;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../interfaces/staking/ISolidZapStaker.sol";
+import "../../interfaces/liquidity-deployer/IHypervisor_0_8_18.sol";
 import "../../libraries/GPv2SafeERC20_0_8_18.sol";
 
 /// @author Solid World
@@ -31,13 +32,17 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         address hypervisor,
         bytes calldata swap1,
         bytes calldata swap2,
-        uint minShares
+        uint
     ) external nonReentrant returns (uint) {
         IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
 
         _approveTokenSpendingIfNeeded(inputToken, router);
         _swapViaRouter(swap1);
         _swapViaRouter(swap2);
+
+        (address token0, address token1) = _fetchHypervisorTokens(hypervisor);
+        _approveTokenSpendingIfNeeded(token0, hypervisor);
+        _approveTokenSpendingIfNeeded(token1, hypervisor);
 
         return 0;
     }
@@ -54,6 +59,15 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         if (!success) {
             _propagateError(retData);
         }
+    }
+
+    function _fetchHypervisorTokens(address hypervisor)
+        private
+        view
+        returns (address token0, address token1)
+    {
+        token0 = IHypervisor(hypervisor).token0();
+        token1 = IHypervisor(hypervisor).token1();
     }
 
     function _propagateError(bytes memory revertReason) private pure {
