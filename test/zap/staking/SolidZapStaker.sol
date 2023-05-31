@@ -7,4 +7,14 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
     function testSetsRouter() public {
         assertEq(zapStaker.router(), ROUTER);
     }
+
+    function testSetsIUniProxy() public {
+        assertEq(zapStaker.iUniProxy(), IUNIPROXY);
+    }
+
+    function testSetsSolidStaking() public {
+        assertEq(zapStaker.solidStaking(), SOLIDSTAKING);
+    }
+
+    function testStakeDoubleSwap() public {}
 }
