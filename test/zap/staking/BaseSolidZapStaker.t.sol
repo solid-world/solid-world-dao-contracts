@@ -45,6 +45,30 @@ abstract contract BaseSolidZapStaker is BaseTest {
         vm.expectCall(address(inputToken), abi.encodeCall(IERC20.approve, (spender, type(uint256).max)), 0);
     }
 
+    function _expectCall_swap(uint dummy) internal {
+        vm.expectCall(ROUTER, abi.encodeWithSignature("swap(uint256)", dummy));
+    }
+
+    function _expectRevert_GenericSwapError() internal {
+        vm.expectRevert(abi.encodeWithSelector(ISolidZapStaker.GenericSwapError.selector));
+    }
+
+    function _mockRouter_swap(uint dummy) internal {
+        vm.mockCall(ROUTER, abi.encodeWithSignature("swap(uint256)", dummy), abi.encode());
+    }
+
+    function _mockRouter_swapReverts(uint dummy) internal {
+        vm.mockCallRevert(
+            ROUTER,
+            abi.encodeWithSignature("swap(uint256)", dummy),
+            abi.encode("router_error")
+        );
+    }
+
+    function _mockRouter_swapRevertsEmptyReason(uint dummy) internal {
+        vm.mockCallRevert(ROUTER, abi.encodeWithSignature("swap(uint256)", dummy), abi.encode());
+    }
+
     function _labelAccounts() private {
         vm.label(ROUTER, "Router");
         vm.label(IUNIPROXY, "IUniProxy");

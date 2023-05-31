@@ -57,4 +57,8 @@ abstract contract BaseTest is Test {
         array[0] = uint88(_number0);
         array[1] = uint88(_number1);
     }
+
+    function _clearMockedCalls() internal {
+        vm.clearMockedCalls();
+    }
 }

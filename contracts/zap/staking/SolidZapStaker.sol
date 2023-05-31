@@ -36,6 +36,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
 
         _approveTokenSpendingIfNeeded(inputToken, router);
+        _swapViaRouter(swap1);
 
         return 0;
     }
@@ -43,6 +44,24 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
     function _approveTokenSpendingIfNeeded(address token, address spender) private {
         if (IERC20(token).allowance(address(this), spender) == 0) {
             IERC20(token).approve(spender, type(uint).max);
+        }
+    }
+
+    function _swapViaRouter(bytes memory encodedSwap) private {
+        (bool success, bytes memory retData) = router.call(encodedSwap);
+
+        if (!success) {
+            _propagateError(success, retData);
+        }
+    }
+
+    function _propagateError(bool success, bytes memory revertReason) private pure {
+        if (revertReason.length == 0) {
+            revert GenericSwapError();
+        }
+
+        assembly {
+            revert(add(32, revertReason), mload(revertReason))
         }
     }
 }
