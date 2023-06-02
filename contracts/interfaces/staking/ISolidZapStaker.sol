@@ -16,7 +16,31 @@ interface ISolidZapStaker {
     /// 1. Partially swaps `inputToken` to desired token via encoded swap1
     /// 2. Partially swaps `inputToken` to desired token via encoded swap2
     /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
-    /// 4. Shares of the deployed liquidity are staked in `solidStaking`
+    /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `recipient` is the beneficiary of the staked shares
+    /// @notice The msg.sender must approve this contract to spend `inputToken`
+    /// @param inputToken The token used to provide liquidity
+    /// @param inputAmount The amount of `inputToken` to use
+    /// @param hypervisor The hypervisor used to deploy liquidity
+    /// @param swap1 Encoded swap to partially swap `inputToken` to desired token
+    /// @param swap2 Encoded swap to partially swap `inputToken` to desired token
+    /// @param minShares The minimum amount of liquidity shares required for transaction to succeed
+    /// @param recipient The beneficiary of the staked shares
+    /// @return The amount of shares staked in `solidStaking`
+    function stakeDoubleSwap(
+        address inputToken,
+        uint inputAmount,
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2,
+        uint minShares,
+        address recipient
+    ) external returns (uint);
+
+    /// @notice Zap function that achieves the following:
+    /// 1. Partially swaps `inputToken` to desired token via encoded swap1
+    /// 2. Partially swaps `inputToken` to desired token via encoded swap2
+    /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
+    /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `msg.sender` is the beneficiary of the staked shares
     /// @notice The msg.sender must approve this contract to spend `inputToken`
     /// @param inputToken The token used to provide liquidity
     /// @param inputAmount The amount of `inputToken` to use

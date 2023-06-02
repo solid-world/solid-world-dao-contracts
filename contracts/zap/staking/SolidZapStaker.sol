@@ -4,6 +4,7 @@ pragma solidity 0.8.18;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../interfaces/staking/ISolidZapStaker.sol";
+import "../../interfaces/staking/ISolidStakingActions_0_8_18.sol";
 import "../../interfaces/liquidity-deployer/IHypervisor_0_8_18.sol";
 import "../../interfaces/liquidity-deployer/IUniProxy_0_8_18.sol";
 import "../../libraries/GPv2SafeERC20_0_8_18.sol";
@@ -43,8 +44,33 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         address hypervisor,
         bytes calldata swap1,
         bytes calldata swap2,
+        uint minShares,
+        address recipient
+    ) external nonReentrant returns (uint) {
+        return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, recipient);
+    }
+
+    /// @inheritdoc ISolidZapStaker
+    function stakeDoubleSwap(
+        address inputToken,
+        uint inputAmount,
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2,
         uint minShares
     ) external nonReentrant returns (uint) {
+        return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, msg.sender);
+    }
+
+    function _stakeDoubleSwap(
+        address inputToken,
+        uint inputAmount,
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2,
+        uint minShares,
+        address recipient
+    ) private returns (uint) {
         IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
         _approveTokenSpendingIfNeeded(inputToken, router);
 
@@ -67,6 +93,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         }
 
         _approveTokenSpendingIfNeeded(hypervisor, solidStaking);
+        _stakeWithRecipient(hypervisor, shares, recipient);
 
         return 0;
     }
@@ -115,6 +142,14 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
             hypervisor,
             _uniProxyMinIn()
         );
+    }
+
+    function _stakeWithRecipient(
+        address token,
+        uint amount,
+        address recipient
+    ) private {
+        ISolidStakingActions(solidStaking).stake(token, amount, recipient);
     }
 
     function _uniProxyMinIn() internal pure returns (uint[4] memory) {

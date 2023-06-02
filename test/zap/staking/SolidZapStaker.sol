@@ -206,4 +206,34 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
 
         _clearMockedCalls();
     }
+
+    function testStakeDoubleSwap_stakesSharesWithRecipient() public {
+        uint sharesMinted = 1500;
+
+        vm.prank(testAccount0);
+        _mockUniProxy_deposit(sharesMinted);
+        _expectCall_stake(address(hypervisor), sharesMinted, testAccount0);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
+
+        _clearMockedCalls();
+    }
+
+    function testStakeDoubleSwap_stakesSharesWithSpecifiedRecipient() public {
+        uint sharesMinted = 1500;
+
+        vm.prank(testAccount0);
+        _mockUniProxy_deposit(sharesMinted);
+        _expectCall_stake(address(hypervisor), sharesMinted, testAccount1);
+        zapStaker.stakeDoubleSwap(
+            address(inputToken),
+            1000,
+            address(hypervisor),
+            emptySwap1,
+            emptySwap2,
+            0,
+            testAccount1
+        );
+
+        _clearMockedCalls();
+    }
 }
