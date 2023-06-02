@@ -95,6 +95,8 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         _approveTokenSpendingIfNeeded(hypervisor, solidStaking);
         _stakeWithRecipient(hypervisor, shares, recipient);
 
+        emit ZapStake(recipient, inputToken, inputAmount, shares);
+
         return shares;
     }
 
@@ -152,7 +154,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         ISolidStakingActions(solidStaking).stake(token, amount, recipient);
     }
 
-    function _uniProxyMinIn() internal pure returns (uint[4] memory) {
+    function _uniProxyMinIn() private pure returns (uint[4] memory) {
         return [uint(0), uint(0), uint(0), uint(0)];
     }
 
