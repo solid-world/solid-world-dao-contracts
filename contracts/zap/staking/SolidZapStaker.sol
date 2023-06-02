@@ -73,7 +73,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         external
         nonReentrant
         returns (
-            bool dustless,
+            bool isDustless,
             uint shares,
             Fraction memory ratio
         )
@@ -83,6 +83,37 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
 
         HypervisorTokens memory tokens = _fetchHypervisorTokens(hypervisor);
         TokenBalances memory acquiredTokenAmounts = _executeSwapsAndReturnResult(swap1, swap2, tokens);
+        (isDustless, ratio) = _isDustless(hypervisor, tokens.token0, acquiredTokenAmounts);
+    }
+
+    function _isDustless(
+        address hypervisor,
+        address token0,
+        TokenBalances memory balances
+    ) private view returns (bool isDustless, Fraction memory currentRatio) {
+        (uint amountStart, uint amountEnd) = IUniProxy(iUniProxy).getDepositAmount(
+            hypervisor,
+            token0,
+            balances.token0Balance
+        );
+
+        isDustless = _between(balances.token1Balance, amountStart, amountEnd);
+
+        if (!isDustless) {
+            currentRatio = Fraction(balances.token0Balance, _avg(amountStart, amountEnd));
+        }
+    }
+
+    function _between(
+        uint x,
+        uint min,
+        uint max
+    ) private pure returns (bool) {
+        return x >= min && x <= max;
+    }
+
+    function _avg(uint x, uint y) private pure returns (uint) {
+        return (x + y) / 2;
     }
 
     function _stakeDoubleSwap(
