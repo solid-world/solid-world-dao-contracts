@@ -236,4 +236,23 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
 
         _clearMockedCalls();
     }
+
+    function testStakeDoubleSwap_returnsFinalStakedSharesAmount() public {
+        uint sharesMinted = 1500;
+
+        vm.prank(testAccount0);
+        _mockUniProxy_deposit(sharesMinted);
+        uint actual = zapStaker.stakeDoubleSwap(
+            address(inputToken),
+            1000,
+            address(hypervisor),
+            emptySwap1,
+            emptySwap2,
+            0
+        );
+
+        assertEq(actual, sharesMinted);
+
+        _clearMockedCalls();
+    }
 }

@@ -95,7 +95,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         _approveTokenSpendingIfNeeded(hypervisor, solidStaking);
         _stakeWithRecipient(hypervisor, shares, recipient);
 
-        return 0;
+        return shares;
     }
 
     function _approveTokenSpendingIfNeeded(address token, address spender) private {
