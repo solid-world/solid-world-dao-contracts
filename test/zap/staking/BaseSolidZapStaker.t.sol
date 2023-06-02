@@ -95,6 +95,17 @@ abstract contract BaseSolidZapStaker is BaseTest {
         );
     }
 
+    function _expectCall_getDepositAmount(
+        address pos,
+        address token,
+        uint depositAmount
+    ) internal {
+        vm.expectCall(
+            IUNIPROXY,
+            abi.encodeWithSelector(IUniProxy.getDepositAmount.selector, pos, token, depositAmount)
+        );
+    }
+
     function _expectCall_stake(
         address token,
         uint amount,
@@ -140,6 +151,14 @@ abstract contract BaseSolidZapStaker is BaseTest {
         vm.mockCall(IUNIPROXY, abi.encodeWithSelector(IUniProxy.deposit.selector), abi.encode(sharesMinted));
     }
 
+    function _mockUniProxy_getDepositAmount(uint amountOut) internal {
+        vm.mockCall(
+            IUNIPROXY,
+            abi.encodeWithSelector(IUniProxy.getDepositAmount.selector),
+            abi.encode(amountOut - 10, amountOut + 10) // +/- 10 to account for average
+        );
+    }
+
     function _setBalancesBeforeSwap(uint token0BalanceBeforeSwap, uint token1BalanceBeforeSwap) internal {
         token0.mint(address(zapStaker), token0BalanceBeforeSwap);
         token1.mint(address(zapStaker), token1BalanceBeforeSwap);
@@ -180,6 +199,7 @@ abstract contract BaseSolidZapStaker is BaseTest {
         _mockHypervisor_token0();
         _mockHypervisor_token1();
         _mockUniProxy_deposit(0);
+        _mockUniProxy_getDepositAmount(10);
         _mockSolidStaking_stake();
     }
 }

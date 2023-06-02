@@ -105,4 +105,15 @@ contract SimulateStakeDoubleSwapTest is BaseSolidZapStaker {
         vm.expectRevert("invalid_swap");
         zapStaker.simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, swap2);
     }
+
+    function testSimulateStakeDoubleSwap_callsIUniProxyForCurrentRatio() public {
+        uint token0AcquiredFromSwap = 500;
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, token0AcquiredFromSwap);
+        bytes memory swap2 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+
+        vm.prank(testAccount0);
+        _expectCall_getDepositAmount(address(hypervisor), address(token0), token0AcquiredFromSwap);
+        zapStaker.simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2);
+    }
 }
