@@ -17,132 +17,89 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
     }
 
     function testStakeDoubleSwap_transfersOverTheInputTokenAmount() public {
-        bytes memory swap1 = new bytes(0);
-        bytes memory swap2 = new bytes(0);
-        uint minShares = 0;
-
         vm.prank(testAccount0);
         _expectCall_ERC20_transferFrom(testAccount0, 1000);
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
     }
 
     function testStakeDoubleSwap_approvesRouterToSpendInputToken() public {
-        bytes memory swap1 = new bytes(0);
-        bytes memory swap2 = new bytes(0);
-        uint minShares = 0;
-
         vm.prank(testAccount0);
         _expectCall_ERC20_approve_maxUint(address(inputToken), ROUTER);
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
 
         uint actual = inputToken.allowance(address(zapStaker), ROUTER);
         assertEq(actual, type(uint).max);
     }
 
     function testStakeDoubleSwap_doesNotApproveRouterToSpendInputTokenIfAlreadyApproved() public {
-        bytes memory swap1 = new bytes(0);
-        bytes memory swap2 = new bytes(0);
-        uint minShares = 0;
-
         vm.prank(address(zapStaker));
         inputToken.approve(ROUTER, type(uint).max);
 
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(inputToken), ROUTER);
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
     }
 
     function testStakeDoubleSwap_executesSwap1() public {
-        bytes memory swap1 = abi.encodeWithSignature("swap(uint256)", 1);
-        bytes memory swap2 = new bytes(0);
-        uint minShares = 0;
-
         vm.prank(testAccount0);
-        _mockRouter_swap(1);
-        _expectCall_swap(1);
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
 
         _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_executesSwap1_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
-        bytes memory swap1 = abi.encodeWithSignature("swap(uint256)", 1);
-        bytes memory swap2 = new bytes(0);
-        uint minShares = 0;
+        bytes memory swap1 = _encodeSwap(RouterBehaviour.REVERTS_NO_REASON, 0);
 
         vm.prank(testAccount0);
-        _mockRouter_swapRevertsEmptyReason(1);
         _expectRevert_GenericSwapError();
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, emptySwap2, 0);
 
         _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_executesSwap1_revertsWithProvidedReason() public {
-        bytes memory swap1 = abi.encodeWithSignature("swap(uint256)", 1);
-        bytes memory swap2 = new bytes(0);
-        uint minShares = 0;
+        bytes memory swap1 = _encodeSwap(RouterBehaviour.REVERTS_WITH_REASON, 0);
 
         vm.prank(testAccount0);
-        _mockRouter_swapReverts(1);
-        vm.expectRevert(); // vm.expectRevert("router_error"); fails but with correct revert reason. Potential bug in vm.
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        vm.expectRevert("invalid_swap");
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, emptySwap2, 0);
 
         _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_executesSwap2() public {
-        bytes memory swap1 = abi.encodeWithSignature("swap(uint256)", 1);
-        bytes memory swap2 = abi.encodeWithSignature("swap(uint256)", 2);
-        uint minShares = 0;
-
         vm.prank(testAccount0);
-        _mockRouter_swap(1);
-        _mockRouter_swap(2);
-        _expectCall_swap(2);
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN1, 0);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
 
         _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_executesSwap2_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
-        bytes memory swap1 = abi.encodeWithSignature("swap(uint256)", 1);
-        bytes memory swap2 = abi.encodeWithSignature("swap(uint256)", 2);
-        uint minShares = 0;
+        bytes memory swap2 = _encodeSwap(RouterBehaviour.REVERTS_NO_REASON, 0);
 
         vm.prank(testAccount0);
-        _mockRouter_swap(1);
-        _mockRouter_swapRevertsEmptyReason(2);
         _expectRevert_GenericSwapError();
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, swap2, 0);
 
         _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_executesSwap2_revertsWithProvidedReason() public {
-        bytes memory swap1 = abi.encodeWithSignature("swap(uint256)", 1);
-        bytes memory swap2 = abi.encodeWithSignature("swap(uint256)", 2);
-        uint minShares = 0;
+        bytes memory swap2 = _encodeSwap(RouterBehaviour.REVERTS_WITH_REASON, 0);
 
         vm.prank(testAccount0);
-        _mockRouter_swap(1);
-        _mockRouter_swapReverts(2);
-        vm.expectRevert(); // vm.expectRevert("router_error"); fails but with correct revert reason. Potential bug in vm.
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        vm.expectRevert("invalid_swap");
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, swap2, 0);
 
         _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_approvesHypervisorToSpendToken0() public {
-        bytes memory swap1 = abi.encodeWithSignature("swap(uint256)", 1);
-        bytes memory swap2 = abi.encodeWithSignature("swap(uint256)", 2);
-        uint minShares = 0;
-
         vm.prank(testAccount0);
-        _mockRouter_swap(1);
-        _mockRouter_swap(2);
         _expectCall_ERC20_approve_maxUint(address(token0), address(hypervisor));
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
 
         uint actual = token0.allowance(address(zapStaker), address(hypervisor));
         assertEq(actual, type(uint).max);
@@ -151,32 +108,20 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
     }
 
     function testStakeDoubleSwap_doesNotApproveHypervisorToSpendToken0IfAlreadyApproved() public {
-        bytes memory swap1 = abi.encodeWithSignature("swap(uint256)", 1);
-        bytes memory swap2 = abi.encodeWithSignature("swap(uint256)", 2);
-        uint minShares = 0;
-
-        _mockRouter_swap(1);
-        _mockRouter_swap(2);
         vm.prank(address(zapStaker));
         token0.approve(address(hypervisor), type(uint).max);
 
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(token0), address(hypervisor));
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
 
         _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_approvesHypervisorToSpendToken1() public {
-        bytes memory swap1 = abi.encodeWithSignature("swap(uint256)", 1);
-        bytes memory swap2 = abi.encodeWithSignature("swap(uint256)", 2);
-        uint minShares = 0;
-
         vm.prank(testAccount0);
-        _mockRouter_swap(1);
-        _mockRouter_swap(2);
         _expectCall_ERC20_approve_maxUint(address(token1), address(hypervisor));
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
 
         uint actual = token1.allowance(address(zapStaker), address(hypervisor));
         assertEq(actual, type(uint).max);
@@ -185,18 +130,12 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
     }
 
     function testStakeDoubleSwap_doesNotApproveHypervisorToSpendToken1IfAlreadyApproved() public {
-        bytes memory swap1 = abi.encodeWithSignature("swap(uint256)", 1);
-        bytes memory swap2 = abi.encodeWithSignature("swap(uint256)", 2);
-        uint minShares = 0;
-
-        _mockRouter_swap(1);
-        _mockRouter_swap(2);
         vm.prank(address(zapStaker));
         token1.approve(address(hypervisor), type(uint).max);
 
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(token1), address(hypervisor));
-        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
 
         _clearMockedCalls();
     }
