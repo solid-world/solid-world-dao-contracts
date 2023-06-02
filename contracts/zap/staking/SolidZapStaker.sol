@@ -84,6 +84,14 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         HypervisorTokens memory tokens = _fetchHypervisorTokens(hypervisor);
         TokenBalances memory acquiredTokenAmounts = _executeSwapsAndReturnResult(swap1, swap2, tokens);
         (isDustless, ratio) = _isDustless(hypervisor, tokens.token0, acquiredTokenAmounts);
+
+        if (isDustless) {
+            shares = _deployLiquidity(
+                acquiredTokenAmounts.token0Balance,
+                acquiredTokenAmounts.token1Balance,
+                hypervisor
+            );
+        }
     }
 
     function _isDustless(
