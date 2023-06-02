@@ -53,6 +53,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         uint minShares,
         address recipient
     ) external nonReentrant returns (uint) {
+        _approveRouterIfNeeded(inputToken, inputAmount);
         return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, recipient);
     }
 
@@ -65,6 +66,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         bytes calldata swap2,
         uint minShares
     ) external nonReentrant returns (uint) {
+        _approveRouterIfNeeded(inputToken, inputAmount);
         return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, msg.sender);
     }
 
@@ -74,10 +76,10 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         bytes calldata swap2,
         uint minShares,
         address recipient
-    ) external payable returns (uint) {
+    ) external payable nonReentrant returns (uint) {
         _wrap(msg.value);
 
-        return 0;
+        return _stakeDoubleSwap(weth, msg.value, hypervisor, swap1, swap2, minShares, recipient);
     }
 
     function stakeETH(
@@ -85,10 +87,10 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         bytes calldata swap1,
         bytes calldata swap2,
         uint minShares
-    ) external payable returns (uint) {
+    ) external payable nonReentrant returns (uint) {
         _wrap(msg.value);
 
-        return 0;
+        return _stakeDoubleSwap(weth, msg.value, hypervisor, swap1, swap2, minShares, msg.sender);
     }
 
     /// @inheritdoc ISolidZapStaker
@@ -132,9 +134,6 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         uint minShares,
         address recipient
     ) private returns (uint shares) {
-        IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
-        _approveTokenSpendingIfNeeded(inputToken, router);
-
         HypervisorTokens memory tokens = _fetchHypervisorTokens(hypervisor);
         TokenBalances memory acquiredTokenAmounts = _executeSwapsAndReturnResult(swap1, swap2, tokens);
 
@@ -172,6 +171,11 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         acquiredTokenAmounts.token1Balance =
             balancesAfterSwap.token1Balance -
             balancesBeforeSwap.token1Balance;
+    }
+
+    function _approveRouterIfNeeded(address inputToken, uint inputAmount) private {
+        IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
+        _approveTokenSpendingIfNeeded(inputToken, router);
     }
 
     function _approveTokenSpendingIfNeeded(address token, address spender) private {
