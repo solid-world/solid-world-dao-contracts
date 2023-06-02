@@ -5,7 +5,10 @@ import "../../BaseTest_0_8_18.sol";
 import "../../../contracts/zap/staking/SolidZapStaker.sol";
 import "../../../contracts/interfaces/staking/ISolidZapStaker.sol";
 import "../../../contracts/interfaces/liquidity-deployer/IHypervisor_0_8_18.sol";
+import "../../../contracts/interfaces/liquidity-deployer/IUniProxy_0_8_18.sol";
 import "../../liquidity-deployer/TestToken.sol";
+import "./MockRouter.sol";
+import "./RouterBehaviour.sol";
 
 abstract contract BaseSolidZapStaker is BaseTest {
     address public ROUTER;
@@ -17,17 +20,23 @@ abstract contract BaseSolidZapStaker is BaseTest {
     TestToken public token0;
     TestToken public token1;
 
+    bytes public emptySwap1;
+    bytes public emptySwap2;
+
     ISolidZapStaker public zapStaker;
 
     function setUp() public {
-        ROUTER = vm.addr(1);
-        IUNIPROXY = vm.addr(2);
-        SOLIDSTAKING = vm.addr(3);
-        testAccount0 = vm.addr(4);
+        emptySwap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 0);
+        emptySwap2 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, 0);
+
+        IUNIPROXY = vm.addr(1);
+        SOLIDSTAKING = vm.addr(2);
+        testAccount0 = vm.addr(3);
         inputToken = new TestToken("Input Token", "IT", 18);
         hypervisor = new TestToken("Hypervisor", "LP", 18);
         token0 = new TestToken("USDC", "USDC", 6);
         token1 = new TestToken("CRISP SCORED MANGROVES", "CRISP-M", 18);
+        ROUTER = address(new MockRouter(address(token0), address(token1)));
 
         zapStaker = new SolidZapStaker(ROUTER, IUNIPROXY, SOLIDSTAKING);
 
@@ -50,16 +59,12 @@ abstract contract BaseSolidZapStaker is BaseTest {
         vm.expectCall(token, abi.encodeCall(IERC20.approve, (spender, type(uint256).max)), 0);
     }
 
-    function _expectCall_swap(uint dummy) internal {
-        vm.expectCall(ROUTER, abi.encodeWithSignature("swap(uint256)", dummy));
+    function _expectCall_swap(RouterBehaviour behaviour, uint acquiredAmount) internal {
+        vm.expectCall(ROUTER, _encodeSwap(behaviour, acquiredAmount));
     }
 
     function _expectRevert_GenericSwapError() internal {
         vm.expectRevert(abi.encodeWithSelector(ISolidZapStaker.GenericSwapError.selector));
-    }
-
-    function _mockRouter_swap(uint dummy) internal {
-        vm.mockCall(ROUTER, abi.encodeWithSignature("swap(uint256)", dummy), abi.encode());
     }
 
     function _mockHypervisor_token0() internal {
@@ -78,16 +83,21 @@ abstract contract BaseSolidZapStaker is BaseTest {
         );
     }
 
-    function _mockRouter_swapReverts(uint dummy) internal {
-        vm.mockCallRevert(
-            ROUTER,
-            abi.encodeWithSignature("swap(uint256)", dummy),
-            abi.encode("router_error")
-        );
+    function _mockUniProxy_deposit(uint sharesMinted) internal {
+        vm.mockCall(IUNIPROXY, abi.encodeWithSelector(IUniProxy.deposit.selector), abi.encode(sharesMinted));
     }
 
-    function _mockRouter_swapRevertsEmptyReason(uint dummy) internal {
-        vm.mockCallRevert(ROUTER, abi.encodeWithSignature("swap(uint256)", dummy), abi.encode());
+    function _setBalancesBeforeSwap(uint token0BalanceBeforeSwap, uint token1BalanceBeforeSwap) internal {
+        token0.mint(address(zapStaker), token0BalanceBeforeSwap);
+        token1.mint(address(zapStaker), token1BalanceBeforeSwap);
+    }
+
+    function _encodeSwap(RouterBehaviour behaviour, uint acquiredAmount)
+        internal
+        pure
+        returns (bytes memory)
+    {
+        return abi.encodeWithSignature("swap(uint256,uint256)", uint(behaviour), acquiredAmount);
     }
 
     function _labelAccounts() private {
