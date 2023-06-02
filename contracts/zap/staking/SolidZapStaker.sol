@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../interfaces/staking/ISolidZapStaker.sol";
 import "../../interfaces/staking/ISolidStakingActions_0_8_18.sol";
+import "../../interfaces/staking/IWETH.sol";
 import "../../interfaces/liquidity-deployer/IHypervisor_0_8_18.sol";
 import "../../interfaces/liquidity-deployer/IUniProxy_0_8_18.sol";
 import "../../libraries/GPv2SafeERC20_0_8_18.sol";
@@ -63,6 +64,29 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         uint minShares
     ) external nonReentrant returns (uint) {
         return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, msg.sender);
+    }
+
+    function stakeETH(
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2,
+        uint minShares,
+        address recipient
+    ) external payable returns (uint) {
+        _wrap(msg.value);
+
+        return 0;
+    }
+
+    function stakeETH(
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2,
+        uint minShares
+    ) external payable returns (uint) {
+        _wrap(msg.value);
+
+        return 0;
     }
 
     /// @inheritdoc ISolidZapStaker
@@ -178,6 +202,10 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         if (!success) {
             _propagateError(retData);
         }
+    }
+
+    function _wrap(uint amount) private {
+        IWETH(weth).deposit{ value: amount }();
     }
 
     function _fetchHypervisorTokens(address hypervisor)
