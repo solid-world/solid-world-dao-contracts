@@ -26,6 +26,13 @@ abstract contract BaseSolidZapStaker is BaseTest {
 
     ISolidZapStaker public zapStaker;
 
+    event ZapStake(
+        address indexed recipient,
+        address indexed inputToken,
+        uint indexed inputAmount,
+        uint shares
+    );
+
     function setUp() public {
         emptySwap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 0);
         emptySwap2 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, 0);
@@ -44,6 +51,16 @@ abstract contract BaseSolidZapStaker is BaseTest {
 
         _labelAccounts();
         _prepareZap();
+    }
+
+    function _expectEmit_ZapStake(
+        address recipient,
+        address _inputToken,
+        uint inputAmount,
+        uint shares
+    ) internal {
+        vm.expectEmit(true, true, true, true, address(zapStaker));
+        emit ZapStake(recipient, _inputToken, inputAmount, shares);
     }
 
     function _expectCall_ERC20_transferFrom(address from, uint amount) internal {

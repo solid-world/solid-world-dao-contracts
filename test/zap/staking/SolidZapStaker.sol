@@ -255,4 +255,15 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
 
         _clearMockedCalls();
     }
+
+    function testStakeDoubleSwap_emitsZapStakeEvent() public {
+        uint sharesMinted = 1500;
+
+        vm.prank(testAccount0);
+        _mockUniProxy_deposit(sharesMinted);
+        _expectEmit_ZapStake(testAccount0, address(inputToken), 1000, sharesMinted);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
+
+        _clearMockedCalls();
+    }
 }

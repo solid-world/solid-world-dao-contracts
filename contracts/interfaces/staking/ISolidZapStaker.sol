@@ -6,6 +6,13 @@ interface ISolidZapStaker {
     error GenericSwapError();
     error AcquiredSharesLessThanMin(uint acquired, uint min);
 
+    event ZapStake(
+        address indexed recipient,
+        address indexed inputToken,
+        uint indexed inputAmount,
+        uint shares
+    );
+
     function router() external view returns (address);
 
     function iUniProxy() external view returns (address);
