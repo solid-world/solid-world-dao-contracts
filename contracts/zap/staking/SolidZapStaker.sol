@@ -62,6 +62,29 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, msg.sender);
     }
 
+    /// @inheritdoc ISolidZapStaker
+    function simulateStakeDoubleSwap(
+        address inputToken,
+        uint inputAmount,
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2
+    )
+        external
+        nonReentrant
+        returns (
+            bool dustless,
+            uint shares,
+            Fraction memory ratio
+        )
+    {
+        IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
+        _approveTokenSpendingIfNeeded(inputToken, router);
+
+        HypervisorTokens memory tokens = _fetchHypervisorTokens(hypervisor);
+        TokenBalances memory acquiredTokenAmounts = _executeSwapsAndReturnResult(swap1, swap2, tokens);
+    }
+
     function _stakeDoubleSwap(
         address inputToken,
         uint inputAmount,
@@ -75,16 +98,13 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         _approveTokenSpendingIfNeeded(inputToken, router);
 
         HypervisorTokens memory tokens = _fetchHypervisorTokens(hypervisor);
-        TokenBalances memory balancesBeforeSwap = _fetchTokenBalances(tokens);
-        _swapViaRouter(swap1);
-        _swapViaRouter(swap2);
-        TokenBalances memory balancesAfterSwap = _fetchTokenBalances(tokens);
+        TokenBalances memory acquiredTokenAmounts = _executeSwapsAndReturnResult(swap1, swap2, tokens);
 
         _approveTokenSpendingIfNeeded(tokens.token0, hypervisor);
         _approveTokenSpendingIfNeeded(tokens.token1, hypervisor);
         uint shares = _deployLiquidity(
-            balancesAfterSwap.token0Balance - balancesBeforeSwap.token0Balance,
-            balancesAfterSwap.token1Balance - balancesBeforeSwap.token1Balance,
+            acquiredTokenAmounts.token0Balance,
+            acquiredTokenAmounts.token1Balance,
             hypervisor
         );
 
@@ -98,6 +118,24 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         emit ZapStake(recipient, inputToken, inputAmount, shares);
 
         return shares;
+    }
+
+    function _executeSwapsAndReturnResult(
+        bytes memory swap1,
+        bytes memory swap2,
+        HypervisorTokens memory tokens
+    ) private returns (TokenBalances memory acquiredTokenAmounts) {
+        TokenBalances memory balancesBeforeSwap = _fetchTokenBalances(tokens);
+        _swapViaRouter(swap1);
+        _swapViaRouter(swap2);
+        TokenBalances memory balancesAfterSwap = _fetchTokenBalances(tokens);
+
+        acquiredTokenAmounts.token0Balance =
+            balancesAfterSwap.token0Balance -
+            balancesBeforeSwap.token0Balance;
+        acquiredTokenAmounts.token1Balance =
+            balancesAfterSwap.token1Balance -
+            balancesBeforeSwap.token1Balance;
     }
 
     function _approveTokenSpendingIfNeeded(address token, address spender) private {

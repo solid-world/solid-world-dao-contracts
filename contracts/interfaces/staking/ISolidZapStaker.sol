@@ -13,6 +13,11 @@ interface ISolidZapStaker {
         uint shares
     );
 
+    struct Fraction {
+        uint numerator;
+        uint denominator;
+    }
+
     function router() external view returns (address);
 
     function iUniProxy() external view returns (address);
@@ -24,7 +29,7 @@ interface ISolidZapStaker {
     /// 2. Partially swaps `inputToken` to desired token via encoded swap2
     /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
     /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `recipient` is the beneficiary of the staked shares
-    /// @notice The msg.sender must approve this contract to spend `inputToken`
+    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`
     /// @param inputToken The token used to provide liquidity
     /// @param inputAmount The amount of `inputToken` to use
     /// @param hypervisor The hypervisor used to deploy liquidity
@@ -48,7 +53,7 @@ interface ISolidZapStaker {
     /// 2. Partially swaps `inputToken` to desired token via encoded swap2
     /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
     /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `msg.sender` is the beneficiary of the staked shares
-    /// @notice The msg.sender must approve this contract to spend `inputToken`
+    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`
     /// @param inputToken The token used to provide liquidity
     /// @param inputAmount The amount of `inputToken` to use
     /// @param hypervisor The hypervisor used to deploy liquidity
@@ -64,4 +69,34 @@ interface ISolidZapStaker {
         bytes calldata swap2,
         uint minShares
     ) external returns (uint);
+
+    /// @notice Function is meant to be called off-chain with _staticCall_.
+    /// @notice Zap function that achieves the following:
+    /// 1. Partially swaps `inputToken` to desired token via encoded swap1
+    /// 2. Partially swaps `inputToken` to desired token via encoded swap2
+    /// 3. Resulting tokens are checked against Gamma Vault to determine if they qualify for a dustless liquidity deployment
+    ///     * if dustless, the function deploys the liquidity to obtain the amounts of shares getting minted and returns
+    ///     * if not dustless, the function computes the current gamma token ratio and returns
+    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`
+    /// @param inputToken The token used to provide liquidity
+    /// @param inputAmount The amount of `inputToken` to use
+    /// @param hypervisor The hypervisor used to deploy liquidity
+    /// @param swap1 Encoded swap to partially swap `inputToken` to desired token
+    /// @param swap2 Encoded swap to partially swap `inputToken` to desired token
+    /// @return dustless Whether the resulting tokens qualify for a dustless liquidity deployment
+    /// @return shares The amount of shares minted from the dustless liquidity deployment
+    /// @return ratio The current gamma token ratio, or empty if dustless
+    function simulateStakeDoubleSwap(
+        address inputToken,
+        uint inputAmount,
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2
+    )
+        external
+        returns (
+            bool dustless,
+            uint shares,
+            Fraction memory ratio
+        );
 }
