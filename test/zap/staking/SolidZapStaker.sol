@@ -184,4 +184,26 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
 
         _clearMockedCalls();
     }
+
+    function testStakeDoubleSwap_approvesSolidStakingToSpendShares() public {
+        vm.prank(testAccount0);
+        _expectCall_ERC20_approve_maxUint(address(hypervisor), address(SOLIDSTAKING));
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
+
+        uint actual = hypervisor.allowance(address(zapStaker), address(SOLIDSTAKING));
+        assertEq(actual, type(uint).max);
+
+        _clearMockedCalls();
+    }
+
+    function testStakeDoubleSwap_doesNotApproveSolidStakingToSpendSharesIfAlreadyApproved() public {
+        vm.prank(address(zapStaker));
+        hypervisor.approve(address(SOLIDSTAKING), type(uint).max);
+
+        vm.prank(testAccount0);
+        _doNotExpectCall_ERC20_approve_maxUint(address(hypervisor), address(SOLIDSTAKING));
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
+
+        _clearMockedCalls();
+    }
 }

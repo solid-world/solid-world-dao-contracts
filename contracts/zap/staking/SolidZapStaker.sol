@@ -66,6 +66,8 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
             revert AcquiredSharesLessThanMin(shares, minShares);
         }
 
+        _approveTokenSpendingIfNeeded(hypervisor, solidStaking);
+
         return 0;
     }
 
