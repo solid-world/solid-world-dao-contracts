@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../interfaces/staking/ISolidZapStaker.sol";
 import "../../interfaces/liquidity-deployer/IHypervisor_0_8_18.sol";
+import "../../interfaces/liquidity-deployer/IUniProxy_0_8_18.sol";
 import "../../libraries/GPv2SafeERC20_0_8_18.sol";
 
 /// @author Solid World
@@ -14,6 +15,16 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
     address public immutable router;
     address public immutable iUniProxy;
     address public immutable solidStaking;
+
+    struct HypervisorTokens {
+        address token0;
+        address token1;
+    }
+
+    struct TokenBalances {
+        uint token0Balance;
+        uint token1Balance;
+    }
 
     constructor(
         address _router,
@@ -32,17 +43,28 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         address hypervisor,
         bytes calldata swap1,
         bytes calldata swap2,
-        uint
+        uint minShares
     ) external nonReentrant returns (uint) {
         IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
-
         _approveTokenSpendingIfNeeded(inputToken, router);
+
+        HypervisorTokens memory tokens = _fetchHypervisorTokens(hypervisor);
+        TokenBalances memory balancesBeforeSwap = _fetchTokenBalances(tokens);
         _swapViaRouter(swap1);
         _swapViaRouter(swap2);
+        TokenBalances memory balancesAfterSwap = _fetchTokenBalances(tokens);
 
-        (address token0, address token1) = _fetchHypervisorTokens(hypervisor);
-        _approveTokenSpendingIfNeeded(token0, hypervisor);
-        _approveTokenSpendingIfNeeded(token1, hypervisor);
+        _approveTokenSpendingIfNeeded(tokens.token0, hypervisor);
+        _approveTokenSpendingIfNeeded(tokens.token1, hypervisor);
+        uint shares = _deployLiquidity(
+            balancesAfterSwap.token0Balance - balancesBeforeSwap.token0Balance,
+            balancesAfterSwap.token1Balance - balancesBeforeSwap.token1Balance,
+            hypervisor
+        );
+
+        if (shares < minShares) {
+            revert AcquiredSharesLessThanMin(shares, minShares);
+        }
 
         return 0;
     }
@@ -64,10 +86,37 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
     function _fetchHypervisorTokens(address hypervisor)
         private
         view
-        returns (address token0, address token1)
+        returns (HypervisorTokens memory tokens)
     {
-        token0 = IHypervisor(hypervisor).token0();
-        token1 = IHypervisor(hypervisor).token1();
+        tokens.token0 = IHypervisor(hypervisor).token0();
+        tokens.token1 = IHypervisor(hypervisor).token1();
+    }
+
+    function _fetchTokenBalances(HypervisorTokens memory tokens)
+        private
+        view
+        returns (TokenBalances memory balances)
+    {
+        balances.token0Balance = IERC20(tokens.token0).balanceOf(address(this));
+        balances.token1Balance = IERC20(tokens.token1).balanceOf(address(this));
+    }
+
+    function _deployLiquidity(
+        uint token0Amount,
+        uint token1Amount,
+        address hypervisor
+    ) private returns (uint shares) {
+        shares = IUniProxy(iUniProxy).deposit(
+            token0Amount,
+            token1Amount,
+            address(this),
+            hypervisor,
+            _uniProxyMinIn()
+        );
+    }
+
+    function _uniProxyMinIn() internal pure returns (uint[4] memory) {
+        return [uint(0), uint(0), uint(0), uint(0)];
     }
 
     function _propagateError(bytes memory revertReason) private pure {

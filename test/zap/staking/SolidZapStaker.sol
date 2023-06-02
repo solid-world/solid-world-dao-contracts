@@ -139,4 +139,49 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
 
         _clearMockedCalls();
     }
+
+    function testStakeDoubleSwap_depositsViaIUniProxy_exactTokenAmountsAfterSwaps() public {
+        uint token0AcquiredFromSwap = 500;
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, token0AcquiredFromSwap);
+        bytes memory swap2 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+        uint sharesMinted = 100;
+        uint token0BalanceBeforeSwap = 1000;
+        uint token1BalanceBeforeSwap = 1001;
+
+        _setBalancesBeforeSwap(token0BalanceBeforeSwap, token1BalanceBeforeSwap);
+
+        vm.prank(testAccount0);
+        _mockUniProxy_deposit(sharesMinted);
+        _expectCall_deposit(
+            token0AcquiredFromSwap,
+            token1AcquiredFromSwap,
+            address(zapStaker),
+            address(hypervisor),
+            _uniProxyMinIn()
+        );
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, 0);
+
+        _clearMockedCalls();
+    }
+
+    function testStakeDoubleSwap_depositsViaIUniProxy_revertsIfMintedSharesIsLessThanMin() public {
+        uint token0AcquiredFromSwap = 500;
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, token0AcquiredFromSwap);
+        bytes memory swap2 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+        uint sharesMinted = 100;
+        uint minShares = sharesMinted + 1;
+        uint token0BalanceBeforeSwap = 1000;
+        uint token1BalanceBeforeSwap = 1001;
+
+        _setBalancesBeforeSwap(token0BalanceBeforeSwap, token1BalanceBeforeSwap);
+
+        vm.prank(testAccount0);
+        _mockUniProxy_deposit(sharesMinted);
+        _expectRevert_AcquiredSharesLessThanMin(sharesMinted, minShares);
+        zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
+
+        _clearMockedCalls();
+    }
 }

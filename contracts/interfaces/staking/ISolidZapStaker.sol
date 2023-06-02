@@ -4,6 +4,7 @@ pragma solidity 0.8.18;
 /// @author Solid World
 interface ISolidZapStaker {
     error GenericSwapError();
+    error AcquiredSharesLessThanMin(uint acquired, uint min);
 
     function router() external view returns (address);
 
