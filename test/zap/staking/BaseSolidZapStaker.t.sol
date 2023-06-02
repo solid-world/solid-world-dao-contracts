@@ -9,6 +9,7 @@ import "../../../contracts/interfaces/liquidity-deployer/IUniProxy_0_8_18.sol";
 import "../../liquidity-deployer/TestToken.sol";
 import "./MockRouter.sol";
 import "./RouterBehaviour.sol";
+import "./WMATIC.sol";
 
 abstract contract BaseSolidZapStaker is BaseTest {
     address public ROUTER;
@@ -20,6 +21,7 @@ abstract contract BaseSolidZapStaker is BaseTest {
     TestToken public hypervisor;
     TestToken public token0;
     TestToken public token1;
+    WMATIC public weth;
 
     bytes public emptySwap1;
     bytes public emptySwap2;
@@ -45,9 +47,10 @@ abstract contract BaseSolidZapStaker is BaseTest {
         hypervisor = new TestToken("Hypervisor", "LP", 18);
         token0 = new TestToken("USDC", "USDC", 6);
         token1 = new TestToken("CRISP SCORED MANGROVES", "CRISP-M", 18);
+        weth = new WMATIC();
         ROUTER = address(new MockRouter(address(token0), address(token1)));
 
-        zapStaker = new SolidZapStaker(ROUTER, IUNIPROXY, SOLIDSTAKING);
+        zapStaker = new SolidZapStaker(ROUTER, address(weth), IUNIPROXY, SOLIDSTAKING);
 
         _labelAccounts();
         _prepareZap();
@@ -182,6 +185,7 @@ abstract contract BaseSolidZapStaker is BaseTest {
 
     function _labelAccounts() private {
         vm.label(ROUTER, "Router");
+        vm.label(address(weth), "WETH");
         vm.label(IUNIPROXY, "IUniProxy");
         vm.label(SOLIDSTAKING, "SolidStaking");
         vm.label(testAccount0, "TestAccount0");

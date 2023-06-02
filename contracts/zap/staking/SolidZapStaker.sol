@@ -14,6 +14,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
     using GPv2SafeERC20 for IERC20;
 
     address public immutable router;
+    address public immutable weth;
     address public immutable iUniProxy;
     address public immutable solidStaking;
 
@@ -29,10 +30,12 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
 
     constructor(
         address _router,
+        address _weth,
         address _iUniProxy,
         address _solidStaking
     ) {
         router = _router;
+        weth = _weth;
         iUniProxy = _iUniProxy;
         solidStaking = _solidStaking;
     }
