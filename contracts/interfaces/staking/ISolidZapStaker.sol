@@ -37,7 +37,7 @@ interface ISolidZapStaker {
     /// @param swap2 Encoded swap to partially swap `inputToken` to desired token
     /// @param minShares The minimum amount of liquidity shares required for transaction to succeed
     /// @param recipient The beneficiary of the staked shares
-    /// @return The amount of shares staked in `solidStaking`
+    /// @return shares The amount of shares staked in `solidStaking`
     function stakeDoubleSwap(
         address inputToken,
         uint inputAmount,
@@ -46,7 +46,7 @@ interface ISolidZapStaker {
         bytes calldata swap2,
         uint minShares,
         address recipient
-    ) external returns (uint);
+    ) external returns (uint shares);
 
     /// @notice Zap function that achieves the following:
     /// 1. Partially swaps `inputToken` to desired token via encoded swap1
@@ -60,7 +60,7 @@ interface ISolidZapStaker {
     /// @param swap1 Encoded swap to partially swap `inputToken` to desired token
     /// @param swap2 Encoded swap to partially swap `inputToken` to desired token
     /// @param minShares The minimum amount of liquidity shares required for transaction to succeed
-    /// @return The amount of shares staked in `solidStaking`
+    /// @return shares The amount of shares staked in `solidStaking`
     function stakeDoubleSwap(
         address inputToken,
         uint inputAmount,
@@ -68,7 +68,7 @@ interface ISolidZapStaker {
         bytes calldata swap1,
         bytes calldata swap2,
         uint minShares
-    ) external returns (uint);
+    ) external returns (uint shares);
 
     /// @notice Function is meant to be called off-chain with _staticCall_.
     /// @notice Zap function that achieves the following:
