@@ -72,6 +72,46 @@ interface ISolidZapStaker {
         uint minShares
     ) external returns (uint shares);
 
+    /// @notice Zap function that achieves the following:
+    /// 1. Wraps `msg.value` to WETH
+    /// 2. Partially swaps `WETH` to desired token via encoded swap1
+    /// 3. Partially swaps `WETH` to desired token via encoded swap2
+    /// 4. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
+    /// 5. Shares of the deployed liquidity are staked in `solidStaking`. `recipient` is the beneficiary of the staked shares
+    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `WETH`
+    /// @param hypervisor The hypervisor used to deploy liquidity
+    /// @param swap1 Encoded swap to partially swap `WETH` to desired token
+    /// @param swap2 Encoded swap to partially swap `WETH` to desired token
+    /// @param minShares The minimum amount of liquidity shares required for transaction to succeed
+    /// @param recipient The beneficiary of the staked shares
+    /// @return shares The amount of shares staked in `solidStaking`
+    function stakeETH(
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2,
+        uint minShares,
+        address recipient
+    ) external payable returns (uint shares);
+
+    /// @notice Zap function that achieves the following:
+    /// 1. Wraps `msg.value` to WETH
+    /// 2. Partially swaps `WETH` to desired token via encoded swap1
+    /// 3. Partially swaps `WETH` to desired token via encoded swap2
+    /// 4. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
+    /// 5. Shares of the deployed liquidity are staked in `solidStaking`. `msg.sender` is the beneficiary of the staked shares
+    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `WETH`
+    /// @param hypervisor The hypervisor used to deploy liquidity
+    /// @param swap1 Encoded swap to partially swap `WETH` to desired token
+    /// @param swap2 Encoded swap to partially swap `WETH` to desired token
+    /// @param minShares The minimum amount of liquidity shares required for transaction to succeed
+    /// @return shares The amount of shares staked in `solidStaking`
+    function stakeETH(
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2,
+        uint minShares
+    ) external payable returns (uint shares);
+
     /// @notice Function is meant to be called off-chain with _staticCall_.
     /// @notice Zap function that achieves the following:
     /// 1. Partially swaps `inputToken` to desired token via encoded swap1
