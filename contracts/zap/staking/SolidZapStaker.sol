@@ -83,7 +83,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
 
         HypervisorTokens memory tokens = _fetchHypervisorTokens(hypervisor);
         TokenBalances memory acquiredTokenAmounts = _executeSwapsAndReturnResult(swap1, swap2, tokens);
-        (isDustless, ratio) = _isDustless(hypervisor, tokens.token0, acquiredTokenAmounts);
+        (isDustless, ratio) = _checkDustless(hypervisor, tokens.token0, acquiredTokenAmounts);
 
         if (isDustless) {
             shares = _deployLiquidity(
@@ -94,36 +94,6 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         }
     }
 
-    function _isDustless(
-        address hypervisor,
-        address token0,
-        TokenBalances memory balances
-    ) private view returns (bool isDustless, Fraction memory currentRatio) {
-        (uint amountStart, uint amountEnd) = IUniProxy(iUniProxy).getDepositAmount(
-            hypervisor,
-            token0,
-            balances.token0Balance
-        );
-
-        isDustless = _between(balances.token1Balance, amountStart, amountEnd);
-
-        if (!isDustless) {
-            currentRatio = Fraction(balances.token0Balance, _avg(amountStart, amountEnd));
-        }
-    }
-
-    function _between(
-        uint x,
-        uint min,
-        uint max
-    ) private pure returns (bool) {
-        return x >= min && x <= max;
-    }
-
-    function _avg(uint x, uint y) private pure returns (uint) {
-        return (x + y) / 2;
-    }
-
     function _stakeDoubleSwap(
         address inputToken,
         uint inputAmount,
@@ -132,7 +102,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         bytes calldata swap2,
         uint minShares,
         address recipient
-    ) private returns (uint) {
+    ) private returns (uint shares) {
         IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
         _approveTokenSpendingIfNeeded(inputToken, router);
 
@@ -141,7 +111,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
 
         _approveTokenSpendingIfNeeded(tokens.token0, hypervisor);
         _approveTokenSpendingIfNeeded(tokens.token1, hypervisor);
-        uint shares = _deployLiquidity(
+        shares = _deployLiquidity(
             acquiredTokenAmounts.token0Balance,
             acquiredTokenAmounts.token1Balance,
             hypervisor
@@ -155,8 +125,6 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         _stakeWithRecipient(hypervisor, shares, recipient);
 
         emit ZapStake(recipient, inputToken, inputAmount, shares);
-
-        return shares;
     }
 
     function _executeSwapsAndReturnResult(
@@ -180,6 +148,24 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
     function _approveTokenSpendingIfNeeded(address token, address spender) private {
         if (IERC20(token).allowance(address(this), spender) == 0) {
             IERC20(token).approve(spender, type(uint).max);
+        }
+    }
+
+    function _checkDustless(
+        address hypervisor,
+        address token0,
+        TokenBalances memory balances
+    ) private view returns (bool isDustless, Fraction memory actualRatio) {
+        (uint amountStart, uint amountEnd) = IUniProxy(iUniProxy).getDepositAmount(
+            hypervisor,
+            token0,
+            balances.token0Balance
+        );
+
+        isDustless = _between(balances.token1Balance, amountStart, amountEnd);
+
+        if (!isDustless) {
+            actualRatio = Fraction(balances.token0Balance, _avg(amountStart, amountEnd));
         }
     }
 
@@ -229,6 +215,18 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         address recipient
     ) private {
         ISolidStakingActions(solidStaking).stake(token, amount, recipient);
+    }
+
+    function _between(
+        uint x,
+        uint min,
+        uint max
+    ) private pure returns (bool) {
+        return x >= min && x <= max;
+    }
+
+    function _avg(uint x, uint y) private pure returns (uint) {
+        return (x + y) / 2;
     }
 
     function _uniProxyMinIn() private pure returns (uint[4] memory) {
