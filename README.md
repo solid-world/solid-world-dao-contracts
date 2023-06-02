@@ -64,6 +64,16 @@ The following tasks are available in Hardhat:
     - `--quantity`: The number of tokens to deploy (Default: 1).
     - `--owner`: The owner of the tokens (Default: OWNER_ADDRESS).
 
+4. Deploy a new SolidZapStaker contract:
+   ```shell
+   yarn hardhat --network localhost deploy-zap-staker [OPTIONS]
+   ```
+
+   Options:
+   - `--router`: The address of the router used to perform token swaps.
+   - `--uni-proxy`: The address of the Gamma UniProxy contract used for deploying liquidity.
+   - `--solid-staking`: The address of our SolidStaking contract, to stake with recipient.
+
 ## Upgradable Contracts
 
 The following contracts are upgradable and managed by a `DefaultProxyAdmin` contract. The owner of the `DefaultProxyAdmin` contract is authorized to upgrade both contracts.

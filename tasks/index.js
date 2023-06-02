@@ -1,5 +1,6 @@
 exports.deployErc20 = require('./deploy-erc20')
 exports.deployRewardOracle = require('./deploy-reward-oracle')
 exports.deployLiquidityDeployer = require('./deploy-liquidity-deployer')
+exports.deployZapStaker = require('./deploy-zap-staker')
 exports.upgradeSwm = require('./upgrade-swm')
 exports.upgradeVerificationRegistry = require('./upgrade-verification-registry')
