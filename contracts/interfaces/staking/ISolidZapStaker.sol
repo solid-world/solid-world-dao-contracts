@@ -83,7 +83,7 @@ interface ISolidZapStaker {
     /// @param hypervisor The hypervisor used to deploy liquidity
     /// @param swap1 Encoded swap to partially swap `inputToken` to desired token
     /// @param swap2 Encoded swap to partially swap `inputToken` to desired token
-    /// @return dustless Whether the resulting tokens qualify for a dustless liquidity deployment
+    /// @return isDustless Whether the resulting tokens qualify for a dustless liquidity deployment
     /// @return shares The amount of shares minted from the dustless liquidity deployment
     /// @return ratio The current gamma token ratio, or empty if dustless
     function simulateStakeDoubleSwap(
@@ -95,7 +95,7 @@ interface ISolidZapStaker {
     )
         external
         returns (
-            bool dustless,
+            bool isDustless,
             uint shares,
             Fraction memory ratio
         );
