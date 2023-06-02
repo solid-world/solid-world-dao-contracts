@@ -116,4 +116,30 @@ contract SimulateStakeDoubleSwapTest is BaseSolidZapStaker {
         _expectCall_getDepositAmount(address(hypervisor), address(token0), token0AcquiredFromSwap);
         zapStaker.simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2);
     }
+
+    function testSimulateStakeDoubleSwap_ifDustless_deploysLiquidityIntoGammaAndReturns() public {
+        uint sharesMinted = 100;
+        uint token0AcquiredFromSwap = 500;
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, token0AcquiredFromSwap);
+        bytes memory swap2 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+
+        vm.prank(testAccount0);
+        _mockUniProxy_deposit(sharesMinted);
+        _mockUniProxy_getDepositAmount(token1AcquiredFromSwap);
+        _expectCall_deposit(
+            token0AcquiredFromSwap,
+            token1AcquiredFromSwap,
+            address(zapStaker),
+            address(hypervisor),
+            _uniProxyMinIn()
+        );
+        (bool actualIsDustless, uint actualShares, ISolidZapStaker.Fraction memory actualRatio) = zapStaker
+            .simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2);
+
+        assertEq(actualIsDustless, true);
+        assertEq(actualShares, sharesMinted);
+        assertEq(actualRatio.numerator, 0);
+        assertEq(actualRatio.denominator, 0);
+    }
 }
