@@ -15,6 +15,7 @@ abstract contract BaseSolidZapStaker is BaseTest {
     address public IUNIPROXY;
     address public SOLIDSTAKING;
     address public testAccount0;
+    address public testAccount1;
     TestToken public inputToken;
     TestToken public hypervisor;
     TestToken public token0;
@@ -32,6 +33,7 @@ abstract contract BaseSolidZapStaker is BaseTest {
         IUNIPROXY = vm.addr(1);
         SOLIDSTAKING = vm.addr(2);
         testAccount0 = vm.addr(3);
+        testAccount1 = vm.addr(4);
         inputToken = new TestToken("Input Token", "IT", 18);
         hypervisor = new TestToken("Hypervisor", "LP", 18);
         token0 = new TestToken("USDC", "USDC", 6);
@@ -76,6 +78,17 @@ abstract contract BaseSolidZapStaker is BaseTest {
         );
     }
 
+    function _expectCall_stake(
+        address token,
+        uint amount,
+        address recipient
+    ) internal {
+        vm.expectCall(
+            SOLIDSTAKING,
+            abi.encodeWithSignature("stake(address,uint256,address)", token, amount, recipient)
+        );
+    }
+
     function _expectRevert_GenericSwapError() internal {
         vm.expectRevert(abi.encodeWithSelector(ISolidZapStaker.GenericSwapError.selector));
     }
@@ -84,6 +97,10 @@ abstract contract BaseSolidZapStaker is BaseTest {
         vm.expectRevert(
             abi.encodeWithSelector(ISolidZapStaker.AcquiredSharesLessThanMin.selector, acquired, min)
         );
+    }
+
+    function _mockSolidStaking_stake() internal {
+        vm.mockCall(SOLIDSTAKING, abi.encodeWithSignature("stake(address,uint256,address)"), abi.encode());
     }
 
     function _mockHypervisor_token0() internal {
@@ -128,6 +145,7 @@ abstract contract BaseSolidZapStaker is BaseTest {
         vm.label(IUNIPROXY, "IUniProxy");
         vm.label(SOLIDSTAKING, "SolidStaking");
         vm.label(testAccount0, "TestAccount0");
+        vm.label(testAccount1, "TestAccount1");
         vm.label(address(inputToken), "InputToken");
         vm.label(address(hypervisor), "Hypervisor");
         vm.label(address(token0), "Token0");
@@ -145,5 +163,6 @@ abstract contract BaseSolidZapStaker is BaseTest {
         _mockHypervisor_token0();
         _mockHypervisor_token1();
         _mockUniProxy_deposit(0);
+        _mockSolidStaking_stake();
     }
 }
