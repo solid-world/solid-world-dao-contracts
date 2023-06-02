@@ -39,6 +39,8 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         weth = _weth;
         iUniProxy = _iUniProxy;
         solidStaking = _solidStaking;
+
+        IWETH(weth).approve(_router, type(uint).max);
     }
 
     /// @inheritdoc ISolidZapStaker

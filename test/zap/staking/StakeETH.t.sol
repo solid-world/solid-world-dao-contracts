@@ -4,6 +4,10 @@ pragma solidity 0.8.18;
 import "./BaseSolidZapStaker.t.sol";
 
 contract StakeETHTest is BaseSolidZapStaker {
+    function testApprovesRouterToSpendWETH() public {
+        assertEq(weth.allowance(address(zapStaker), ROUTER), type(uint).max);
+    }
+
     function testStakeDoubleSwap_wrapsTheValueReceived() public {
         uint wethBalanceBefore = weth.balanceOf(address(zapStaker));
 
