@@ -20,6 +20,8 @@ interface ISolidZapStaker {
 
     function router() external view returns (address);
 
+    function weth() external view returns (address);
+
     function iUniProxy() external view returns (address);
 
     function solidStaking() external view returns (address);
