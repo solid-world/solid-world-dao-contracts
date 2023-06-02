@@ -95,6 +95,10 @@ abstract contract BaseSolidZapStaker is BaseTest {
         );
     }
 
+    function _doNotExpectCall_deposit() internal {
+        vm.expectCall(IUNIPROXY, abi.encodeWithSelector(IUniProxy.deposit.selector), 0);
+    }
+
     function _expectCall_getDepositAmount(
         address pos,
         address token,
