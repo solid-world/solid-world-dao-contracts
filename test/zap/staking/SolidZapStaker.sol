@@ -44,8 +44,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         vm.prank(testAccount0);
         _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_executesSwap1_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
@@ -54,8 +52,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         vm.prank(testAccount0);
         _expectRevert_GenericSwapError();
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, emptySwap2, 0);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_executesSwap1_revertsWithProvidedReason() public {
@@ -64,16 +60,12 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         vm.prank(testAccount0);
         vm.expectRevert("invalid_swap");
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, emptySwap2, 0);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_executesSwap2() public {
         vm.prank(testAccount0);
         _expectCall_swap(RouterBehaviour.MINTS_TOKEN1, 0);
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_executesSwap2_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
@@ -82,8 +74,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         vm.prank(testAccount0);
         _expectRevert_GenericSwapError();
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, swap2, 0);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_executesSwap2_revertsWithProvidedReason() public {
@@ -92,8 +82,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         vm.prank(testAccount0);
         vm.expectRevert("invalid_swap");
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, swap2, 0);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_approvesHypervisorToSpendToken0() public {
@@ -103,8 +91,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
 
         uint actual = token0.allowance(address(zapStaker), address(hypervisor));
         assertEq(actual, type(uint).max);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_doesNotApproveHypervisorToSpendToken0IfAlreadyApproved() public {
@@ -114,8 +100,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(token0), address(hypervisor));
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_approvesHypervisorToSpendToken1() public {
@@ -125,8 +109,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
 
         uint actual = token1.allowance(address(zapStaker), address(hypervisor));
         assertEq(actual, type(uint).max);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_doesNotApproveHypervisorToSpendToken1IfAlreadyApproved() public {
@@ -136,8 +118,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(token1), address(hypervisor));
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_depositsViaIUniProxy_exactTokenAmountsAfterSwaps() public {
@@ -161,8 +141,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
             _uniProxyMinIn()
         );
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, 0);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_depositsViaIUniProxy_revertsIfMintedSharesIsLessThanMin() public {
@@ -181,8 +159,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         _mockUniProxy_deposit(sharesMinted);
         _expectRevert_AcquiredSharesLessThanMin(sharesMinted, minShares);
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, swap2, minShares);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_approvesSolidStakingToSpendShares() public {
@@ -192,8 +168,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
 
         uint actual = hypervisor.allowance(address(zapStaker), address(SOLIDSTAKING));
         assertEq(actual, type(uint).max);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_doesNotApproveSolidStakingToSpendSharesIfAlreadyApproved() public {
@@ -203,8 +177,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(hypervisor), address(SOLIDSTAKING));
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_stakesSharesWithRecipient() public {
@@ -214,8 +186,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         _mockUniProxy_deposit(sharesMinted);
         _expectCall_stake(address(hypervisor), sharesMinted, testAccount0);
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_stakesSharesWithSpecifiedRecipient() public {
@@ -233,8 +203,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
             0,
             testAccount1
         );
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_returnsFinalStakedSharesAmount() public {
@@ -252,8 +220,6 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         );
 
         assertEq(actual, sharesMinted);
-
-        _clearMockedCalls();
     }
 
     function testStakeDoubleSwap_emitsZapStakeEvent() public {
@@ -263,7 +229,5 @@ contract SolidZapStakerTest is BaseSolidZapStaker {
         _mockUniProxy_deposit(sharesMinted);
         _expectEmit_ZapStake(testAccount0, address(inputToken), 1000, sharesMinted);
         zapStaker.stakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, emptySwap2, 0);
-
-        _clearMockedCalls();
     }
 }
