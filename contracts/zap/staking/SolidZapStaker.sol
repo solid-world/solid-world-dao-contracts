@@ -1,48 +1,18 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.18;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
-import "../../interfaces/staking/ISolidZapStaker.sol";
-import "../../interfaces/staking/ISolidStakingActions_0_8_18.sol";
-import "../../interfaces/staking/IWETH.sol";
-import "../../interfaces/liquidity-deployer/IHypervisor_0_8_18.sol";
-import "../../interfaces/liquidity-deployer/IUniProxy_0_8_18.sol";
-import "../../libraries/GPv2SafeERC20_0_8_18.sol";
+import "./BaseSolidZapStaker.sol";
 
 /// @author Solid World
-contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
+contract SolidZapStaker is BaseSolidZapStaker, ReentrancyGuard {
     using GPv2SafeERC20 for IERC20;
-
-    address public immutable router;
-    address public immutable weth;
-    address public immutable iUniProxy;
-    address public immutable solidStaking;
-
-    struct SwapResult {
-        address _address;
-        uint balance;
-    }
-
-    struct SwapResults {
-        SwapResult token0;
-        SwapResult token1;
-    }
 
     constructor(
         address _router,
         address _weth,
         address _iUniProxy,
         address _solidStaking
-    ) {
-        router = _router;
-        weth = _weth;
-        iUniProxy = _iUniProxy;
-        solidStaking = _solidStaking;
-
-        IWETH(weth).approve(_router, type(uint).max);
-    }
+    ) BaseSolidZapStaker(_router, _weth, _iUniProxy, _solidStaking) {}
 
     /// @inheritdoc ISolidZapStaker
     function stakeDoubleSwap(
@@ -318,17 +288,6 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         swapResults.token1.balance = token1BalanceAfter - token1BalanceBefore;
     }
 
-    function _prepareToSwap(address inputToken, uint inputAmount) private {
-        IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
-        _approveTokenSpendingIfNeeded(inputToken, router);
-    }
-
-    function _approveTokenSpendingIfNeeded(address token, address spender) private {
-        if (IERC20(token).allowance(address(this), spender) == 0) {
-            IERC20(token).approve(spender, type(uint).max);
-        }
-    }
-
     function _checkDustless(address hypervisor, SwapResults memory swapResults)
         private
         view
@@ -347,77 +306,8 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         }
     }
 
-    function _swapViaRouter(bytes calldata encodedSwap) private {
-        (bool success, bytes memory retData) = router.call(encodedSwap);
-
-        if (!success) {
-            _propagateError(retData);
-        }
-    }
-
-    function _wrap(uint amount) private {
-        IWETH(weth).deposit{ value: amount }();
-    }
-
-    function _fetchHypervisorTokens(address hypervisor)
-        private
-        view
-        returns (address token0, address token1)
-    {
-        token0 = IHypervisor(hypervisor).token0();
-        token1 = IHypervisor(hypervisor).token1();
-    }
-
-    function _fetchTokenBalances(address token0, address token1)
-        private
-        view
-        returns (uint token0Balance, uint token1Balance)
-    {
-        token0Balance = IERC20(token0).balanceOf(address(this));
-        token1Balance = IERC20(token1).balanceOf(address(this));
-    }
-
-    function _deployLiquidity(
-        uint token0Amount,
-        uint token1Amount,
-        address hypervisor
-    ) private returns (uint shares) {
-        shares = IUniProxy(iUniProxy).deposit(
-            token0Amount,
-            token1Amount,
-            address(this),
-            hypervisor,
-            _uniProxyMinIn()
-        );
-    }
-
-    function _stakeWithRecipient(
-        address token,
-        uint amount,
-        address recipient
-    ) private {
-        ISolidStakingActions(solidStaking).stake(token, amount, recipient);
-    }
-
-    function _between(
-        uint x,
-        uint min,
-        uint max
-    ) private pure returns (bool) {
-        return x >= min && x <= max;
-    }
-
-    function _uniProxyMinIn() private pure returns (uint[4] memory) {
-        return [uint(0), uint(0), uint(0), uint(0)];
-    }
-
-    function _propagateError(bytes memory revertReason) private pure {
-        if (revertReason.length == 0) {
-            revert GenericSwapError();
-        }
-
-        assembly {
-            revert(add(32, revertReason), mload(revertReason))
-        }
+    function _prepareToSwap(address inputToken, uint inputAmount) private {
+        IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
+        _approveTokenSpendingIfNeeded(inputToken, router);
     }
 }

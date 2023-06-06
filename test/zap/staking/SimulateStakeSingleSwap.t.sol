@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 
 import "./BaseSolidZapStaker.t.sol";
 
-contract SimulateStakeSingleSwapTest is BaseSolidZapStaker {
+contract SimulateStakeSingleSwapTest is BaseSolidZapStakerTest {
     function testSimulateStakeSingleSwap_revertsIfInputTokenIsNotAHypervisorToken() public {
         vm.prank(testAccount0);
         _expectRevert_InvalidInput();

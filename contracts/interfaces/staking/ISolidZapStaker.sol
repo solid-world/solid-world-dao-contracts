@@ -19,6 +19,16 @@ interface ISolidZapStaker {
         uint denominator;
     }
 
+    struct SwapResult {
+        address _address;
+        uint balance;
+    }
+
+    struct SwapResults {
+        SwapResult token0;
+        SwapResult token1;
+    }
+
     function router() external view returns (address);
 
     function weth() external view returns (address);

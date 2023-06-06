@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 
 import "./BaseSolidZapStaker.t.sol";
 
-contract SimulateStakeDoubleSwapTest is BaseSolidZapStaker {
+contract SimulateStakeDoubleSwapTest is BaseSolidZapStakerTest {
     function testSimulateStakeDoubleSwap_transfersOverTheInputTokenAmount() public {
         vm.prank(testAccount0);
         _expectCall_ERC20_transferFrom(testAccount0, 1000);

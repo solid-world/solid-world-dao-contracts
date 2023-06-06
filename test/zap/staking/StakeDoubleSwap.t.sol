@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 
 import "./BaseSolidZapStaker.t.sol";
 
-contract StakeDoubleSwapTest is BaseSolidZapStaker {
+contract StakeDoubleSwapTest is BaseSolidZapStakerTest {
     function testSetsRouter() public {
         assertEq(zapStaker.router(), ROUTER);
     }
