@@ -78,7 +78,6 @@ interface ISolidZapStaker {
     /// 3. Partially swaps `WETH` to desired token via encoded swap2
     /// 4. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
     /// 5. Shares of the deployed liquidity are staked in `solidStaking`. `recipient` is the beneficiary of the staked shares
-    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `WETH`
     /// @param hypervisor The hypervisor used to deploy liquidity
     /// @param swap1 Encoded swap to partially swap `WETH` to desired token
     /// @param swap2 Encoded swap to partially swap `WETH` to desired token
@@ -99,7 +98,6 @@ interface ISolidZapStaker {
     /// 3. Partially swaps `WETH` to desired token via encoded swap2
     /// 4. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
     /// 5. Shares of the deployed liquidity are staked in `solidStaking`. `msg.sender` is the beneficiary of the staked shares
-    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `WETH`
     /// @param hypervisor The hypervisor used to deploy liquidity
     /// @param swap1 Encoded swap to partially swap `WETH` to desired token
     /// @param swap2 Encoded swap to partially swap `WETH` to desired token
@@ -136,6 +134,33 @@ interface ISolidZapStaker {
         bytes calldata swap2
     )
         external
+        returns (
+            bool isDustless,
+            uint shares,
+            Fraction memory ratio
+        );
+
+    /// @notice Function is meant to be called off-chain with _staticCall_.
+    /// @notice Zap function that achieves the following:
+    /// 1. Wraps `msg.value` to WETH
+    /// 2. Partially swaps `WETH` to desired token via encoded swap1
+    /// 3. Partially swaps `WETH` to desired token via encoded swap2
+    /// 4. Resulting tokens are checked against Gamma Vault to determine if they qualify for a dustless liquidity deployment
+    ///     * if dustless, the function deploys the liquidity to obtain the amounts of shares getting minted and returns
+    ///     * if not dustless, the function computes the current gamma token ratio and returns
+    /// @param hypervisor The hypervisor used to deploy liquidity
+    /// @param swap1 Encoded swap to partially swap `WETH` to desired token
+    /// @param swap2 Encoded swap to partially swap `WETH` to desired token
+    /// @return isDustless Whether the resulting tokens qualify for a dustless liquidity deployment
+    /// @return shares The amount of shares minted from the dustless liquidity deployment
+    /// @return ratio The current gamma token ratio, or empty if dustless
+    function simulateStakeETH(
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2
+    )
+        external
+        payable
         returns (
             bool isDustless,
             uint shares,

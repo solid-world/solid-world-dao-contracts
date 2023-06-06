@@ -105,13 +105,48 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         external
         nonReentrant
         returns (
+            bool,
+            uint,
+            Fraction memory
+        )
+    {
+        _prepareToSwap(inputToken, inputAmount);
+
+        return _simulateStakeDoubleSwap(hypervisor, swap1, swap2);
+    }
+
+    /// @inheritdoc ISolidZapStaker
+    function simulateStakeETH(
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2
+    )
+        external
+        payable
+        nonReentrant
+        returns (
+            bool,
+            uint,
+            Fraction memory
+        )
+    {
+        _wrap(msg.value);
+
+        return _simulateStakeDoubleSwap(hypervisor, swap1, swap2);
+    }
+
+    function _simulateStakeDoubleSwap(
+        address hypervisor,
+        bytes calldata swap1,
+        bytes calldata swap2
+    )
+        private
+        returns (
             bool isDustless,
             uint shares,
             Fraction memory ratio
         )
     {
-        _prepareToSwap(inputToken, inputAmount);
-
         HypervisorTokens memory tokens = _fetchHypervisorTokens(hypervisor);
         TokenBalances memory acquiredTokenAmounts = _executeSwapsAndReturnResult(swap1, swap2, tokens);
         (isDustless, ratio) = _checkDustless(hypervisor, tokens.token0, acquiredTokenAmounts);
