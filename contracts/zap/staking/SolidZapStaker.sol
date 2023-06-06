@@ -160,6 +160,26 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         return _simulateStakeDoubleSwap(hypervisor, swap1, swap2);
     }
 
+    /// @inheritdoc ISolidZapStaker
+    function simulateStakeSingleSwap(
+        address inputToken,
+        uint inputAmount,
+        address hypervisor,
+        bytes calldata swap
+    )
+        external
+        nonReentrant
+        returns (
+            bool isDustless,
+            uint shares,
+            Fraction memory ratio
+        )
+    {
+        SwapResults memory swapResults = _singleSwap(inputToken, inputAmount, hypervisor, swap);
+
+        return _simulateLiquidityDeployment(hypervisor, swapResults);
+    }
+
     function _simulateStakeDoubleSwap(
         address hypervisor,
         bytes calldata swap1,

@@ -209,4 +209,32 @@ interface ISolidZapStaker {
             uint shares,
             Fraction memory ratio
         );
+
+    /// @notice Function is meant to be called off-chain with _staticCall_.
+    /// @notice Zap function that achieves the following:
+    /// 1. Partially swaps `inputToken` to desired token via encoded swap
+    /// 2. Resulting tokens are checked against Gamma Vault to determine if they qualify for a dustless liquidity deployment
+    ///     * if dustless, the function deploys the liquidity to obtain the amounts of shares getting minted and returns
+    ///     * if not dustless, the function computes the current gamma token ratio and returns
+    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`
+    /// @notice `inputToken` must be one of hypervisor's token0 or token1
+    /// @param inputToken The token used to provide liquidity
+    /// @param inputAmount The amount of `inputToken` to use
+    /// @param hypervisor The hypervisor used to deploy liquidity
+    /// @param swap Encoded swap to partially swap `inputToken` to desired token
+    /// @return isDustless Whether the resulting tokens qualify for a dustless liquidity deployment
+    /// @return shares The amount of shares minted from the dustless liquidity deployment
+    /// @return ratio The current gamma token ratio, or empty if dustless
+    function simulateStakeSingleSwap(
+        address inputToken,
+        uint inputAmount,
+        address hypervisor,
+        bytes calldata swap
+    )
+        external
+        returns (
+            bool isDustless,
+            uint shares,
+            Fraction memory ratio
+        );
 }
