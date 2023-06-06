@@ -12,21 +12,23 @@ import "./RouterBehaviour.sol";
 import "./WMATIC.sol";
 
 abstract contract BaseSolidZapStaker is BaseTest {
-    address public ROUTER;
-    address public IUNIPROXY;
-    address public SOLIDSTAKING;
-    address public testAccount0;
-    address public testAccount1;
-    TestToken public inputToken;
-    TestToken public hypervisor;
-    TestToken public token0;
-    TestToken public token1;
-    WMATIC public weth;
+    uint internal constant INITIAL_TOKEN_AMOUNT = 1000000;
 
-    bytes public emptySwap1;
-    bytes public emptySwap2;
+    address internal ROUTER;
+    address internal IUNIPROXY;
+    address internal SOLIDSTAKING;
+    address internal testAccount0;
+    address internal testAccount1;
+    TestToken internal inputToken;
+    TestToken internal hypervisor;
+    TestToken internal token0;
+    TestToken internal token1;
+    WMATIC internal weth;
 
-    ISolidZapStaker public zapStaker;
+    bytes internal emptySwap1;
+    bytes internal emptySwap2;
+
+    ISolidZapStaker internal zapStaker;
 
     event ZapStake(
         address indexed recipient,
@@ -128,6 +130,10 @@ abstract contract BaseSolidZapStaker is BaseTest {
         vm.expectRevert(abi.encodeWithSelector(ISolidZapStaker.GenericSwapError.selector));
     }
 
+    function _expectRevert_InvalidInput() internal {
+        vm.expectRevert(abi.encodeWithSelector(ISolidZapStaker.InvalidInput.selector));
+    }
+
     function _expectRevert_AcquiredSharesLessThanMin(uint acquired, uint min) internal {
         vm.expectRevert(
             abi.encodeWithSelector(ISolidZapStaker.AcquiredSharesLessThanMin.selector, acquired, min)
@@ -138,11 +144,11 @@ abstract contract BaseSolidZapStaker is BaseTest {
         vm.mockCall(SOLIDSTAKING, abi.encodeWithSignature("stake(address,uint256,address)"), abi.encode());
     }
 
-    function _mockHypervisor_token0() internal {
+    function _mockHypervisor_token0(address _token0) internal {
         vm.mockCall(
             address(hypervisor),
             abi.encodeWithSelector(IHypervisor.token0.selector),
-            abi.encode(address(token0))
+            abi.encode(_token0)
         );
     }
 
@@ -183,6 +189,11 @@ abstract contract BaseSolidZapStaker is BaseTest {
         return [uint(0), uint(0), uint(0), uint(0)];
     }
 
+    function _overwriteToken0() internal {
+        token0 = inputToken;
+        _mockHypervisor_token0(address(inputToken));
+    }
+
     function _labelAccounts() private {
         vm.label(ROUTER, "Router");
         vm.label(address(weth), "WETH");
@@ -198,13 +209,13 @@ abstract contract BaseSolidZapStaker is BaseTest {
     }
 
     function _prepareZap() private {
-        inputToken.mint(testAccount0, 1000000);
-        hypervisor.mint(address(zapStaker), 1000000);
+        inputToken.mint(testAccount0, INITIAL_TOKEN_AMOUNT);
+        hypervisor.mint(address(zapStaker), INITIAL_TOKEN_AMOUNT);
 
         vm.prank(testAccount0);
-        inputToken.approve(address(zapStaker), 1000000);
+        inputToken.approve(address(zapStaker), INITIAL_TOKEN_AMOUNT);
 
-        _mockHypervisor_token0();
+        _mockHypervisor_token0(address(token0));
         _mockHypervisor_token1();
         _mockUniProxy_deposit(0);
         _mockUniProxy_getDepositAmount(10);
