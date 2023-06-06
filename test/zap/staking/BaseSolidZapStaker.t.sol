@@ -12,23 +12,23 @@ import "./RouterBehaviour.sol";
 import "./WMATIC.sol";
 
 abstract contract BaseSolidZapStaker is BaseTest {
-    uint public constant INITIAL_TOKEN_AMOUNT = 1000000;
+    uint internal constant INITIAL_TOKEN_AMOUNT = 1000000;
 
-    address public ROUTER;
-    address public IUNIPROXY;
-    address public SOLIDSTAKING;
-    address public testAccount0;
-    address public testAccount1;
-    TestToken public inputToken;
-    TestToken public hypervisor;
-    TestToken public token0;
-    TestToken public token1;
-    WMATIC public weth;
+    address internal ROUTER;
+    address internal IUNIPROXY;
+    address internal SOLIDSTAKING;
+    address internal testAccount0;
+    address internal testAccount1;
+    TestToken internal inputToken;
+    TestToken internal hypervisor;
+    TestToken internal token0;
+    TestToken internal token1;
+    WMATIC internal weth;
 
-    bytes public emptySwap1;
-    bytes public emptySwap2;
+    bytes internal emptySwap1;
+    bytes internal emptySwap2;
 
-    ISolidZapStaker public zapStaker;
+    ISolidZapStaker internal zapStaker;
 
     event ZapStake(
         address indexed recipient,
