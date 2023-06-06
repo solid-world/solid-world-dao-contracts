@@ -130,6 +130,10 @@ abstract contract BaseSolidZapStaker is BaseTest {
         vm.expectRevert(abi.encodeWithSelector(ISolidZapStaker.GenericSwapError.selector));
     }
 
+    function _expectRevert_InvalidInput() internal {
+        vm.expectRevert(abi.encodeWithSelector(ISolidZapStaker.InvalidInput.selector));
+    }
+
     function _expectRevert_AcquiredSharesLessThanMin(uint acquired, uint min) internal {
         vm.expectRevert(
             abi.encodeWithSelector(ISolidZapStaker.AcquiredSharesLessThanMin.selector, acquired, min)
@@ -140,11 +144,11 @@ abstract contract BaseSolidZapStaker is BaseTest {
         vm.mockCall(SOLIDSTAKING, abi.encodeWithSignature("stake(address,uint256,address)"), abi.encode());
     }
 
-    function _mockHypervisor_token0() internal {
+    function _mockHypervisor_token0(address _token0) internal {
         vm.mockCall(
             address(hypervisor),
             abi.encodeWithSelector(IHypervisor.token0.selector),
-            abi.encode(address(token0))
+            abi.encode(_token0)
         );
     }
 
@@ -185,6 +189,11 @@ abstract contract BaseSolidZapStaker is BaseTest {
         return [uint(0), uint(0), uint(0), uint(0)];
     }
 
+    function _overwriteToken0() internal {
+        token0 = inputToken;
+        _mockHypervisor_token0(address(inputToken));
+    }
+
     function _labelAccounts() private {
         vm.label(ROUTER, "Router");
         vm.label(address(weth), "WETH");
@@ -206,7 +215,7 @@ abstract contract BaseSolidZapStaker is BaseTest {
         vm.prank(testAccount0);
         inputToken.approve(address(zapStaker), INITIAL_TOKEN_AMOUNT);
 
-        _mockHypervisor_token0();
+        _mockHypervisor_token0(address(token0));
         _mockHypervisor_token1();
         _mockUniProxy_deposit(0);
         _mockUniProxy_getDepositAmount(10);

@@ -4,6 +4,7 @@ pragma solidity 0.8.18;
 /// @author Solid World
 interface ISolidZapStaker {
     error GenericSwapError();
+    error InvalidInput();
     error AcquiredSharesLessThanMin(uint acquired, uint min);
 
     event ZapStake(
@@ -77,6 +78,7 @@ interface ISolidZapStaker {
     /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
     /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `recipient` is the beneficiary of the staked shares
     /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`
+    /// @notice `inputToken` must be one of hypervisor's token0 or token1
     /// @param inputToken The token used to provide liquidity
     /// @param inputAmount The amount of `inputToken` to use
     /// @param hypervisor The hypervisor used to deploy liquidity
@@ -98,6 +100,7 @@ interface ISolidZapStaker {
     /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
     /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `msg.sender` is the beneficiary of the staked shares
     /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`
+    /// @notice `inputToken` must be one of hypervisor's token0 or token1
     /// @param inputToken The token used to provide liquidity
     /// @param inputAmount The amount of `inputToken` to use
     /// @param hypervisor The hypervisor used to deploy liquidity

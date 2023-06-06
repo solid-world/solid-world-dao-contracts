@@ -80,8 +80,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         uint minShares,
         address recipient
     ) external nonReentrant returns (uint) {
-        _prepareToSwap(inputToken, inputAmount);
-        return 0;
+        return _stakeSingleSwap(inputToken, inputAmount, hypervisor, swap, minShares, recipient);
     }
 
     /// @inheritdoc ISolidZapStaker
@@ -92,8 +91,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         bytes calldata swap,
         uint minShares
     ) external nonReentrant returns (uint) {
-        _prepareToSwap(inputToken, inputAmount);
-        return 0;
+        return _stakeSingleSwap(inputToken, inputAmount, hypervisor, swap, minShares, msg.sender);
     }
 
     /// @inheritdoc ISolidZapStaker
@@ -207,6 +205,19 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         return _stake(inputToken, inputAmount, hypervisor, minShares, recipient, swapResults);
     }
 
+    function _stakeSingleSwap(
+        address inputToken,
+        uint inputAmount,
+        address hypervisor,
+        bytes calldata swap,
+        uint minShares,
+        address recipient
+    ) private returns (uint) {
+        SwapResults memory swapResults = _singleSwap(inputToken, inputAmount, hypervisor, swap);
+
+        return _stake(inputToken, inputAmount, hypervisor, minShares, recipient, swapResults);
+    }
+
     function _stake(
         address inputToken,
         uint inputAmount,
@@ -231,16 +242,50 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
 
     function _doubleSwap(
         address hypervisor,
-        bytes memory swap1,
-        bytes memory swap2
+        bytes calldata swap1,
+        bytes calldata swap2
     ) private returns (SwapResults memory swapResults) {
         (address token0Address, address token1Address) = _fetchHypervisorTokens(hypervisor);
         (uint token0BalanceBefore, uint token1BalanceBefore) = _fetchTokenBalances(
             token0Address,
             token1Address
         );
+
         _swapViaRouter(swap1);
         _swapViaRouter(swap2);
+
+        (uint token0BalanceAfter, uint token1BalanceAfter) = _fetchTokenBalances(
+            token0Address,
+            token1Address
+        );
+
+        swapResults.token0._address = token0Address;
+        swapResults.token0.balance = token0BalanceAfter - token0BalanceBefore;
+
+        swapResults.token1._address = token1Address;
+        swapResults.token1.balance = token1BalanceAfter - token1BalanceBefore;
+    }
+
+    function _singleSwap(
+        address inputToken,
+        uint inputAmount,
+        address hypervisor,
+        bytes calldata swap
+    ) private returns (SwapResults memory swapResults) {
+        (address token0Address, address token1Address) = _fetchHypervisorTokens(hypervisor);
+
+        if (inputToken != token0Address && inputToken != token1Address) {
+            revert InvalidInput();
+        }
+
+        (uint token0BalanceBefore, uint token1BalanceBefore) = _fetchTokenBalances(
+            token0Address,
+            token1Address
+        );
+
+        _prepareToSwap(inputToken, inputAmount);
+        _swapViaRouter(swap);
+
         (uint token0BalanceAfter, uint token1BalanceAfter) = _fetchTokenBalances(
             token0Address,
             token1Address
@@ -282,7 +327,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         }
     }
 
-    function _swapViaRouter(bytes memory encodedSwap) private {
+    function _swapViaRouter(bytes calldata encodedSwap) private {
         (bool success, bytes memory retData) = router.call(encodedSwap);
 
         if (!success) {
