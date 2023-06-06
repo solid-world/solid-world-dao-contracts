@@ -3,6 +3,7 @@ pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "../../interfaces/staking/ISolidZapStaker.sol";
 import "../../interfaces/staking/ISolidStakingActions_0_8_18.sol";
 import "../../interfaces/staking/IWETH.sol";
@@ -53,7 +54,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         uint minShares,
         address recipient
     ) external nonReentrant returns (uint) {
-        _approveRouterIfNeeded(inputToken, inputAmount);
+        _prepareToSwap(inputToken, inputAmount);
         return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, recipient);
     }
 
@@ -66,7 +67,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         bytes calldata swap2,
         uint minShares
     ) external nonReentrant returns (uint) {
-        _approveRouterIfNeeded(inputToken, inputAmount);
+        _prepareToSwap(inputToken, inputAmount);
         return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, msg.sender);
     }
 
@@ -109,8 +110,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
             Fraction memory ratio
         )
     {
-        IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
-        _approveTokenSpendingIfNeeded(inputToken, router);
+        _prepareToSwap(inputToken, inputAmount);
 
         HypervisorTokens memory tokens = _fetchHypervisorTokens(hypervisor);
         TokenBalances memory acquiredTokenAmounts = _executeSwapsAndReturnResult(swap1, swap2, tokens);
@@ -173,7 +173,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
             balancesBeforeSwap.token1Balance;
     }
 
-    function _approveRouterIfNeeded(address inputToken, uint inputAmount) private {
+    function _prepareToSwap(address inputToken, uint inputAmount) private {
         IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
         _approveTokenSpendingIfNeeded(inputToken, router);
     }
@@ -198,7 +198,7 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         isDustless = _between(balances.token1Balance, amountStart, amountEnd);
 
         if (!isDustless) {
-            actualRatio = Fraction(balances.token0Balance, _avg(amountStart, amountEnd));
+            actualRatio = Fraction(balances.token0Balance, Math.average(amountStart, amountEnd));
         }
     }
 
@@ -260,10 +260,6 @@ contract SolidZapStaker is ISolidZapStaker, ReentrancyGuard {
         uint max
     ) private pure returns (bool) {
         return x >= min && x <= max;
-    }
-
-    function _avg(uint x, uint y) private pure returns (uint) {
-        return (x + y) / 2;
     }
 
     function _uniProxyMinIn() private pure returns (uint[4] memory) {
