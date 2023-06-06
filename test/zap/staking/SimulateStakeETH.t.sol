@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 
 import "./BaseSolidZapStaker.t.sol";
 
-contract SimulateStakeETHTest is BaseSolidZapStaker {
+contract SimulateStakeETHTest is BaseSolidZapStakerTest {
     function testSimulateStakeETH_wrapsTheValueReceived() public {
         uint wethBalanceBefore = weth.balanceOf(address(zapStaker));
 

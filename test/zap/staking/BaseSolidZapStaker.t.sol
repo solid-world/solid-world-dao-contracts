@@ -11,7 +11,7 @@ import "./MockRouter.sol";
 import "./RouterBehaviour.sol";
 import "./WMATIC.sol";
 
-abstract contract BaseSolidZapStaker is BaseTest {
+abstract contract BaseSolidZapStakerTest is BaseTest {
     uint internal constant INITIAL_TOKEN_AMOUNT = 1000000;
 
     address internal ROUTER;
