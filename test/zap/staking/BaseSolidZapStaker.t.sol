@@ -12,6 +12,8 @@ import "./RouterBehaviour.sol";
 import "./WMATIC.sol";
 
 abstract contract BaseSolidZapStaker is BaseTest {
+    uint public constant INITIAL_TOKEN_AMOUNT = 1000000;
+
     address public ROUTER;
     address public IUNIPROXY;
     address public SOLIDSTAKING;
@@ -198,11 +200,11 @@ abstract contract BaseSolidZapStaker is BaseTest {
     }
 
     function _prepareZap() private {
-        inputToken.mint(testAccount0, 1000000);
-        hypervisor.mint(address(zapStaker), 1000000);
+        inputToken.mint(testAccount0, INITIAL_TOKEN_AMOUNT);
+        hypervisor.mint(address(zapStaker), INITIAL_TOKEN_AMOUNT);
 
         vm.prank(testAccount0);
-        inputToken.approve(address(zapStaker), 1000000);
+        inputToken.approve(address(zapStaker), INITIAL_TOKEN_AMOUNT);
 
         _mockHypervisor_token0();
         _mockHypervisor_token1();
