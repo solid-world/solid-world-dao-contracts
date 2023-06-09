@@ -103,6 +103,104 @@ contract SimulateStakeSingleSwapTest is BaseSolidZapStakerTest {
         assertEq(actualRatio.denominator, 0);
     }
 
+    function testSimulateStakeSingleSwap_ifDustless_approvesHypervisorToSpendToken0() public {
+        _overwriteToken0();
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+        uint sharesMinted = 100;
+
+        vm.prank(testAccount0);
+        _mockUniProxy_deposit(sharesMinted);
+        _mockUniProxy_getDepositAmount(token1AcquiredFromSwap);
+        _expectCall_ERC20_approve_maxUint(address(token0), address(hypervisor));
+        (bool actualIsDustless, , ) = zapStaker.simulateStakeSingleSwap(
+            address(inputToken),
+            1000,
+            address(hypervisor),
+            swap
+        );
+
+        assertEq(actualIsDustless, true);
+        uint actual = token0.allowance(address(zapStaker), address(hypervisor));
+        assertEq(actual, type(uint).max);
+    }
+
+    function testSimulateStakeSingleSwap_ifDustless_doesNotApproveHypervisorToSpendToken0IfAlreadyApproved()
+        public
+    {
+        _overwriteToken0();
+        vm.prank(address(zapStaker));
+        token0.approve(address(hypervisor), type(uint).max);
+
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+        uint sharesMinted = 100;
+
+        vm.prank(testAccount0);
+        _mockUniProxy_deposit(sharesMinted);
+        _mockUniProxy_getDepositAmount(token1AcquiredFromSwap);
+        _doNotExpectCall_ERC20_approve_maxUint(address(token0), address(hypervisor));
+        (bool actualIsDustless, , ) = zapStaker.simulateStakeSingleSwap(
+            address(inputToken),
+            1000,
+            address(hypervisor),
+            swap
+        );
+
+        assertEq(actualIsDustless, true);
+        uint actual = token0.allowance(address(zapStaker), address(hypervisor));
+        assertEq(actual, type(uint).max);
+    }
+
+    function testSimulateStakeSingleSwap_ifDustless_approvesHypervisorToSpendToken1() public {
+        _overwriteToken0();
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+        uint sharesMinted = 100;
+
+        vm.prank(testAccount0);
+        _mockUniProxy_deposit(sharesMinted);
+        _mockUniProxy_getDepositAmount(token1AcquiredFromSwap);
+        _expectCall_ERC20_approve_maxUint(address(token1), address(hypervisor));
+        (bool actualIsDustless, , ) = zapStaker.simulateStakeSingleSwap(
+            address(inputToken),
+            1000,
+            address(hypervisor),
+            swap
+        );
+
+        assertEq(actualIsDustless, true);
+        uint actual = token1.allowance(address(zapStaker), address(hypervisor));
+        assertEq(actual, type(uint).max);
+    }
+
+    function testSimulateStakeSingleSwap_ifDustless_doesNotApproveHypervisorToSpendToken1IfAlreadyApproved()
+        public
+    {
+        _overwriteToken0();
+        vm.prank(address(zapStaker));
+        token1.approve(address(hypervisor), type(uint).max);
+
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+        uint sharesMinted = 100;
+
+        vm.prank(testAccount0);
+        _mockUniProxy_deposit(sharesMinted);
+        _mockUniProxy_getDepositAmount(token1AcquiredFromSwap);
+        _doNotExpectCall_ERC20_approve_maxUint(address(token1), address(hypervisor));
+        (bool actualIsDustless, , ) = zapStaker.simulateStakeSingleSwap(
+            address(inputToken),
+            1000,
+            address(hypervisor),
+            swap
+        );
+
+        assertEq(actualIsDustless, true);
+        uint actual = token1.allowance(address(zapStaker), address(hypervisor));
+        assertEq(actual, type(uint).max);
+    }
+
     function testSimulateStakeSingleSwap_ifNotDustless_doesNotDeployLiquidityAndReturnsCurrentRatio() public {
         _overwriteToken0();
         uint inputAmount = 1000;

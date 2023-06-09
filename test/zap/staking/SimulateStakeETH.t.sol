@@ -96,6 +96,100 @@ contract SimulateStakeETHTest is BaseSolidZapStakerTest {
         assertEq(actualRatio.denominator, 0);
     }
 
+    function testSimulateStakeETH_ifDustless_approvesHypervisorToSpendToken0() public {
+        uint sharesMinted = 100;
+        uint token0AcquiredFromSwap = 500;
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, token0AcquiredFromSwap);
+        bytes memory swap2 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+
+        hoax(testAccount0, 1 ether);
+        _mockUniProxy_deposit(sharesMinted);
+        _mockUniProxy_getDepositAmount(token1AcquiredFromSwap);
+        _expectCall_ERC20_approve_maxUint(address(token0), address(hypervisor));
+        (bool actualIsDustless, , ) = zapStaker.simulateStakeETH{ value: 1000 }(
+            address(hypervisor),
+            swap1,
+            swap2
+        );
+
+        assertEq(actualIsDustless, true);
+        uint actual = token0.allowance(address(zapStaker), address(hypervisor));
+        assertEq(actual, type(uint).max);
+    }
+
+    function testSimulateStakeETH_ifDustless_doesNotApproveHypervisorToSpendToken0IfAlreadyApproved() public {
+        vm.prank(address(zapStaker));
+        token0.approve(address(hypervisor), type(uint).max);
+
+        uint sharesMinted = 100;
+        uint token0AcquiredFromSwap = 500;
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, token0AcquiredFromSwap);
+        bytes memory swap2 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+
+        hoax(testAccount0, 1 ether);
+        _mockUniProxy_deposit(sharesMinted);
+        _mockUniProxy_getDepositAmount(token1AcquiredFromSwap);
+        _doNotExpectCall_ERC20_approve_maxUint(address(token0), address(hypervisor));
+        (bool actualIsDustless, , ) = zapStaker.simulateStakeETH{ value: 1000 }(
+            address(hypervisor),
+            swap1,
+            swap2
+        );
+
+        assertEq(actualIsDustless, true);
+        uint actual = token0.allowance(address(zapStaker), address(hypervisor));
+        assertEq(actual, type(uint).max);
+    }
+
+    function testSimulateStakeETH_ifDustless_approvesHypervisorToSpendToken1() public {
+        uint sharesMinted = 100;
+        uint token0AcquiredFromSwap = 500;
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, token0AcquiredFromSwap);
+        bytes memory swap2 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+
+        hoax(testAccount0, 1 ether);
+        _mockUniProxy_deposit(sharesMinted);
+        _mockUniProxy_getDepositAmount(token1AcquiredFromSwap);
+        _expectCall_ERC20_approve_maxUint(address(token1), address(hypervisor));
+        (bool actualIsDustless, , ) = zapStaker.simulateStakeETH{ value: 1000 }(
+            address(hypervisor),
+            swap1,
+            swap2
+        );
+
+        assertEq(actualIsDustless, true);
+        uint actual = token1.allowance(address(zapStaker), address(hypervisor));
+        assertEq(actual, type(uint).max);
+    }
+
+    function testSimulateStakeETH_ifDustless_doesNotApproveHypervisorToSpendToken1IfAlreadyApproved() public {
+        vm.prank(address(zapStaker));
+        token1.approve(address(hypervisor), type(uint).max);
+
+        uint sharesMinted = 100;
+        uint token0AcquiredFromSwap = 500;
+        uint token1AcquiredFromSwap = 600;
+        bytes memory swap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, token0AcquiredFromSwap);
+        bytes memory swap2 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, token1AcquiredFromSwap);
+
+        hoax(testAccount0, 1 ether);
+        _mockUniProxy_deposit(sharesMinted);
+        _mockUniProxy_getDepositAmount(token1AcquiredFromSwap);
+        _doNotExpectCall_ERC20_approve_maxUint(address(token1), address(hypervisor));
+        (bool actualIsDustless, , ) = zapStaker.simulateStakeETH{ value: 1000 }(
+            address(hypervisor),
+            swap1,
+            swap2
+        );
+
+        assertEq(actualIsDustless, true);
+        uint actual = token1.allowance(address(zapStaker), address(hypervisor));
+        assertEq(actual, type(uint).max);
+    }
+
     function testSimulateStakeETH_ifNotDustless_doesNotDeployLiquidityAndReturnsCurrentRatio() public {
         uint token0AcquiredFromSwap = 500;
         uint token1AcquiredFromSwap = 600;

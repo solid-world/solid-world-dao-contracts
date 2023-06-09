@@ -177,7 +177,7 @@ contract SolidZapStaker is BaseSolidZapStaker, ReentrancyGuard {
         (isDustless, ratio) = _checkDustless(hypervisor, swapResults);
 
         if (isDustless) {
-            shares = _deployLiquidity(swapResults.token0.balance, swapResults.token1.balance, hypervisor);
+            shares = _deployLiquidity(swapResults, hypervisor);
         }
     }
 
@@ -216,9 +216,7 @@ contract SolidZapStaker is BaseSolidZapStaker, ReentrancyGuard {
         address recipient,
         SwapResults memory swapResults
     ) private returns (uint shares) {
-        _approveTokenSpendingIfNeeded(swapResults.token0._address, hypervisor);
-        _approveTokenSpendingIfNeeded(swapResults.token1._address, hypervisor);
-        shares = _deployLiquidity(swapResults.token0.balance, swapResults.token1.balance, hypervisor);
+        shares = _deployLiquidity(swapResults, hypervisor);
 
         if (shares < minShares) {
             revert AcquiredSharesLessThanMin(shares, minShares);
