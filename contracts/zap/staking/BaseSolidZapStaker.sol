@@ -68,14 +68,15 @@ abstract contract BaseSolidZapStaker is ISolidZapStaker {
         }
     }
 
-    function _deployLiquidity(
-        uint token0Amount,
-        uint token1Amount,
-        address hypervisor
-    ) internal returns (uint shares) {
+    function _deployLiquidity(SwapResults memory swapResults, address hypervisor)
+        internal
+        returns (uint shares)
+    {
+        _approveTokenSpendingIfNeeded(swapResults.token0._address, hypervisor);
+        _approveTokenSpendingIfNeeded(swapResults.token1._address, hypervisor);
         shares = IUniProxy(iUniProxy).deposit(
-            token0Amount,
-            token1Amount,
+            swapResults.token0.balance,
+            swapResults.token1.balance,
             address(this),
             hypervisor,
             _uniProxyMinIn()

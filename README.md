@@ -71,6 +71,7 @@ The following tasks are available in Hardhat:
 
    Options:
    - `--router`: The address of the router used to perform token swaps.
+   - `--weth`: The address of WETH contract of the network.
    - `--uni-proxy`: The address of the Gamma UniProxy contract used for deploying liquidity.
    - `--solid-staking`: The address of our SolidStaking contract, to stake with recipient.
 
