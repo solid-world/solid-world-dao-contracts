@@ -26,7 +26,7 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.4",
-    "@openzeppelin/contracts": "4.8.3",
+    "@openzeppelin/contracts": "4.9.2",
     "@openzeppelin/contracts-upgradeable": "4.8.3",
     "@solid-world/gas-station": "0.3.0",
     "@typechain/ethers-v5": "10.2.0",
