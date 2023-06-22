@@ -816,10 +816,10 @@
     "@sentry/types" "5.30.0"
     tslib "^1.9.3"
 
-"@solid-world/gas-station@0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@solid-world/gas-station/-/gas-station-0.3.0.tgz#a1d0861ef64ece3a11e6b9ce9cacf38512ad9eb0"
-  integrity sha512-xrfRoglWo5qoEV6KrDJ35z3ZtX+GLLktAlQmjFHSLmtrutOBSgxN4lhLu5Ia4crPLsMNM3hQOb9FzqpRKeapRQ==
+"@solid-world/gas-station@0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@solid-world/gas-station/-/gas-station-0.4.0.tgz#af5ec40c4fe525ac20605ad34a04b308d3f630b4"
+  integrity sha512-V4brHFpy9OE96en3qnmiFELGX/JPMmZfJ4hHI7K65sjUhfPlLyGAovE8+An8ij5fl09o+hQB0qUk6JnXS4XqPQ==
   dependencies:
     "@ethersproject/providers" "5.7.1"
     ethers "5.7.1"
