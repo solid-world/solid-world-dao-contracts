@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import "../../liquidity-deployer/TestToken.sol";
+import "../liquidity-deployer/TestToken.sol";
 import "./RouterBehaviour.sol";
 
 contract MockRouter {

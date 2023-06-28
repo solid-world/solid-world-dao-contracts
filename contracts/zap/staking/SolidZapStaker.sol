@@ -4,7 +4,7 @@ pragma solidity 0.8.18;
 import "./BaseSolidZapStaker.sol";
 
 /// @author Solid World
-contract SolidZapStaker is BaseSolidZapStaker, ReentrancyGuard {
+contract SolidZapStaker is BaseSolidZapStaker {
     using GPv2SafeERC20 for IERC20;
 
     constructor(
@@ -72,7 +72,7 @@ contract SolidZapStaker is BaseSolidZapStaker, ReentrancyGuard {
         uint minShares,
         address recipient
     ) external payable nonReentrant returns (uint) {
-        _wrap(msg.value);
+        _wrap(weth, msg.value);
 
         return _stakeDoubleSwap(weth, msg.value, hypervisor, swap1, swap2, minShares, recipient);
     }
@@ -84,7 +84,7 @@ contract SolidZapStaker is BaseSolidZapStaker, ReentrancyGuard {
         bytes calldata swap2,
         uint minShares
     ) external payable nonReentrant returns (uint) {
-        _wrap(msg.value);
+        _wrap(weth, msg.value);
 
         return _stakeDoubleSwap(weth, msg.value, hypervisor, swap1, swap2, minShares, msg.sender);
     }
@@ -125,7 +125,7 @@ contract SolidZapStaker is BaseSolidZapStaker, ReentrancyGuard {
             Fraction memory
         )
     {
-        _wrap(msg.value);
+        _wrap(weth, msg.value);
 
         return _simulateStakeDoubleSwap(hypervisor, swap1, swap2);
     }
@@ -239,8 +239,8 @@ contract SolidZapStaker is BaseSolidZapStaker, ReentrancyGuard {
             token1Address
         );
 
-        _swapViaRouter(swap1);
-        _swapViaRouter(swap2);
+        _swapViaRouter(router, swap1);
+        _swapViaRouter(router, swap2);
 
         (uint token0BalanceAfter, uint token1BalanceAfter) = _fetchTokenBalances(
             token0Address,
@@ -272,7 +272,7 @@ contract SolidZapStaker is BaseSolidZapStaker, ReentrancyGuard {
         );
 
         _prepareToSwap(inputToken, inputAmount);
-        _swapViaRouter(swap);
+        _swapViaRouter(router, swap);
 
         (uint token0BalanceAfter, uint token1BalanceAfter) = _fetchTokenBalances(
             token0Address,

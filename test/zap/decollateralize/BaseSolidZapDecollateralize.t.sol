@@ -2,8 +2,8 @@
 pragma solidity 0.8.18;
 
 import "./TestERC1155.sol";
-import "../staking/MockRouter.sol";
-import "../staking/WMATIC.sol";
+import "../MockRouter.sol";
+import "../WMATIC.sol";
 import "../../BaseTest_0_8_18.sol";
 import "../../liquidity-deployer/TestToken.sol";
 import "../../../contracts/interfaces/zap/ISolidZapDecollateralize.sol";
