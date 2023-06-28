@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-import "./BaseSolidZapCollateralize.t.sol";
+import "./BaseSolidZapDecollateralize.t.sol";
 
-contract SolidZapCollateralizeTest is BaseSolidZapCollateralizeTest {
+contract SolidZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
     function testSetsRouter() public {
         assertEq(zap.router(), ROUTER);
     }

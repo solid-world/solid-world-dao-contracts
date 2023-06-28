@@ -2,7 +2,7 @@
 pragma solidity 0.8.18;
 
 /// @author Solid World
-interface ISolidZapCollateralize {
+interface ISolidZapDecollateralize {
     function router() external view returns (address);
 
     function weth() external view returns (address);

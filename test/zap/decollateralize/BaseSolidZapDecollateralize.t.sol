@@ -6,10 +6,10 @@ import "../staking/MockRouter.sol";
 import "../staking/WMATIC.sol";
 import "../../BaseTest_0_8_18.sol";
 import "../../liquidity-deployer/TestToken.sol";
-import "../../../contracts/interfaces/zap/ISolidZapCollateralize.sol";
-import "../../../contracts/zap/collateralize/SolidZapCollateralize.sol";
+import "../../../contracts/interfaces/zap/ISolidZapDecollateralize.sol";
+import "../../../contracts/zap/decollateralize/SolidZapDecollateralize.sol";
 
-abstract contract BaseSolidZapCollateralizeTest is BaseTest {
+abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
     uint internal constant INITIAL_TOKEN_AMOUNT = 1000000;
 
     address internal ROUTER;
@@ -23,7 +23,7 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
     address internal testAccount1;
     bytes internal emptySwap;
 
-    ISolidZapCollateralize internal zap;
+    ISolidZapDecollateralize internal zap;
 
     function setUp() public {
         emptySwap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 0);
@@ -36,7 +36,7 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
         ROUTER = address(new MockRouter(address(crispToken), address(crispToken)));
         fcbt = new TestERC1155("");
 
-        zap = new SolidZapCollateralize(ROUTER, address(weth), address(SWM), address(fcbt));
+        zap = new SolidZapDecollateralize(ROUTER, address(weth), address(SWM), address(fcbt));
 
         _labelAccounts();
         _prepareZap();

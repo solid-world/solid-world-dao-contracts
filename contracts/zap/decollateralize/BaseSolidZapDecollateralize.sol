@@ -3,11 +3,11 @@ pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import "../../interfaces/zap/ISolidZapCollateralize.sol";
+import "../../interfaces/zap/ISolidZapDecollateralize.sol";
 import "../../interfaces/staking/IWETH.sol";
 
 /// @author Solid World
-abstract contract BaseSolidZapCollateralize is ISolidZapCollateralize, IERC1155Receiver, ReentrancyGuard {
+abstract contract BaseSolidZapDecollateralize is ISolidZapDecollateralize, IERC1155Receiver, ReentrancyGuard {
     address public immutable router;
     address public immutable weth;
     address public immutable swManager;
