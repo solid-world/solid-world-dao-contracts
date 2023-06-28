@@ -3,8 +3,10 @@ pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "../../interfaces/zap/ISolidZapDecollateralize.sol";
 import "../../interfaces/staking/IWETH.sol";
+import "../../libraries/GPv2SafeERC20_0_8_18.sol";
 import "../BaseZap.sol";
 
 /// @author Solid World

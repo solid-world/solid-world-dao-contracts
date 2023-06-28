@@ -8,6 +8,7 @@ import "../../BaseTest_0_8_18.sol";
 import "../../liquidity-deployer/TestToken.sol";
 import "../../../contracts/interfaces/zap/ISolidZapDecollateralize.sol";
 import "../../../contracts/zap/decollateralize/SolidZapDecollateralize.sol";
+import "./MockSWM.sol";
 
 abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
     uint internal constant INITIAL_TOKEN_AMOUNT = 1000000;
@@ -24,9 +25,17 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
     bytes internal emptySwap;
 
     ISolidZapDecollateralize internal zap;
+    ISolidZapDecollateralize.DecollateralizeParams internal emptyParams;
+
+    event ZapDecollateralize();
 
     function setUp() public {
         emptySwap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 0);
+        emptyParams = ISolidZapDecollateralize.DecollateralizeParams({
+            batchIds: _toArray(0),
+            amountsIn: _toArray(0),
+            amountsOutMin: _toArray(0)
+        });
 
         testAccount0 = vm.addr(3);
         testAccount1 = vm.addr(4);
@@ -35,11 +44,71 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
         weth = new WMATIC();
         ROUTER = address(new MockRouter(address(crispToken), address(crispToken)));
         fcbt = new TestERC1155("");
-
-        zap = new SolidZapDecollateralize(ROUTER, address(weth), address(SWM), address(fcbt));
+        SWM = address(new MockSWM(fcbt, crispToken));
+        zap = new SolidZapDecollateralize(ROUTER, address(weth), SWM, address(fcbt));
 
         _labelAccounts();
         _prepareZap();
+    }
+
+    function _expectCall_ERC20_transferFrom(address from, uint amount) internal {
+        vm.expectCall(address(inputToken), abi.encodeCall(IERC20.transferFrom, (from, address(zap), amount)));
+    }
+
+    function _expectCall_ERC20_approve_maxUint(address token, address spender) internal {
+        vm.expectCall(token, abi.encodeCall(IERC20.approve, (spender, type(uint256).max)));
+    }
+
+    function _doNotExpectCall_ERC20_approve_maxUint(address token, address spender) internal {
+        vm.expectCall(token, abi.encodeCall(IERC20.approve, (spender, type(uint256).max)), 0);
+    }
+
+    function _expectCall_bulkDecollateralizeTokens(
+        uint[] memory batchIds,
+        uint[] memory amountsIn,
+        uint[] memory amountsOutMin
+    ) internal {
+        vm.expectCall(
+            SWM,
+            abi.encodeWithSelector(
+                MockSWM.bulkDecollateralizeTokens.selector,
+                batchIds,
+                amountsIn,
+                amountsOutMin
+            )
+        );
+    }
+
+    function _expectCall_onERC1155Received(
+        address operator,
+        address from,
+        uint id,
+        uint value,
+        bytes memory data
+    ) internal {
+        vm.expectCall(
+            address(zap),
+            abi.encodeWithSelector(
+                IERC1155Receiver.onERC1155Received.selector,
+                operator,
+                from,
+                id,
+                value,
+                data
+            )
+        );
+    }
+
+    function _expectCall_swap(RouterBehaviour behaviour, uint acquiredAmount) internal {
+        vm.expectCall(ROUTER, _encodeSwap(behaviour, acquiredAmount));
+    }
+
+    function _expectRevert_GenericSwapError() internal {
+        vm.expectRevert(abi.encodeWithSelector(BaseZap.GenericSwapError.selector));
+    }
+
+    function _expectRevert_InvalidInput() internal {
+        vm.expectRevert(abi.encodeWithSelector(BaseZap.InvalidInput.selector));
     }
 
     function _encodeSwap(RouterBehaviour behaviour, uint acquiredAmount)
@@ -48,6 +117,11 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
         returns (bytes memory)
     {
         return abi.encodeWithSignature("swap(uint256,uint256)", uint(behaviour), acquiredAmount);
+    }
+
+    function _expectEmit_ZapDecollateralize() internal {
+        vm.expectEmit(true, true, true, true, address(zap));
+        emit ZapDecollateralize();
     }
 
     function _labelAccounts() private {
@@ -59,7 +133,7 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
         vm.label(address(crispToken), "CrispToken");
         vm.label(address(zap), "Zap");
         vm.label(address(fcbt), "FCBT");
-        vm.label(address(SWM), "SWM");
+        vm.label(SWM, "SWM");
     }
 
     function _prepareZap() private {
