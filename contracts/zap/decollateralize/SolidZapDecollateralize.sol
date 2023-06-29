@@ -9,6 +9,8 @@ interface SWManager {
         uint[] calldata amountsIn,
         uint[] calldata amountsOutMin
     ) external;
+
+    function getBatchCategory(uint batchId) external view returns (uint);
 }
 
 /// @author Solid World
@@ -88,8 +90,10 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             decollateralizeParams.amountsOutMin,
             ""
         );
-        _transferDust(crispToken, dustReceiver);
-        emit ZapDecollateralize();
+        uint dustAmount = _transferDust(crispToken, dustReceiver);
+        uint categoryId = SWManager(swManager).getBatchCategory(decollateralizeParams.batchIds[0]);
+
+        emit ZapDecollateralize(recipient, inputToken, inputAmount, dustAmount, dustReceiver, categoryId);
     }
 
     function _prepareToSwap(address inputToken, uint inputAmount) private {
@@ -97,8 +101,8 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
         _approveTokenSpendingIfNeeded(inputToken, router);
     }
 
-    function _transferDust(address token, address dustReceiver) private {
-        uint dustAmount = IERC20(token).balanceOf(address(this));
+    function _transferDust(address token, address dustReceiver) private returns (uint dustAmount) {
+        dustAmount = IERC20(token).balanceOf(address(this));
         if (dustAmount > 0) {
             IERC20(token).safeTransfer(dustReceiver, dustAmount);
         }

@@ -23,4 +23,8 @@ contract MockSWM {
             fcbt.mint(msg.sender, batchIds[i], amountsOutMin[i], "");
         }
     }
+
+    function getBatchCategory(uint) external pure returns (uint) {
+        return 1;
+    }
 }

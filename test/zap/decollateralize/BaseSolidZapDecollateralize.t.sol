@@ -27,7 +27,14 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
     ISolidZapDecollateralize internal zap;
     ISolidZapDecollateralize.DecollateralizeParams internal emptyParams;
 
-    event ZapDecollateralize();
+    event ZapDecollateralize(
+        address indexed receiver,
+        address indexed inputToken,
+        uint indexed inputAmount,
+        uint dust,
+        address dustReceiver,
+        uint categoryId
+    );
 
     function setUp() public {
         emptySwap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 0);
@@ -119,9 +126,16 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
         return abi.encodeWithSignature("swap(uint256,uint256)", uint(behaviour), acquiredAmount);
     }
 
-    function _expectEmit_ZapDecollateralize() internal {
+    function _expectEmit_ZapDecollateralize(
+        address receiver,
+        address _inputToken,
+        uint inputAmount,
+        uint dust,
+        address dustReceiver,
+        uint categoryId
+    ) internal {
         vm.expectEmit(true, true, true, true, address(zap));
-        emit ZapDecollateralize();
+        emit ZapDecollateralize(receiver, _inputToken, inputAmount, dust, dustReceiver, categoryId);
     }
 
     function _labelAccounts() private {

@@ -3,7 +3,14 @@ pragma solidity 0.8.18;
 
 /// @author Solid World
 interface ISolidZapDecollateralize {
-    event ZapDecollateralize();
+    event ZapDecollateralize(
+        address indexed receiver,
+        address indexed inputToken,
+        uint indexed inputAmount,
+        uint dust,
+        address dustReceiver,
+        uint categoryId
+    );
 
     struct DecollateralizeParams {
         uint[] batchIds;
