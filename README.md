@@ -75,6 +75,17 @@ The following tasks are available in Hardhat:
    - `--uni-proxy`: The address of the Gamma UniProxy contract used for deploying liquidity.
    - `--solid-staking`: The address of our SolidStaking contract, to stake with recipient.
 
+5. Deploy a new SolidZapDecollateralize contract:
+   ```shell
+   yarn hardhat --network localhost deploy-zap-decollateralize [OPTIONS]
+   ```
+
+   Options:
+   - `--router`: The address of the router used to perform token swaps.
+   - `--weth`: The address of WETH contract of the network.
+   - `--sw-manager`: The address of the SolidWorldManager contract used for decollateralizing tokens.
+   - `--forward-contract-batch`: The address of our ForwardContractBatchToken contract, to transfer ERC1155 to receiver.
+
 ## Upgradable Contracts
 
 The following contracts are upgradable and managed by a `DefaultProxyAdmin` contract. The owner of the `DefaultProxyAdmin` contract is authorized to upgrade both contracts.
