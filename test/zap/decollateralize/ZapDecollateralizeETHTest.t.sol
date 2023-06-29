@@ -104,10 +104,28 @@ contract ZapDecollateralizeETHTest is BaseSolidZapDecollateralizeTest {
         bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, params.amountsIn[0] + dust);
 
         hoax(testAccount0, 1 ether);
-        _expectEmit_ZapDecollateralize();
+        _expectEmit_ZapDecollateralize(testAccount0, address(weth), 1000, 1, testAccount1, 1);
         zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), swap, testAccount1, params);
+    }
 
-        uint actual = crispToken.balanceOf(testAccount1);
-        assertEq(actual, dust);
+    function testZapDecollateralizeETH_emitsEvent_customReceiver() public {
+        ISolidZapDecollateralize.DecollateralizeParams memory params = ISolidZapDecollateralize
+            .DecollateralizeParams({
+                batchIds: _toArray(1),
+                amountsIn: _toArray(123),
+                amountsOutMin: _toArray(150)
+            });
+        uint dust = 1;
+        bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, params.amountsIn[0] + dust);
+
+        hoax(testAccount0, 1 ether);
+        _expectEmit_ZapDecollateralize(testAccount1, address(weth), 1000, 1, testAccount1, 1);
+        zap.zapDecollateralizeETH{ value: 1000 }(
+            address(crispToken),
+            swap,
+            testAccount1,
+            params,
+            testAccount1
+        );
     }
 }
