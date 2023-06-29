@@ -67,6 +67,45 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
         );
     }
 
+    /// @inheritdoc ISolidZapDecollateralize
+    function zapDecollateralizeETH(
+        address crispToken,
+        bytes calldata swap,
+        address dustReceiver,
+        DecollateralizeParams calldata decollateralizeParams
+    ) external payable nonReentrant {
+        _wrap(weth, msg.value);
+        _zapDecollateralize(
+            weth,
+            msg.value,
+            crispToken,
+            swap,
+            dustReceiver,
+            decollateralizeParams,
+            msg.sender
+        );
+    }
+
+    /// @inheritdoc ISolidZapDecollateralize
+    function zapDecollateralizeETH(
+        address crispToken,
+        bytes calldata swap,
+        address dustReceiver,
+        DecollateralizeParams calldata decollateralizeParams,
+        address recipient
+    ) external payable nonReentrant {
+        _wrap(weth, msg.value);
+        _zapDecollateralize(
+            weth,
+            msg.value,
+            crispToken,
+            swap,
+            dustReceiver,
+            decollateralizeParams,
+            recipient
+        );
+    }
+
     function _zapDecollateralize(
         address inputToken,
         uint inputAmount,

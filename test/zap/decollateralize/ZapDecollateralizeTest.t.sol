@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 
 import "./BaseSolidZapDecollateralize.t.sol";
 
-contract ZapDecollateralize is BaseSolidZapDecollateralizeTest {
+contract ZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
     function testZapDecollateralize_transfersOverTheInputTokenAmount() public {
         vm.prank(testAccount0);
         _expectCall_ERC20_transferFrom(testAccount0, 1000);
