@@ -24,7 +24,7 @@ contract SolidZapStaker is BaseSolidZapStaker {
         uint minShares,
         address recipient
     ) external nonReentrant returns (uint) {
-        _prepareToSwap(inputToken, inputAmount);
+        _prepareToSwap(inputToken, inputAmount, router);
         return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, recipient);
     }
 
@@ -37,7 +37,7 @@ contract SolidZapStaker is BaseSolidZapStaker {
         bytes calldata swap2,
         uint minShares
     ) external nonReentrant returns (uint) {
-        _prepareToSwap(inputToken, inputAmount);
+        _prepareToSwap(inputToken, inputAmount, router);
         return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, msg.sender);
     }
 
@@ -105,7 +105,7 @@ contract SolidZapStaker is BaseSolidZapStaker {
             Fraction memory
         )
     {
-        _prepareToSwap(inputToken, inputAmount);
+        _prepareToSwap(inputToken, inputAmount, router);
 
         return _simulateStakeDoubleSwap(hypervisor, swap1, swap2);
     }
@@ -271,7 +271,7 @@ contract SolidZapStaker is BaseSolidZapStaker {
             token1Address
         );
 
-        _prepareToSwap(inputToken, inputAmount);
+        _prepareToSwap(inputToken, inputAmount, router);
         _swapViaRouter(router, swap);
 
         (uint token0BalanceAfter, uint token1BalanceAfter) = _fetchTokenBalances(
@@ -302,10 +302,5 @@ contract SolidZapStaker is BaseSolidZapStaker {
         if (!isDustless) {
             actualRatio = Fraction(swapResults.token0.balance, Math.average(amountStart, amountEnd));
         }
-    }
-
-    function _prepareToSwap(address inputToken, uint inputAmount) private {
-        IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
-        _approveTokenSpendingIfNeeded(inputToken, router);
     }
 }

@@ -33,7 +33,7 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
         address dustReceiver,
         DecollateralizeParams calldata decollateralizeParams
     ) external nonReentrant {
-        _prepareToSwap(inputToken, inputAmount);
+        _prepareToSwap(inputToken, inputAmount, router);
         _zapDecollateralize(
             inputToken,
             inputAmount,
@@ -55,7 +55,7 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
         DecollateralizeParams calldata decollateralizeParams,
         address recipient
     ) external nonReentrant {
-        _prepareToSwap(inputToken, inputAmount);
+        _prepareToSwap(inputToken, inputAmount, router);
         _zapDecollateralize(
             inputToken,
             inputAmount,
@@ -133,17 +133,5 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
         uint categoryId = SWManager(swManager).getBatchCategory(decollateralizeParams.batchIds[0]);
 
         emit ZapDecollateralize(recipient, inputToken, inputAmount, dustAmount, dustReceiver, categoryId);
-    }
-
-    function _prepareToSwap(address inputToken, uint inputAmount) private {
-        IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
-        _approveTokenSpendingIfNeeded(inputToken, router);
-    }
-
-    function _transferDust(address token, address dustReceiver) private returns (uint dustAmount) {
-        dustAmount = IERC20(token).balanceOf(address(this));
-        if (dustAmount > 0) {
-            IERC20(token).safeTransfer(dustReceiver, dustAmount);
-        }
     }
 }

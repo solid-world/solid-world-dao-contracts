@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import "./BaseSolidZapStaker.t.sol";
+import "./BaseSolidZapStaker.sol";
 
 contract StakeSingleSwapTest is BaseSolidZapStakerTest {
     function testStakeSingleSwap_revertsIfInputTokenIsNotAHypervisorToken() public {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import "./BaseSolidZapDecollateralize.t.sol";
+import "./BaseSolidZapDecollateralize.sol";
 
 contract ZapDecollateralizeETHTest is BaseSolidZapDecollateralizeTest {
     function testZapDecollateralizeETH_wrapsTheValueReceived() public {
