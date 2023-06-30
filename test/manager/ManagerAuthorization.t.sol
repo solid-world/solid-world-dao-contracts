@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 import "./BaseSolidWorldManager.sol";
 
-contract ManagerAuthorizationTest is BaseSolidWorldManager {
+contract ManagerAuthorizationTest is BaseSolidWorldManagerTest {
     function testAuthorization() public {
         vm.startPrank(vm.addr(77));
 

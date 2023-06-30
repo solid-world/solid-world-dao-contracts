@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 import "./BaseSolidWorldManager.sol";
 
-contract TimelockedManager is BaseSolidWorldManager {
+contract TimelockedManagerTest is BaseSolidWorldManagerTest {
     function testGetTimelockController() public {
         assertEq(manager.getTimelockController(), timelockController);
     }

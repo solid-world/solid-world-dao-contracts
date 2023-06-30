@@ -7,7 +7,7 @@ import "../../../contracts/rewards/RewardsController.sol";
 import "../../../contracts/CollateralizedBasketToken.sol";
 import "../../../contracts/compliance/VerificationRegistry.sol";
 
-abstract contract BaseRewardsDistributor is BaseTest {
+abstract contract BaseRewardsDistributorTest is BaseTest {
     event Accrued(
         address indexed asset,
         address indexed reward,

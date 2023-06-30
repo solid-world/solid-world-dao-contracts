@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 import "./BaseSolidWorldManager.sol";
 
-contract RegulatoryComplianceManagerTest is BaseSolidWorldManager {
+contract RegulatoryComplianceManagerTest is BaseSolidWorldManagerTest {
     function testSetCategoryKYCRequired_revertsIfCategoryDoesNotExist() public {
         vm.prank(timelockController);
         _expectRevert_InvalidCategoryId(CATEGORY_ID);

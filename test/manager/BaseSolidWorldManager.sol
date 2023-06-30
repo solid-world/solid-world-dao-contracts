@@ -5,7 +5,7 @@ import "../BaseTest.sol";
 import "../../contracts/SolidWorldManager.sol";
 import "../../contracts/compliance/VerificationRegistry.sol";
 
-abstract contract BaseSolidWorldManager is BaseTest {
+abstract contract BaseSolidWorldManagerTest is BaseTest {
     event CategoryRebalanced(
         uint indexed categoryId,
         uint indexed averageTA,

@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 import "./BaseSolidWorldManager.sol";
 
-contract ReactiveTimeAppreciationScenarios is BaseSolidWorldManager {
+contract ReactiveTimeAppreciationScenariosTest is BaseSolidWorldManagerTest {
     function testReactiveTAOutcomes_initialCategoryParams() public {
         _addBatchWithDependencies(PRESET_CURRENT_DATE + ONE_YEAR, 50000);
 

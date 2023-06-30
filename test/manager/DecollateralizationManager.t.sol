@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 import "./BaseSolidWorldManager.sol";
 
-contract DecollateralizationManagerTest is BaseSolidWorldManager {
+contract DecollateralizationManagerTest is BaseSolidWorldManagerTest {
     uint24 constant TIME_APPRECIATION = 100_000; // 10%
 
     event TokensDecollateralized(

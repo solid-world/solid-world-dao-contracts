@@ -84,7 +84,7 @@ contract Attacker2 is IERC1155Receiver {
     }
 }
 
-contract ReentrancyTest is BaseSolidWorldManager {
+contract ReentrancyTest is BaseSolidWorldManagerTest {
     function testAddBatchReentrancy() public {
         Attacker1 attacker = new Attacker1(forwardContractBatch);
 

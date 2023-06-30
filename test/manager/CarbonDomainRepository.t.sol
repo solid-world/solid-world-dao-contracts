@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 import "./BaseSolidWorldManager.sol";
 
-contract CarbonDomainRepositoryTest is BaseSolidWorldManager {
+contract CarbonDomainRepositoryTest is BaseSolidWorldManagerTest {
     event CategoryCreated(uint indexed categoryId);
     event CategoryUpdated(
         uint indexed categoryId,

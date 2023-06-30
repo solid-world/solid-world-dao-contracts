@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 import "./BaseSolidWorldManager.sol";
 
-contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManager {
+contract WeeklyCarbonRewardsManagerTest is BaseSolidWorldManagerTest {
     event WeeklyRewardMinted(address indexed rewardToken, uint indexed rewardAmount);
     event RewardsFeeUpdated(uint indexed rewardsFee);
     event RewardsMinterUpdated(address indexed rewardsMinter);
