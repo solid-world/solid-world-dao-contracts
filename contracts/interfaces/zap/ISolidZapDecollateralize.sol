@@ -79,9 +79,9 @@ interface ISolidZapDecollateralize {
     /// @notice Zap function that achieves the following:
     /// 1. Wraps `msg.value` to WETH
     /// 2. Swaps `WETH` to `crispToken` via encoded swap
-    /// 3. Resulting tokens are decollateralized to forward credits via SolidWorldManager
-    /// 4. The resulting forward credits are transferred to `msg.sender`
-    /// 5. Any remaining crisp token balance of SolidZapDecollateralize will be transferred to the `dustReceiver`
+    /// 3. Decollateralizes resulting tokens to forward credits via SolidWorldManager
+    /// 4. Transfers resulting forward credits to `msg.sender`
+    /// 5. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustReceiver`
     /// @param crispToken The intermediate token used for redeeming forward credits
     /// @param swap Encoded swap from `inputToken` to `crispToken`
     /// @param dustReceiver Address to receive any remaining crisp tokens dust
@@ -99,9 +99,9 @@ interface ISolidZapDecollateralize {
     /// @notice Zap function that achieves the following:
     /// 1. Wraps `msg.value` to WETH
     /// 2. Swaps `WETH` to `crispToken` via encoded swap
-    /// 3. Resulting tokens are decollateralized to forward credits via SolidWorldManager
-    /// 4. The resulting forward credits are transferred to `recipient`
-    /// 5. Any remaining crisp token balance of SolidZapDecollateralize will be transferred to the `dustReceiver`
+    /// 3. Decollateralizes resulting tokens to forward credits via SolidWorldManager
+    /// 4. Transfers resulting forward credits to `recipient`
+    /// 5. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustReceiver`
     /// @param crispToken The intermediate token used for redeeming forward credits
     /// @param swap Encoded swap from `inputToken` to `crispToken`
     /// @param dustReceiver Address to receive any remaining crisp tokens dust
@@ -109,7 +109,7 @@ interface ISolidZapDecollateralize {
     ///  batchIds The batch ids of the forward credits to redeem
     ///  amountsIn The amounts of `crispToken` to used to redeem forward credits
     ///  amountsOutMin The minimum amounts of forward credits to receive
-    /// @param recipient The address to receive the crisp tokens dust
+    /// @param recipient The address to receive forward credits
     function zapDecollateralizeETH(
         address crispToken,
         bytes calldata swap,
