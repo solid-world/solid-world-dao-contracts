@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "./TestERC1155.sol";
-import "../liquidity-deployer/TestToken.sol";
+import "../TestToken.sol";
 
 contract MockSWM is IERC1155Receiver {
     TestERC1155 private fcbt;

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./BaseSolidWorldManager.t.sol";
+import "./BaseSolidWorldManager.sol";
 
 contract DecollateralizationManagerTest is BaseSolidWorldManager {
     uint24 constant TIME_APPRECIATION = 100_000; // 10%

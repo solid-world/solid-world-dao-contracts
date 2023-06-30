@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./BaseSolidStaking.t.sol";
+import "./BaseSolidStaking.sol";
 
 contract SolidStakingTest is BaseSolidStakingTest {
     function testSetupFailsWhenAlreadyInitialized() public {

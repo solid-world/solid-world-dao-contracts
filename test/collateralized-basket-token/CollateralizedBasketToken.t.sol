@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./BaseCollateralizedBasketToken.t.sol";
+import "./BaseCollateralizedBasketToken.sol";
 
 contract CollateralizedBasketTokenTest is BaseCollateralizedBasketTokenTest {
     function testIsKYCRequired() public {

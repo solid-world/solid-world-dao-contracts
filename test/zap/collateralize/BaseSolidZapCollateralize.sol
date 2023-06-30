@@ -5,7 +5,7 @@ import "../TestERC1155.sol";
 import "../MockRouter.sol";
 import "../WMATIC.sol";
 import "../../BaseTest_0_8_18.sol";
-import "../../liquidity-deployer/TestToken.sol";
+import "../../TestToken.sol";
 import "../../../contracts/interfaces/zap/ISolidZapCollateralize.sol";
 import "../../../contracts/zap/collateralize/SolidZapCollateralize.sol";
 import "../MockSWM.sol";
