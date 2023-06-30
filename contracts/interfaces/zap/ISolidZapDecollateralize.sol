@@ -28,9 +28,9 @@ interface ISolidZapDecollateralize {
 
     /// @notice Zap function that achieves the following:
     /// 1. Swaps `inputToken` to `crispToken` via encoded swap
-    /// 2. Resulting tokens are decollateralized to forward credits via SolidWorldManager
-    /// 3. The resulting forward credits are transferred to `msg.sender`
-    /// 4. Any remaining crisp token balance of SolidZapDecollateralize will be transferred to the `dustReceiver`
+    /// 2. Decollateralizes resulting tokens to forward credits via SolidWorldManager
+    /// 3. Transfers resulting forward credits to `msg.sender`
+    /// 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustReceiver`
     /// @notice The `msg.sender` must own `inputAmount` and approve this contract to spend `inputToken`
     /// @param inputToken The token used for obtaining forward credits
     /// @param inputAmount The amount of `inputToken` to use
@@ -52,9 +52,9 @@ interface ISolidZapDecollateralize {
 
     /// @notice Zap function that achieves the following:
     /// 1. Swaps `inputToken` to `crispToken` via encoded swap
-    /// 2. Resulting tokens are decollateralized to forward credits via SolidWorldManager
-    /// 3. The resulting forward credits are transferred to `recipient`
-    /// 4. Any remaining crisp token balance of SolidZapDecollateralize will be transferred to the `dustReceiver`
+    /// 2. Decollateralizes resulting tokens to forward credits via SolidWorldManager
+    /// 3. Transfers resulting forward credits to `recipient`
+    /// 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustReceiver`
     /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`
     /// @param inputToken The token used for obtaining forward credits
     /// @param inputAmount The amount of `inputToken` to use
@@ -65,7 +65,7 @@ interface ISolidZapDecollateralize {
     ///  batchIds The batch ids of the forward credits to redeem
     ///  amountsIn The amounts of `crispToken` to used to redeem forward credits
     ///  amountsOutMin The minimum amounts of forward credits to receive
-    /// @param recipient The address to receive the crisp tokens dust
+    /// @param recipient The address to receive forward credits
     function zapDecollateralize(
         address inputToken,
         uint inputAmount,
