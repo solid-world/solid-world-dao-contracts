@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
+pragma solidity ^0.8.16;
 
-import "../../liquidity-deployer/TestToken.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
+import "../liquidity-deployer/TestToken.sol";
 import "./RouterBehaviour.sol";
 
 contract MockRouter {
@@ -22,6 +23,11 @@ contract MockRouter {
             revert();
         } else if (behaviour == uint(RouterBehaviour.REVERTS_WITH_REASON)) {
             revert("invalid_swap");
+        } else if (behaviour == uint(RouterBehaviour.GAS_INTENSIVE)) {
+            // around 200k gas
+            for (uint i = 0; i < 800; i++) {
+                Math.mulDiv(123 ether, 13 ether, 3 ether);
+            }
         }
     }
 }

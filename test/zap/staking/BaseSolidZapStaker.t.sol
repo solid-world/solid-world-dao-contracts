@@ -3,13 +3,13 @@ pragma solidity 0.8.18;
 
 import "../../BaseTest_0_8_18.sol";
 import "../../../contracts/zap/staking/SolidZapStaker.sol";
-import "../../../contracts/interfaces/staking/ISolidZapStaker.sol";
+import "../../../contracts/interfaces/zap/ISolidZapStaker.sol";
 import "../../../contracts/interfaces/liquidity-deployer/IHypervisor_0_8_18.sol";
 import "../../../contracts/interfaces/liquidity-deployer/IUniProxy_0_8_18.sol";
 import "../../liquidity-deployer/TestToken.sol";
-import "./MockRouter.sol";
-import "./RouterBehaviour.sol";
-import "./WMATIC.sol";
+import "../MockRouter.sol";
+import "../RouterBehaviour.sol";
+import "../WMATIC.sol";
 
 abstract contract BaseSolidZapStakerTest is BaseTest {
     uint internal constant INITIAL_TOKEN_AMOUNT = 1000000;
@@ -127,11 +127,11 @@ abstract contract BaseSolidZapStakerTest is BaseTest {
     }
 
     function _expectRevert_GenericSwapError() internal {
-        vm.expectRevert(abi.encodeWithSelector(ISolidZapStaker.GenericSwapError.selector));
+        vm.expectRevert(abi.encodeWithSelector(BaseZap.GenericSwapError.selector));
     }
 
     function _expectRevert_InvalidInput() internal {
-        vm.expectRevert(abi.encodeWithSelector(ISolidZapStaker.InvalidInput.selector));
+        vm.expectRevert(abi.encodeWithSelector(BaseZap.InvalidInput.selector));
     }
 
     function _expectRevert_AcquiredSharesLessThanMin(uint acquired, uint min) internal {
