@@ -34,23 +34,33 @@ abstract contract BaseSolidZapCollateralize is
         IERC1155(forwardContractBatch).setApprovalForAll(swManager, true);
     }
 
+    /// @dev accept transfers from this contract only
     function onERC1155Received(
-        address,
+        address operator,
         address,
         uint,
         uint,
         bytes memory
     ) public virtual returns (bytes4) {
+        if (operator != address(this)) {
+            return bytes4(0);
+        }
+
         return this.onERC1155Received.selector;
     }
 
+    /// @dev accept transfers from this contract only
     function onERC1155BatchReceived(
-        address,
+        address operator,
         address,
         uint[] memory,
         uint[] memory,
         bytes memory
     ) public virtual returns (bytes4) {
+        if (operator != address(this)) {
+            return bytes4(0);
+        }
+
         return this.onERC1155BatchReceived.selector;
     }
 
