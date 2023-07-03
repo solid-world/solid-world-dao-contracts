@@ -38,6 +38,7 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         _collateralize(batchId, amountIn, amountOutMin);
         _approveTokenSpendingIfNeeded(crispToken, router);
         _swapViaRouter(router, swap);
+        _transferTokenBalance(outputToken, msg.sender);
     }
 
     /// @inheritdoc ISolidZapCollateralize
@@ -55,6 +56,7 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         _collateralize(batchId, amountIn, amountOutMin);
         _approveTokenSpendingIfNeeded(crispToken, router);
         _swapViaRouter(router, swap);
+        _transferTokenBalance(outputToken, recipient);
     }
 
     function _transferOverTheForwardCredits(uint batchId, uint amountIn) private {
@@ -67,5 +69,10 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         uint amountOutMin
     ) private {
         SWManager(swManager).collateralizeBatch(batchId, amountIn, amountOutMin);
+    }
+
+    function _transferTokenBalance(address token, address recipient) private {
+        uint balance = IERC20(token).balanceOf(address(this));
+        IERC20(token).safeTransfer(recipient, balance);
     }
 }

@@ -108,4 +108,47 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
         vm.expectRevert("invalid_swap");
         zap.zapCollateralize(address(outputToken), address(crispToken), BATCH_ID, 0, 0, swap, testAccount1);
     }
+
+    function testZapCollateralize_transfersOutputTokenBalanceToMsgSender() public {
+        uint amountIn = 100;
+        uint amountOutMin = 100 ether;
+        uint expectedOutputTokenAmount = 50 ether;
+        bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, expectedOutputTokenAmount);
+
+        vm.prank(testAccount0);
+        zap.zapCollateralize(
+            address(outputToken),
+            address(crispToken),
+            BATCH_ID,
+            amountIn,
+            amountOutMin,
+            swap,
+            testAccount1
+        );
+
+        uint actualOutputTokenAmount = outputToken.balanceOf(testAccount0);
+        assertEq(actualOutputTokenAmount, expectedOutputTokenAmount);
+    }
+
+    function testZapCollateralize_transfersOutputTokenBalanceToReceiver() public {
+        uint amountIn = 100;
+        uint amountOutMin = 100 ether;
+        uint expectedOutputTokenAmount = 50 ether;
+        bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, expectedOutputTokenAmount);
+
+        vm.prank(testAccount0);
+        zap.zapCollateralize(
+            address(outputToken),
+            address(crispToken),
+            BATCH_ID,
+            amountIn,
+            amountOutMin,
+            swap,
+            testAccount1,
+            testAccount1
+        );
+
+        uint actualOutputTokenAmount = outputToken.balanceOf(testAccount1);
+        assertEq(actualOutputTokenAmount, expectedOutputTokenAmount);
+    }
 }
