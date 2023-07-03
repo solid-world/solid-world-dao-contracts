@@ -37,6 +37,7 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         _transferOverTheForwardCredits(batchId, amountIn);
         _collateralize(batchId, amountIn, amountOutMin);
         _approveTokenSpendingIfNeeded(crispToken, router);
+        _swapViaRouter(router, swap);
     }
 
     /// @inheritdoc ISolidZapCollateralize
@@ -53,6 +54,7 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         _transferOverTheForwardCredits(batchId, amountIn);
         _collateralize(batchId, amountIn, amountOutMin);
         _approveTokenSpendingIfNeeded(crispToken, router);
+        _swapViaRouter(router, swap);
     }
 
     function _transferOverTheForwardCredits(uint batchId, uint amountIn) private {

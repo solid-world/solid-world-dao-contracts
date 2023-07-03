@@ -78,4 +78,34 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
             testAccount1
         );
     }
+
+    function testZapCollateralize_executesSwap() public {
+        vm.prank(testAccount0);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
+        zap.zapCollateralize(
+            address(outputToken),
+            address(crispToken),
+            BATCH_ID,
+            0,
+            0,
+            emptySwap,
+            testAccount1
+        );
+    }
+
+    function testZapCollateralize_executesSwap_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
+        bytes memory swap = _encodeSwap(RouterBehaviour.REVERTS_NO_REASON, 0);
+
+        vm.prank(testAccount0);
+        _expectRevert_GenericSwapError();
+        zap.zapCollateralize(address(outputToken), address(crispToken), BATCH_ID, 0, 0, swap, testAccount1);
+    }
+
+    function testZapCollateralize_executesSwap_revertsWithProvidedReason() public {
+        bytes memory swap = _encodeSwap(RouterBehaviour.REVERTS_WITH_REASON, 0);
+
+        vm.prank(testAccount0);
+        vm.expectRevert("invalid_swap");
+        zap.zapCollateralize(address(outputToken), address(crispToken), BATCH_ID, 0, 0, swap, testAccount1);
+    }
 }
