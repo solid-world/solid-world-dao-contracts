@@ -137,4 +137,57 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
         uint actualDustReceived = crispToken.balanceOf(testAccount1);
         assertEq(actualDustReceived, dust);
     }
+
+    function testZapCollateralizeETH_emitsEvent() public {
+        uint amountIn = 100;
+        uint amountOutMin = 100 ether;
+        uint wethOutputAmount = 1 ether;
+        vm.deal(address(weth), 1 ether);
+        weth.mint(address(zap), wethOutputAmount);
+
+        vm.prank(testAccount0);
+        _expectEmit_ZapCollateralize(
+            testAccount0,
+            address(weth),
+            wethOutputAmount,
+            amountOutMin,
+            testAccount1,
+            1
+        );
+        zap.zapCollateralizeETH(
+            address(crispToken),
+            BATCH_ID,
+            amountIn,
+            amountOutMin,
+            emptySwap,
+            testAccount1
+        );
+    }
+
+    function testZapCollateralizeETH_emitsEvent_customRecipient() public {
+        uint amountIn = 100;
+        uint amountOutMin = 100 ether;
+        uint wethOutputAmount = 1 ether;
+        vm.deal(address(weth), 1 ether);
+        weth.mint(address(zap), wethOutputAmount);
+
+        vm.prank(testAccount0);
+        _expectEmit_ZapCollateralize(
+            testAccount1,
+            address(weth),
+            wethOutputAmount,
+            amountOutMin,
+            testAccount1,
+            1
+        );
+        zap.zapCollateralizeETH(
+            address(crispToken),
+            BATCH_ID,
+            amountIn,
+            amountOutMin,
+            emptySwap,
+            testAccount1,
+            testAccount1
+        );
+    }
 }

@@ -3,6 +3,15 @@ pragma solidity 0.8.18;
 
 /// @author Solid World
 interface ISolidZapCollateralize {
+    event ZapCollateralize(
+        address indexed receiver,
+        address indexed outputToken,
+        uint indexed outputAmount,
+        uint dust,
+        address dustReceiver,
+        uint categoryId
+    );
+
     error ETHTransferFailed();
 
     function router() external view returns (address);

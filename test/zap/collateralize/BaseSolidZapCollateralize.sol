@@ -27,6 +27,15 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
 
     ISolidZapCollateralize internal zap;
 
+    event ZapCollateralize(
+        address indexed receiver,
+        address indexed outputToken,
+        uint indexed outputAmount,
+        uint dust,
+        address dustReceiver,
+        uint categoryId
+    );
+
     function setUp() public {
         emptySwap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 0);
 
@@ -83,6 +92,18 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
 
     function _expectCall_withdraw(uint amount) internal {
         vm.expectCall(address(weth), abi.encodeWithSelector(WMATIC.withdraw.selector, amount));
+    }
+
+    function _expectEmit_ZapCollateralize(
+        address receiver,
+        address _outputToken,
+        uint outputAmount,
+        uint dust,
+        address dustReceiver,
+        uint categoryId
+    ) internal {
+        vm.expectEmit(true, true, true, true, address(zap));
+        emit ZapCollateralize(receiver, _outputToken, outputAmount, dust, dustReceiver, categoryId);
     }
 
     function _expectRevert_GenericSwapError() internal {
