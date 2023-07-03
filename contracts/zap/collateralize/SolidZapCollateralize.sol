@@ -23,4 +23,35 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         address _swManager,
         address _forwardContractBatch
     ) BaseSolidZapCollateralize(_router, _weth, _swManager, _forwardContractBatch) {}
+
+    /// @inheritdoc ISolidZapCollateralize
+    function zapCollateralize(
+        address outputToken,
+        address crispToken,
+        uint batchId,
+        uint amountIn,
+        uint amountOutMin,
+        bytes calldata swap,
+        address dustReceiver
+    ) external nonReentrant {
+        _transferOverTheForwardCredits(batchId, amountIn);
+    }
+
+    /// @inheritdoc ISolidZapCollateralize
+    function zapCollateralize(
+        address outputToken,
+        address crispToken,
+        uint batchId,
+        uint amountIn,
+        uint amountOutMin,
+        bytes calldata swap,
+        address dustReceiver,
+        address recipient
+    ) external nonReentrant {
+        _transferOverTheForwardCredits(batchId, amountIn);
+    }
+
+    function _transferOverTheForwardCredits(uint batchId, uint amountIn) private {
+        IERC1155(forwardContractBatch).safeTransferFrom(msg.sender, address(this), batchId, amountIn, "");
+    }
 }
