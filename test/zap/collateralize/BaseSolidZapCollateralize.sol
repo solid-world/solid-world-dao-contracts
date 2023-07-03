@@ -51,6 +51,13 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
         );
     }
 
+    function _expectCall_ERC1155_safeTransferFrom(address from, uint amount) internal {
+        vm.expectCall(
+            address(fcbt),
+            abi.encodeCall(IERC1155.safeTransferFrom, (from, address(zap), BATCH_ID, amount, ""))
+        );
+    }
+
     function _expectCall_ERC20_approve_maxUint(address token, address spender) internal {
         vm.expectCall(token, abi.encodeCall(IERC20.approve, (spender, type(uint256).max)));
     }

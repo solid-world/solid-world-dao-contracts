@@ -35,6 +35,7 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         address dustReceiver
     ) external nonReentrant {
         _transferOverTheForwardCredits(batchId, amountIn);
+        _collateralize(batchId, amountIn, amountOutMin);
     }
 
     /// @inheritdoc ISolidZapCollateralize
@@ -49,9 +50,18 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         address recipient
     ) external nonReentrant {
         _transferOverTheForwardCredits(batchId, amountIn);
+        _collateralize(batchId, amountIn, amountOutMin);
     }
 
     function _transferOverTheForwardCredits(uint batchId, uint amountIn) private {
         IERC1155(forwardContractBatch).safeTransferFrom(msg.sender, address(this), batchId, amountIn, "");
+    }
+
+    function _collateralize(
+        uint batchId,
+        uint amountIn,
+        uint amountOutMin
+    ) private {
+        SWManager(swManager).collateralizeBatch(batchId, amountIn, amountOutMin);
     }
 }
