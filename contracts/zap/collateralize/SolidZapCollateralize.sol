@@ -35,7 +35,8 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         address dustReceiver
     ) external nonReentrant {
         _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
-        _transferTokenBalance(outputToken, msg.sender);
+        _sweepTokensTo(outputToken, msg.sender);
+        _sweepTokensTo(crispToken, dustReceiver);
     }
 
     /// @inheritdoc ISolidZapCollateralize
@@ -50,7 +51,8 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         address recipient
     ) external nonReentrant {
         _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
-        _transferTokenBalance(outputToken, recipient);
+        _sweepTokensTo(outputToken, recipient);
+        _sweepTokensTo(crispToken, dustReceiver);
     }
 
     function _collateralizeToOutputToken(
@@ -76,10 +78,5 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         uint amountOutMin
     ) private {
         SWManager(swManager).collateralizeBatch(batchId, amountIn, amountOutMin);
-    }
-
-    function _transferTokenBalance(address token, address recipient) private {
-        uint balance = IERC20(token).balanceOf(address(this));
-        IERC20(token).safeTransfer(recipient, balance);
     }
 }

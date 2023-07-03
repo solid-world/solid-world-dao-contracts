@@ -39,8 +39,6 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
             testAccount1
         );
 
-        uint zapCrispBalance = crispToken.balanceOf(address(zap));
-        assertEq(zapCrispBalance, amountOutMin);
         uint zapForwardCreditsBalance = fcbt.balanceOf(address(zap), BATCH_ID);
         assertEq(zapForwardCreditsBalance, 0);
     }
@@ -150,5 +148,24 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
 
         uint actualOutputTokenAmount = outputToken.balanceOf(testAccount1);
         assertEq(actualOutputTokenAmount, expectedOutputTokenAmount);
+    }
+
+    function testZapCollateralize_transfersCrispTokenDustToDustReceiver() public {
+        uint amountIn = 100;
+        uint dust = 1 ether;
+
+        vm.prank(testAccount0);
+        zap.zapCollateralize(
+            address(outputToken),
+            address(crispToken),
+            BATCH_ID,
+            amountIn,
+            dust,
+            emptySwap,
+            testAccount1
+        );
+
+        uint actualDustReceived = crispToken.balanceOf(testAccount1);
+        assertEq(actualDustReceived, dust);
     }
 }

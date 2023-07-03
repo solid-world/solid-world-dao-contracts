@@ -129,7 +129,7 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             decollateralizeParams.amountsOutMin,
             ""
         );
-        uint dustAmount = _transferDust(crispToken, dustReceiver);
+        uint dustAmount = _sweepTokensTo(crispToken, dustReceiver);
         uint categoryId = SWManager(swManager).getBatchCategory(decollateralizeParams.batchIds[0]);
 
         emit ZapDecollateralize(recipient, inputToken, inputAmount, dustAmount, dustReceiver, categoryId);
