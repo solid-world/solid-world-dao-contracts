@@ -32,7 +32,7 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
         address indexed outputToken,
         uint indexed outputAmount,
         uint dust,
-        address dustReceiver,
+        address dustRecipient,
         uint categoryId
     );
 
@@ -99,11 +99,11 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
         address _outputToken,
         uint outputAmount,
         uint dust,
-        address dustReceiver,
+        address dustRecipient,
         uint categoryId
     ) internal {
         vm.expectEmit(true, true, true, true, address(zap));
-        emit ZapCollateralize(receiver, _outputToken, outputAmount, dust, dustReceiver, categoryId);
+        emit ZapCollateralize(receiver, _outputToken, outputAmount, dust, dustRecipient, categoryId);
     }
 
     function _expectRevert_GenericSwapError() internal {

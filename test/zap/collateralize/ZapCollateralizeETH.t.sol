@@ -127,7 +127,7 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
         assertEq(actualETHAmount, wethOutputAmount);
     }
 
-    function testZapCollateralizeETH_transfersCrispTokenDustToDustReceiver() public {
+    function testZapCollateralizeETH_transfersCrispTokenDustToDustRecipient() public {
         uint amountIn = 100;
         uint dust = 1 ether;
 

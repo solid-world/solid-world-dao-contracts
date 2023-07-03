@@ -32,13 +32,13 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         uint amountIn,
         uint amountOutMin,
         bytes calldata swap,
-        address dustReceiver
+        address dustRecipient
     ) external nonReentrant {
         _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
         uint outputAmount = _sweepTokensTo(outputToken, msg.sender);
-        uint dust = _sweepTokensTo(crispToken, dustReceiver);
+        uint dust = _sweepTokensTo(crispToken, dustRecipient);
 
-        _emitZapEvent(msg.sender, batchId, outputToken, outputAmount, dust, dustReceiver);
+        _emitZapEvent(msg.sender, batchId, outputToken, outputAmount, dust, dustRecipient);
     }
 
     /// @inheritdoc ISolidZapCollateralize
@@ -49,14 +49,14 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         uint amountIn,
         uint amountOutMin,
         bytes calldata swap,
-        address dustReceiver,
-        address recipient
+        address dustRecipient,
+        address zapRecipient
     ) external nonReentrant {
         _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
-        uint outputAmount = _sweepTokensTo(outputToken, recipient);
-        uint dust = _sweepTokensTo(crispToken, dustReceiver);
+        uint outputAmount = _sweepTokensTo(outputToken, zapRecipient);
+        uint dust = _sweepTokensTo(crispToken, dustRecipient);
 
-        _emitZapEvent(recipient, batchId, outputToken, outputAmount, dust, dustReceiver);
+        _emitZapEvent(zapRecipient, batchId, outputToken, outputAmount, dust, dustRecipient);
     }
 
     /// @inheritdoc ISolidZapCollateralize
@@ -66,13 +66,13 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         uint amountIn,
         uint amountOutMin,
         bytes calldata swap,
-        address dustReceiver
+        address dustRecipient
     ) external nonReentrant {
         _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
         uint outputAmount = _sweepETHTo(msg.sender);
-        uint dust = _sweepTokensTo(crispToken, dustReceiver);
+        uint dust = _sweepTokensTo(crispToken, dustRecipient);
 
-        _emitZapEvent(msg.sender, batchId, weth, outputAmount, dust, dustReceiver);
+        _emitZapEvent(msg.sender, batchId, weth, outputAmount, dust, dustRecipient);
     }
 
     /// @inheritdoc ISolidZapCollateralize
@@ -82,14 +82,14 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         uint amountIn,
         uint amountOutMin,
         bytes calldata swap,
-        address dustReceiver,
-        address recipient
+        address dustRecipient,
+        address zapRecipient
     ) external nonReentrant {
         _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
-        uint outputAmount = _sweepETHTo(recipient);
-        uint dust = _sweepTokensTo(crispToken, dustReceiver);
+        uint outputAmount = _sweepETHTo(zapRecipient);
+        uint dust = _sweepTokensTo(crispToken, dustRecipient);
 
-        _emitZapEvent(recipient, batchId, weth, outputAmount, dust, dustReceiver);
+        _emitZapEvent(zapRecipient, batchId, weth, outputAmount, dust, dustRecipient);
     }
 
     function _collateralizeToOutputToken(
@@ -117,14 +117,14 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         SWManager(swManager).collateralizeBatch(batchId, amountIn, amountOutMin);
     }
 
-    function _sweepETHTo(address recipient) private returns (uint sweptAmount) {
+    function _sweepETHTo(address zapRecipient) private returns (uint sweptAmount) {
         sweptAmount = IERC20(weth).balanceOf(address(this));
         if (sweptAmount == 0) {
             return 0;
         }
 
         IWETH(weth).withdraw(sweptAmount);
-        (bool success, ) = payable(recipient).call{ value: sweptAmount }("");
+        (bool success, ) = payable(zapRecipient).call{ value: sweptAmount }("");
         if (!success) {
             revert ETHTransferFailed();
         }
@@ -136,14 +136,14 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         address outputToken,
         uint outputAmount,
         uint dust,
-        address dustReceiver
+        address dustRecipient
     ) private {
         emit ZapCollateralize(
             receiver,
             outputToken,
             outputAmount,
             dust,
-            dustReceiver,
+            dustRecipient,
             SWManager(swManager).getBatchCategory(batchId)
         );
     }
