@@ -81,6 +81,10 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
         vm.expectCall(ROUTER, _encodeSwap(behaviour, acquiredAmount));
     }
 
+    function _expectCall_withdraw(uint amount) internal {
+        vm.expectCall(address(weth), abi.encodeWithSelector(WMATIC.withdraw.selector, amount));
+    }
+
     function _expectRevert_GenericSwapError() internal {
         vm.expectRevert(abi.encodeWithSelector(BaseZap.GenericSwapError.selector));
     }

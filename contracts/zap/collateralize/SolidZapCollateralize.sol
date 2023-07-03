@@ -55,6 +55,35 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         _sweepTokensTo(crispToken, dustReceiver);
     }
 
+    /// @inheritdoc ISolidZapCollateralize
+    function zapCollateralizeETH(
+        address crispToken,
+        uint batchId,
+        uint amountIn,
+        uint amountOutMin,
+        bytes calldata swap,
+        address dustReceiver
+    ) external nonReentrant {
+        _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
+        _sweepETHTo(msg.sender);
+        _sweepTokensTo(crispToken, dustReceiver);
+    }
+
+    /// @inheritdoc ISolidZapCollateralize
+    function zapCollateralizeETH(
+        address crispToken,
+        uint batchId,
+        uint amountIn,
+        uint amountOutMin,
+        bytes calldata swap,
+        address dustReceiver,
+        address recipient
+    ) external nonReentrant {
+        _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
+        _sweepETHTo(recipient);
+        _sweepTokensTo(crispToken, dustReceiver);
+    }
+
     function _collateralizeToOutputToken(
         address crispToken,
         uint batchId,
@@ -78,5 +107,18 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         uint amountOutMin
     ) private {
         SWManager(swManager).collateralizeBatch(batchId, amountIn, amountOutMin);
+    }
+
+    function _sweepETHTo(address recipient) private {
+        uint balance = IERC20(weth).balanceOf(address(this));
+        if (balance == 0) {
+            return;
+        }
+
+        IWETH(weth).withdraw(balance);
+        (bool success, ) = payable(recipient).call{ value: balance }("");
+        if (!success) {
+            revert ETHTransferFailed();
+        }
     }
 }
