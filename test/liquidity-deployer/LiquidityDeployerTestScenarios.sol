@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./BaseLiquidityDeployer.t.sol";
+import "./BaseLiquidityDeployer.sol";
 
-contract LiquidityDeployerTestScenarios is BaseLiquidityDeployerTest {
+contract LiquidityDeployerTestScenariosTest is BaseLiquidityDeployerTest {
     mapping(uint => TestDataTypes.TestScenario) testScenarios;
     uint testScenariosCount;
 

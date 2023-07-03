@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 import "./base-tests/BaseRewardsDistributor.sol";
 
-contract RewardsDistributorTest is BaseRewardsDistributor {
+contract RewardsDistributorTest is BaseRewardsDistributorTest {
     function testInitialConfiguration() public {
         _assertInitialFirstDistributionIsCorrect();
         _assertInitialSecondDistributionIsCorrect();

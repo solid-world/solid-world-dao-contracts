@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./BaseForwardContractBatchToken.t.sol";
+import "./BaseForwardContractBatchToken.sol";
 
 contract ForwardContractBatchTokenTest is BaseForwardContractBatchTokenTest {
     function testIsKYCRequired() public {

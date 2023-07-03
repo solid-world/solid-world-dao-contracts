@@ -6,7 +6,7 @@ import "../../../contracts/zap/staking/SolidZapStaker.sol";
 import "../../../contracts/interfaces/zap/ISolidZapStaker.sol";
 import "../../../contracts/interfaces/liquidity-deployer/IHypervisor_0_8_18.sol";
 import "../../../contracts/interfaces/liquidity-deployer/IUniProxy_0_8_18.sol";
-import "../../liquidity-deployer/TestToken.sol";
+import "../../TestToken.sol";
 import "../MockRouter.sol";
 import "../RouterBehaviour.sol";
 import "../WMATIC.sol";

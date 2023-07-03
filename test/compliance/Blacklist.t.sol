@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./BaseBlacklist.t.sol";
+import "./BaseBlacklist.sol";
 
 contract BlacklistTest is BaseBlacklistTest {
     function testGetBlacklister_initial() public {

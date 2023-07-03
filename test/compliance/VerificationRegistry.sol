@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./BaseVerificationRegistry.t.sol";
+import "./BaseVerificationRegistry.sol";
 
 contract VerificationRegistryTest is BaseVerificationRegistryTest {
     function testBlacklist_revertsIfNotBlacklisterOrOwner() public {

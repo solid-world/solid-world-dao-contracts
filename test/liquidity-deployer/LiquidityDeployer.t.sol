@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 import "./LiquidityDeployerTestScenarios.sol";
 
-contract LiquidityDeployerTest is LiquidityDeployerTestScenarios {
+contract LiquidityDeployerTest is LiquidityDeployerTestScenariosTest {
     function testInitialization_failsIfSpecifiedTokensDontMatchGammaVaultTokens() public {
         _mockLpToken_token0(token1);
         _mockLpToken_token1(token1);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./BaseSolidWorldManager.t.sol";
+import "./BaseSolidWorldManager.sol";
 
 contract Attacker1 is IERC1155Receiver {
     uint constant BATCH_ID = 5;
@@ -84,7 +84,7 @@ contract Attacker2 is IERC1155Receiver {
     }
 }
 
-contract ReentrancyTest is BaseSolidWorldManager {
+contract ReentrancyTest is BaseSolidWorldManagerTest {
     function testAddBatchReentrancy() public {
         Attacker1 attacker = new Attacker1(forwardContractBatch);
 

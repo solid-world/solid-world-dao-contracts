@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./base-tests/BaseEmissionManager.t.sol";
+import "./base-tests/BaseEmissionManager.sol";
 
 contract EmissionManagerTest is BaseEmissionManagerTest {
     function testRecurrentSetup() public {

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "../liquidity-deployer/TestToken.sol";
+import "../TestToken.sol";
 import "./RouterBehaviour.sol";
 
 contract MockRouter {

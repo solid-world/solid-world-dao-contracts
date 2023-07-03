@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./ReactiveTimeAppreciationMathWrapper.t.sol";
+import "./ReactiveTimeAppreciationMathWrapper.sol";
 import "./BaseReactiveTimeAppreciationMath.sol";
 
 contract ReactiveTimeAppreciationMathTest is BaseReactiveTimeAppreciationMathTest {

@@ -2,7 +2,7 @@
 pragma solidity 0.8.16;
 
 import "../BaseTest.sol";
-import "./TestToken.sol";
+import "../TestToken.sol";
 import "./TestDataTypes.sol";
 import "../../contracts/LiquidityDeployer.sol";
 import "../../contracts/interfaces/liquidity-deployer/IHypervisor.sol";

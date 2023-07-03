@@ -4,9 +4,12 @@ pragma solidity 0.8.18;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/staking/IWETH.sol";
 import "../interfaces/zap/ISolidZapStaker.sol";
+import "../libraries/GPv2SafeERC20_0_8_18.sol";
 
 /// @author Solid World
 abstract contract BaseZap {
+    using GPv2SafeERC20 for IERC20;
+
     error GenericSwapError();
     error InvalidInput();
 
@@ -35,6 +38,22 @@ abstract contract BaseZap {
     function _approveTokenSpendingIfNeeded(address token, address spender) internal {
         if (IERC20(token).allowance(address(this), spender) == 0) {
             IERC20(token).approve(spender, type(uint).max);
+        }
+    }
+
+    function _prepareToSwap(
+        address inputToken,
+        uint inputAmount,
+        address _router
+    ) internal {
+        IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);
+        _approveTokenSpendingIfNeeded(inputToken, _router);
+    }
+
+    function _transferDust(address token, address dustReceiver) internal returns (uint dustAmount) {
+        dustAmount = IERC20(token).balanceOf(address(this));
+        if (dustAmount > 0) {
+            IERC20(token).safeTransfer(dustReceiver, dustAmount);
         }
     }
 }

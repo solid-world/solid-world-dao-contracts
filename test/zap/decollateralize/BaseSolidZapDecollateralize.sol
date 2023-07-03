@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import "./TestERC1155.sol";
+import "../TestERC1155.sol";
 import "../MockRouter.sol";
 import "../WMATIC.sol";
 import "../../BaseTest_0_8_18.sol";
-import "../../liquidity-deployer/TestToken.sol";
+import "../../TestToken.sol";
 import "../../../contracts/interfaces/zap/ISolidZapDecollateralize.sol";
 import "../../../contracts/zap/decollateralize/SolidZapDecollateralize.sol";
-import "./MockSWM.sol";
+import "../MockSWM.sol";
 
 abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
     uint internal constant INITIAL_TOKEN_AMOUNT = 1000000;
@@ -112,10 +112,6 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
 
     function _expectRevert_GenericSwapError() internal {
         vm.expectRevert(abi.encodeWithSelector(BaseZap.GenericSwapError.selector));
-    }
-
-    function _expectRevert_InvalidInput() internal {
-        vm.expectRevert(abi.encodeWithSelector(BaseZap.InvalidInput.selector));
     }
 
     function _encodeSwap(RouterBehaviour behaviour, uint acquiredAmount)

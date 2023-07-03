@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "../../interfaces/liquidity-deployer/IHypervisor_0_8_18.sol";
 import "../../interfaces/liquidity-deployer/IUniProxy_0_8_18.sol";
 import "../../interfaces/staking/ISolidStakingActions_0_8_18.sol";
-import "../../libraries/GPv2SafeERC20_0_8_18.sol";
 import "../BaseZap.sol";
 
 /// @author Solid World

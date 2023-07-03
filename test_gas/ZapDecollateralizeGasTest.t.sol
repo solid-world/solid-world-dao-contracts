@@ -3,7 +3,7 @@ pragma solidity ^0.8.16;
 
 import "./utils/GasTest.sol";
 import "../contracts/SolidWorldManager.sol";
-import "../test/liquidity-deployer/TestToken.sol";
+import "../test/TestToken.sol";
 import "../test/zap/WMATIC.sol";
 import "../test/zap/MockRouter.sol";
 import "./SolidZapDecollateralize_0_8_16.sol";

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.16;
 
-import "./BaseSolidMath.t.sol";
-import "./SolidMathWrapper.t.sol";
+import "./BaseSolidMath.sol";
+import "./SolidMathWrapper.sol";
 
 contract SolidMathTest is BaseSolidMathTest {
     function testComputeTimeAppreciationDiscountSingleWeek() public {
