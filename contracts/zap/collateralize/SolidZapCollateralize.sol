@@ -36,6 +36,7 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
     ) external nonReentrant {
         _transferOverTheForwardCredits(batchId, amountIn);
         _collateralize(batchId, amountIn, amountOutMin);
+        _approveTokenSpendingIfNeeded(crispToken, router);
     }
 
     /// @inheritdoc ISolidZapCollateralize
@@ -51,6 +52,7 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
     ) external nonReentrant {
         _transferOverTheForwardCredits(batchId, amountIn);
         _collateralize(batchId, amountIn, amountOutMin);
+        _approveTokenSpendingIfNeeded(crispToken, router);
     }
 
     function _transferOverTheForwardCredits(uint batchId, uint amountIn) private {

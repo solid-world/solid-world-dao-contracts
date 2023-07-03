@@ -44,4 +44,38 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
         uint zapForwardCreditsBalance = fcbt.balanceOf(address(zap), BATCH_ID);
         assertEq(zapForwardCreditsBalance, 0);
     }
+
+    function testZapCollateralize_approvesRouterToSpendCrispToken() public {
+        vm.prank(testAccount0);
+        _expectCall_ERC20_approve_maxUint(address(crispToken), ROUTER);
+        zap.zapCollateralize(
+            address(outputToken),
+            address(crispToken),
+            BATCH_ID,
+            0,
+            0,
+            emptySwap,
+            testAccount1
+        );
+
+        uint actual = crispToken.allowance(address(zap), ROUTER);
+        assertEq(actual, type(uint).max);
+    }
+
+    function testZapCollateralize_doesNotApproveRouterToSpendCrispTokenIfAlreadyApproved() public {
+        vm.prank(address(zap));
+        crispToken.approve(ROUTER, type(uint).max);
+
+        vm.prank(testAccount0);
+        _doNotExpectCall_ERC20_approve_maxUint(address(crispToken), ROUTER);
+        zap.zapCollateralize(
+            address(outputToken),
+            address(crispToken),
+            BATCH_ID,
+            0,
+            0,
+            emptySwap,
+            testAccount1
+        );
+    }
 }
