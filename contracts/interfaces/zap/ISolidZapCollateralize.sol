@@ -16,7 +16,7 @@ interface ISolidZapCollateralize {
     /// 2. Collateralizes the transferred forward credits via SolidWorldManager, receives `crispToken`
     /// 3. Swaps `crispToken` for `outputToken` via encoded swap
     /// 4. Transfers the `outputToken` balance of SolidZapCollateralize to `msg.sender`
-    /// 5. Transfers remaining crisp token balance of SolidZapCollateralize to the `dustReceiver`
+    /// 5. Transfers remaining `crispToken` balance of SolidZapCollateralize to the `dustReceiver`
     /// @notice The `msg.sender` must approve this contract to spend the forward credits
     /// @param outputToken The token used for obtaining forward credits
     /// @param crispToken The intermediate token used for redeeming forward credits
@@ -40,7 +40,7 @@ interface ISolidZapCollateralize {
     /// 2. Collateralizes the transferred forward credits via SolidWorldManager, receives `crispToken`
     /// 3. Swaps `crispToken` for `outputToken` via encoded swap
     /// 4. Transfers the `outputToken` balance of SolidZapCollateralize to `recipient`
-    /// 5. Transfers remaining crisp token balance of SolidZapCollateralize to the `dustReceiver`
+    /// 5. Transfers remaining `crispToken` balance of SolidZapCollateralize to the `dustReceiver`
     /// @notice The `msg.sender` must approve this contract to spend the forward credits
     /// @param outputToken The token used for obtaining forward credits
     /// @param crispToken The intermediate token used for redeeming forward credits
