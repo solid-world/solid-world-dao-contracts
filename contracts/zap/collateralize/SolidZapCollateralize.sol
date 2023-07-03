@@ -34,10 +34,7 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         bytes calldata swap,
         address dustReceiver
     ) external nonReentrant {
-        _transferOverTheForwardCredits(batchId, amountIn);
-        _collateralize(batchId, amountIn, amountOutMin);
-        _approveTokenSpendingIfNeeded(crispToken, router);
-        _swapViaRouter(router, swap);
+        _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
         _transferTokenBalance(outputToken, msg.sender);
     }
 
@@ -52,11 +49,21 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         address dustReceiver,
         address recipient
     ) external nonReentrant {
+        _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
+        _transferTokenBalance(outputToken, recipient);
+    }
+
+    function _collateralizeToOutputToken(
+        address crispToken,
+        uint batchId,
+        uint amountIn,
+        uint amountOutMin,
+        bytes calldata swap
+    ) private {
         _transferOverTheForwardCredits(batchId, amountIn);
         _collateralize(batchId, amountIn, amountOutMin);
         _approveTokenSpendingIfNeeded(crispToken, router);
         _swapViaRouter(router, swap);
-        _transferTokenBalance(outputToken, recipient);
     }
 
     function _transferOverTheForwardCredits(uint batchId, uint amountIn) private {
