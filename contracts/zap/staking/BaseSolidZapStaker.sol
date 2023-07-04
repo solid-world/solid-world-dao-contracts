@@ -3,8 +3,8 @@ pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "../../interfaces/liquidity-deployer/IHypervisor_0_8_18.sol";
-import "../../interfaces/liquidity-deployer/IUniProxy_0_8_18.sol";
+import "../../interfaces/liquidity-deployer/IHypervisor.sol";
+import "../../interfaces/liquidity-deployer/IUniProxy.sol";
 import "../../interfaces/staking/ISolidStakingActions_0_8_18.sol";
 import "../BaseZap.sol";
 
@@ -12,18 +12,15 @@ import "../BaseZap.sol";
 abstract contract BaseSolidZapStaker is BaseZap, ISolidZapStaker, ReentrancyGuard {
     address public immutable router;
     address public immutable weth;
-    address public immutable iUniProxy;
     address public immutable solidStaking;
 
     constructor(
         address _router,
         address _weth,
-        address _iUniProxy,
         address _solidStaking
     ) {
         router = _router;
         weth = _weth;
-        iUniProxy = _iUniProxy;
         solidStaking = _solidStaking;
 
         IWETH(weth).approve(_router, type(uint).max);
@@ -53,7 +50,7 @@ abstract contract BaseSolidZapStaker is BaseZap, ISolidZapStaker, ReentrancyGuar
     {
         _approveTokenSpendingIfNeeded(swapResults.token0._address, hypervisor);
         _approveTokenSpendingIfNeeded(swapResults.token1._address, hypervisor);
-        shares = IUniProxy(iUniProxy).deposit(
+        shares = IUniProxy(getUniProxy(hypervisor)).deposit(
             swapResults.token0.balance,
             swapResults.token1.balance,
             address(this),
@@ -80,5 +77,9 @@ abstract contract BaseSolidZapStaker is BaseZap, ISolidZapStaker, ReentrancyGuar
 
     function _uniProxyMinIn() internal pure returns (uint[4] memory) {
         return [uint(0), uint(0), uint(0), uint(0)];
+    }
+
+    function getUniProxy(address hypervisor) internal view returns (address) {
+        return IHypervisor(hypervisor).whitelistedAddress();
     }
 }

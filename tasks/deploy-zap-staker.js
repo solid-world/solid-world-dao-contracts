@@ -4,16 +4,12 @@ task('deploy-zap-staker', 'Deploys a SolidZapStaker contract')
   .addParam('router', 'The address of the router used to perform token swaps.')
   .addParam('weth', 'The address of WETH contract of the network.')
   .addParam(
-    'uniProxy',
-    'The address of the Gamma UniProxy contract used for deploying liquidity.'
-  )
-  .addParam(
     'solidStaking',
     'The address of our SolidStaking contract, to stake with recipient.'
   )
   .setAction(
     async (
-      { router, weth, uniProxy, solidStaking },
+      { router, weth, solidStaking },
       { getNamedAccounts, deployments, ethers }
     ) => {
       const gasStation = await initializeGasStation(ethers.provider)
@@ -22,14 +18,13 @@ task('deploy-zap-staker', 'Deploys a SolidZapStaker contract')
       const deploymentName = await makeDeploymentName(
         router,
         weth,
-        uniProxy,
         solidStaking
       )
       const SolidZapStaker = await deployments.deploy(deploymentName, {
         ...(await gasStation.getCurrentFees()),
         contract: 'SolidZapStaker',
         from: deployer,
-        args: [router, weth, uniProxy, solidStaking],
+        args: [router, weth, solidStaking],
         log: true
       })
 
@@ -37,13 +32,12 @@ task('deploy-zap-staker', 'Deploys a SolidZapStaker contract')
     }
   )
 
-async function makeDeploymentName(router, weth, uniProxy, solidStaking) {
+async function makeDeploymentName(router, weth, solidStaking) {
   router = last4Digits(router)
   weth = last4Digits(weth)
-  uniProxy = last4Digits(uniProxy)
   solidStaking = last4Digits(solidStaking)
 
-  return `SolidZapStaker_${router}_${weth}_${uniProxy}_${solidStaking}`
+  return `SolidZapStaker_${router}_${weth}_${solidStaking}`
 }
 
 function last4Digits(address) {

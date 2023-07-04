@@ -4,8 +4,8 @@ pragma solidity 0.8.18;
 import "../../BaseTest_0_8_18.sol";
 import "../../../contracts/zap/staking/SolidZapStaker.sol";
 import "../../../contracts/interfaces/zap/ISolidZapStaker.sol";
-import "../../../contracts/interfaces/liquidity-deployer/IHypervisor_0_8_18.sol";
-import "../../../contracts/interfaces/liquidity-deployer/IUniProxy_0_8_18.sol";
+import "../../../contracts/interfaces/liquidity-deployer/IHypervisor.sol";
+import "../../../contracts/interfaces/liquidity-deployer/IUniProxy.sol";
 import "../../TestToken.sol";
 import "../MockRouter.sol";
 import "../RouterBehaviour.sol";
@@ -52,10 +52,19 @@ abstract contract BaseSolidZapStakerTest is BaseTest {
         weth = new WMATIC();
         ROUTER = address(new MockRouter(address(token0), address(token1)));
 
-        zapStaker = new SolidZapStaker(ROUTER, address(weth), IUNIPROXY, SOLIDSTAKING);
+        zapStaker = new SolidZapStaker(ROUTER, address(weth), SOLIDSTAKING);
 
         _labelAccounts();
+        mockCall_whitelistedAddress();
         _prepareZap();
+    }
+
+    function mockCall_whitelistedAddress() public {
+        vm.mockCall(
+            address(hypervisor),
+            abi.encodeWithSelector(IHypervisor.whitelistedAddress.selector),
+            abi.encode(IUNIPROXY)
+        );
     }
 
     function _expectEmit_ZapStake(

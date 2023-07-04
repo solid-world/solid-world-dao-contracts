@@ -12,10 +12,6 @@ contract StakeDoubleSwapTest is BaseSolidZapStakerTest {
         assertEq(zapStaker.weth(), address(weth));
     }
 
-    function testSetsIUniProxy() public {
-        assertEq(zapStaker.iUniProxy(), IUNIPROXY);
-    }
-
     function testSetsSolidStaking() public {
         assertEq(zapStaker.solidStaking(), SOLIDSTAKING);
     }

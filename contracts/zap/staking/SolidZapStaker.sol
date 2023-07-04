@@ -10,9 +10,8 @@ contract SolidZapStaker is BaseSolidZapStaker {
     constructor(
         address _router,
         address _weth,
-        address _iUniProxy,
         address _solidStaking
-    ) BaseSolidZapStaker(_router, _weth, _iUniProxy, _solidStaking) {}
+    ) BaseSolidZapStaker(_router, _weth, _solidStaking) {}
 
     /// @inheritdoc ISolidZapStaker
     function stakeDoubleSwap(
@@ -291,7 +290,7 @@ contract SolidZapStaker is BaseSolidZapStaker {
         view
         returns (bool isDustless, Fraction memory actualRatio)
     {
-        (uint amountStart, uint amountEnd) = IUniProxy(iUniProxy).getDepositAmount(
+        (uint amountStart, uint amountEnd) = IUniProxy(getUniProxy(hypervisor)).getDepositAmount(
             hypervisor,
             swapResults.token0._address,
             swapResults.token0.balance

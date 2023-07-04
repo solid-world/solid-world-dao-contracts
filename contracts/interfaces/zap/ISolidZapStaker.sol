@@ -31,8 +31,6 @@ interface ISolidZapStaker {
 
     function weth() external view returns (address);
 
-    function iUniProxy() external view returns (address);
-
     function solidStaking() external view returns (address);
 
     /// @notice Zap function that achieves the following:
