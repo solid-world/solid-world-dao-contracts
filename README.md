@@ -86,6 +86,17 @@ The following tasks are available in Hardhat:
    - `--sw-manager`: The address of the SolidWorldManager contract used for decollateralizing tokens.
    - `--forward-contract-batch`: The address of our ForwardContractBatchToken contract, to transfer ERC1155 to receiver.
 
+6. Deploy a new SolidZapCollateralize contract:
+   ```shell
+   yarn hardhat --network localhost deploy-zap-collateralize [OPTIONS]
+   ```
+
+   Options:
+   - `--router`: The address of the router used to perform token swaps.
+   - `--weth`: The address of WETH contract of the network.
+   - `--sw-manager`: The address of the SolidWorldManager contract used for collateralizing forward credits.
+   - `--forward-contract-batch`: The address of our ForwardContractBatchToken contract, to transfer over ERC1155 from receiver.
+
 ## Upgradable Contracts
 
 The following contracts are upgradable and managed by a `DefaultProxyAdmin` contract. The owner of the `DefaultProxyAdmin` contract is authorized to upgrade both contracts.
