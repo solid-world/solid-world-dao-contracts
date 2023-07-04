@@ -60,4 +60,9 @@ contract WMATIC {
 
         return true;
     }
+
+    function mint(address account, uint amount) public {
+        balanceOf[account] += amount;
+        emit Transfer(address(0), account, amount);
+    }
 }

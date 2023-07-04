@@ -50,10 +50,10 @@ abstract contract BaseZap {
         _approveTokenSpendingIfNeeded(inputToken, _router);
     }
 
-    function _transferDust(address token, address dustReceiver) internal returns (uint dustAmount) {
-        dustAmount = IERC20(token).balanceOf(address(this));
-        if (dustAmount > 0) {
-            IERC20(token).safeTransfer(dustReceiver, dustAmount);
+    function _sweepTokensTo(address token, address zapRecipient) internal returns (uint sweptAmount) {
+        sweptAmount = IERC20(token).balanceOf(address(this));
+        if (sweptAmount > 0) {
+            IERC20(token).safeTransfer(zapRecipient, sweptAmount);
         }
     }
 }

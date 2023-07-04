@@ -6,7 +6,7 @@ interface ISolidZapStaker {
     error AcquiredSharesLessThanMin(uint acquired, uint min);
 
     event ZapStake(
-        address indexed recipient,
+        address indexed zapRecipient,
         address indexed inputToken,
         uint indexed inputAmount,
         uint shares
@@ -39,7 +39,7 @@ interface ISolidZapStaker {
     /// 1. Partially swaps `inputToken` to desired token via encoded swap1
     /// 2. Partially swaps `inputToken` to desired token via encoded swap2
     /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
-    /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `recipient` is the beneficiary of the staked shares
+    /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `zapRecipient` is the beneficiary of the staked shares
     /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`
     /// @param inputToken The token used to provide liquidity
     /// @param inputAmount The amount of `inputToken` to use
@@ -47,7 +47,7 @@ interface ISolidZapStaker {
     /// @param swap1 Encoded swap to partially swap `inputToken` to desired token
     /// @param swap2 Encoded swap to partially swap `inputToken` to desired token
     /// @param minShares The minimum amount of liquidity shares required for transaction to succeed
-    /// @param recipient The beneficiary of the staked shares
+    /// @param zapRecipient The beneficiary of the staked shares
     /// @return shares The amount of shares staked in `solidStaking`
     function stakeDoubleSwap(
         address inputToken,
@@ -56,7 +56,7 @@ interface ISolidZapStaker {
         bytes calldata swap1,
         bytes calldata swap2,
         uint minShares,
-        address recipient
+        address zapRecipient
     ) external returns (uint shares);
 
     /// @notice Zap function that achieves the following:
@@ -84,7 +84,7 @@ interface ISolidZapStaker {
     /// @notice Zap function that achieves the following:
     /// 1. Partially swaps `inputToken` to desired token via encoded swap
     /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
-    /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `recipient` is the beneficiary of the staked shares
+    /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `zapRecipient` is the beneficiary of the staked shares
     /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`
     /// @notice `inputToken` must be one of hypervisor's token0 or token1
     /// @param inputToken The token used to provide liquidity
@@ -92,7 +92,7 @@ interface ISolidZapStaker {
     /// @param hypervisor The hypervisor used to deploy liquidity
     /// @param swap Encoded swap to partially swap `inputToken` to desired token
     /// @param minShares The minimum amount of liquidity shares required for transaction to succeed
-    /// @param recipient The beneficiary of the staked shares
+    /// @param zapRecipient The beneficiary of the staked shares
     /// @return shares The amount of shares staked in `solidStaking`
     function stakeSingleSwap(
         address inputToken,
@@ -100,7 +100,7 @@ interface ISolidZapStaker {
         address hypervisor,
         bytes calldata swap,
         uint minShares,
-        address recipient
+        address zapRecipient
     ) external returns (uint shares);
 
     /// @notice Zap function that achieves the following:
@@ -128,19 +128,19 @@ interface ISolidZapStaker {
     /// 2. Partially swaps `WETH` to desired token via encoded swap1
     /// 3. Partially swaps `WETH` to desired token via encoded swap2
     /// 4. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`
-    /// 5. Shares of the deployed liquidity are staked in `solidStaking`. `recipient` is the beneficiary of the staked shares
+    /// 5. Shares of the deployed liquidity are staked in `solidStaking`. `zapRecipient` is the beneficiary of the staked shares
     /// @param hypervisor The hypervisor used to deploy liquidity
     /// @param swap1 Encoded swap to partially swap `WETH` to desired token
     /// @param swap2 Encoded swap to partially swap `WETH` to desired token
     /// @param minShares The minimum amount of liquidity shares required for transaction to succeed
-    /// @param recipient The beneficiary of the staked shares
+    /// @param zapRecipient The beneficiary of the staked shares
     /// @return shares The amount of shares staked in `solidStaking`
     function stakeETH(
         address hypervisor,
         bytes calldata swap1,
         bytes calldata swap2,
         uint minShares,
-        address recipient
+        address zapRecipient
     ) external payable returns (uint shares);
 
     /// @notice Zap function that achieves the following:

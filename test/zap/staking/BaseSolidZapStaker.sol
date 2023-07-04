@@ -31,7 +31,7 @@ abstract contract BaseSolidZapStakerTest is BaseTest {
     ISolidZapStaker internal zapStaker;
 
     event ZapStake(
-        address indexed recipient,
+        address indexed zapRecipient,
         address indexed inputToken,
         uint indexed inputAmount,
         uint shares
@@ -59,13 +59,13 @@ abstract contract BaseSolidZapStakerTest is BaseTest {
     }
 
     function _expectEmit_ZapStake(
-        address recipient,
+        address zapRecipient,
         address _inputToken,
         uint inputAmount,
         uint shares
     ) internal {
         vm.expectEmit(true, true, true, true, address(zapStaker));
-        emit ZapStake(recipient, _inputToken, inputAmount, shares);
+        emit ZapStake(zapRecipient, _inputToken, inputAmount, shares);
     }
 
     function _expectCall_ERC20_transferFrom(address from, uint amount) internal {
@@ -118,11 +118,11 @@ abstract contract BaseSolidZapStakerTest is BaseTest {
     function _expectCall_stake(
         address token,
         uint amount,
-        address recipient
+        address zapRecipient
     ) internal {
         vm.expectCall(
             SOLIDSTAKING,
-            abi.encodeWithSignature("stake(address,uint256,address)", token, amount, recipient)
+            abi.encodeWithSignature("stake(address,uint256,address)", token, amount, zapRecipient)
         );
     }
 

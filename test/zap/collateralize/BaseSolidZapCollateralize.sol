@@ -27,6 +27,15 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
 
     ISolidZapCollateralize internal zap;
 
+    event ZapCollateralize(
+        address indexed receiver,
+        address indexed outputToken,
+        uint indexed outputAmount,
+        uint dust,
+        address dustRecipient,
+        uint categoryId
+    );
+
     function setUp() public {
         emptySwap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 0);
 
@@ -51,6 +60,13 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
         );
     }
 
+    function _expectCall_ERC1155_safeTransferFrom(address from, uint amount) internal {
+        vm.expectCall(
+            address(fcbt),
+            abi.encodeCall(IERC1155.safeTransferFrom, (from, address(zap), BATCH_ID, amount, ""))
+        );
+    }
+
     function _expectCall_ERC20_approve_maxUint(address token, address spender) internal {
         vm.expectCall(token, abi.encodeCall(IERC20.approve, (spender, type(uint256).max)));
     }
@@ -72,6 +88,22 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
 
     function _expectCall_swap(RouterBehaviour behaviour, uint acquiredAmount) internal {
         vm.expectCall(ROUTER, _encodeSwap(behaviour, acquiredAmount));
+    }
+
+    function _expectCall_withdraw(uint amount) internal {
+        vm.expectCall(address(weth), abi.encodeWithSelector(WMATIC.withdraw.selector, amount));
+    }
+
+    function _expectEmit_ZapCollateralize(
+        address receiver,
+        address _outputToken,
+        uint outputAmount,
+        uint dust,
+        address dustRecipient,
+        uint categoryId
+    ) internal {
+        vm.expectEmit(true, true, true, true, address(zap));
+        emit ZapCollateralize(receiver, _outputToken, outputAmount, dust, dustRecipient, categoryId);
     }
 
     function _expectRevert_GenericSwapError() internal {

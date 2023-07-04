@@ -65,9 +65,9 @@ abstract contract BaseSolidZapStaker is BaseZap, ISolidZapStaker, ReentrancyGuar
     function _stakeWithRecipient(
         address token,
         uint amount,
-        address recipient
+        address zapRecipient
     ) internal {
-        ISolidStakingActions(solidStaking).stake(token, amount, recipient);
+        ISolidStakingActions(solidStaking).stake(token, amount, zapRecipient);
     }
 
     function _between(
