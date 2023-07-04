@@ -22,10 +22,10 @@ contract SolidZapStaker is BaseSolidZapStaker {
         bytes calldata swap1,
         bytes calldata swap2,
         uint minShares,
-        address recipient
+        address zapRecipient
     ) external nonReentrant returns (uint) {
         _prepareToSwap(inputToken, inputAmount, router);
-        return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, recipient);
+        return _stakeDoubleSwap(inputToken, inputAmount, hypervisor, swap1, swap2, minShares, zapRecipient);
     }
 
     /// @inheritdoc ISolidZapStaker
@@ -48,9 +48,9 @@ contract SolidZapStaker is BaseSolidZapStaker {
         address hypervisor,
         bytes calldata swap,
         uint minShares,
-        address recipient
+        address zapRecipient
     ) external nonReentrant returns (uint) {
-        return _stakeSingleSwap(inputToken, inputAmount, hypervisor, swap, minShares, recipient);
+        return _stakeSingleSwap(inputToken, inputAmount, hypervisor, swap, minShares, zapRecipient);
     }
 
     /// @inheritdoc ISolidZapStaker
@@ -70,11 +70,11 @@ contract SolidZapStaker is BaseSolidZapStaker {
         bytes calldata swap1,
         bytes calldata swap2,
         uint minShares,
-        address recipient
+        address zapRecipient
     ) external payable nonReentrant returns (uint) {
         _wrap(weth, msg.value);
 
-        return _stakeDoubleSwap(weth, msg.value, hypervisor, swap1, swap2, minShares, recipient);
+        return _stakeDoubleSwap(weth, msg.value, hypervisor, swap1, swap2, minShares, zapRecipient);
     }
 
     /// @inheritdoc ISolidZapStaker
@@ -188,11 +188,11 @@ contract SolidZapStaker is BaseSolidZapStaker {
         bytes calldata swap1,
         bytes calldata swap2,
         uint minShares,
-        address recipient
+        address zapRecipient
     ) private returns (uint) {
         SwapResults memory swapResults = _doubleSwap(hypervisor, swap1, swap2);
 
-        return _stake(inputToken, inputAmount, hypervisor, minShares, recipient, swapResults);
+        return _stake(inputToken, inputAmount, hypervisor, minShares, zapRecipient, swapResults);
     }
 
     function _stakeSingleSwap(
@@ -201,11 +201,11 @@ contract SolidZapStaker is BaseSolidZapStaker {
         address hypervisor,
         bytes calldata swap,
         uint minShares,
-        address recipient
+        address zapRecipient
     ) private returns (uint) {
         SwapResults memory swapResults = _singleSwap(inputToken, inputAmount, hypervisor, swap);
 
-        return _stake(inputToken, inputAmount, hypervisor, minShares, recipient, swapResults);
+        return _stake(inputToken, inputAmount, hypervisor, minShares, zapRecipient, swapResults);
     }
 
     function _stake(
@@ -213,7 +213,7 @@ contract SolidZapStaker is BaseSolidZapStaker {
         uint inputAmount,
         address hypervisor,
         uint minShares,
-        address recipient,
+        address zapRecipient,
         SwapResults memory swapResults
     ) private returns (uint shares) {
         shares = _deployLiquidity(swapResults, hypervisor);
@@ -223,9 +223,9 @@ contract SolidZapStaker is BaseSolidZapStaker {
         }
 
         _approveTokenSpendingIfNeeded(hypervisor, solidStaking);
-        _stakeWithRecipient(hypervisor, shares, recipient);
+        _stakeWithRecipient(hypervisor, shares, zapRecipient);
 
-        emit ZapStake(recipient, inputToken, inputAmount, shares);
+        emit ZapStake(zapRecipient, inputToken, inputAmount, shares);
     }
 
     function _doubleSwap(

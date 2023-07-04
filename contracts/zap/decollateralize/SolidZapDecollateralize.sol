@@ -30,7 +30,7 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
         uint inputAmount,
         address crispToken,
         bytes calldata swap,
-        address dustReceiver,
+        address dustRecipient,
         DecollateralizeParams calldata decollateralizeParams
     ) external nonReentrant {
         _prepareToSwap(inputToken, inputAmount, router);
@@ -39,7 +39,7 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             inputAmount,
             crispToken,
             swap,
-            dustReceiver,
+            dustRecipient,
             decollateralizeParams,
             msg.sender
         );
@@ -51,9 +51,9 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
         uint inputAmount,
         address crispToken,
         bytes calldata swap,
-        address dustReceiver,
+        address dustRecipient,
         DecollateralizeParams calldata decollateralizeParams,
-        address recipient
+        address zapRecipient
     ) external nonReentrant {
         _prepareToSwap(inputToken, inputAmount, router);
         _zapDecollateralize(
@@ -61,9 +61,9 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             inputAmount,
             crispToken,
             swap,
-            dustReceiver,
+            dustRecipient,
             decollateralizeParams,
-            recipient
+            zapRecipient
         );
     }
 
@@ -71,7 +71,7 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
     function zapDecollateralizeETH(
         address crispToken,
         bytes calldata swap,
-        address dustReceiver,
+        address dustRecipient,
         DecollateralizeParams calldata decollateralizeParams
     ) external payable nonReentrant {
         _wrap(weth, msg.value);
@@ -80,7 +80,7 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             msg.value,
             crispToken,
             swap,
-            dustReceiver,
+            dustRecipient,
             decollateralizeParams,
             msg.sender
         );
@@ -90,9 +90,9 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
     function zapDecollateralizeETH(
         address crispToken,
         bytes calldata swap,
-        address dustReceiver,
+        address dustRecipient,
         DecollateralizeParams calldata decollateralizeParams,
-        address recipient
+        address zapRecipient
     ) external payable nonReentrant {
         _wrap(weth, msg.value);
         _zapDecollateralize(
@@ -100,9 +100,9 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             msg.value,
             crispToken,
             swap,
-            dustReceiver,
+            dustRecipient,
             decollateralizeParams,
-            recipient
+            zapRecipient
         );
     }
 
@@ -111,9 +111,9 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
         uint inputAmount,
         address crispToken,
         bytes calldata swap,
-        address dustReceiver,
+        address dustRecipient,
         DecollateralizeParams calldata decollateralizeParams,
-        address recipient
+        address zapRecipient
     ) private {
         _swapViaRouter(router, swap);
         _approveTokenSpendingIfNeeded(crispToken, swManager);
@@ -124,14 +124,14 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
         );
         IERC1155(forwardContractBatch).safeBatchTransferFrom(
             address(this),
-            recipient,
+            zapRecipient,
             decollateralizeParams.batchIds,
             decollateralizeParams.amountsOutMin,
             ""
         );
-        uint dustAmount = _sweepTokensTo(crispToken, dustReceiver);
+        uint dustAmount = _sweepTokensTo(crispToken, dustRecipient);
         uint categoryId = SWManager(swManager).getBatchCategory(decollateralizeParams.batchIds[0]);
 
-        emit ZapDecollateralize(recipient, inputToken, inputAmount, dustAmount, dustReceiver, categoryId);
+        emit ZapDecollateralize(zapRecipient, inputToken, inputAmount, dustAmount, dustRecipient, categoryId);
     }
 }

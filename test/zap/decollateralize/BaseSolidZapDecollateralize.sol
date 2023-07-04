@@ -32,7 +32,7 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
         address indexed inputToken,
         uint indexed inputAmount,
         uint dust,
-        address dustReceiver,
+        address dustRecipient,
         uint categoryId
     );
 
@@ -127,11 +127,11 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
         address _inputToken,
         uint inputAmount,
         uint dust,
-        address dustReceiver,
+        address dustRecipient,
         uint categoryId
     ) internal {
         vm.expectEmit(true, true, true, true, address(zap));
-        emit ZapDecollateralize(receiver, _inputToken, inputAmount, dust, dustReceiver, categoryId);
+        emit ZapDecollateralize(receiver, _inputToken, inputAmount, dust, dustRecipient, categoryId);
     }
 
     function _labelAccounts() private {

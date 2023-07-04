@@ -68,4 +68,8 @@ abstract contract BaseSolidZapCollateralize is
         // ERC165 && ERC1155TokenReceiver support
         return interfaceId == 0x01ffc9a7 || interfaceId == 0x4e2312e0;
     }
+
+    receive() external payable {}
+
+    fallback() external payable {}
 }

@@ -150,7 +150,7 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
         assertEq(actualOutputTokenAmount, expectedOutputTokenAmount);
     }
 
-    function testZapCollateralize_transfersCrispTokenDustToDustReceiver() public {
+    function testZapCollateralize_transfersCrispTokenDustToDustRecipient() public {
         uint amountIn = 100;
         uint dust = 1 ether;
 
@@ -167,5 +167,58 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
 
         uint actualDustReceived = crispToken.balanceOf(testAccount1);
         assertEq(actualDustReceived, dust);
+    }
+
+    function testZapCollateralize_emitsEvent() public {
+        uint amountIn = 100;
+        uint amountOutMin = 100 ether;
+        uint expectedOutputTokenAmount = 50 ether;
+        bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, expectedOutputTokenAmount);
+
+        vm.prank(testAccount0);
+        _expectEmit_ZapCollateralize(
+            testAccount0,
+            address(outputToken),
+            expectedOutputTokenAmount,
+            amountOutMin,
+            testAccount1,
+            1
+        );
+        zap.zapCollateralize(
+            address(outputToken),
+            address(crispToken),
+            BATCH_ID,
+            amountIn,
+            amountOutMin,
+            swap,
+            testAccount1
+        );
+    }
+
+    function testZapCollateralize_emitsEvent_customRecipient() public {
+        uint amountIn = 100;
+        uint amountOutMin = 100 ether;
+        uint expectedOutputTokenAmount = 50 ether;
+        bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, expectedOutputTokenAmount);
+
+        vm.prank(testAccount0);
+        _expectEmit_ZapCollateralize(
+            testAccount1,
+            address(outputToken),
+            expectedOutputTokenAmount,
+            amountOutMin,
+            testAccount1,
+            1
+        );
+        zap.zapCollateralize(
+            address(outputToken),
+            address(crispToken),
+            BATCH_ID,
+            amountIn,
+            amountOutMin,
+            swap,
+            testAccount1,
+            testAccount1
+        );
     }
 }
