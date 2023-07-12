@@ -126,12 +126,25 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             address(this),
             zapRecipient,
             decollateralizeParams.batchIds,
-            decollateralizeParams.amountsOutMin,
+            _getDecollateralizedForwardCreditAmounts(decollateralizeParams.batchIds),
             ""
         );
         uint dustAmount = _sweepTokensTo(crispToken, dustRecipient);
         uint categoryId = SWManager(swManager).getBatchCategory(decollateralizeParams.batchIds[0]);
 
         emit ZapDecollateralize(zapRecipient, inputToken, inputAmount, dustAmount, dustRecipient, categoryId);
+    }
+
+    function _getDecollateralizedForwardCreditAmounts(uint[] calldata batchIds)
+        private
+        view
+        returns (uint[] memory decollateralizedForwardCreditAmounts)
+    {
+        address[] memory addresses = new address[](1);
+        addresses[0] = address(this);
+        decollateralizedForwardCreditAmounts = IERC1155(forwardContractBatch).balanceOfBatch(
+            addresses,
+            batchIds
+        );
     }
 }
