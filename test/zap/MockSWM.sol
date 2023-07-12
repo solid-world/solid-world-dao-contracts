@@ -30,7 +30,8 @@ contract MockSWM is IERC1155Receiver {
     ) external {
         for (uint i; i < batchIds.length; i++) {
             crispToken.transferFrom(msg.sender, address(this), amountsIn[i]);
-            fcbt.mint(msg.sender, batchIds[i], amountsOutMin[i], "");
+            // Transfer 1 extra forward credit to check if all the resulted forward credits are transferred to the user, not just amountOutMin
+            fcbt.mint(msg.sender, batchIds[i], amountsOutMin[i] + 1, "");
         }
     }
 

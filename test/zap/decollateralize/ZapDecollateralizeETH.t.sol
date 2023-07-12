@@ -67,13 +67,13 @@ contract ZapDecollateralizeETHTest is BaseSolidZapDecollateralizeTest {
 
         hoax(testAccount0, 1 ether);
         _expectCall_bulkDecollateralizeTokens(params.batchIds, params.amountsIn, params.amountsOutMin);
-        _expectCall_onERC1155Received(SWM, address(0), params.batchIds[0], params.amountsOutMin[0], "");
+        _expectCall_onERC1155Received(SWM, address(0), params.batchIds[0], params.amountsOutMin[0] + 1, "");
         zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), swap, testAccount1, params);
 
         uint actualCrispBalance = crispToken.balanceOf(address(zap));
         assertEq(actualCrispBalance, 0);
         uint[] memory actualCreditsBalance = fcbt.balanceOfBatch(_toArray(testAccount0), params.batchIds);
-        assertEq(actualCreditsBalance, params.amountsOutMin);
+        assertEq(actualCreditsBalance, _toArray(params.amountsOutMin[0] + 1));
     }
 
     function testZapDecollateralizeETH_transfersDust() public {
