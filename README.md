@@ -23,6 +23,11 @@ To deploy the smart contracts, follow these steps:
    ```
    (The second command is required due to a [bug](https://github.com/wighawag/hardhat-deploy/issues/253) that prevents contract verification with linked libraries.)
 
+4. To verify the contracts on Sourcify, run the following command:
+    ```shell
+    yarn hardhat --network <network> sourcify
+    ```
+
 ## Hardhat Tasks
 
 The following tasks are available in Hardhat:
