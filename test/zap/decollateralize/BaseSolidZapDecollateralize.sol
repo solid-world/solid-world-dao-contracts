@@ -22,7 +22,7 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
 
     address internal testAccount0;
     address internal testAccount1;
-    bytes internal emptySwap;
+    bytes internal basicSwap;
 
     ISolidZapDecollateralize internal zap;
     ISolidZapDecollateralize.DecollateralizeParams internal emptyParams;
@@ -37,7 +37,7 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
     );
 
     function setUp() public {
-        emptySwap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 0);
+        basicSwap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 1);
         emptyParams = ISolidZapDecollateralize.DecollateralizeParams({
             batchIds: _toArray(0),
             amountsIn: _toArray(0),

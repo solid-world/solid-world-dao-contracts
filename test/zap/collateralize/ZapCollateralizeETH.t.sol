@@ -5,17 +5,21 @@ import "./BaseSolidZapCollateralize.sol";
 
 contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
     function testZapCollateralizeETH_transferForwardCreditsFromUserToZap() public {
+        _prepareMinWethOutputAmount();
+
         uint amountIn = 100;
 
         vm.prank(testAccount0);
         _expectCall_ERC1155_safeTransferFrom(testAccount0, amountIn);
-        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, amountIn, 0, emptySwap, testAccount1);
+        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, amountIn, 0, basicSwap, testAccount1);
 
         uint userBalance = fcbt.balanceOf(testAccount0, BATCH_ID);
         assertEq(userBalance, INITIAL_TOKEN_AMOUNT - amountIn);
     }
 
     function testZapCollateralizeETH_collateralizesTheForwardCredits() public {
+        _prepareMinWethOutputAmount();
+
         uint amountIn = 100;
         uint amountOutMin = 100 ether;
 
@@ -26,7 +30,7 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
             BATCH_ID,
             amountIn,
             amountOutMin,
-            emptySwap,
+            basicSwap,
             testAccount1
         );
 
@@ -35,27 +39,33 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
     }
 
     function testZapCollateralizeETH_approvesRouterToSpendCrispToken() public {
+        _prepareMinWethOutputAmount();
+
         vm.prank(testAccount0);
         _expectCall_ERC20_approve_maxUint(address(crispToken), ROUTER);
-        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, 0, 0, emptySwap, testAccount1);
+        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, 0, 0, basicSwap, testAccount1);
 
         uint actual = crispToken.allowance(address(zap), ROUTER);
         assertEq(actual, type(uint).max);
     }
 
     function testZapCollateralizeETH_doesNotApproveRouterToSpendCrispTokenIfAlreadyApproved() public {
+        _prepareMinWethOutputAmount();
+
         vm.prank(address(zap));
         crispToken.approve(ROUTER, type(uint).max);
 
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(crispToken), ROUTER);
-        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, 0, 0, emptySwap, testAccount1);
+        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, 0, 0, basicSwap, testAccount1);
     }
 
     function testZapCollateralizeETH_executesSwap() public {
+        _prepareMinWethOutputAmount();
+
         vm.prank(testAccount0);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
-        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, 0, 0, emptySwap, testAccount1);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 1);
+        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, 0, 0, basicSwap, testAccount1);
     }
 
     function testZapCollateralizeETH_executesSwap_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
@@ -75,21 +85,17 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
     }
 
     function testZapCollateralizeETH_unwrapsWETH() public {
-        uint wethOutputAmount = 1 ether;
-        vm.deal(address(weth), 1 ether);
-        weth.mint(address(zap), wethOutputAmount);
+        uint wethOutputAmount = _prepareWethOutputAmount(1 ether);
 
         vm.prank(testAccount0);
         _expectCall_withdraw(wethOutputAmount);
-        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, 0, 0, emptySwap, testAccount1);
+        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, 0, 0, basicSwap, testAccount1);
     }
 
     function testZapCollateralizeETH_transfersETHBalanceToMsgSender() public {
         uint amountIn = 100;
         uint amountOutMin = 100 ether;
-        uint wethOutputAmount = 1 ether;
-        vm.deal(address(weth), 1 ether);
-        weth.mint(address(zap), wethOutputAmount);
+        uint wethOutputAmount = _prepareWethOutputAmount(1 ether);
 
         vm.prank(testAccount0);
         zap.zapCollateralizeETH(
@@ -97,7 +103,7 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
             BATCH_ID,
             amountIn,
             amountOutMin,
-            emptySwap,
+            basicSwap,
             testAccount1
         );
 
@@ -108,9 +114,7 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
     function testZapCollateralizeETH_transfersETHTokenBalanceToReceiver() public {
         uint amountIn = 100;
         uint amountOutMin = 100 ether;
-        uint wethOutputAmount = 1 ether;
-        vm.deal(address(weth), 1 ether);
-        weth.mint(address(zap), wethOutputAmount);
+        uint wethOutputAmount = _prepareWethOutputAmount(1 ether);
 
         vm.prank(testAccount0);
         zap.zapCollateralizeETH(
@@ -118,7 +122,7 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
             BATCH_ID,
             amountIn,
             amountOutMin,
-            emptySwap,
+            basicSwap,
             testAccount1,
             testAccount1
         );
@@ -128,11 +132,13 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
     }
 
     function testZapCollateralizeETH_transfersCrispTokenDustToDustRecipient() public {
+        _prepareMinWethOutputAmount();
+
         uint amountIn = 100;
         uint dust = 1 ether;
 
         vm.prank(testAccount0);
-        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, amountIn, dust, emptySwap, testAccount1);
+        zap.zapCollateralizeETH(address(crispToken), BATCH_ID, amountIn, dust, basicSwap, testAccount1);
 
         uint actualDustReceived = crispToken.balanceOf(testAccount1);
         assertEq(actualDustReceived, dust);
@@ -141,9 +147,7 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
     function testZapCollateralizeETH_emitsEvent() public {
         uint amountIn = 100;
         uint amountOutMin = 100 ether;
-        uint wethOutputAmount = 1 ether;
-        vm.deal(address(weth), 1 ether);
-        weth.mint(address(zap), wethOutputAmount);
+        uint wethOutputAmount = _prepareWethOutputAmount(1 ether);
 
         vm.prank(testAccount0);
         _expectEmit_ZapCollateralize(
@@ -159,7 +163,7 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
             BATCH_ID,
             amountIn,
             amountOutMin,
-            emptySwap,
+            basicSwap,
             testAccount1
         );
     }
@@ -167,9 +171,7 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
     function testZapCollateralizeETH_emitsEvent_customRecipient() public {
         uint amountIn = 100;
         uint amountOutMin = 100 ether;
-        uint wethOutputAmount = 1 ether;
-        vm.deal(address(weth), 1 ether);
-        weth.mint(address(zap), wethOutputAmount);
+        uint wethOutputAmount = _prepareWethOutputAmount(1 ether);
 
         vm.prank(testAccount0);
         _expectEmit_ZapCollateralize(
@@ -185,7 +187,7 @@ contract ZapCollateralizeETHTest is BaseSolidZapCollateralizeTest {
             BATCH_ID,
             amountIn,
             amountOutMin,
-            emptySwap,
+            basicSwap,
             testAccount1,
             testAccount1
         );

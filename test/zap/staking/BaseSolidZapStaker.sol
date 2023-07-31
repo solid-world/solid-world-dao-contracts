@@ -25,8 +25,8 @@ abstract contract BaseSolidZapStakerTest is BaseTest {
     TestToken internal token1;
     WMATIC internal weth;
 
-    bytes internal emptySwap1;
-    bytes internal emptySwap2;
+    bytes internal basicSwap0;
+    bytes internal basicSwap1;
 
     ISolidZapStaker internal zapStaker;
 
@@ -38,8 +38,8 @@ abstract contract BaseSolidZapStakerTest is BaseTest {
     );
 
     function setUp() public {
-        emptySwap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 0);
-        emptySwap2 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, 0);
+        basicSwap0 = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 1);
+        basicSwap1 = _encodeSwap(RouterBehaviour.MINTS_TOKEN1, 1);
 
         IUNIPROXY = vm.addr(1);
         SOLIDSTAKING = vm.addr(2);

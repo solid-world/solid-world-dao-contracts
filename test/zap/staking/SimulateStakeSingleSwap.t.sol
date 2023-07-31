@@ -7,21 +7,21 @@ contract SimulateStakeSingleSwapTest is BaseSolidZapStakerTest {
     function testSimulateStakeSingleSwap_revertsIfInputTokenIsNotAHypervisorToken() public {
         vm.prank(testAccount0);
         _expectRevert_InvalidInput();
-        zapStaker.simulateStakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1);
+        zapStaker.simulateStakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap0);
     }
 
     function testSimulateStakeSingleSwap_transfersOverTheInputTokenAmount() public {
         _overwriteToken0();
         vm.prank(testAccount0);
         _expectCall_ERC20_transferFrom(testAccount0, 1000);
-        zapStaker.simulateStakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1);
+        zapStaker.simulateStakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1);
     }
 
     function testSimulateStakeSingleSwap_approvesRouterToSpendInputToken() public {
         _overwriteToken0();
         vm.prank(testAccount0);
         _expectCall_ERC20_approve_maxUint(address(inputToken), ROUTER);
-        zapStaker.simulateStakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1);
+        zapStaker.simulateStakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1);
 
         uint actual = inputToken.allowance(address(zapStaker), ROUTER);
         assertEq(actual, type(uint).max);
@@ -34,14 +34,14 @@ contract SimulateStakeSingleSwapTest is BaseSolidZapStakerTest {
 
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(inputToken), ROUTER);
-        zapStaker.simulateStakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1);
+        zapStaker.simulateStakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1);
     }
 
     function testSimulateStakeSingleSwap_executesSwap() public {
         _overwriteToken0();
         vm.prank(testAccount0);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
-        zapStaker.simulateStakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN1, 1);
+        zapStaker.simulateStakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1);
     }
 
     function testSimulateStakeSingleSwap_executesSwap_revertsWithGenericErrorIfRouterGivesEmptyReason()

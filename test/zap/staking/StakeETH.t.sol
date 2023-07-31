@@ -12,7 +12,7 @@ contract StakeETHTest is BaseSolidZapStakerTest {
         uint wethBalanceBefore = weth.balanceOf(address(zapStaker));
 
         hoax(testAccount0, 1 ether);
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
 
         uint wethBalanceAfter = weth.balanceOf(address(zapStaker));
         assertEq(wethBalanceAfter - wethBalanceBefore, 1000);
@@ -21,8 +21,8 @@ contract StakeETHTest is BaseSolidZapStakerTest {
 
     function testStakeETH_executesSwap1() public {
         hoax(testAccount0, 1 ether);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 1);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
     }
 
     function testStakeETH_executesSwap1_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
@@ -30,7 +30,7 @@ contract StakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         _expectRevert_GenericSwapError();
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), swap1, emptySwap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), swap1, basicSwap1, 0);
     }
 
     function testStakeETH_executesSwap1_revertsWithProvidedReason() public {
@@ -38,13 +38,13 @@ contract StakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         vm.expectRevert("invalid_swap");
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), swap1, emptySwap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), swap1, basicSwap1, 0);
     }
 
     function testStakeETH_executesSwap2() public {
         hoax(testAccount0, 1 ether);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN1, 0);
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN1, 1);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
     }
 
     function testStakeETH_executesSwap2_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
@@ -52,7 +52,7 @@ contract StakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         _expectRevert_GenericSwapError();
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, swap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, swap2, 0);
     }
 
     function testStakeETH_executesSwap2_revertsWithProvidedReason() public {
@@ -60,13 +60,13 @@ contract StakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         vm.expectRevert("invalid_swap");
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, swap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, swap2, 0);
     }
 
     function testStakeETH_approvesHypervisorToSpendToken0() public {
         hoax(testAccount0, 1 ether);
         _expectCall_ERC20_approve_maxUint(address(token0), address(hypervisor));
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
 
         uint actual = token0.allowance(address(zapStaker), address(hypervisor));
         assertEq(actual, type(uint).max);
@@ -78,13 +78,13 @@ contract StakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         _doNotExpectCall_ERC20_approve_maxUint(address(token0), address(hypervisor));
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
     }
 
     function testStakeETH_approvesHypervisorToSpendToken1() public {
         hoax(testAccount0, 1 ether);
         _expectCall_ERC20_approve_maxUint(address(token1), address(hypervisor));
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
 
         uint actual = token1.allowance(address(zapStaker), address(hypervisor));
         assertEq(actual, type(uint).max);
@@ -96,7 +96,7 @@ contract StakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         _doNotExpectCall_ERC20_approve_maxUint(address(token1), address(hypervisor));
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
     }
 
     function testStakeETH_depositsViaIUniProxy_exactTokenAmountsAfterSwaps() public {
@@ -143,7 +143,7 @@ contract StakeETHTest is BaseSolidZapStakerTest {
     function testStakeETH_approvesSolidStakingToSpendShares() public {
         hoax(testAccount0, 1 ether);
         _expectCall_ERC20_approve_maxUint(address(hypervisor), address(SOLIDSTAKING));
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
 
         uint actual = hypervisor.allowance(address(zapStaker), address(SOLIDSTAKING));
         assertEq(actual, type(uint).max);
@@ -155,7 +155,7 @@ contract StakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         _doNotExpectCall_ERC20_approve_maxUint(address(hypervisor), address(SOLIDSTAKING));
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
     }
 
     function testStakeETH_stakesSharesWithRecipient() public {
@@ -164,7 +164,7 @@ contract StakeETHTest is BaseSolidZapStakerTest {
         hoax(testAccount0, 1 ether);
         _mockUniProxy_deposit(sharesMinted);
         _expectCall_stake(address(hypervisor), sharesMinted, testAccount0);
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
     }
 
     function testStakeETH_stakesSharesWithSpecifiedRecipient() public {
@@ -173,7 +173,7 @@ contract StakeETHTest is BaseSolidZapStakerTest {
         hoax(testAccount0, 1 ether);
         _mockUniProxy_deposit(sharesMinted);
         _expectCall_stake(address(hypervisor), sharesMinted, testAccount1);
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0, testAccount1);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0, testAccount1);
     }
 
     function testStakeETH_returnsFinalStakedSharesAmount() public {
@@ -181,7 +181,7 @@ contract StakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         _mockUniProxy_deposit(sharesMinted);
-        uint actual = zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        uint actual = zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
 
         assertEq(actual, sharesMinted);
     }
@@ -192,6 +192,6 @@ contract StakeETHTest is BaseSolidZapStakerTest {
         hoax(testAccount0, 1 ether);
         _mockUniProxy_deposit(sharesMinted);
         _expectEmit_ZapStake(testAccount0, address(weth), 1000, sharesMinted);
-        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2, 0);
+        zapStaker.stakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1, 0);
     }
 }

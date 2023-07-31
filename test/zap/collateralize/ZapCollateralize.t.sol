@@ -15,7 +15,7 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
             BATCH_ID,
             amountIn,
             0,
-            emptySwap,
+            basicSwap,
             testAccount1
         );
 
@@ -35,7 +35,7 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
             BATCH_ID,
             amountIn,
             amountOutMin,
-            emptySwap,
+            basicSwap,
             testAccount1
         );
 
@@ -52,7 +52,7 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
             BATCH_ID,
             0,
             0,
-            emptySwap,
+            basicSwap,
             testAccount1
         );
 
@@ -72,21 +72,21 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
             BATCH_ID,
             0,
             0,
-            emptySwap,
+            basicSwap,
             testAccount1
         );
     }
 
     function testZapCollateralize_executesSwap() public {
         vm.prank(testAccount0);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 1);
         zap.zapCollateralize(
             address(outputToken),
             address(crispToken),
             BATCH_ID,
             0,
             0,
-            emptySwap,
+            basicSwap,
             testAccount1
         );
     }
@@ -161,7 +161,7 @@ contract ZapCollateralizeTest is BaseSolidZapCollateralizeTest {
             BATCH_ID,
             amountIn,
             dust,
-            emptySwap,
+            basicSwap,
             testAccount1
         );
 

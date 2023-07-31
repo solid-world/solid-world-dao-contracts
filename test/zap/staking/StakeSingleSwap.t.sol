@@ -7,21 +7,21 @@ contract StakeSingleSwapTest is BaseSolidZapStakerTest {
     function testStakeSingleSwap_revertsIfInputTokenIsNotAHypervisorToken() public {
         vm.prank(testAccount0);
         _expectRevert_InvalidInput();
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap0, 0);
     }
 
     function testStakeSingleSwap_transfersOverTheInputTokenAmount() public {
         _overwriteToken0();
         vm.prank(testAccount0);
         _expectCall_ERC20_transferFrom(testAccount0, 1000);
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1, 0);
     }
 
     function testStakeSingleSwap_approvesRouterToSpendInputToken() public {
         _overwriteToken0();
         vm.prank(testAccount0);
         _expectCall_ERC20_approve_maxUint(address(inputToken), ROUTER);
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1, 0);
 
         uint actual = inputToken.allowance(address(zapStaker), ROUTER);
         assertEq(actual, type(uint).max);
@@ -34,14 +34,14 @@ contract StakeSingleSwapTest is BaseSolidZapStakerTest {
 
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(inputToken), ROUTER);
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1, 0);
     }
 
     function testStakeSingleSwap_executesSwap() public {
         _overwriteToken0();
         vm.prank(testAccount0);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN1, 1);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1, 0);
     }
 
     function testStakeSingleSwap_executesSwap_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
@@ -67,7 +67,7 @@ contract StakeSingleSwapTest is BaseSolidZapStakerTest {
 
         vm.prank(testAccount0);
         _expectCall_ERC20_approve_maxUint(address(token0), address(hypervisor));
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1, 0);
 
         uint actual = token0.allowance(address(zapStaker), address(hypervisor));
         assertEq(actual, type(uint).max);
@@ -80,14 +80,14 @@ contract StakeSingleSwapTest is BaseSolidZapStakerTest {
 
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(token0), address(hypervisor));
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1, 0);
     }
 
     function testStakeSingleSwap_approvesHypervisorToSpendToken1() public {
         _overwriteToken0();
         vm.prank(testAccount0);
         _expectCall_ERC20_approve_maxUint(address(token1), address(hypervisor));
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1, 0);
 
         uint actual = token1.allowance(address(zapStaker), address(hypervisor));
         assertEq(actual, type(uint).max);
@@ -100,7 +100,7 @@ contract StakeSingleSwapTest is BaseSolidZapStakerTest {
 
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(token1), address(hypervisor));
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1, 0);
     }
 
     function testStakeSingleSwap_depositsViaIUniProxy_exactTokenAmountsAfterSwap() public {
@@ -141,7 +141,7 @@ contract StakeSingleSwapTest is BaseSolidZapStakerTest {
         _overwriteToken0();
         vm.prank(testAccount0);
         _expectCall_ERC20_approve_maxUint(address(hypervisor), address(SOLIDSTAKING));
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1, 0);
 
         uint actual = hypervisor.allowance(address(zapStaker), address(SOLIDSTAKING));
         assertEq(actual, type(uint).max);
@@ -154,7 +154,7 @@ contract StakeSingleSwapTest is BaseSolidZapStakerTest {
 
         vm.prank(testAccount0);
         _doNotExpectCall_ERC20_approve_maxUint(address(hypervisor), address(SOLIDSTAKING));
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1, 0);
     }
 
     function testStakeSingleSwap_stakesSharesWithRecipient() public {
@@ -164,7 +164,7 @@ contract StakeSingleSwapTest is BaseSolidZapStakerTest {
         vm.prank(testAccount0);
         _mockUniProxy_deposit(sharesMinted);
         _expectCall_stake(address(hypervisor), sharesMinted, testAccount0);
-        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), 1000, address(hypervisor), basicSwap1, 0);
     }
 
     function testStakeSingleSwap_stakesSharesWithSpecifiedRecipient() public {
@@ -178,7 +178,7 @@ contract StakeSingleSwapTest is BaseSolidZapStakerTest {
             address(inputToken),
             1000,
             address(hypervisor),
-            emptySwap1,
+            basicSwap1,
             0,
             testAccount1
         );
@@ -194,7 +194,7 @@ contract StakeSingleSwapTest is BaseSolidZapStakerTest {
             address(inputToken),
             1000,
             address(hypervisor),
-            emptySwap1,
+            basicSwap1,
             0
         );
 
@@ -209,6 +209,6 @@ contract StakeSingleSwapTest is BaseSolidZapStakerTest {
         vm.prank(testAccount0);
         _mockUniProxy_deposit(sharesMinted);
         _expectEmit_ZapStake(testAccount0, address(inputToken), inputAmount, sharesMinted);
-        zapStaker.stakeSingleSwap(address(inputToken), inputAmount, address(hypervisor), emptySwap1, 0);
+        zapStaker.stakeSingleSwap(address(inputToken), inputAmount, address(hypervisor), basicSwap1, 0);
     }
 }
