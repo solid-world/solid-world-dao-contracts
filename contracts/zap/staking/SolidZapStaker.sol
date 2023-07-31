@@ -246,6 +246,10 @@ contract SolidZapStaker is BaseSolidZapStaker {
             token1Address
         );
 
+        if (token0BalanceAfter <= token0BalanceBefore || token1BalanceAfter <= token1BalanceBefore) {
+            revert InvalidSwap();
+        }
+
         swapResults.token0._address = token0Address;
         swapResults.token0.balance = token0BalanceAfter - token0BalanceBefore;
 
@@ -277,6 +281,10 @@ contract SolidZapStaker is BaseSolidZapStaker {
             token0Address,
             token1Address
         );
+
+        if (token0BalanceAfter <= token0BalanceBefore || token1BalanceAfter <= token1BalanceBefore) {
+            revert InvalidSwap();
+        }
 
         swapResults.token0._address = token0Address;
         swapResults.token0.balance = token0BalanceAfter - token0BalanceBefore;

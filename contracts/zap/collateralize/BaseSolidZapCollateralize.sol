@@ -69,7 +69,15 @@ abstract contract BaseSolidZapCollateralize is
         return interfaceId == 0x01ffc9a7 || interfaceId == 0x4e2312e0;
     }
 
-    receive() external payable {}
+    receive() external payable {
+        if (msg.sender != weth) {
+            revert ETHTransferFailed();
+        }
+    }
 
-    fallback() external payable {}
+    fallback() external payable {
+        if (msg.sender != weth) {
+            revert ETHTransferFailed();
+        }
+    }
 }

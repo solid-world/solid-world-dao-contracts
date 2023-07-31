@@ -4,6 +4,7 @@ pragma solidity 0.8.18;
 /// @author Solid World
 interface ISolidZapStaker {
     error AcquiredSharesLessThanMin(uint acquired, uint min);
+    error InvalidSwap();
 
     event ZapStake(
         address indexed zapRecipient,

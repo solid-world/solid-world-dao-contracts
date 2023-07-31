@@ -12,6 +12,7 @@ abstract contract BaseZap {
 
     error GenericSwapError();
     error InvalidInput();
+    error SweepAmountZero();
 
     function _swapViaRouter(address router, bytes calldata encodedSwap) internal {
         (bool success, bytes memory retData) = router.call(encodedSwap);
@@ -51,7 +52,19 @@ abstract contract BaseZap {
     }
 
     function _sweepTokensTo(address token, address zapRecipient) internal returns (uint sweptAmount) {
+        sweptAmount = _sweepTokensTo(token, zapRecipient, false);
+    }
+
+    function _sweepTokensTo(
+        address token,
+        address zapRecipient,
+        bool revertOnSweepAmountZero
+    ) internal returns (uint sweptAmount) {
         sweptAmount = IERC20(token).balanceOf(address(this));
+        if (sweptAmount == 0 && revertOnSweepAmountZero) {
+            revert SweepAmountZero();
+        }
+
         if (sweptAmount > 0) {
             IERC20(token).safeTransfer(zapRecipient, sweptAmount);
         }

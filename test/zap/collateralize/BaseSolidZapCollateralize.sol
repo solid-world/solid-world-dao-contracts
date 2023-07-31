@@ -23,7 +23,7 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
 
     address internal testAccount0;
     address internal testAccount1;
-    bytes internal emptySwap;
+    bytes internal basicSwap;
 
     ISolidZapCollateralize internal zap;
 
@@ -37,7 +37,7 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
     );
 
     function setUp() public {
-        emptySwap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 0);
+        basicSwap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, 1);
 
         testAccount0 = vm.addr(3);
         testAccount1 = vm.addr(4);
@@ -120,6 +120,16 @@ abstract contract BaseSolidZapCollateralizeTest is BaseTest {
         returns (bytes memory)
     {
         return abi.encodeWithSignature("swap(uint256,uint256)", uint(behaviour), acquiredAmount);
+    }
+
+    function _prepareMinWethOutputAmount() internal returns (uint) {
+        return _prepareWethOutputAmount(1);
+    }
+
+    function _prepareWethOutputAmount(uint wethOutputAmount) internal returns (uint) {
+        vm.deal(address(weth), wethOutputAmount);
+        weth.mint(address(zap), wethOutputAmount);
+        return wethOutputAmount;
     }
 
     function _labelAccounts() private {

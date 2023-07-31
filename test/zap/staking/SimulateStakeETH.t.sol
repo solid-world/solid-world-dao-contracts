@@ -8,7 +8,7 @@ contract SimulateStakeETHTest is BaseSolidZapStakerTest {
         uint wethBalanceBefore = weth.balanceOf(address(zapStaker));
 
         hoax(testAccount0, 1 ether);
-        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2);
+        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1);
 
         uint wethBalanceAfter = weth.balanceOf(address(zapStaker));
         assertEq(wethBalanceAfter - wethBalanceBefore, 1000);
@@ -17,8 +17,8 @@ contract SimulateStakeETHTest is BaseSolidZapStakerTest {
 
     function testSimulateStakeETH_executesSwap1() public {
         hoax(testAccount0, 1 ether);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
-        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 1);
+        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1);
     }
 
     function testSimulateStakeETH_executesSwap1_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
@@ -26,7 +26,7 @@ contract SimulateStakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         _expectRevert_GenericSwapError();
-        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), swap1, emptySwap2);
+        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), swap1, basicSwap1);
     }
 
     function testSimulateStakeETH_executesSwap1_revertsWithProvidedReason() public {
@@ -34,13 +34,13 @@ contract SimulateStakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         vm.expectRevert("invalid_swap");
-        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), swap1, emptySwap2);
+        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), swap1, basicSwap1);
     }
 
     function testSimulateStakeETH_executesSwap2() public {
         hoax(testAccount0, 1 ether);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN1, 0);
-        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), emptySwap1, emptySwap2);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN1, 1);
+        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), basicSwap0, basicSwap1);
     }
 
     function testSimulateStakeETH_executesSwap2_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
@@ -48,7 +48,7 @@ contract SimulateStakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         _expectRevert_GenericSwapError();
-        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), emptySwap1, swap2);
+        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), basicSwap0, swap2);
     }
 
     function testSimulateStakeETH_executesSwap2_revertsWithProvidedReason() public {
@@ -56,7 +56,7 @@ contract SimulateStakeETHTest is BaseSolidZapStakerTest {
 
         hoax(testAccount0, 1 ether);
         vm.expectRevert("invalid_swap");
-        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), emptySwap1, swap2);
+        zapStaker.simulateStakeETH{ value: 1000 }(address(hypervisor), basicSwap0, swap2);
     }
 
     function testSimulateStakeETH_callsIUniProxyForCurrentRatio() public {

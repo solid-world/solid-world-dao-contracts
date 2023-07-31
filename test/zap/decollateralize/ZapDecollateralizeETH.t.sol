@@ -8,7 +8,7 @@ contract ZapDecollateralizeETHTest is BaseSolidZapDecollateralizeTest {
         uint wethBalanceBefore = weth.balanceOf(address(zap));
 
         hoax(testAccount0, 1 ether);
-        zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), emptySwap, testAccount1, emptyParams);
+        zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), basicSwap, testAccount1, emptyParams);
 
         uint wethBalanceAfter = weth.balanceOf(address(zap));
 
@@ -18,8 +18,8 @@ contract ZapDecollateralizeETHTest is BaseSolidZapDecollateralizeTest {
 
     function testZapDecollateralizeETH_executesSwap() public {
         hoax(testAccount0, 1 ether);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
-        zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), emptySwap, testAccount1, emptyParams);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 1);
+        zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), basicSwap, testAccount1, emptyParams);
     }
 
     function testZapDecollateralizeETH_executesSwap_revertsWithGenericErrorIfRouterGivesEmptyReason() public {
@@ -41,7 +41,7 @@ contract ZapDecollateralizeETHTest is BaseSolidZapDecollateralizeTest {
     function testZapDecollateralizeETH_approvesSWMToSpendCrispToken() public {
         hoax(testAccount0, 1 ether);
         _expectCall_ERC20_approve_maxUint(address(crispToken), SWM);
-        zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), emptySwap, testAccount1, emptyParams);
+        zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), basicSwap, testAccount1, emptyParams);
 
         uint actual = crispToken.allowance(address(zap), SWM);
         assertEq(actual, type(uint).max);
@@ -53,7 +53,7 @@ contract ZapDecollateralizeETHTest is BaseSolidZapDecollateralizeTest {
 
         hoax(testAccount0, 1 ether);
         _doNotExpectCall_ERC20_approve_maxUint(address(crispToken), SWM);
-        zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), emptySwap, testAccount1, emptyParams);
+        zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), basicSwap, testAccount1, emptyParams);
     }
 
     function testZapDecollateralizeETH_decollateralizesTokens() public {

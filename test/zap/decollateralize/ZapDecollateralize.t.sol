@@ -11,7 +11,7 @@ contract ZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
             address(inputToken),
             1000,
             address(crispToken),
-            emptySwap,
+            basicSwap,
             testAccount1,
             emptyParams
         );
@@ -24,7 +24,7 @@ contract ZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
             address(inputToken),
             1000,
             address(crispToken),
-            emptySwap,
+            basicSwap,
             testAccount1,
             emptyParams
         );
@@ -43,7 +43,7 @@ contract ZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
             address(inputToken),
             1000,
             address(crispToken),
-            emptySwap,
+            basicSwap,
             testAccount1,
             emptyParams
         );
@@ -51,12 +51,12 @@ contract ZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
 
     function testZapDecollateralize_executesSwap() public {
         vm.prank(testAccount0);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 1);
         zap.zapDecollateralize(
             address(inputToken),
             1000,
             address(crispToken),
-            emptySwap,
+            basicSwap,
             testAccount1,
             emptyParams
         );
@@ -99,7 +99,7 @@ contract ZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
             address(inputToken),
             1000,
             address(crispToken),
-            emptySwap,
+            basicSwap,
             testAccount1,
             emptyParams
         );
@@ -118,7 +118,7 @@ contract ZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
             address(inputToken),
             1000,
             address(crispToken),
-            emptySwap,
+            basicSwap,
             testAccount1,
             emptyParams
         );

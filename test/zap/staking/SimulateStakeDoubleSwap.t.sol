@@ -11,8 +11,8 @@ contract SimulateStakeDoubleSwapTest is BaseSolidZapStakerTest {
             address(inputToken),
             1000,
             address(hypervisor),
-            emptySwap1,
-            emptySwap2
+            basicSwap0,
+            basicSwap1
         );
     }
 
@@ -23,8 +23,8 @@ contract SimulateStakeDoubleSwapTest is BaseSolidZapStakerTest {
             address(inputToken),
             1000,
             address(hypervisor),
-            emptySwap1,
-            emptySwap2
+            basicSwap0,
+            basicSwap1
         );
 
         uint actual = inputToken.allowance(address(zapStaker), ROUTER);
@@ -41,69 +41,69 @@ contract SimulateStakeDoubleSwapTest is BaseSolidZapStakerTest {
             address(inputToken),
             1000,
             address(hypervisor),
-            emptySwap1,
-            emptySwap2
+            basicSwap0,
+            basicSwap1
         );
     }
 
-    function testSimulateStakeDoubleSwap_executesSwap1() public {
+    function testSimulateStakeDoubleSwap_executesSwap0() public {
         vm.prank(testAccount0);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 0);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN0, 1);
         zapStaker.simulateStakeDoubleSwap(
             address(inputToken),
             1000,
             address(hypervisor),
-            emptySwap1,
-            emptySwap2
+            basicSwap0,
+            basicSwap1
         );
     }
 
-    function testSimulateStakeDoubleSwap_executesSwap1_revertsWithGenericErrorIfRouterGivesEmptyReason()
+    function testSimulateStakeDoubleSwap_executesSwap0_revertsWithGenericErrorIfRouterGivesEmptyReason()
         public
     {
         bytes memory swap1 = _encodeSwap(RouterBehaviour.REVERTS_NO_REASON, 0);
 
         vm.prank(testAccount0);
         _expectRevert_GenericSwapError();
-        zapStaker.simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, emptySwap2);
+        zapStaker.simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, basicSwap1);
     }
 
-    function testSimulateStakeDoubleSwap_executesSwap1_revertsWithProvidedReason() public {
+    function testSimulateStakeDoubleSwap_executesSwap0_revertsWithProvidedReason() public {
         bytes memory swap1 = _encodeSwap(RouterBehaviour.REVERTS_WITH_REASON, 0);
 
         vm.prank(testAccount0);
         vm.expectRevert("invalid_swap");
-        zapStaker.simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, emptySwap2);
+        zapStaker.simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), swap1, basicSwap1);
     }
 
-    function testSimulateStakeDoubleSwap_executesSwap2() public {
+    function testSimulateStakeDoubleSwap_executesSwap1() public {
         vm.prank(testAccount0);
-        _expectCall_swap(RouterBehaviour.MINTS_TOKEN1, 0);
+        _expectCall_swap(RouterBehaviour.MINTS_TOKEN1, 1);
         zapStaker.simulateStakeDoubleSwap(
             address(inputToken),
             1000,
             address(hypervisor),
-            emptySwap1,
-            emptySwap2
+            basicSwap0,
+            basicSwap1
         );
     }
 
-    function testSimulateStakeDoubleSwap_executesSwap2_revertsWithGenericErrorIfRouterGivesEmptyReason()
+    function testSimulateStakeDoubleSwap_executesSwap1_revertsWithGenericErrorIfRouterGivesEmptyReason()
         public
     {
         bytes memory swap2 = _encodeSwap(RouterBehaviour.REVERTS_NO_REASON, 0);
 
         vm.prank(testAccount0);
         _expectRevert_GenericSwapError();
-        zapStaker.simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, swap2);
+        zapStaker.simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), basicSwap0, swap2);
     }
 
-    function testSimulateStakeDoubleSwap_executesSwap2_revertsWithProvidedReason() public {
+    function testSimulateStakeDoubleSwap_executesSwap1_revertsWithProvidedReason() public {
         bytes memory swap2 = _encodeSwap(RouterBehaviour.REVERTS_WITH_REASON, 0);
 
         vm.prank(testAccount0);
         vm.expectRevert("invalid_swap");
-        zapStaker.simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), emptySwap1, swap2);
+        zapStaker.simulateStakeDoubleSwap(address(inputToken), 1000, address(hypervisor), basicSwap0, swap2);
     }
 
     function testSimulateStakeDoubleSwap_callsIUniProxyForCurrentRatio() public {
