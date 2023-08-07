@@ -29,8 +29,8 @@ interface ISolidZapCollateralize {
     /// 4. Transfers the `outputToken` balance of SolidZapCollateralize to `msg.sender`
     /// 5. Transfers remaining `crispToken` balance of SolidZapCollateralize to the `dustRecipient`
     /// @notice The `msg.sender` must approve this contract to spend the forward credits
-    /// @param outputToken The token used for obtaining forward credits
-    /// @param crispToken The intermediate token used for redeeming forward credits
+    /// @param outputToken The actual token received for collateralizing forward credits
+    /// @param crispToken The intermediate token received for collateralizing forward credits
     /// @param batchId The batch id of the forward credits to collateralize
     /// @param amountIn The amounts of forward credits to collateralize
     /// @param amountOutMin The minimum amounts of `crispToken` to receive from collateralization
@@ -53,8 +53,8 @@ interface ISolidZapCollateralize {
     /// 4. Transfers the `outputToken` balance of SolidZapCollateralize to `zapRecipient`
     /// 5. Transfers remaining `crispToken` balance of SolidZapCollateralize to the `dustRecipient`
     /// @notice The `msg.sender` must approve this contract to spend the forward credits
-    /// @param outputToken The token used for obtaining forward credits
-    /// @param crispToken The intermediate token used for redeeming forward credits
+    /// @param outputToken The actual token received for collateralizing forward credits
+    /// @param crispToken The intermediate token received for collateralizing forward credits
     /// @param batchId The batch id of the forward credits to collateralize
     /// @param amountIn The amounts of forward credits to collateralize
     /// @param amountOutMin The minimum amounts of `crispToken` to receive from collateralization
@@ -80,7 +80,7 @@ interface ISolidZapCollateralize {
     /// 5. Transfers the ETH balance of SolidZapCollateralize to `msg.sender`
     /// 6. Transfers remaining `crispToken` balance of SolidZapCollateralize to the `dustRecipient`
     /// @notice The `msg.sender` must approve this contract to spend the forward credits
-    /// @param crispToken The intermediate token used for redeeming forward credits
+    /// @param crispToken The intermediate token received for collateralizing forward credits
     /// @param batchId The batch id of the forward credits to collateralize
     /// @param amountIn The amounts of forward credits to collateralize
     /// @param amountOutMin The minimum amounts of `crispToken` to receive from collateralization
@@ -103,7 +103,7 @@ interface ISolidZapCollateralize {
     /// 5. Transfers the ETH balance of SolidZapCollateralize to `zapRecipient`
     /// 6. Transfers remaining `crispToken` balance of SolidZapCollateralize to the `dustRecipient`
     /// @notice The `msg.sender` must approve this contract to spend the forward credits
-    /// @param crispToken The intermediate token used for redeeming forward credits
+    /// @param crispToken The intermediate token received for collateralizing forward credits
     /// @param batchId The batch id of the forward credits to collateralize
     /// @param amountIn The amounts of forward credits to collateralize
     /// @param amountOutMin The minimum amounts of `crispToken` to receive from collateralization

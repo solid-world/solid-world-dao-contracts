@@ -3,16 +3,6 @@ pragma solidity 0.8.18;
 
 import "./BaseSolidZapCollateralize.sol";
 
-interface SWManager {
-    function collateralizeBatch(
-        uint batchId,
-        uint amountIn,
-        uint amountOutMin
-    ) external;
-
-    function getBatchCategory(uint batchId) external view returns (uint);
-}
-
 /// @author Solid World
 contract SolidZapCollateralize is BaseSolidZapCollateralize {
     using GPv2SafeERC20 for IERC20;
@@ -114,7 +104,7 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         uint amountIn,
         uint amountOutMin
     ) private {
-        SWManager(swManager).collateralizeBatch(batchId, amountIn, amountOutMin);
+        ISWManager(swManager).collateralizeBatch(batchId, amountIn, amountOutMin);
     }
 
     function _sweepETHTo(address zapRecipient) private returns (uint sweptAmount) {
@@ -144,7 +134,7 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
             outputAmount,
             dust,
             dustRecipient,
-            SWManager(swManager).getBatchCategory(batchId)
+            ISWManager(swManager).getBatchCategory(batchId)
         );
     }
 }

@@ -32,7 +32,7 @@ interface ISolidZapDecollateralize {
     /// 3. Transfers resulting forward credits to `msg.sender`
     /// 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`
     /// @notice The `msg.sender` must own `inputAmount` and approve this contract to spend `inputToken`
-    /// @param inputToken The token used for obtaining forward credits
+    /// @param inputToken The token used for redeeming forward credits
     /// @param inputAmount The amount of `inputToken` to use
     /// @param crispToken The intermediate token used for redeeming forward credits
     /// @param swap Encoded swap from `inputToken` to `crispToken`
@@ -56,7 +56,7 @@ interface ISolidZapDecollateralize {
     /// 3. Transfers resulting forward credits to `zapRecipient`
     /// 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`
     /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`
-    /// @param inputToken The token used for obtaining forward credits
+    /// @param inputToken The token used for redeeming forward credits
     /// @param inputAmount The amount of `inputToken` to use
     /// @param crispToken The intermediate token used for redeeming forward credits
     /// @param swap Encoded swap from `inputToken` to `crispToken`

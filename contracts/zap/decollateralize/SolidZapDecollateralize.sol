@@ -3,16 +3,6 @@ pragma solidity 0.8.18;
 
 import "./BaseSolidZapDecollateralize.sol";
 
-interface SWManager {
-    function bulkDecollateralizeTokens(
-        uint[] calldata batchIds,
-        uint[] calldata amountsIn,
-        uint[] calldata amountsOutMin
-    ) external;
-
-    function getBatchCategory(uint batchId) external view returns (uint);
-}
-
 /// @author Solid World
 contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
     using GPv2SafeERC20 for IERC20;
@@ -117,7 +107,7 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
     ) private {
         _swapViaRouter(router, swap);
         _approveTokenSpendingIfNeeded(crispToken, swManager);
-        SWManager(swManager).bulkDecollateralizeTokens(
+        ISWManager(swManager).bulkDecollateralizeTokens(
             decollateralizeParams.batchIds,
             decollateralizeParams.amountsIn,
             decollateralizeParams.amountsOutMin
@@ -130,7 +120,7 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             ""
         );
         uint dustAmount = _sweepTokensTo(crispToken, dustRecipient);
-        uint categoryId = SWManager(swManager).getBatchCategory(decollateralizeParams.batchIds[0]);
+        uint categoryId = ISWManager(swManager).getBatchCategory(decollateralizeParams.batchIds[0]);
 
         emit ZapDecollateralize(zapRecipient, inputToken, inputAmount, dustAmount, dustRecipient, categoryId);
     }
