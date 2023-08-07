@@ -4,6 +4,7 @@ pragma solidity 0.8.18;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/staking/IWETH.sol";
 import "../interfaces/zap/ISolidZapStaker.sol";
+import "../interfaces/zap/ISWManager.sol";
 import "../libraries/GPv2SafeERC20_0_8_18.sol";
 
 /// @author Solid World
