@@ -6,10 +6,12 @@ import "../interfaces/staking/IWETH.sol";
 import "../interfaces/zap/ISolidZapStaker.sol";
 import "../interfaces/zap/ISWManager.sol";
 import "../libraries/GPv2SafeERC20_0_8_18.sol";
+import "../libraries/SafeTransferLib.sol";
 
 /// @author Solid World
 abstract contract BaseZap {
     using GPv2SafeERC20 for IERC20;
+    using SafeTransferLib for address;
 
     error GenericSwapError();
     error InvalidInput();
@@ -39,7 +41,7 @@ abstract contract BaseZap {
 
     function _approveTokenSpendingIfNeeded(address token, address spender) internal {
         if (IERC20(token).allowance(address(this), spender) == 0) {
-            IERC20(token).approve(spender, type(uint).max);
+            token.safeApprove(spender, type(uint).max);
         }
     }
 
