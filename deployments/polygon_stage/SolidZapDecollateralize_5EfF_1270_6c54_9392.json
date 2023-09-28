@@ -1,0 +1,596 @@
+{
+  "address": "0x2A969e800e7C51C08448Be91853DF009B334FD79",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_router",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_weth",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_swManager",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_forwardContractBatch",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "GenericSwapError",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidInput",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SweepAmountZero",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "inputToken",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "inputAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "dust",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "dustRecipient",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "categoryId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ZapDecollateralize",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "forwardContractBatch",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC1155BatchReceived",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC1155Received",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "router",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "swManager",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "weth",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "inputToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "inputAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "crispToken",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "swap",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "dustRecipient",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256[]",
+              "name": "batchIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amountsIn",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amountsOutMin",
+              "type": "uint256[]"
+            }
+          ],
+          "internalType": "struct ISolidZapDecollateralize.DecollateralizeParams",
+          "name": "decollateralizeParams",
+          "type": "tuple"
+        }
+      ],
+      "name": "zapDecollateralize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "inputToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "inputAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "crispToken",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "swap",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "dustRecipient",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256[]",
+              "name": "batchIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amountsIn",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amountsOutMin",
+              "type": "uint256[]"
+            }
+          ],
+          "internalType": "struct ISolidZapDecollateralize.DecollateralizeParams",
+          "name": "decollateralizeParams",
+          "type": "tuple"
+        },
+        {
+          "internalType": "address",
+          "name": "zapRecipient",
+          "type": "address"
+        }
+      ],
+      "name": "zapDecollateralize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "crispToken",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "swap",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "dustRecipient",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256[]",
+              "name": "batchIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amountsIn",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amountsOutMin",
+              "type": "uint256[]"
+            }
+          ],
+          "internalType": "struct ISolidZapDecollateralize.DecollateralizeParams",
+          "name": "decollateralizeParams",
+          "type": "tuple"
+        },
+        {
+          "internalType": "address",
+          "name": "zapRecipient",
+          "type": "address"
+        }
+      ],
+      "name": "zapDecollateralizeETH",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "crispToken",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "swap",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "dustRecipient",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256[]",
+              "name": "batchIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amountsIn",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amountsOutMin",
+              "type": "uint256[]"
+            }
+          ],
+          "internalType": "struct ISolidZapDecollateralize.DecollateralizeParams",
+          "name": "decollateralizeParams",
+          "type": "tuple"
+        }
+      ],
+      "name": "zapDecollateralizeETH",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x30e983dfdf1711a0190422e7a9b9c0bd96ed9e61bf2a52d2f845f0395c536cf9",
+  "receipt": {
+    "to": null,
+    "from": "0x0CD61abdd7985eF9Baa84A9a8B48E2F75212040C",
+    "contractAddress": "0x2A969e800e7C51C08448Be91853DF009B334FD79",
+    "transactionIndex": 42,
+    "gasUsed": "1541212",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000018000000000000000004000200000000000000000402000000000000000800000000000000000000100000040000000000000000000000000000000000040000000000000000080000000200000000000000000000000000000000000000000000000001000000000000000000000220000000000000000104000000000004400000000000000000000000000004000000000000000000021000000000000000000000000000000100000000000000010000000000000000040000000000000000000000000000000000000100800",
+    "blockHash": "0xa551249bdc4258a07c83f5722a411ca5c5dafbb2cf246c6ce89216bc60f5a445",
+    "transactionHash": "0x30e983dfdf1711a0190422e7a9b9c0bd96ed9e61bf2a52d2f845f0395c536cf9",
+    "logs": [
+      {
+        "transactionIndex": 42,
+        "blockNumber": 48081300,
+        "transactionHash": "0x30e983dfdf1711a0190422e7a9b9c0bd96ed9e61bf2a52d2f845f0395c536cf9",
+        "address": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+        "topics": [
+          "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+          "0x0000000000000000000000002a969e800e7c51c08448be91853df009b334fd79",
+          "0x000000000000000000000000def1c0ded9bec7f1a1670819833240f027b25eff"
+        ],
+        "data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "logIndex": 175,
+        "blockHash": "0xa551249bdc4258a07c83f5722a411ca5c5dafbb2cf246c6ce89216bc60f5a445"
+      },
+      {
+        "transactionIndex": 42,
+        "blockNumber": 48081300,
+        "transactionHash": "0x30e983dfdf1711a0190422e7a9b9c0bd96ed9e61bf2a52d2f845f0395c536cf9",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x0000000000000000000000000cd61abdd7985ef9baa84a9a8b48e2f75212040c",
+          "0x00000000000000000000000009385a960a2e0b6b4516d341534da92cb2a50085"
+        ],
+        "data": "0x00000000000000000000000000000000000000000000000000e5f86a0ae8f0000000000000000000000000000000000000000000000000005488970285b05478000000000000000000000000000000000000000000000038f4cd693bc4ec52e500000000000000000000000000000000000000000000000053a29e987ac76478000000000000000000000000000000000000000000000038f5b361a5cfd542e5",
+        "logIndex": 176,
+        "blockHash": "0xa551249bdc4258a07c83f5722a411ca5c5dafbb2cf246c6ce89216bc60f5a445"
+      }
+    ],
+    "blockNumber": 48081300,
+    "cumulativeGasUsed": "8376292",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xDef1C0ded9bec7F1a1670819833240f027b25EfF",
+    "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+    "0x2465E7F8A91a4e766566B3a529492AD34A9e6c54",
+    "0x0C4fdD1e34603AF7E1e9Ce49a2a798719bDD9392"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "1174a45943333910f45a57b5ab85a8f8",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.18+commit.87f61d96\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_router\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_weth\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_swManager\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_forwardContractBatch\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"GenericSwapError\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInput\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SweepAmountZero\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"inputToken\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"inputAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"dust\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"dustRecipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"categoryId\",\"type\":\"uint256\"}],\"name\":\"ZapDecollateralize\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"forwardContractBatch\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC1155BatchReceived\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC1155Received\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"router\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"swManager\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"weth\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"inputToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"inputAmount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"crispToken\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"swap\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"dustRecipient\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint256[]\",\"name\":\"batchIds\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amountsIn\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amountsOutMin\",\"type\":\"uint256[]\"}],\"internalType\":\"struct ISolidZapDecollateralize.DecollateralizeParams\",\"name\":\"decollateralizeParams\",\"type\":\"tuple\"}],\"name\":\"zapDecollateralize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"inputToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"inputAmount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"crispToken\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"swap\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"dustRecipient\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint256[]\",\"name\":\"batchIds\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amountsIn\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amountsOutMin\",\"type\":\"uint256[]\"}],\"internalType\":\"struct ISolidZapDecollateralize.DecollateralizeParams\",\"name\":\"decollateralizeParams\",\"type\":\"tuple\"},{\"internalType\":\"address\",\"name\":\"zapRecipient\",\"type\":\"address\"}],\"name\":\"zapDecollateralize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"crispToken\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"swap\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"dustRecipient\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint256[]\",\"name\":\"batchIds\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amountsIn\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amountsOutMin\",\"type\":\"uint256[]\"}],\"internalType\":\"struct ISolidZapDecollateralize.DecollateralizeParams\",\"name\":\"decollateralizeParams\",\"type\":\"tuple\"},{\"internalType\":\"address\",\"name\":\"zapRecipient\",\"type\":\"address\"}],\"name\":\"zapDecollateralizeETH\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"crispToken\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"swap\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"dustRecipient\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint256[]\",\"name\":\"batchIds\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amountsIn\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amountsOutMin\",\"type\":\"uint256[]\"}],\"internalType\":\"struct ISolidZapDecollateralize.DecollateralizeParams\",\"name\":\"decollateralizeParams\",\"type\":\"tuple\"}],\"name\":\"zapDecollateralizeETH\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Solid World\",\"kind\":\"dev\",\"methods\":{\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\":{\"details\":\"accept transfers from swManager contract only\"},\"onERC1155Received(address,address,uint256,uint256,bytes)\":{\"details\":\"accept transfers from swManager contract only\"},\"supportsInterface(bytes4)\":{\"details\":\"Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.\"},\"zapDecollateralize(address,uint256,address,bytes,address,(uint256[],uint256[],uint256[]))\":{\"params\":{\"crispToken\":\"The intermediate token used for redeeming forward credits\",\"decollateralizeParams\":\"Parameters for decollateralization  batchIds The batch ids of the forward credits to redeem  amountsIn The amounts of `crispToken` to used to redeem forward credits  amountsOutMin The minimum amounts of forward credits to receive\",\"dustRecipient\":\"Address to receive any remaining crisp tokens dust\",\"inputAmount\":\"The amount of `inputToken` to use\",\"inputToken\":\"The token used for redeeming forward credits\",\"swap\":\"Encoded swap from `inputToken` to `crispToken`\"}},\"zapDecollateralize(address,uint256,address,bytes,address,(uint256[],uint256[],uint256[]),address)\":{\"params\":{\"crispToken\":\"The intermediate token used for redeeming forward credits\",\"decollateralizeParams\":\"Parameters for decollateralization  batchIds The batch ids of the forward credits to redeem  amountsIn The amounts of `crispToken` to used to redeem forward credits  amountsOutMin The minimum amounts of forward credits to receive\",\"dustRecipient\":\"Address to receive any remaining crisp tokens dust\",\"inputAmount\":\"The amount of `inputToken` to use\",\"inputToken\":\"The token used for redeeming forward credits\",\"swap\":\"Encoded swap from `inputToken` to `crispToken`\",\"zapRecipient\":\"The address to receive forward credits\"}},\"zapDecollateralizeETH(address,bytes,address,(uint256[],uint256[],uint256[]))\":{\"params\":{\"crispToken\":\"The intermediate token used for redeeming forward credits\",\"decollateralizeParams\":\"Parameters for decollateralization  batchIds The batch ids of the forward credits to redeem  amountsIn The amounts of `crispToken` to used to redeem forward credits  amountsOutMin The minimum amounts of forward credits to receive\",\"dustRecipient\":\"Address to receive any remaining crisp tokens dust\",\"swap\":\"Encoded swap from `inputToken` to `crispToken`\"}},\"zapDecollateralizeETH(address,bytes,address,(uint256[],uint256[],uint256[]),address)\":{\"params\":{\"crispToken\":\"The intermediate token used for redeeming forward credits\",\"decollateralizeParams\":\"Parameters for decollateralization  batchIds The batch ids of the forward credits to redeem  amountsIn The amounts of `crispToken` to used to redeem forward credits  amountsOutMin The minimum amounts of forward credits to receive\",\"dustRecipient\":\"Address to receive any remaining crisp tokens dust\",\"swap\":\"Encoded swap from `inputToken` to `crispToken`\",\"zapRecipient\":\"The address to receive forward credits\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"zapDecollateralize(address,uint256,address,bytes,address,(uint256[],uint256[],uint256[]))\":{\"notice\":\"Zap function that achieves the following: 1. Swaps `inputToken` to `crispToken` via encoded swap 2. Decollateralizes resulting tokens to forward credits via SolidWorldManager 3. Transfers resulting forward credits to `msg.sender` 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`The `msg.sender` must own `inputAmount` and approve this contract to spend `inputToken`\"},\"zapDecollateralize(address,uint256,address,bytes,address,(uint256[],uint256[],uint256[]),address)\":{\"notice\":\"Zap function that achieves the following: 1. Swaps `inputToken` to `crispToken` via encoded swap 2. Decollateralizes resulting tokens to forward credits via SolidWorldManager 3. Transfers resulting forward credits to `zapRecipient` 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`\"},\"zapDecollateralizeETH(address,bytes,address,(uint256[],uint256[],uint256[]))\":{\"notice\":\"Zap function that achieves the following: 1. Wraps `msg.value` to WETH 2. Swaps `WETH` to `crispToken` via encoded swap 3. Decollateralizes resulting tokens to forward credits via SolidWorldManager 4. Transfers resulting forward credits to `msg.sender` 5. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`\"},\"zapDecollateralizeETH(address,bytes,address,(uint256[],uint256[],uint256[]),address)\":{\"notice\":\"Zap function that achieves the following: 1. Wraps `msg.value` to WETH 2. Swaps `WETH` to `crispToken` via encoded swap 3. Decollateralizes resulting tokens to forward credits via SolidWorldManager 4. Transfers resulting forward credits to `zapRecipient` 5. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/zap/decollateralize/SolidZapDecollateralize.sol\":\"SolidZapDecollateralize\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/security/ReentrancyGuard.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.8.0) (security/ReentrancyGuard.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Contract module that helps prevent reentrant calls to a function.\\n *\\n * Inheriting from `ReentrancyGuard` will make the {nonReentrant} modifier\\n * available, which can be applied to functions to make sure there are no nested\\n * (reentrant) calls to them.\\n *\\n * Note that because there is a single `nonReentrant` guard, functions marked as\\n * `nonReentrant` may not call one another. This can be worked around by making\\n * those functions `private`, and then adding `external` `nonReentrant` entry\\n * points to them.\\n *\\n * TIP: If you would like to learn more about reentrancy and alternative ways\\n * to protect against it, check out our blog post\\n * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].\\n */\\nabstract contract ReentrancyGuard {\\n    // Booleans are more expensive than uint256 or any type that takes up a full\\n    // word because each write operation emits an extra SLOAD to first read the\\n    // slot's contents, replace the bits taken up by the boolean, and then write\\n    // back. This is the compiler's defense against contract upgrades and\\n    // pointer aliasing, and it cannot be disabled.\\n\\n    // The values being non-zero value makes deployment a bit more expensive,\\n    // but in exchange the refund on every call to nonReentrant will be lower in\\n    // amount. Since refunds are capped to a percentage of the total\\n    // transaction's gas, it is best to keep them low in cases like this one, to\\n    // increase the likelihood of the full refund coming into effect.\\n    uint256 private constant _NOT_ENTERED = 1;\\n    uint256 private constant _ENTERED = 2;\\n\\n    uint256 private _status;\\n\\n    constructor() {\\n        _status = _NOT_ENTERED;\\n    }\\n\\n    /**\\n     * @dev Prevents a contract from calling itself, directly or indirectly.\\n     * Calling a `nonReentrant` function from another `nonReentrant`\\n     * function is not supported. It is possible to prevent this from happening\\n     * by making the `nonReentrant` function external, and making it call a\\n     * `private` function that does the actual work.\\n     */\\n    modifier nonReentrant() {\\n        _nonReentrantBefore();\\n        _;\\n        _nonReentrantAfter();\\n    }\\n\\n    function _nonReentrantBefore() private {\\n        // On the first call to nonReentrant, _status will be _NOT_ENTERED\\n        require(_status != _ENTERED, \\\"ReentrancyGuard: reentrant call\\\");\\n\\n        // Any calls to nonReentrant after this point will fail\\n        _status = _ENTERED;\\n    }\\n\\n    function _nonReentrantAfter() private {\\n        // By storing the original value once again, a refund is triggered (see\\n        // https://eips.ethereum.org/EIPS/eip-2200)\\n        _status = _NOT_ENTERED;\\n    }\\n}\\n\",\"keccak256\":\"0x190dd6f8d592b7e4e930feb7f4313aeb8e1c4ad3154c27ce1cf6a512fc30d8cc\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC1155/IERC1155.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.7.0) (token/ERC1155/IERC1155.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../../utils/introspection/IERC165.sol\\\";\\n\\n/**\\n * @dev Required interface of an ERC1155 compliant contract, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-1155[EIP].\\n *\\n * _Available since v3.1._\\n */\\ninterface IERC1155 is IERC165 {\\n    /**\\n     * @dev Emitted when `value` tokens of token type `id` are transferred from `from` to `to` by `operator`.\\n     */\\n    event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);\\n\\n    /**\\n     * @dev Equivalent to multiple {TransferSingle} events, where `operator`, `from` and `to` are the same for all\\n     * transfers.\\n     */\\n    event TransferBatch(\\n        address indexed operator,\\n        address indexed from,\\n        address indexed to,\\n        uint256[] ids,\\n        uint256[] values\\n    );\\n\\n    /**\\n     * @dev Emitted when `account` grants or revokes permission to `operator` to transfer their tokens, according to\\n     * `approved`.\\n     */\\n    event ApprovalForAll(address indexed account, address indexed operator, bool approved);\\n\\n    /**\\n     * @dev Emitted when the URI for token type `id` changes to `value`, if it is a non-programmatic URI.\\n     *\\n     * If an {URI} event was emitted for `id`, the standard\\n     * https://eips.ethereum.org/EIPS/eip-1155#metadata-extensions[guarantees] that `value` will equal the value\\n     * returned by {IERC1155MetadataURI-uri}.\\n     */\\n    event URI(string value, uint256 indexed id);\\n\\n    /**\\n     * @dev Returns the amount of tokens of token type `id` owned by `account`.\\n     *\\n     * Requirements:\\n     *\\n     * - `account` cannot be the zero address.\\n     */\\n    function balanceOf(address account, uint256 id) external view returns (uint256);\\n\\n    /**\\n     * @dev xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {balanceOf}.\\n     *\\n     * Requirements:\\n     *\\n     * - `accounts` and `ids` must have the same length.\\n     */\\n    function balanceOfBatch(address[] calldata accounts, uint256[] calldata ids)\\n        external\\n        view\\n        returns (uint256[] memory);\\n\\n    /**\\n     * @dev Grants or revokes permission to `operator` to transfer the caller's tokens, according to `approved`,\\n     *\\n     * Emits an {ApprovalForAll} event.\\n     *\\n     * Requirements:\\n     *\\n     * - `operator` cannot be the caller.\\n     */\\n    function setApprovalForAll(address operator, bool approved) external;\\n\\n    /**\\n     * @dev Returns true if `operator` is approved to transfer ``account``'s tokens.\\n     *\\n     * See {setApprovalForAll}.\\n     */\\n    function isApprovedForAll(address account, address operator) external view returns (bool);\\n\\n    /**\\n     * @dev Transfers `amount` tokens of token type `id` from `from` to `to`.\\n     *\\n     * Emits a {TransferSingle} event.\\n     *\\n     * Requirements:\\n     *\\n     * - `to` cannot be the zero address.\\n     * - If the caller is not `from`, it must have been approved to spend ``from``'s tokens via {setApprovalForAll}.\\n     * - `from` must have a balance of tokens of type `id` of at least `amount`.\\n     * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the\\n     * acceptance magic value.\\n     */\\n    function safeTransferFrom(\\n        address from,\\n        address to,\\n        uint256 id,\\n        uint256 amount,\\n        bytes calldata data\\n    ) external;\\n\\n    /**\\n     * @dev xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {safeTransferFrom}.\\n     *\\n     * Emits a {TransferBatch} event.\\n     *\\n     * Requirements:\\n     *\\n     * - `ids` and `amounts` must have the same length.\\n     * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155BatchReceived} and return the\\n     * acceptance magic value.\\n     */\\n    function safeBatchTransferFrom(\\n        address from,\\n        address to,\\n        uint256[] calldata ids,\\n        uint256[] calldata amounts,\\n        bytes calldata data\\n    ) external;\\n}\\n\",\"keccak256\":\"0x6392f2cfe3a5ee802227fe7a2dfd47096d881aec89bddd214b35c5b46d3cd941\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.5.0) (token/ERC1155/IERC1155Receiver.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../../utils/introspection/IERC165.sol\\\";\\n\\n/**\\n * @dev _Available since v3.1._\\n */\\ninterface IERC1155Receiver is IERC165 {\\n    /**\\n     * @dev Handles the receipt of a single ERC1155 token type. This function is\\n     * called at the end of a `safeTransferFrom` after the balance has been updated.\\n     *\\n     * NOTE: To accept the transfer, this must return\\n     * `bytes4(keccak256(\\\"onERC1155Received(address,address,uint256,uint256,bytes)\\\"))`\\n     * (i.e. 0xf23a6e61, or its own function selector).\\n     *\\n     * @param operator The address which initiated the transfer (i.e. msg.sender)\\n     * @param from The address which previously owned the token\\n     * @param id The ID of the token being transferred\\n     * @param value The amount of tokens being transferred\\n     * @param data Additional data with no specified format\\n     * @return `bytes4(keccak256(\\\"onERC1155Received(address,address,uint256,uint256,bytes)\\\"))` if transfer is allowed\\n     */\\n    function onERC1155Received(\\n        address operator,\\n        address from,\\n        uint256 id,\\n        uint256 value,\\n        bytes calldata data\\n    ) external returns (bytes4);\\n\\n    /**\\n     * @dev Handles the receipt of a multiple ERC1155 token types. This function\\n     * is called at the end of a `safeBatchTransferFrom` after the balances have\\n     * been updated.\\n     *\\n     * NOTE: To accept the transfer(s), this must return\\n     * `bytes4(keccak256(\\\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\\\"))`\\n     * (i.e. 0xbc197c81, or its own function selector).\\n     *\\n     * @param operator The address which initiated the batch transfer (i.e. msg.sender)\\n     * @param from The address which previously owned the token\\n     * @param ids An array containing ids of each token being transferred (order and length must match values array)\\n     * @param values An array containing amounts of each token being transferred (order and length must match ids array)\\n     * @param data Additional data with no specified format\\n     * @return `bytes4(keccak256(\\\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\\\"))` if transfer is allowed\\n     */\\n    function onERC1155BatchReceived(\\n        address operator,\\n        address from,\\n        uint256[] calldata ids,\\n        uint256[] calldata values,\\n        bytes calldata data\\n    ) external returns (bytes4);\\n}\\n\",\"keccak256\":\"0xeb373f1fdc7b755c6a750123a9b9e3a8a02c1470042fd6505d875000a80bde0b\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.6.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the amount of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the amount of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves `amount` tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Moves `amount` tokens from `from` to `to` using the\\n     * allowance mechanism. `amount` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(\\n        address from,\\n        address to,\\n        uint256 amount\\n    ) external returns (bool);\\n}\\n\",\"keccak256\":\"0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\"},\"contracts/interfaces/staking/IWETH.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.16;\\n\\ninterface IWETH {\\n    function deposit() external payable;\\n\\n    function withdraw(uint amount) external;\\n\\n    function approve(address spender, uint amount) external returns (bool);\\n}\\n\",\"keccak256\":\"0x3c5c1ca48db86c8180fd33431a6934a843f6778a56f1cfe26b35be1976c5c026\",\"license\":\"MIT\"},\"contracts/interfaces/zap/ISWManager.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.18;\\n\\n/// @author Solid World\\n/// @dev The minimal interface used to interact with SolidWorldManager\\ninterface ISWManager {\\n    function collateralizeBatch(\\n        uint batchId,\\n        uint amountIn,\\n        uint amountOutMin\\n    ) external;\\n\\n    function bulkDecollateralizeTokens(\\n        uint[] calldata batchIds,\\n        uint[] calldata amountsIn,\\n        uint[] calldata amountsOutMin\\n    ) external;\\n\\n    function getBatchCategory(uint batchId) external view returns (uint);\\n}\\n\",\"keccak256\":\"0x78a58d7b460191ad01996d373fe19058fee655e7d9866a4c289317c28b64fb58\",\"license\":\"BUSL-1.1\"},\"contracts/interfaces/zap/ISolidZapDecollateralize.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.18;\\n\\n/// @author Solid World\\ninterface ISolidZapDecollateralize {\\n    event ZapDecollateralize(\\n        address indexed receiver,\\n        address indexed inputToken,\\n        uint indexed inputAmount,\\n        uint dust,\\n        address dustRecipient,\\n        uint categoryId\\n    );\\n\\n    struct DecollateralizeParams {\\n        uint[] batchIds;\\n        uint[] amountsIn;\\n        uint[] amountsOutMin;\\n    }\\n\\n    function router() external view returns (address);\\n\\n    function weth() external view returns (address);\\n\\n    function swManager() external view returns (address);\\n\\n    function forwardContractBatch() external view returns (address);\\n\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Swaps `inputToken` to `crispToken` via encoded swap\\n    /// 2. Decollateralizes resulting tokens to forward credits via SolidWorldManager\\n    /// 3. Transfers resulting forward credits to `msg.sender`\\n    /// 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`\\n    /// @notice The `msg.sender` must own `inputAmount` and approve this contract to spend `inputToken`\\n    /// @param inputToken The token used for redeeming forward credits\\n    /// @param inputAmount The amount of `inputToken` to use\\n    /// @param crispToken The intermediate token used for redeeming forward credits\\n    /// @param swap Encoded swap from `inputToken` to `crispToken`\\n    /// @param dustRecipient Address to receive any remaining crisp tokens dust\\n    /// @param decollateralizeParams Parameters for decollateralization\\n    ///  batchIds The batch ids of the forward credits to redeem\\n    ///  amountsIn The amounts of `crispToken` to used to redeem forward credits\\n    ///  amountsOutMin The minimum amounts of forward credits to receive\\n    function zapDecollateralize(\\n        address inputToken,\\n        uint inputAmount,\\n        address crispToken,\\n        bytes calldata swap,\\n        address dustRecipient,\\n        DecollateralizeParams calldata decollateralizeParams\\n    ) external;\\n\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Swaps `inputToken` to `crispToken` via encoded swap\\n    /// 2. Decollateralizes resulting tokens to forward credits via SolidWorldManager\\n    /// 3. Transfers resulting forward credits to `zapRecipient`\\n    /// 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`\\n    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`\\n    /// @param inputToken The token used for redeeming forward credits\\n    /// @param inputAmount The amount of `inputToken` to use\\n    /// @param crispToken The intermediate token used for redeeming forward credits\\n    /// @param swap Encoded swap from `inputToken` to `crispToken`\\n    /// @param dustRecipient Address to receive any remaining crisp tokens dust\\n    /// @param decollateralizeParams Parameters for decollateralization\\n    ///  batchIds The batch ids of the forward credits to redeem\\n    ///  amountsIn The amounts of `crispToken` to used to redeem forward credits\\n    ///  amountsOutMin The minimum amounts of forward credits to receive\\n    /// @param zapRecipient The address to receive forward credits\\n    function zapDecollateralize(\\n        address inputToken,\\n        uint inputAmount,\\n        address crispToken,\\n        bytes calldata swap,\\n        address dustRecipient,\\n        DecollateralizeParams calldata decollateralizeParams,\\n        address zapRecipient\\n    ) external;\\n\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Wraps `msg.value` to WETH\\n    /// 2. Swaps `WETH` to `crispToken` via encoded swap\\n    /// 3. Decollateralizes resulting tokens to forward credits via SolidWorldManager\\n    /// 4. Transfers resulting forward credits to `msg.sender`\\n    /// 5. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`\\n    /// @param crispToken The intermediate token used for redeeming forward credits\\n    /// @param swap Encoded swap from `inputToken` to `crispToken`\\n    /// @param dustRecipient Address to receive any remaining crisp tokens dust\\n    /// @param decollateralizeParams Parameters for decollateralization\\n    ///  batchIds The batch ids of the forward credits to redeem\\n    ///  amountsIn The amounts of `crispToken` to used to redeem forward credits\\n    ///  amountsOutMin The minimum amounts of forward credits to receive\\n    function zapDecollateralizeETH(\\n        address crispToken,\\n        bytes calldata swap,\\n        address dustRecipient,\\n        DecollateralizeParams calldata decollateralizeParams\\n    ) external payable;\\n\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Wraps `msg.value` to WETH\\n    /// 2. Swaps `WETH` to `crispToken` via encoded swap\\n    /// 3. Decollateralizes resulting tokens to forward credits via SolidWorldManager\\n    /// 4. Transfers resulting forward credits to `zapRecipient`\\n    /// 5. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`\\n    /// @param crispToken The intermediate token used for redeeming forward credits\\n    /// @param swap Encoded swap from `inputToken` to `crispToken`\\n    /// @param dustRecipient Address to receive any remaining crisp tokens dust\\n    /// @param decollateralizeParams Parameters for decollateralization\\n    ///  batchIds The batch ids of the forward credits to redeem\\n    ///  amountsIn The amounts of `crispToken` to used to redeem forward credits\\n    ///  amountsOutMin The minimum amounts of forward credits to receive\\n    /// @param zapRecipient The address to receive forward credits\\n    function zapDecollateralizeETH(\\n        address crispToken,\\n        bytes calldata swap,\\n        address dustRecipient,\\n        DecollateralizeParams calldata decollateralizeParams,\\n        address zapRecipient\\n    ) external payable;\\n}\\n\",\"keccak256\":\"0x238d16c54799ca964c97ce39e157679e2c4f4608581055fa0c6bf5bf39e98470\",\"license\":\"BUSL-1.1\"},\"contracts/interfaces/zap/ISolidZapStaker.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.18;\\n\\n/// @author Solid World\\ninterface ISolidZapStaker {\\n    error AcquiredSharesLessThanMin(uint acquired, uint min);\\n    error InvalidSwap();\\n\\n    event ZapStake(\\n        address indexed zapRecipient,\\n        address indexed inputToken,\\n        uint indexed inputAmount,\\n        uint shares\\n    );\\n\\n    struct Fraction {\\n        uint numerator;\\n        uint denominator;\\n    }\\n\\n    struct SwapResult {\\n        address _address;\\n        uint balance;\\n    }\\n\\n    struct SwapResults {\\n        SwapResult token0;\\n        SwapResult token1;\\n    }\\n\\n    function router() external view returns (address);\\n\\n    function weth() external view returns (address);\\n\\n    function solidStaking() external view returns (address);\\n\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Partially swaps `inputToken` to desired token via encoded swap1\\n    /// 2. Partially swaps `inputToken` to desired token via encoded swap2\\n    /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`\\n    /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `zapRecipient` is the beneficiary of the staked shares\\n    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`\\n    /// @param inputToken The token used to provide liquidity\\n    /// @param inputAmount The amount of `inputToken` to use\\n    /// @param hypervisor The hypervisor used to deploy liquidity\\n    /// @param swap1 Encoded swap to partially swap `inputToken` to desired token\\n    /// @param swap2 Encoded swap to partially swap `inputToken` to desired token\\n    /// @param minShares The minimum amount of liquidity shares required for transaction to succeed\\n    /// @param zapRecipient The beneficiary of the staked shares\\n    /// @return shares The amount of shares staked in `solidStaking`\\n    function stakeDoubleSwap(\\n        address inputToken,\\n        uint inputAmount,\\n        address hypervisor,\\n        bytes calldata swap1,\\n        bytes calldata swap2,\\n        uint minShares,\\n        address zapRecipient\\n    ) external returns (uint shares);\\n\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Partially swaps `inputToken` to desired token via encoded swap1\\n    /// 2. Partially swaps `inputToken` to desired token via encoded swap2\\n    /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`\\n    /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `msg.sender` is the beneficiary of the staked shares\\n    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`\\n    /// @param inputToken The token used to provide liquidity\\n    /// @param inputAmount The amount of `inputToken` to use\\n    /// @param hypervisor The hypervisor used to deploy liquidity\\n    /// @param swap1 Encoded swap to partially swap `inputToken` to desired token\\n    /// @param swap2 Encoded swap to partially swap `inputToken` to desired token\\n    /// @param minShares The minimum amount of liquidity shares required for transaction to succeed\\n    /// @return shares The amount of shares staked in `solidStaking`\\n    function stakeDoubleSwap(\\n        address inputToken,\\n        uint inputAmount,\\n        address hypervisor,\\n        bytes calldata swap1,\\n        bytes calldata swap2,\\n        uint minShares\\n    ) external returns (uint shares);\\n\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Partially (close to 50%) swaps `inputToken` to desired token via encoded swap\\n    /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`\\n    /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `zapRecipient` is the beneficiary of the staked shares\\n    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`\\n    /// @notice `inputToken` must be one of hypervisor's token0 or token1\\n    /// @param inputToken The token used to provide liquidity\\n    /// @param inputAmount The amount of `inputToken` to use\\n    /// @param hypervisor The hypervisor used to deploy liquidity\\n    /// @param swap Encoded swap to partially swap `inputToken` to desired token\\n    /// @param minShares The minimum amount of liquidity shares required for transaction to succeed\\n    /// @param zapRecipient The beneficiary of the staked shares\\n    /// @return shares The amount of shares staked in `solidStaking`\\n    function stakeSingleSwap(\\n        address inputToken,\\n        uint inputAmount,\\n        address hypervisor,\\n        bytes calldata swap,\\n        uint minShares,\\n        address zapRecipient\\n    ) external returns (uint shares);\\n\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Partially (close to 50%) swaps `inputToken` to desired token via encoded swap\\n    /// 3. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`\\n    /// 4. Shares of the deployed liquidity are staked in `solidStaking`. `msg.sender` is the beneficiary of the staked shares\\n    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`\\n    /// @notice `inputToken` must be one of hypervisor's token0 or token1\\n    /// @param inputToken The token used to provide liquidity\\n    /// @param inputAmount The amount of `inputToken` to use\\n    /// @param hypervisor The hypervisor used to deploy liquidity\\n    /// @param swap Encoded swap to partially swap `inputToken` to desired token\\n    /// @param minShares The minimum amount of liquidity shares required for transaction to succeed\\n    /// @return shares The amount of shares staked in `solidStaking`\\n    function stakeSingleSwap(\\n        address inputToken,\\n        uint inputAmount,\\n        address hypervisor,\\n        bytes calldata swap,\\n        uint minShares\\n    ) external returns (uint shares);\\n\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Wraps `msg.value` to WETH\\n    /// 2. Partially swaps `WETH` to desired token via encoded swap1\\n    /// 3. Partially swaps `WETH` to desired token via encoded swap2\\n    /// 4. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`\\n    /// 5. Shares of the deployed liquidity are staked in `solidStaking`. `zapRecipient` is the beneficiary of the staked shares\\n    /// @param hypervisor The hypervisor used to deploy liquidity\\n    /// @param swap1 Encoded swap to partially swap `WETH` to desired token\\n    /// @param swap2 Encoded swap to partially swap `WETH` to desired token\\n    /// @param minShares The minimum amount of liquidity shares required for transaction to succeed\\n    /// @param zapRecipient The beneficiary of the staked shares\\n    /// @return shares The amount of shares staked in `solidStaking`\\n    function stakeETH(\\n        address hypervisor,\\n        bytes calldata swap1,\\n        bytes calldata swap2,\\n        uint minShares,\\n        address zapRecipient\\n    ) external payable returns (uint shares);\\n\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Wraps `msg.value` to WETH\\n    /// 2. Partially swaps `WETH` to desired token via encoded swap1\\n    /// 3. Partially swaps `WETH` to desired token via encoded swap2\\n    /// 4. Resulting tokens are deployed as liquidity via IUniProxy & `hypervisor`\\n    /// 5. Shares of the deployed liquidity are staked in `solidStaking`. `msg.sender` is the beneficiary of the staked shares\\n    /// @param hypervisor The hypervisor used to deploy liquidity\\n    /// @param swap1 Encoded swap to partially swap `WETH` to desired token\\n    /// @param swap2 Encoded swap to partially swap `WETH` to desired token\\n    /// @param minShares The minimum amount of liquidity shares required for transaction to succeed\\n    /// @return shares The amount of shares staked in `solidStaking`\\n    function stakeETH(\\n        address hypervisor,\\n        bytes calldata swap1,\\n        bytes calldata swap2,\\n        uint minShares\\n    ) external payable returns (uint shares);\\n\\n    /// @notice Function is meant to be called off-chain with _staticCall_.\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Partially swaps `inputToken` to desired token via encoded swap1\\n    /// 2. Partially swaps `inputToken` to desired token via encoded swap2\\n    /// 3. Resulting tokens are checked against Gamma Vault to determine if they qualify for a dustless liquidity deployment\\n    ///     * if dustless, the function deploys the liquidity to obtain the amounts of shares getting minted and returns\\n    ///     * if not dustless, the function computes the current gamma token ratio and returns\\n    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`\\n    /// @param inputToken The token used to provide liquidity\\n    /// @param inputAmount The amount of `inputToken` to use\\n    /// @param hypervisor The hypervisor used to deploy liquidity\\n    /// @param swap1 Encoded swap to partially swap `inputToken` to desired token\\n    /// @param swap2 Encoded swap to partially swap `inputToken` to desired token\\n    /// @return isDustless Whether the resulting tokens qualify for a dustless liquidity deployment\\n    /// @return shares The amount of shares minted from the dustless liquidity deployment\\n    /// @return ratio The current gamma token ratio, or empty if dustless\\n    function simulateStakeDoubleSwap(\\n        address inputToken,\\n        uint inputAmount,\\n        address hypervisor,\\n        bytes calldata swap1,\\n        bytes calldata swap2\\n    )\\n        external\\n        returns (\\n            bool isDustless,\\n            uint shares,\\n            Fraction memory ratio\\n        );\\n\\n    /// @notice Function is meant to be called off-chain with _staticCall_.\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Wraps `msg.value` to WETH\\n    /// 2. Partially swaps `WETH` to desired token via encoded swap1\\n    /// 3. Partially swaps `WETH` to desired token via encoded swap2\\n    /// 4. Resulting tokens are checked against Gamma Vault to determine if they qualify for a dustless liquidity deployment\\n    ///     * if dustless, the function deploys the liquidity to obtain the amounts of shares getting minted and returns\\n    ///     * if not dustless, the function computes the current gamma token ratio and returns\\n    /// @param hypervisor The hypervisor used to deploy liquidity\\n    /// @param swap1 Encoded swap to partially swap `WETH` to desired token\\n    /// @param swap2 Encoded swap to partially swap `WETH` to desired token\\n    /// @return isDustless Whether the resulting tokens qualify for a dustless liquidity deployment\\n    /// @return shares The amount of shares minted from the dustless liquidity deployment\\n    /// @return ratio The current gamma token ratio, or empty if dustless\\n    function simulateStakeETH(\\n        address hypervisor,\\n        bytes calldata swap1,\\n        bytes calldata swap2\\n    )\\n        external\\n        payable\\n        returns (\\n            bool isDustless,\\n            uint shares,\\n            Fraction memory ratio\\n        );\\n\\n    /// @notice Function is meant to be called off-chain with _staticCall_.\\n    /// @notice Zap function that achieves the following:\\n    /// 1. Partially (close to 50%) swaps `inputToken` to desired token via encoded swap\\n    /// 2. Resulting tokens are checked against Gamma Vault to determine if they qualify for a dustless liquidity deployment\\n    ///     * if dustless, the function deploys the liquidity to obtain the amounts of shares getting minted and returns\\n    ///     * if not dustless, the function computes the current gamma token ratio and returns\\n    /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`\\n    /// @notice `inputToken` must be one of hypervisor's token0 or token1\\n    /// @param inputToken The token used to provide liquidity\\n    /// @param inputAmount The amount of `inputToken` to use\\n    /// @param hypervisor The hypervisor used to deploy liquidity\\n    /// @param swap Encoded swap to partially (close to 50%) swap `inputToken` to desired token\\n    /// @return isDustless Whether the resulting tokens qualify for a dustless liquidity deployment\\n    /// @return shares The amount of shares minted from the dustless liquidity deployment\\n    /// @return ratio The current gamma token ratio, or empty if dustless\\n    function simulateStakeSingleSwap(\\n        address inputToken,\\n        uint inputAmount,\\n        address hypervisor,\\n        bytes calldata swap\\n    )\\n        external\\n        returns (\\n            bool isDustless,\\n            uint shares,\\n            Fraction memory ratio\\n        );\\n}\\n\",\"keccak256\":\"0xac2c8e49c9d706e6d5d862cfc5230d0ca0a576244888585c0cc488fd78275469\",\"license\":\"BUSL-1.1\"},\"contracts/libraries/GPv2SafeERC20_0_8_18.sol\":{\"content\":\"// SPDX-License-Identifier: LGPL-3.0-or-later\\npragma solidity 0.8.18;\\n\\nimport \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\n\\n/// @title Gnosis Protocol v2 Safe ERC20 Transfer Library\\n/// @author Gnosis Developers\\n/// @dev Gas-efficient version of Openzeppelin's SafeERC20 contract.\\nlibrary GPv2SafeERC20 {\\n    /// @dev Wrapper around a call to the ERC20 function `transfer` that reverts\\n    /// also when the token returns `false`.\\n    function safeTransfer(\\n        IERC20 token,\\n        address to,\\n        uint256 value\\n    ) internal {\\n        bytes4 selector_ = token.transfer.selector;\\n\\n        // solhint-disable-next-line no-inline-assembly\\n        assembly {\\n            let freeMemoryPointer := mload(0x40)\\n            mstore(freeMemoryPointer, selector_)\\n            mstore(add(freeMemoryPointer, 4), and(to, 0xffffffffffffffffffffffffffffffffffffffff))\\n            mstore(add(freeMemoryPointer, 36), value)\\n\\n            if iszero(call(gas(), token, 0, freeMemoryPointer, 68, 0, 0)) {\\n                returndatacopy(0, 0, returndatasize())\\n                revert(0, returndatasize())\\n            }\\n        }\\n\\n        require(getLastTransferResult(token), \\\"GPv2: failed transfer\\\");\\n    }\\n\\n    /// @dev Wrapper around a call to the ERC20 function `transferFrom` that\\n    /// reverts also when the token returns `false`.\\n    function safeTransferFrom(\\n        IERC20 token,\\n        address from,\\n        address to,\\n        uint256 value\\n    ) internal {\\n        bytes4 selector_ = token.transferFrom.selector;\\n\\n        // solhint-disable-next-line no-inline-assembly\\n        assembly {\\n            let freeMemoryPointer := mload(0x40)\\n            mstore(freeMemoryPointer, selector_)\\n            mstore(add(freeMemoryPointer, 4), and(from, 0xffffffffffffffffffffffffffffffffffffffff))\\n            mstore(add(freeMemoryPointer, 36), and(to, 0xffffffffffffffffffffffffffffffffffffffff))\\n            mstore(add(freeMemoryPointer, 68), value)\\n\\n            if iszero(call(gas(), token, 0, freeMemoryPointer, 100, 0, 0)) {\\n                returndatacopy(0, 0, returndatasize())\\n                revert(0, returndatasize())\\n            }\\n        }\\n\\n        require(getLastTransferResult(token), \\\"GPv2: failed transferFrom\\\");\\n    }\\n\\n    /// @dev Verifies that the last return was a successful `transfer*` call.\\n    /// This is done by checking that the return data is either empty, or\\n    /// is a valid ABI encoded boolean.\\n    function getLastTransferResult(IERC20 token) private view returns (bool success) {\\n        // NOTE: Inspecting previous return data requires assembly. Note that\\n        // we write the return data to memory 0 in the case where the return\\n        // data size is 32, this is OK since the first 64 bytes of memory are\\n        // reserved by Solidy as a scratch space that can be used within\\n        // assembly blocks.\\n        // <https://docs.soliditylang.org/en/v0.7.6/internals/layout_in_memory.html>\\n        // solhint-disable-next-line no-inline-assembly\\n        assembly {\\n            /// @dev Revert with an ABI encoded Solidity error with a message\\n            /// that fits into 32-bytes.\\n            ///\\n            /// An ABI encoded Solidity error has the following memory layout:\\n            ///\\n            /// ------------+----------------------------------\\n            ///  byte range | value\\n            /// ------------+----------------------------------\\n            ///  0x00..0x04 |        selector(\\\"Error(string)\\\")\\n            ///  0x04..0x24 |      string offset (always 0x20)\\n            ///  0x24..0x44 |                    string length\\n            ///  0x44..0x64 | string value, padded to 32-bytes\\n            function revertWithMessage(length, message) {\\n                mstore(0x00, \\\"\\\\x08\\\\xc3\\\\x79\\\\xa0\\\")\\n                mstore(0x04, 0x20)\\n                mstore(0x24, length)\\n                mstore(0x44, message)\\n                revert(0x00, 0x64)\\n            }\\n\\n            switch returndatasize()\\n            // Non-standard ERC20 transfer without return.\\n            case 0 {\\n                // NOTE: When the return data size is 0, verify that there\\n                // is code at the address. This is done in order to maintain\\n                // compatibility with Solidity calling conventions.\\n                // <https://docs.soliditylang.org/en/v0.7.6/control-structures.html#external-function-calls>\\n                if iszero(extcodesize(token)) {\\n                    revertWithMessage(20, \\\"GPv2: not a contract\\\")\\n                }\\n\\n                success := 1\\n            }\\n            // Standard ERC20 transfer returning boolean success value.\\n            case 32 {\\n                returndatacopy(0, 0, returndatasize())\\n\\n                // NOTE: For ABI encoding v1, any non-zero value is accepted\\n                // as `true` for a boolean. In order to stay compatible with\\n                // OpenZeppelin's `SafeERC20` library which is known to work\\n                // with the existing ERC20 implementation we care about,\\n                // make sure we return success for any non-zero return value\\n                // from the `transfer*` call.\\n                success := iszero(iszero(mload(0)))\\n            }\\n            default {\\n                revertWithMessage(31, \\\"GPv2: malformed transfer result\\\")\\n            }\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x5957e7cdd5e776533722343b4470d247943950d5a18020d675870292931040d1\",\"license\":\"LGPL-3.0-or-later\"},\"contracts/libraries/SafeTransferLib.sol\":{\"content\":\"// SPDX-License-Identifier: AGPL-3.0-only\\npragma solidity >=0.8.0;\\n\\n/// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/utils/SafeTransferLib.sol)\\n/// @dev Simply use address for `token` parameter\\nlibrary SafeTransferLib {\\n    function safeApprove(\\n        address token,\\n        address to,\\n        uint256 amount\\n    ) internal {\\n        bool success;\\n\\n        /// @solidity memory-safe-assembly\\n        assembly {\\n            // Get a pointer to some free memory.\\n            let freeMemoryPointer := mload(0x40)\\n\\n            // Write the abi-encoded calldata into memory, beginning with the function selector.\\n            mstore(freeMemoryPointer, 0x095ea7b300000000000000000000000000000000000000000000000000000000)\\n            mstore(add(freeMemoryPointer, 4), and(to, 0xffffffffffffffffffffffffffffffffffffffff)) // Append and mask the \\\"to\\\" argument.\\n            mstore(add(freeMemoryPointer, 36), amount) // Append the \\\"amount\\\" argument. Masking not required as it's a full 32 byte type.\\n\\n            success := and(\\n                // Set success to whether the call reverted, if not we check it either\\n                // returned exactly 1 (can't just be non-zero data), or had no return data.\\n                or(and(eq(mload(0), 1), gt(returndatasize(), 31)), iszero(returndatasize())),\\n                // We use 68 because the length of our calldata totals up like so: 4 + 32 * 2.\\n                // We use 0 and 32 to copy up to 32 bytes of return data into the scratch space.\\n                // Counterintuitively, this call must be positioned second to the or() call in the\\n                // surrounding and() call or else returndatasize() will be zero during the computation.\\n                call(gas(), token, 0, freeMemoryPointer, 68, 0, 32)\\n            )\\n        }\\n\\n        require(success, \\\"APPROVE_FAILED\\\");\\n    }\\n}\\n\",\"keccak256\":\"0x591f3ac809bd1fd8c3e1550e11c63c96430b6d8996c405c530899e5641cff24e\",\"license\":\"AGPL-3.0-only\"},\"contracts/zap/BaseZap.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.18;\\n\\nimport \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport \\\"../interfaces/staking/IWETH.sol\\\";\\nimport \\\"../interfaces/zap/ISolidZapStaker.sol\\\";\\nimport \\\"../interfaces/zap/ISWManager.sol\\\";\\nimport \\\"../libraries/GPv2SafeERC20_0_8_18.sol\\\";\\nimport \\\"../libraries/SafeTransferLib.sol\\\";\\n\\n/// @author Solid World\\nabstract contract BaseZap {\\n    using GPv2SafeERC20 for IERC20;\\n    using SafeTransferLib for address;\\n\\n    error GenericSwapError();\\n    error InvalidInput();\\n    error SweepAmountZero();\\n\\n    function _swapViaRouter(address router, bytes calldata encodedSwap) internal {\\n        (bool success, bytes memory retData) = router.call(encodedSwap);\\n\\n        if (!success) {\\n            _propagateError(retData);\\n        }\\n    }\\n\\n    function _propagateError(bytes memory revertReason) internal pure {\\n        if (revertReason.length == 0) {\\n            revert GenericSwapError();\\n        }\\n\\n        assembly {\\n            revert(add(32, revertReason), mload(revertReason))\\n        }\\n    }\\n\\n    function _wrap(address weth, uint amount) internal {\\n        IWETH(weth).deposit{ value: amount }();\\n    }\\n\\n    function _approveTokenSpendingIfNeeded(address token, address spender) internal {\\n        if (IERC20(token).allowance(address(this), spender) == 0) {\\n            token.safeApprove(spender, type(uint).max);\\n        }\\n    }\\n\\n    function _prepareToSwap(\\n        address inputToken,\\n        uint inputAmount,\\n        address _router\\n    ) internal {\\n        IERC20(inputToken).safeTransferFrom(msg.sender, address(this), inputAmount);\\n        _approveTokenSpendingIfNeeded(inputToken, _router);\\n    }\\n\\n    function _sweepTokensTo(address token, address zapRecipient) internal returns (uint sweptAmount) {\\n        sweptAmount = _sweepTokensTo(token, zapRecipient, false);\\n    }\\n\\n    function _sweepTokensTo(\\n        address token,\\n        address zapRecipient,\\n        bool revertOnSweepAmountZero\\n    ) internal returns (uint sweptAmount) {\\n        sweptAmount = IERC20(token).balanceOf(address(this));\\n        if (sweptAmount == 0 && revertOnSweepAmountZero) {\\n            revert SweepAmountZero();\\n        }\\n\\n        if (sweptAmount > 0) {\\n            IERC20(token).safeTransfer(zapRecipient, sweptAmount);\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xed80506f342328f01ab000176090d593355bdb2ee83474c9993948f0f1811db7\",\"license\":\"BUSL-1.1\"},\"contracts/zap/decollateralize/BaseSolidZapDecollateralize.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.18;\\n\\nimport \\\"@openzeppelin/contracts/security/ReentrancyGuard.sol\\\";\\nimport \\\"@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol\\\";\\nimport \\\"@openzeppelin/contracts/token/ERC1155/IERC1155.sol\\\";\\nimport \\\"../../interfaces/zap/ISolidZapDecollateralize.sol\\\";\\nimport \\\"../../interfaces/staking/IWETH.sol\\\";\\nimport \\\"../BaseZap.sol\\\";\\n\\n/// @author Solid World\\nabstract contract BaseSolidZapDecollateralize is\\n    BaseZap,\\n    ISolidZapDecollateralize,\\n    IERC1155Receiver,\\n    ReentrancyGuard\\n{\\n    address public immutable router;\\n    address public immutable weth;\\n    address public immutable swManager;\\n    address public immutable forwardContractBatch;\\n\\n    constructor(\\n        address _router,\\n        address _weth,\\n        address _swManager,\\n        address _forwardContractBatch\\n    ) {\\n        router = _router;\\n        weth = _weth;\\n        swManager = _swManager;\\n        forwardContractBatch = _forwardContractBatch;\\n\\n        IWETH(weth).approve(_router, type(uint).max);\\n    }\\n\\n    /// @dev accept transfers from swManager contract only\\n    function onERC1155Received(\\n        address operator,\\n        address,\\n        uint,\\n        uint,\\n        bytes memory\\n    ) public virtual returns (bytes4) {\\n        if (operator != swManager) {\\n            return bytes4(0);\\n        }\\n\\n        return this.onERC1155Received.selector;\\n    }\\n\\n    /// @dev accept transfers from swManager contract only\\n    function onERC1155BatchReceived(\\n        address operator,\\n        address,\\n        uint[] memory,\\n        uint[] memory,\\n        bytes memory\\n    ) public virtual returns (bytes4) {\\n        if (operator != swManager) {\\n            return bytes4(0);\\n        }\\n\\n        return this.onERC1155BatchReceived.selector;\\n    }\\n\\n    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {\\n        // ERC165 && ERC1155TokenReceiver support\\n        return interfaceId == 0x01ffc9a7 || interfaceId == 0x4e2312e0;\\n    }\\n}\\n\",\"keccak256\":\"0xbb34796c372a792f2f8136720103dfdeb963c831f24029ff5bb823d735935ef3\",\"license\":\"BUSL-1.1\"},\"contracts/zap/decollateralize/SolidZapDecollateralize.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.18;\\n\\nimport \\\"./BaseSolidZapDecollateralize.sol\\\";\\n\\n/// @author Solid World\\ncontract SolidZapDecollateralize is BaseSolidZapDecollateralize {\\n    using GPv2SafeERC20 for IERC20;\\n\\n    constructor(\\n        address _router,\\n        address _weth,\\n        address _swManager,\\n        address _forwardContractBatch\\n    ) BaseSolidZapDecollateralize(_router, _weth, _swManager, _forwardContractBatch) {}\\n\\n    /// @inheritdoc ISolidZapDecollateralize\\n    function zapDecollateralize(\\n        address inputToken,\\n        uint inputAmount,\\n        address crispToken,\\n        bytes calldata swap,\\n        address dustRecipient,\\n        DecollateralizeParams calldata decollateralizeParams\\n    ) external nonReentrant {\\n        _prepareToSwap(inputToken, inputAmount, router);\\n        _zapDecollateralize(\\n            inputToken,\\n            inputAmount,\\n            crispToken,\\n            swap,\\n            dustRecipient,\\n            decollateralizeParams,\\n            msg.sender\\n        );\\n    }\\n\\n    /// @inheritdoc ISolidZapDecollateralize\\n    function zapDecollateralize(\\n        address inputToken,\\n        uint inputAmount,\\n        address crispToken,\\n        bytes calldata swap,\\n        address dustRecipient,\\n        DecollateralizeParams calldata decollateralizeParams,\\n        address zapRecipient\\n    ) external nonReentrant {\\n        _prepareToSwap(inputToken, inputAmount, router);\\n        _zapDecollateralize(\\n            inputToken,\\n            inputAmount,\\n            crispToken,\\n            swap,\\n            dustRecipient,\\n            decollateralizeParams,\\n            zapRecipient\\n        );\\n    }\\n\\n    /// @inheritdoc ISolidZapDecollateralize\\n    function zapDecollateralizeETH(\\n        address crispToken,\\n        bytes calldata swap,\\n        address dustRecipient,\\n        DecollateralizeParams calldata decollateralizeParams\\n    ) external payable nonReentrant {\\n        _wrap(weth, msg.value);\\n        _zapDecollateralize(\\n            weth,\\n            msg.value,\\n            crispToken,\\n            swap,\\n            dustRecipient,\\n            decollateralizeParams,\\n            msg.sender\\n        );\\n    }\\n\\n    /// @inheritdoc ISolidZapDecollateralize\\n    function zapDecollateralizeETH(\\n        address crispToken,\\n        bytes calldata swap,\\n        address dustRecipient,\\n        DecollateralizeParams calldata decollateralizeParams,\\n        address zapRecipient\\n    ) external payable nonReentrant {\\n        _wrap(weth, msg.value);\\n        _zapDecollateralize(\\n            weth,\\n            msg.value,\\n            crispToken,\\n            swap,\\n            dustRecipient,\\n            decollateralizeParams,\\n            zapRecipient\\n        );\\n    }\\n\\n    function _zapDecollateralize(\\n        address inputToken,\\n        uint inputAmount,\\n        address crispToken,\\n        bytes calldata swap,\\n        address dustRecipient,\\n        DecollateralizeParams calldata decollateralizeParams,\\n        address zapRecipient\\n    ) private {\\n        _swapViaRouter(router, swap);\\n        _approveTokenSpendingIfNeeded(crispToken, swManager);\\n        ISWManager(swManager).bulkDecollateralizeTokens(\\n            decollateralizeParams.batchIds,\\n            decollateralizeParams.amountsIn,\\n            decollateralizeParams.amountsOutMin\\n        );\\n        IERC1155(forwardContractBatch).safeBatchTransferFrom(\\n            address(this),\\n            zapRecipient,\\n            decollateralizeParams.batchIds,\\n            _getDecollateralizedForwardCreditAmounts(decollateralizeParams.batchIds),\\n            \\\"\\\"\\n        );\\n        uint dustAmount = _sweepTokensTo(crispToken, dustRecipient);\\n        uint categoryId = ISWManager(swManager).getBatchCategory(decollateralizeParams.batchIds[0]);\\n\\n        emit ZapDecollateralize(zapRecipient, inputToken, inputAmount, dustAmount, dustRecipient, categoryId);\\n    }\\n\\n    function _getDecollateralizedForwardCreditAmounts(uint[] calldata batchIds)\\n        private\\n        view\\n        returns (uint[] memory decollateralizedForwardCreditAmounts)\\n    {\\n        address[] memory addresses = new address[](1);\\n        addresses[0] = address(this);\\n        decollateralizedForwardCreditAmounts = IERC1155(forwardContractBatch).balanceOfBatch(\\n            addresses,\\n            batchIds\\n        );\\n    }\\n}\\n\",\"keccak256\":\"0x6121d07e20a7211fae65ed51639e448691ac2601efce4a2b92c20b5d3a496c73\",\"license\":\"BUSL-1.1\"}},\"version\":1}",
+  "bytecode": "0x6101006040523480156200001257600080fd5b5060405162001c4038038062001c408339810160408190526200003591620000fe565b60016000556001600160a01b03848116608081905284821660a081905284831660c05291831660e05260405163095ea7b360e01b815260048101919091526000196024820152859185918591859163095ea7b3906044016020604051808303816000875af1158015620000ac573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190620000d291906200015b565b50505050505050505062000186565b80516001600160a01b0381168114620000f957600080fd5b919050565b600080600080608085870312156200011557600080fd5b6200012085620000e1565b93506200013060208601620000e1565b92506200014060408601620000e1565b91506200015060608601620000e1565b905092959194509250565b6000602082840312156200016e57600080fd5b815180151581146200017f57600080fd5b9392505050565b60805160a05160c05160e051611a1e62000222600039600081816102a2015281816107c80152610cba0152600081816101a3015281816104820152818161057e015281816106dc01528181610717015261088801526000818161012a015281816104170152818161044101528181610514015261053e01526000818161026e0152818161036c015281816103c201526106b00152611a1e6000f3fe6080604052600436106100bc5760003560e01c806383d56e1211610074578063f23a6e611161004e578063f23a6e611461023c578063f887ea401461025c578063fb5ba8eb1461029057600080fd5b806383d56e12146101c5578063bc197c81146101d8578063d4d15e171461022957600080fd5b80633fc8cef3116100a55780633fc8cef3146101185780636a3df5631461017157806373d0eb6b1461019157600080fd5b806301ffc9a7146100c157806332ffa465146100f6575b600080fd5b3480156100cd57600080fd5b506100e16100dc366004611122565b6102c4565b60405190151581526020015b60405180910390f35b34801561010257600080fd5b506101166101113660046111e8565b61035d565b005b34801561012457600080fd5b5061014c7f000000000000000000000000000000000000000000000000000000000000000081565b60405173ffffffffffffffffffffffffffffffffffffffff90911681526020016100ed565b34801561017d57600080fd5b5061011661018c366004611290565b6103b3565b34801561019d57600080fd5b5061014c7f000000000000000000000000000000000000000000000000000000000000000081565b6101166101d3366004611348565b61040a565b3480156101e457600080fd5b506101f86101f3366004611580565b61047e565b6040517fffffffff0000000000000000000000000000000000000000000000000000000090911681526020016100ed565b61011661023736600461162a565b610507565b34801561024857600080fd5b506101f86102573660046116ab565b61057a565b34801561026857600080fd5b5061014c7f000000000000000000000000000000000000000000000000000000000000000081565b34801561029c57600080fd5b5061014c7f000000000000000000000000000000000000000000000000000000000000000081565b60007f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316148061035757507f4e2312e0000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316145b92915050565b610365610602565b61039087877f000000000000000000000000000000000000000000000000000000000000000061067a565b6103a087878787878787336106ab565b6103aa6001600055565b50505050505050565b6103bb610602565b6103e688887f000000000000000000000000000000000000000000000000000000000000000061067a565b6103f688888888888888886106ab565b6104006001600055565b5050505050505050565b610412610602565b61043c7f00000000000000000000000000000000000000000000000000000000000000003461099d565b61046c7f0000000000000000000000000000000000000000000000000000000000000000348888888888886106ab565b6104766001600055565b505050505050565b60007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff168673ffffffffffffffffffffffffffffffffffffffff16146104db575060006104fe565b507fbc197c81000000000000000000000000000000000000000000000000000000005b95945050505050565b61050f610602565b6105397f00000000000000000000000000000000000000000000000000000000000000003461099d565b6105697f0000000000000000000000000000000000000000000000000000000000000000348787878787336106ab565b6105736001600055565b5050505050565b60007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff168673ffffffffffffffffffffffffffffffffffffffff16146105d7575060006104fe565b507ff23a6e610000000000000000000000000000000000000000000000000000000095945050505050565b600260005403610673576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601f60248201527f5265656e7472616e637947756172643a207265656e7472616e742063616c6c0060448201526064015b60405180910390fd5b6002600055565b61069c73ffffffffffffffffffffffffffffffffffffffff84163330856109f9565b6106a68382610ad4565b505050565b6106d67f00000000000000000000000000000000000000000000000000000000000000008686610bb6565b610700867f0000000000000000000000000000000000000000000000000000000000000000610ad4565b73ffffffffffffffffffffffffffffffffffffffff7f00000000000000000000000000000000000000000000000000000000000000001663940870dc6107468480611710565b6107536020870187611710565b6107606040890189611710565b6040518763ffffffff1660e01b8152600401610781969594939291906117c3565b600060405180830381600087803b15801561079b57600080fd5b505af11580156107af573d6000803e3d6000fd5b505073ffffffffffffffffffffffffffffffffffffffff7f0000000000000000000000000000000000000000000000000000000000000000169150632eb2c2d6905030836107fd8680611710565b61080f61080a8980611710565b610c35565b6040518663ffffffff1660e01b815260040161082f95949392919061180c565b600060405180830381600087803b15801561084957600080fd5b505af115801561085d573d6000803e3d6000fd5b50505050600061086d8785610d60565b9050600073ffffffffffffffffffffffffffffffffffffffff7f00000000000000000000000000000000000000000000000000000000000000001663a88fd94a6108b78680611710565b60008181106108c8576108c861189b565b905060200201356040518263ffffffff1660e01b81526004016108ed91815260200190565b602060405180830381865afa15801561090a573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061092e91906118ca565b6040805184815273ffffffffffffffffffffffffffffffffffffffff88811660208301529181018390529192508a91818d16918616907f90a1fbbf6c5359b6c8fbd1140c1132a6774bfcc2a94ad5754f3ef61d90a8f8219060600160405180910390a450505050505050505050565b8173ffffffffffffffffffffffffffffffffffffffff1663d0e30db0826040518263ffffffff1660e01b81526004016000604051808303818588803b1580156109e557600080fd5b505af11580156103aa573d6000803e3d6000fd5b6040517f23b872dd0000000000000000000000000000000000000000000000000000000080825273ffffffffffffffffffffffffffffffffffffffff8581166004840152841660248301526044820183905290600080606483828a5af1610a64573d6000803e3d6000fd5b50610a6e85610d75565b610573576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601960248201527f475076323a206661696c6564207472616e7366657246726f6d00000000000000604482015260640161066a565b6040517fdd62ed3e00000000000000000000000000000000000000000000000000000000815230600482015273ffffffffffffffffffffffffffffffffffffffff828116602483015283169063dd62ed3e90604401602060405180830381865afa158015610b46573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610b6a91906118ca565b600003610bb257610bb273ffffffffffffffffffffffffffffffffffffffff8316827fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff610e40565b5050565b6000808473ffffffffffffffffffffffffffffffffffffffff168484604051610be09291906118e3565b6000604051808303816000865af19150503d8060008114610c1d576040519150601f19603f3d011682016040523d82523d6000602084013e610c22565b606091505b5091509150816105735761057381610f15565b60408051600180825281830190925260609160009190602080830190803683370190505090503081600081518110610c6f57610c6f61189b565b73ffffffffffffffffffffffffffffffffffffffff92831660209182029290920101526040517f4e1273f40000000000000000000000000000000000000000000000000000000081527f000000000000000000000000000000000000000000000000000000000000000090911690634e1273f490610cf5908490889088906004016118f3565b600060405180830381865afa158015610d12573d6000803e3d6000fd5b505050506040513d6000823e601f3d9081017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0168201604052610d589190810190611962565b949350505050565b6000610d6e83836000610f58565b9392505050565b6000610db4565b7f08c379a000000000000000000000000000000000000000000000000000000000600052602060045280602452508060445260646000fd5b3d8015610df35760208114610e2d57610dee7f475076323a206d616c666f726d6564207472616e7366657220726573756c7400601f610d7c565b610e3a565b823b610e2457610e247f475076323a206e6f74206120636f6e74726163740000000000000000000000006014610d7c565b60019150610e3a565b3d6000803e600051151591505b50919050565b60006040517f095ea7b300000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff84166004820152826024820152602060006044836000895af13d15601f3d1160016000511416171691505080610f0f576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600e60248201527f415050524f56455f4641494c4544000000000000000000000000000000000000604482015260640161066a565b50505050565b8051600003610f50576040517f67e1b70700000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b805181602001fd5b6040517f70a0823100000000000000000000000000000000000000000000000000000000815230600482015260009073ffffffffffffffffffffffffffffffffffffffff8516906370a0823190602401602060405180830381865afa158015610fc5573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610fe991906118ca565b905080158015610ff65750815b1561102d576040517ff2035b6300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b8015610d6e57610d6e73ffffffffffffffffffffffffffffffffffffffff851684836040517fa9059cbb0000000000000000000000000000000000000000000000000000000080825273ffffffffffffffffffffffffffffffffffffffff84166004830152602482018390529060008060448382895af16110b2573d6000803e3d6000fd5b506110bc84610d75565b610f0f576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601560248201527f475076323a206661696c6564207472616e736665720000000000000000000000604482015260640161066a565b60006020828403121561113457600080fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114610d6e57600080fd5b803573ffffffffffffffffffffffffffffffffffffffff8116811461118857600080fd5b919050565b60008083601f84011261119f57600080fd5b50813567ffffffffffffffff8111156111b757600080fd5b6020830191508360208285010111156111cf57600080fd5b9250929050565b600060608284031215610e3a57600080fd5b600080600080600080600060c0888a03121561120357600080fd5b61120c88611164565b96506020880135955061122160408901611164565b9450606088013567ffffffffffffffff8082111561123e57600080fd5b61124a8b838c0161118d565b909650945084915061125e60808b01611164565b935060a08a013591508082111561127457600080fd5b506112818a828b016111d6565b91505092959891949750929550565b60008060008060008060008060e0898b0312156112ac57600080fd5b6112b589611164565b9750602089013596506112ca60408a01611164565b9550606089013567ffffffffffffffff808211156112e757600080fd5b6112f38c838d0161118d565b909750955085915061130760808c01611164565b945060a08b013591508082111561131d57600080fd5b5061132a8b828c016111d6565b92505061133960c08a01611164565b90509295985092959890939650565b60008060008060008060a0878903121561136157600080fd5b61136a87611164565b9550602087013567ffffffffffffffff8082111561138757600080fd5b6113938a838b0161118d565b90975095508591506113a760408a01611164565b945060608901359150808211156113bd57600080fd5b506113ca89828a016111d6565b9250506113d960808801611164565b90509295509295509295565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b604051601f82017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe016810167ffffffffffffffff8111828210171561145b5761145b6113e5565b604052919050565b600067ffffffffffffffff82111561147d5761147d6113e5565b5060051b60200190565b600082601f83011261149857600080fd5b813560206114ad6114a883611463565b611414565b82815260059290921b840181019181810190868411156114cc57600080fd5b8286015b848110156114e757803583529183019183016114d0565b509695505050505050565b600082601f83011261150357600080fd5b813567ffffffffffffffff81111561151d5761151d6113e5565b61154e60207fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0601f84011601611414565b81815284602083860101111561156357600080fd5b816020850160208301376000918101602001919091529392505050565b600080600080600060a0868803121561159857600080fd5b6115a186611164565b94506115af60208701611164565b9350604086013567ffffffffffffffff808211156115cc57600080fd5b6115d889838a01611487565b945060608801359150808211156115ee57600080fd5b6115fa89838a01611487565b9350608088013591508082111561161057600080fd5b5061161d888289016114f2565b9150509295509295909350565b60008060008060006080868803121561164257600080fd5b61164b86611164565b9450602086013567ffffffffffffffff8082111561166857600080fd5b61167489838a0161118d565b909650945084915061168860408901611164565b9350606088013591508082111561169e57600080fd5b5061161d888289016111d6565b600080600080600060a086880312156116c357600080fd5b6116cc86611164565b94506116da60208701611164565b93506040860135925060608601359150608086013567ffffffffffffffff81111561170457600080fd5b61161d888289016114f2565b60008083357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe184360301811261174557600080fd5b83018035915067ffffffffffffffff82111561176057600080fd5b6020019150600581901b36038213156111cf57600080fd5b81835260007f07ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8311156117aa57600080fd5b8260051b80836020870137939093016020019392505050565b6060815260006117d760608301888a611778565b82810360208401526117ea818789611778565b905082810360408401526117ff818587611778565b9998505050505050505050565b600073ffffffffffffffffffffffffffffffffffffffff808816835260208188168185015260a0604085015261184660a085018789611778565b8481036060860152855180825282870193509082019060005b8181101561187b5784518352938301939183019160010161185f565b505084810360808601526000815281810193505050509695505050505050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fd5b6000602082840312156118dc57600080fd5b5051919050565b8183823760009101908152919050565b604080825284519082018190526000906020906060840190828801845b8281101561194257815173ffffffffffffffffffffffffffffffffffffffff1684529284019290840190600101611910565b50505083810382850152611957818688611778565b979650505050505050565b6000602080838503121561197557600080fd5b825167ffffffffffffffff81111561198c57600080fd5b8301601f8101851361199d57600080fd5b80516119ab6114a882611463565b81815260059190911b820183019083810190878311156119ca57600080fd5b928401925b82841015611957578351825292840192908401906119cf56fea2646970667358221220980a7a410c516346948da3e57a919659dd21353b3bb0b428d2d2854590df44cb64736f6c63430008120033",
+  "deployedBytecode": "0x6080604052600436106100bc5760003560e01c806383d56e1211610074578063f23a6e611161004e578063f23a6e611461023c578063f887ea401461025c578063fb5ba8eb1461029057600080fd5b806383d56e12146101c5578063bc197c81146101d8578063d4d15e171461022957600080fd5b80633fc8cef3116100a55780633fc8cef3146101185780636a3df5631461017157806373d0eb6b1461019157600080fd5b806301ffc9a7146100c157806332ffa465146100f6575b600080fd5b3480156100cd57600080fd5b506100e16100dc366004611122565b6102c4565b60405190151581526020015b60405180910390f35b34801561010257600080fd5b506101166101113660046111e8565b61035d565b005b34801561012457600080fd5b5061014c7f000000000000000000000000000000000000000000000000000000000000000081565b60405173ffffffffffffffffffffffffffffffffffffffff90911681526020016100ed565b34801561017d57600080fd5b5061011661018c366004611290565b6103b3565b34801561019d57600080fd5b5061014c7f000000000000000000000000000000000000000000000000000000000000000081565b6101166101d3366004611348565b61040a565b3480156101e457600080fd5b506101f86101f3366004611580565b61047e565b6040517fffffffff0000000000000000000000000000000000000000000000000000000090911681526020016100ed565b61011661023736600461162a565b610507565b34801561024857600080fd5b506101f86102573660046116ab565b61057a565b34801561026857600080fd5b5061014c7f000000000000000000000000000000000000000000000000000000000000000081565b34801561029c57600080fd5b5061014c7f000000000000000000000000000000000000000000000000000000000000000081565b60007f01ffc9a7000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316148061035757507f4e2312e0000000000000000000000000000000000000000000000000000000007fffffffff000000000000000000000000000000000000000000000000000000008316145b92915050565b610365610602565b61039087877f000000000000000000000000000000000000000000000000000000000000000061067a565b6103a087878787878787336106ab565b6103aa6001600055565b50505050505050565b6103bb610602565b6103e688887f000000000000000000000000000000000000000000000000000000000000000061067a565b6103f688888888888888886106ab565b6104006001600055565b5050505050505050565b610412610602565b61043c7f00000000000000000000000000000000000000000000000000000000000000003461099d565b61046c7f0000000000000000000000000000000000000000000000000000000000000000348888888888886106ab565b6104766001600055565b505050505050565b60007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff168673ffffffffffffffffffffffffffffffffffffffff16146104db575060006104fe565b507fbc197c81000000000000000000000000000000000000000000000000000000005b95945050505050565b61050f610602565b6105397f00000000000000000000000000000000000000000000000000000000000000003461099d565b6105697f0000000000000000000000000000000000000000000000000000000000000000348787878787336106ab565b6105736001600055565b5050505050565b60007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff168673ffffffffffffffffffffffffffffffffffffffff16146105d7575060006104fe565b507ff23a6e610000000000000000000000000000000000000000000000000000000095945050505050565b600260005403610673576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601f60248201527f5265656e7472616e637947756172643a207265656e7472616e742063616c6c0060448201526064015b60405180910390fd5b6002600055565b61069c73ffffffffffffffffffffffffffffffffffffffff84163330856109f9565b6106a68382610ad4565b505050565b6106d67f00000000000000000000000000000000000000000000000000000000000000008686610bb6565b610700867f0000000000000000000000000000000000000000000000000000000000000000610ad4565b73ffffffffffffffffffffffffffffffffffffffff7f00000000000000000000000000000000000000000000000000000000000000001663940870dc6107468480611710565b6107536020870187611710565b6107606040890189611710565b6040518763ffffffff1660e01b8152600401610781969594939291906117c3565b600060405180830381600087803b15801561079b57600080fd5b505af11580156107af573d6000803e3d6000fd5b505073ffffffffffffffffffffffffffffffffffffffff7f0000000000000000000000000000000000000000000000000000000000000000169150632eb2c2d6905030836107fd8680611710565b61080f61080a8980611710565b610c35565b6040518663ffffffff1660e01b815260040161082f95949392919061180c565b600060405180830381600087803b15801561084957600080fd5b505af115801561085d573d6000803e3d6000fd5b50505050600061086d8785610d60565b9050600073ffffffffffffffffffffffffffffffffffffffff7f00000000000000000000000000000000000000000000000000000000000000001663a88fd94a6108b78680611710565b60008181106108c8576108c861189b565b905060200201356040518263ffffffff1660e01b81526004016108ed91815260200190565b602060405180830381865afa15801561090a573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061092e91906118ca565b6040805184815273ffffffffffffffffffffffffffffffffffffffff88811660208301529181018390529192508a91818d16918616907f90a1fbbf6c5359b6c8fbd1140c1132a6774bfcc2a94ad5754f3ef61d90a8f8219060600160405180910390a450505050505050505050565b8173ffffffffffffffffffffffffffffffffffffffff1663d0e30db0826040518263ffffffff1660e01b81526004016000604051808303818588803b1580156109e557600080fd5b505af11580156103aa573d6000803e3d6000fd5b6040517f23b872dd0000000000000000000000000000000000000000000000000000000080825273ffffffffffffffffffffffffffffffffffffffff8581166004840152841660248301526044820183905290600080606483828a5af1610a64573d6000803e3d6000fd5b50610a6e85610d75565b610573576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601960248201527f475076323a206661696c6564207472616e7366657246726f6d00000000000000604482015260640161066a565b6040517fdd62ed3e00000000000000000000000000000000000000000000000000000000815230600482015273ffffffffffffffffffffffffffffffffffffffff828116602483015283169063dd62ed3e90604401602060405180830381865afa158015610b46573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610b6a91906118ca565b600003610bb257610bb273ffffffffffffffffffffffffffffffffffffffff8316827fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff610e40565b5050565b6000808473ffffffffffffffffffffffffffffffffffffffff168484604051610be09291906118e3565b6000604051808303816000865af19150503d8060008114610c1d576040519150601f19603f3d011682016040523d82523d6000602084013e610c22565b606091505b5091509150816105735761057381610f15565b60408051600180825281830190925260609160009190602080830190803683370190505090503081600081518110610c6f57610c6f61189b565b73ffffffffffffffffffffffffffffffffffffffff92831660209182029290920101526040517f4e1273f40000000000000000000000000000000000000000000000000000000081527f000000000000000000000000000000000000000000000000000000000000000090911690634e1273f490610cf5908490889088906004016118f3565b600060405180830381865afa158015610d12573d6000803e3d6000fd5b505050506040513d6000823e601f3d9081017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0168201604052610d589190810190611962565b949350505050565b6000610d6e83836000610f58565b9392505050565b6000610db4565b7f08c379a000000000000000000000000000000000000000000000000000000000600052602060045280602452508060445260646000fd5b3d8015610df35760208114610e2d57610dee7f475076323a206d616c666f726d6564207472616e7366657220726573756c7400601f610d7c565b610e3a565b823b610e2457610e247f475076323a206e6f74206120636f6e74726163740000000000000000000000006014610d7c565b60019150610e3a565b3d6000803e600051151591505b50919050565b60006040517f095ea7b300000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff84166004820152826024820152602060006044836000895af13d15601f3d1160016000511416171691505080610f0f576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600e60248201527f415050524f56455f4641494c4544000000000000000000000000000000000000604482015260640161066a565b50505050565b8051600003610f50576040517f67e1b70700000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b805181602001fd5b6040517f70a0823100000000000000000000000000000000000000000000000000000000815230600482015260009073ffffffffffffffffffffffffffffffffffffffff8516906370a0823190602401602060405180830381865afa158015610fc5573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610fe991906118ca565b905080158015610ff65750815b1561102d576040517ff2035b6300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b8015610d6e57610d6e73ffffffffffffffffffffffffffffffffffffffff851684836040517fa9059cbb0000000000000000000000000000000000000000000000000000000080825273ffffffffffffffffffffffffffffffffffffffff84166004830152602482018390529060008060448382895af16110b2573d6000803e3d6000fd5b506110bc84610d75565b610f0f576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601560248201527f475076323a206661696c6564207472616e736665720000000000000000000000604482015260640161066a565b60006020828403121561113457600080fd5b81357fffffffff0000000000000000000000000000000000000000000000000000000081168114610d6e57600080fd5b803573ffffffffffffffffffffffffffffffffffffffff8116811461118857600080fd5b919050565b60008083601f84011261119f57600080fd5b50813567ffffffffffffffff8111156111b757600080fd5b6020830191508360208285010111156111cf57600080fd5b9250929050565b600060608284031215610e3a57600080fd5b600080600080600080600060c0888a03121561120357600080fd5b61120c88611164565b96506020880135955061122160408901611164565b9450606088013567ffffffffffffffff8082111561123e57600080fd5b61124a8b838c0161118d565b909650945084915061125e60808b01611164565b935060a08a013591508082111561127457600080fd5b506112818a828b016111d6565b91505092959891949750929550565b60008060008060008060008060e0898b0312156112ac57600080fd5b6112b589611164565b9750602089013596506112ca60408a01611164565b9550606089013567ffffffffffffffff808211156112e757600080fd5b6112f38c838d0161118d565b909750955085915061130760808c01611164565b945060a08b013591508082111561131d57600080fd5b5061132a8b828c016111d6565b92505061133960c08a01611164565b90509295985092959890939650565b60008060008060008060a0878903121561136157600080fd5b61136a87611164565b9550602087013567ffffffffffffffff8082111561138757600080fd5b6113938a838b0161118d565b90975095508591506113a760408a01611164565b945060608901359150808211156113bd57600080fd5b506113ca89828a016111d6565b9250506113d960808801611164565b90509295509295509295565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b604051601f82017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe016810167ffffffffffffffff8111828210171561145b5761145b6113e5565b604052919050565b600067ffffffffffffffff82111561147d5761147d6113e5565b5060051b60200190565b600082601f83011261149857600080fd5b813560206114ad6114a883611463565b611414565b82815260059290921b840181019181810190868411156114cc57600080fd5b8286015b848110156114e757803583529183019183016114d0565b509695505050505050565b600082601f83011261150357600080fd5b813567ffffffffffffffff81111561151d5761151d6113e5565b61154e60207fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0601f84011601611414565b81815284602083860101111561156357600080fd5b816020850160208301376000918101602001919091529392505050565b600080600080600060a0868803121561159857600080fd5b6115a186611164565b94506115af60208701611164565b9350604086013567ffffffffffffffff808211156115cc57600080fd5b6115d889838a01611487565b945060608801359150808211156115ee57600080fd5b6115fa89838a01611487565b9350608088013591508082111561161057600080fd5b5061161d888289016114f2565b9150509295509295909350565b60008060008060006080868803121561164257600080fd5b61164b86611164565b9450602086013567ffffffffffffffff8082111561166857600080fd5b61167489838a0161118d565b909650945084915061168860408901611164565b9350606088013591508082111561169e57600080fd5b5061161d888289016111d6565b600080600080600060a086880312156116c357600080fd5b6116cc86611164565b94506116da60208701611164565b93506040860135925060608601359150608086013567ffffffffffffffff81111561170457600080fd5b61161d888289016114f2565b60008083357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe184360301811261174557600080fd5b83018035915067ffffffffffffffff82111561176057600080fd5b6020019150600581901b36038213156111cf57600080fd5b81835260007f07ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8311156117aa57600080fd5b8260051b80836020870137939093016020019392505050565b6060815260006117d760608301888a611778565b82810360208401526117ea818789611778565b905082810360408401526117ff818587611778565b9998505050505050505050565b600073ffffffffffffffffffffffffffffffffffffffff808816835260208188168185015260a0604085015261184660a085018789611778565b8481036060860152855180825282870193509082019060005b8181101561187b5784518352938301939183019160010161185f565b505084810360808601526000815281810193505050509695505050505050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fd5b6000602082840312156118dc57600080fd5b5051919050565b8183823760009101908152919050565b604080825284519082018190526000906020906060840190828801845b8281101561194257815173ffffffffffffffffffffffffffffffffffffffff1684529284019290840190600101611910565b50505083810382850152611957818688611778565b979650505050505050565b6000602080838503121561197557600080fd5b825167ffffffffffffffff81111561198c57600080fd5b8301601f8101851361199d57600080fd5b80516119ab6114a882611463565b81815260059190911b820183019083810190878311156119ca57600080fd5b928401925b82841015611957578351825292840192908401906119cf56fea2646970667358221220980a7a410c516346948da3e57a919659dd21353b3bb0b428d2d2854590df44cb64736f6c63430008120033",
+  "devdoc": {
+    "author": "Solid World",
+    "kind": "dev",
+    "methods": {
+      "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)": {
+        "details": "accept transfers from swManager contract only"
+      },
+      "onERC1155Received(address,address,uint256,uint256,bytes)": {
+        "details": "accept transfers from swManager contract only"
+      },
+      "supportsInterface(bytes4)": {
+        "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+      },
+      "zapDecollateralize(address,uint256,address,bytes,address,(uint256[],uint256[],uint256[]))": {
+        "params": {
+          "crispToken": "The intermediate token used for redeeming forward credits",
+          "decollateralizeParams": "Parameters for decollateralization  batchIds The batch ids of the forward credits to redeem  amountsIn The amounts of `crispToken` to used to redeem forward credits  amountsOutMin The minimum amounts of forward credits to receive",
+          "dustRecipient": "Address to receive any remaining crisp tokens dust",
+          "inputAmount": "The amount of `inputToken` to use",
+          "inputToken": "The token used for redeeming forward credits",
+          "swap": "Encoded swap from `inputToken` to `crispToken`"
+        }
+      },
+      "zapDecollateralize(address,uint256,address,bytes,address,(uint256[],uint256[],uint256[]),address)": {
+        "params": {
+          "crispToken": "The intermediate token used for redeeming forward credits",
+          "decollateralizeParams": "Parameters for decollateralization  batchIds The batch ids of the forward credits to redeem  amountsIn The amounts of `crispToken` to used to redeem forward credits  amountsOutMin The minimum amounts of forward credits to receive",
+          "dustRecipient": "Address to receive any remaining crisp tokens dust",
+          "inputAmount": "The amount of `inputToken` to use",
+          "inputToken": "The token used for redeeming forward credits",
+          "swap": "Encoded swap from `inputToken` to `crispToken`",
+          "zapRecipient": "The address to receive forward credits"
+        }
+      },
+      "zapDecollateralizeETH(address,bytes,address,(uint256[],uint256[],uint256[]))": {
+        "params": {
+          "crispToken": "The intermediate token used for redeeming forward credits",
+          "decollateralizeParams": "Parameters for decollateralization  batchIds The batch ids of the forward credits to redeem  amountsIn The amounts of `crispToken` to used to redeem forward credits  amountsOutMin The minimum amounts of forward credits to receive",
+          "dustRecipient": "Address to receive any remaining crisp tokens dust",
+          "swap": "Encoded swap from `inputToken` to `crispToken`"
+        }
+      },
+      "zapDecollateralizeETH(address,bytes,address,(uint256[],uint256[],uint256[]),address)": {
+        "params": {
+          "crispToken": "The intermediate token used for redeeming forward credits",
+          "decollateralizeParams": "Parameters for decollateralization  batchIds The batch ids of the forward credits to redeem  amountsIn The amounts of `crispToken` to used to redeem forward credits  amountsOutMin The minimum amounts of forward credits to receive",
+          "dustRecipient": "Address to receive any remaining crisp tokens dust",
+          "swap": "Encoded swap from `inputToken` to `crispToken`",
+          "zapRecipient": "The address to receive forward credits"
+        }
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "zapDecollateralize(address,uint256,address,bytes,address,(uint256[],uint256[],uint256[]))": {
+        "notice": "Zap function that achieves the following: 1. Swaps `inputToken` to `crispToken` via encoded swap 2. Decollateralizes resulting tokens to forward credits via SolidWorldManager 3. Transfers resulting forward credits to `msg.sender` 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`The `msg.sender` must own `inputAmount` and approve this contract to spend `inputToken`"
+      },
+      "zapDecollateralize(address,uint256,address,bytes,address,(uint256[],uint256[],uint256[]),address)": {
+        "notice": "Zap function that achieves the following: 1. Swaps `inputToken` to `crispToken` via encoded swap 2. Decollateralizes resulting tokens to forward credits via SolidWorldManager 3. Transfers resulting forward credits to `zapRecipient` 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`"
+      },
+      "zapDecollateralizeETH(address,bytes,address,(uint256[],uint256[],uint256[]))": {
+        "notice": "Zap function that achieves the following: 1. Wraps `msg.value` to WETH 2. Swaps `WETH` to `crispToken` via encoded swap 3. Decollateralizes resulting tokens to forward credits via SolidWorldManager 4. Transfers resulting forward credits to `msg.sender` 5. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`"
+      },
+      "zapDecollateralizeETH(address,bytes,address,(uint256[],uint256[],uint256[]),address)": {
+        "notice": "Zap function that achieves the following: 1. Wraps `msg.value` to WETH 2. Swaps `WETH` to `crispToken` via encoded swap 3. Decollateralizes resulting tokens to forward credits via SolidWorldManager 4. Transfers resulting forward credits to `zapRecipient` 5. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 2179,
+        "contract": "contracts/zap/decollateralize/SolidZapDecollateralize.sol:SolidZapDecollateralize",
+        "label": "_status",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
