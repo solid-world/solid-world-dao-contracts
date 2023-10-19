@@ -58,6 +58,14 @@ abstract contract BaseSolidZapDecollateralizeTest is BaseTest {
         _prepareZap();
     }
 
+    function _expectCall_deposit(uint amount) internal {
+        vm.expectCall(address(weth), amount, abi.encodeCall(WMATIC.deposit, ()));
+    }
+
+    function _expectCall_withdraw(uint amount) internal {
+        vm.expectCall(address(weth), abi.encodeWithSelector(WMATIC.withdraw.selector, amount));
+    }
+
     function _expectCall_ERC20_transferFrom(address from, uint amount) internal {
         vm.expectCall(address(inputToken), abi.encodeCall(IERC20.transferFrom, (from, address(zap), amount)));
     }

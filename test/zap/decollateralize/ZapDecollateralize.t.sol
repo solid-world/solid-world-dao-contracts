@@ -127,21 +127,28 @@ contract ZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
     function testZapDecollateralize_decollateralizesTokens() public {
         ISolidZapDecollateralize.DecollateralizeParams memory params = ISolidZapDecollateralize
             .DecollateralizeParams({
-                batchIds: _toArray(1),
-                amountsIn: _toArray(123),
-                amountsOutMin: _toArray(150)
+                batchIds: _toArray(1, 2),
+                amountsIn: _toArray(123, 456),
+                amountsOutMin: _toArray(150, 250)
             });
-        bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, params.amountsIn[0]);
+        bytes memory swap = _encodeSwap(
+            RouterBehaviour.MINTS_TOKEN0,
+            params.amountsIn[0] + params.amountsIn[1]
+        );
 
         vm.prank(testAccount0);
         _expectCall_bulkDecollateralizeTokens(params.batchIds, params.amountsIn, params.amountsOutMin);
         _expectCall_onERC1155Received(SWM, address(0), params.batchIds[0], params.amountsOutMin[0] + 1, "");
+        _expectCall_onERC1155Received(SWM, address(0), params.batchIds[1], params.amountsOutMin[1] + 1, "");
         zap.zapDecollateralize(address(inputToken), 1000, address(crispToken), swap, testAccount1, params);
 
         uint actualCrispBalance = crispToken.balanceOf(address(zap));
         assertEq(actualCrispBalance, 0);
-        uint[] memory actualCreditsBalance = fcbt.balanceOfBatch(_toArray(testAccount0), params.batchIds);
-        assertEq(actualCreditsBalance, _toArray(params.amountsOutMin[0] + 1));
+        uint[] memory actualCreditsBalance = fcbt.balanceOfBatch(
+            _toArray(testAccount0, testAccount0),
+            params.batchIds
+        );
+        assertEq(actualCreditsBalance, _toArray(params.amountsOutMin[0] + 1, params.amountsOutMin[1] + 1));
     }
 
     function testZapDecollateralize_transfersDust() public {
@@ -159,6 +166,25 @@ contract ZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
 
         uint actual = crispToken.balanceOf(testAccount1);
         assertEq(actual, dust);
+    }
+
+    function testZapDecollateralize_returnsUnusedInputTokensToReceiver() public {
+        uint testAccount1BalanceBefore = inputToken.balanceOf(testAccount1);
+
+        vm.prank(testAccount0);
+        zap.zapDecollateralize(
+            address(inputToken),
+            1000,
+            address(crispToken),
+            basicSwap,
+            testAccount1,
+            emptyParams,
+            testAccount1
+        );
+
+        uint testAccount1BalanceAfter = inputToken.balanceOf(testAccount1);
+
+        assertEq(testAccount1BalanceAfter - testAccount1BalanceBefore, 1000);
     }
 
     function testZapDecollateralize_emitsEvent() public {

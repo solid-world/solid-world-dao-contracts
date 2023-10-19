@@ -5,15 +5,9 @@ import "./BaseSolidZapDecollateralize.sol";
 
 contract ZapDecollateralizeETHTest is BaseSolidZapDecollateralizeTest {
     function testZapDecollateralizeETH_wrapsTheValueReceived() public {
-        uint wethBalanceBefore = weth.balanceOf(address(zap));
-
         hoax(testAccount0, 1 ether);
+        _expectCall_deposit(1000);
         zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), basicSwap, testAccount1, emptyParams);
-
-        uint wethBalanceAfter = weth.balanceOf(address(zap));
-
-        assertEq(wethBalanceAfter - wethBalanceBefore, 1000);
-        assertEq(testAccount0.balance, 1 ether - 1000);
     }
 
     function testZapDecollateralizeETH_executesSwap() public {
@@ -91,6 +85,20 @@ contract ZapDecollateralizeETHTest is BaseSolidZapDecollateralizeTest {
 
         uint actual = crispToken.balanceOf(testAccount1);
         assertEq(actual, dust);
+    }
+
+    function testZapDecollateralizeETH_returnsUnusedETHToReceiver() public {
+        hoax(testAccount0, 1 ether);
+        _expectCall_withdraw(1000);
+        zap.zapDecollateralizeETH{ value: 1000 }(
+            address(crispToken),
+            basicSwap,
+            testAccount1,
+            emptyParams,
+            testAccount1
+        );
+
+        assertEq(address(testAccount1).balance, 1000);
     }
 
     function testZapDecollateralizeETH_emitsEvent() public {

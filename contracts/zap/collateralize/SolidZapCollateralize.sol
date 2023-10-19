@@ -25,8 +25,8 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         address dustRecipient
     ) external nonReentrant {
         _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
-        uint outputAmount = _sweepTokensTo(outputToken, msg.sender, true);
-        uint dust = _sweepTokensTo(crispToken, dustRecipient);
+        uint outputAmount = _safeSweepTokens(outputToken, msg.sender, true);
+        uint dust = _sweepTokens(crispToken, dustRecipient);
 
         _emitZapEvent(msg.sender, batchId, outputToken, outputAmount, dust, dustRecipient);
     }
@@ -43,8 +43,8 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         address zapRecipient
     ) external nonReentrant {
         _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
-        uint outputAmount = _sweepTokensTo(outputToken, zapRecipient, true);
-        uint dust = _sweepTokensTo(crispToken, dustRecipient);
+        uint outputAmount = _safeSweepTokens(outputToken, zapRecipient, true);
+        uint dust = _sweepTokens(crispToken, dustRecipient);
 
         _emitZapEvent(zapRecipient, batchId, outputToken, outputAmount, dust, dustRecipient);
     }
@@ -59,8 +59,8 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         address dustRecipient
     ) external nonReentrant {
         _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
-        uint outputAmount = _sweepETHTo(msg.sender);
-        uint dust = _sweepTokensTo(crispToken, dustRecipient);
+        uint outputAmount = _safeSweepETH(weth, msg.sender, true);
+        uint dust = _sweepTokens(crispToken, dustRecipient);
 
         _emitZapEvent(msg.sender, batchId, weth, outputAmount, dust, dustRecipient);
     }
@@ -76,8 +76,8 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         address zapRecipient
     ) external nonReentrant {
         _collateralizeToOutputToken(crispToken, batchId, amountIn, amountOutMin, swap);
-        uint outputAmount = _sweepETHTo(zapRecipient);
-        uint dust = _sweepTokensTo(crispToken, dustRecipient);
+        uint outputAmount = _safeSweepETH(weth, zapRecipient, true);
+        uint dust = _sweepTokens(crispToken, dustRecipient);
 
         _emitZapEvent(zapRecipient, batchId, weth, outputAmount, dust, dustRecipient);
     }
@@ -105,19 +105,6 @@ contract SolidZapCollateralize is BaseSolidZapCollateralize {
         uint amountOutMin
     ) private {
         ISWManager(swManager).collateralizeBatch(batchId, amountIn, amountOutMin);
-    }
-
-    function _sweepETHTo(address zapRecipient) private returns (uint sweptAmount) {
-        sweptAmount = IERC20(weth).balanceOf(address(this));
-        if (sweptAmount == 0) {
-            revert SweepAmountZero();
-        }
-
-        IWETH(weth).withdraw(sweptAmount);
-        (bool success, ) = payable(zapRecipient).call{ value: sweptAmount }("");
-        if (!success) {
-            revert ETHTransferFailed();
-        }
     }
 
     function _emitZapEvent(
