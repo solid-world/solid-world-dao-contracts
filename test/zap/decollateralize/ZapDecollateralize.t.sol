@@ -198,7 +198,14 @@ contract ZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
         bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, params.amountsIn[0] + dust);
 
         vm.prank(testAccount0);
-        _expectEmit_ZapDecollateralize(testAccount0, address(inputToken), 1000, 1, testAccount1, 1);
+        _expectEmit_ZapDecollateralize(
+            testAccount0,
+            address(inputToken),
+            0, /*all input tokens are refunded*/
+            1,
+            testAccount1,
+            1
+        );
         zap.zapDecollateralize(address(inputToken), 1000, address(crispToken), swap, testAccount1, params);
     }
 
@@ -213,7 +220,14 @@ contract ZapDecollateralizeTest is BaseSolidZapDecollateralizeTest {
         bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, params.amountsIn[0] + dust);
 
         vm.prank(testAccount0);
-        _expectEmit_ZapDecollateralize(testAccount1, address(inputToken), 1000, 1, testAccount1, 1);
+        _expectEmit_ZapDecollateralize(
+            testAccount1,
+            address(inputToken),
+            0, /*all input tokens are refunded*/
+            1,
+            testAccount1,
+            1
+        );
         zap.zapDecollateralize(
             address(inputToken),
             1000,

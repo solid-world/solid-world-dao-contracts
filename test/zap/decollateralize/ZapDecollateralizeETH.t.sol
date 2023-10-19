@@ -112,7 +112,14 @@ contract ZapDecollateralizeETHTest is BaseSolidZapDecollateralizeTest {
         bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, params.amountsIn[0] + dust);
 
         hoax(testAccount0, 1 ether);
-        _expectEmit_ZapDecollateralize(testAccount0, address(weth), 1000, 1, testAccount1, 1);
+        _expectEmit_ZapDecollateralize(
+            testAccount0,
+            address(weth),
+            0, /*all input tokens are refunded*/
+            1,
+            testAccount1,
+            1
+        );
         zap.zapDecollateralizeETH{ value: 1000 }(address(crispToken), swap, testAccount1, params);
     }
 
@@ -127,7 +134,14 @@ contract ZapDecollateralizeETHTest is BaseSolidZapDecollateralizeTest {
         bytes memory swap = _encodeSwap(RouterBehaviour.MINTS_TOKEN0, params.amountsIn[0] + dust);
 
         hoax(testAccount0, 1 ether);
-        _expectEmit_ZapDecollateralize(testAccount1, address(weth), 1000, 1, testAccount1, 1);
+        _expectEmit_ZapDecollateralize(
+            testAccount1,
+            address(weth),
+            0, /*all input tokens are refunded*/
+            1,
+            testAccount1,
+            1
+        );
         zap.zapDecollateralizeETH{ value: 1000 }(
             address(crispToken),
             swap,
