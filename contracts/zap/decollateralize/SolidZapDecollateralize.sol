@@ -31,7 +31,8 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             swap,
             dustRecipient,
             decollateralizeParams,
-            msg.sender
+            msg.sender,
+            _sweepTokens
         );
     }
 
@@ -53,7 +54,8 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             swap,
             dustRecipient,
             decollateralizeParams,
-            zapRecipient
+            zapRecipient,
+            _sweepTokens
         );
     }
 
@@ -72,7 +74,8 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             swap,
             dustRecipient,
             decollateralizeParams,
-            msg.sender
+            msg.sender,
+            _sweepETH
         );
     }
 
@@ -92,7 +95,8 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             swap,
             dustRecipient,
             decollateralizeParams,
-            zapRecipient
+            zapRecipient,
+            _sweepETH
         );
     }
 
@@ -103,7 +107,8 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
         bytes calldata swap,
         address dustRecipient,
         DecollateralizeParams calldata decollateralizeParams,
-        address zapRecipient
+        address zapRecipient,
+        function(address, address) returns (uint) sweepUnspentTokens
     ) private {
         _swapViaRouter(router, swap);
         _approveTokenSpendingIfNeeded(crispToken, swManager);
@@ -119,10 +124,18 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
             _getDecollateralizedForwardCreditAmounts(decollateralizeParams.batchIds),
             ""
         );
-        uint dustAmount = _sweepTokensTo(crispToken, dustRecipient);
+        uint dustAmount = _sweepTokens(crispToken, dustRecipient);
+        uint refundAmount = sweepUnspentTokens(inputToken, zapRecipient);
         uint categoryId = ISWManager(swManager).getBatchCategory(decollateralizeParams.batchIds[0]);
 
-        emit ZapDecollateralize(zapRecipient, inputToken, inputAmount, dustAmount, dustRecipient, categoryId);
+        emit ZapDecollateralize(
+            zapRecipient,
+            inputToken,
+            inputAmount - refundAmount,
+            dustAmount,
+            dustRecipient,
+            categoryId
+        );
     }
 
     function _getDecollateralizedForwardCreditAmounts(uint[] calldata batchIds)
@@ -130,8 +143,10 @@ contract SolidZapDecollateralize is BaseSolidZapDecollateralize {
         view
         returns (uint[] memory decollateralizedForwardCreditAmounts)
     {
-        address[] memory addresses = new address[](1);
-        addresses[0] = address(this);
+        address[] memory addresses = new address[](batchIds.length);
+        for (uint i; i < batchIds.length; i++) {
+            addresses[i] = address(this);
+        }
         decollateralizedForwardCreditAmounts = IERC1155(forwardContractBatch).balanceOfBatch(
             addresses,
             batchIds

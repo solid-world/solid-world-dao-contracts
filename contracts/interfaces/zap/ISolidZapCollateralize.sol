@@ -12,8 +12,6 @@ interface ISolidZapCollateralize {
         uint categoryId
     );
 
-    error ETHTransferFailed();
-
     function router() external view returns (address);
 
     function weth() external view returns (address);

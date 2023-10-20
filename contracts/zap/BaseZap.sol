@@ -16,6 +16,7 @@ abstract contract BaseZap {
     error GenericSwapError();
     error InvalidInput();
     error SweepAmountZero();
+    error ETHTransferFailed();
 
     function _swapViaRouter(address router, bytes calldata encodedSwap) internal {
         (bool success, bytes memory retData) = router.call(encodedSwap);
@@ -54,13 +55,13 @@ abstract contract BaseZap {
         _approveTokenSpendingIfNeeded(inputToken, _router);
     }
 
-    function _sweepTokensTo(address token, address zapRecipient) internal returns (uint sweptAmount) {
-        sweptAmount = _sweepTokensTo(token, zapRecipient, false);
+    function _sweepTokens(address token, address recipient) internal returns (uint sweptAmount) {
+        sweptAmount = _safeSweepTokens(token, recipient, false);
     }
 
-    function _sweepTokensTo(
+    function _safeSweepTokens(
         address token,
-        address zapRecipient,
+        address recipient,
         bool revertOnSweepAmountZero
     ) internal returns (uint sweptAmount) {
         sweptAmount = IERC20(token).balanceOf(address(this));
@@ -69,7 +70,30 @@ abstract contract BaseZap {
         }
 
         if (sweptAmount > 0) {
-            IERC20(token).safeTransfer(zapRecipient, sweptAmount);
+            IERC20(token).safeTransfer(recipient, sweptAmount);
+        }
+    }
+
+    function _sweepETH(address weth, address recipient) internal returns (uint sweptAmount) {
+        sweptAmount = _safeSweepETH(weth, recipient, false);
+    }
+
+    function _safeSweepETH(
+        address weth,
+        address recipient,
+        bool revertOnSweepAmountZero
+    ) internal returns (uint sweptAmount) {
+        sweptAmount = IERC20(weth).balanceOf(address(this));
+        if (sweptAmount == 0 && revertOnSweepAmountZero) {
+            revert SweepAmountZero();
+        }
+
+        if (sweptAmount > 0) {
+            IWETH(weth).withdraw(sweptAmount);
+            (bool success, ) = payable(recipient).call{ value: sweptAmount }("");
+            if (!success) {
+                revert ETHTransferFailed();
+            }
         }
     }
 }

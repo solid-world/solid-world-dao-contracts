@@ -31,6 +31,7 @@ interface ISolidZapDecollateralize {
     /// 2. Decollateralizes resulting tokens to forward credits via SolidWorldManager
     /// 3. Transfers resulting forward credits to `msg.sender`
     /// 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`
+    /// 5. Transfers any remaining input token balance of SolidZapDecollateralize to `msg.sender`
     /// @notice The `msg.sender` must own `inputAmount` and approve this contract to spend `inputToken`
     /// @param inputToken The token used for redeeming forward credits
     /// @param inputAmount The amount of `inputToken` to use
@@ -55,6 +56,7 @@ interface ISolidZapDecollateralize {
     /// 2. Decollateralizes resulting tokens to forward credits via SolidWorldManager
     /// 3. Transfers resulting forward credits to `zapRecipient`
     /// 4. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`
+    /// 5. Transfers any remaining input token balance of SolidZapDecollateralize to `zapRecipient`
     /// @notice The msg.sender must own `inputAmount` and approve this contract to spend `inputToken`
     /// @param inputToken The token used for redeeming forward credits
     /// @param inputAmount The amount of `inputToken` to use
@@ -82,6 +84,7 @@ interface ISolidZapDecollateralize {
     /// 3. Decollateralizes resulting tokens to forward credits via SolidWorldManager
     /// 4. Transfers resulting forward credits to `msg.sender`
     /// 5. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`
+    /// 6. Withdraws any remaining WETH balance of SolidZapDecollateralize and transfers the ETH to `msg.sender`
     /// @param crispToken The intermediate token used for redeeming forward credits
     /// @param swap Encoded swap from `inputToken` to `crispToken`
     /// @param dustRecipient Address to receive any remaining crisp tokens dust
@@ -102,6 +105,7 @@ interface ISolidZapDecollateralize {
     /// 3. Decollateralizes resulting tokens to forward credits via SolidWorldManager
     /// 4. Transfers resulting forward credits to `zapRecipient`
     /// 5. Transfers remaining crisp token balance of SolidZapDecollateralize to the `dustRecipient`
+    /// 6. Withdraws any remaining WETH balance of SolidZapDecollateralize and transfers the ETH to `zapRecipient`
     /// @param crispToken The intermediate token used for redeeming forward credits
     /// @param swap Encoded swap from `inputToken` to `crispToken`
     /// @param dustRecipient Address to receive any remaining crisp tokens dust
